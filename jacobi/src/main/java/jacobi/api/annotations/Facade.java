@@ -29,7 +29,7 @@ import java.lang.annotation.Target;
  * implementation. Instead, a proxy should be created in which each method is 
  * invoked and handled by the class annotated by @Implementation.
  * 
- * See also <link>jacobi.api.annotations.Implementation</link>.
+ * See also jacobi.api.annotations.Implementation.
  * 
  * @author Y.K. Chan
  */
