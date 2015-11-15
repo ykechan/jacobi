@@ -59,4 +59,12 @@ public interface Matrix {
      */
     public Matrix swapRow(int i, int j);
     
+    /**
+     * Extend functionalities to given interface.
+     * @param <T>  Extension interface
+     * @param clazz  Java class of the extension interface
+     * @return An instance of the interface
+     */
+    public <T> T ext(Class<T> clazz);
+    
 }
