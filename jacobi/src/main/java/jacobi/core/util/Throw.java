@@ -20,18 +20,30 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 /**
- *
- * @author Edwin
+ * Utility class for preconditions checking.
+ * @author Y.K. Chan
  */
 public final class Throw {
     
-    private Throw() {        
+    private Throw() { 
+        throw new UnsupportedOperationException("Do not instaniate.");
     }
     
+    /**
+     * Get an instance of Throw.
+     * @return An instance of Throw
+     */
     public static Throw when() {
         return INSTANCE;
     }
     
+    /**
+     * Throw exception if the result of a given lambda evaluates to null.
+     * @param supplier  given lambda expression
+     * @param message   lambda expression for getting error message
+     * @return This
+     * @throws IllegalArgumentException  if expression evaluates to null
+     */
     public Throw isNull(Supplier<?> supplier, Supplier<String> message) {
         if(supplier.get() == null){
             throw new IllegalArgumentException(message.get());
@@ -39,6 +51,13 @@ public final class Throw {
         return this;
     }
     
+    /**
+     * Throw exception if the result of a given lambda evaluates to true.
+     * @param cond      given lambda expression
+     * @param message   lambda expression for getting error message
+     * @return This
+     * @throws IllegalArgumentException  if expression evaluates to true
+     */
     public Throw isTrue(BooleanSupplier cond, Supplier<String> message) {
         if(cond.getAsBoolean()){
             throw new IllegalArgumentException(message.get());
@@ -46,6 +65,13 @@ public final class Throw {
         return this;
     }
     
+    /**
+     * Throw exception if the result of a given lambda evaluates to false.
+     * @param cond      given lambda expression
+     * @param message   lambda expression for getting error message
+     * @return This
+     * @throws IllegalArgumentException  if expression evaluates to false
+     */
     public Throw isFalse(BooleanSupplier cond, Supplier<String> message) {
         if(!cond.getAsBoolean()){
             throw new IllegalArgumentException(message.get());
@@ -53,5 +79,8 @@ public final class Throw {
         return this;
     }
     
+    /**
+     * Singleton instance. 
+     */
     private static final Throw INSTANCE = new Throw();
 }
