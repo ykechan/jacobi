@@ -1,0 +1,101 @@
+/*
+ * Copyright (C) 2015 Y.K. Chan
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package jacobi.core.facade;
+
+import jacobi.api.annotations.Implementation;
+import jacobi.core.util.Throw;
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Detect and invoke the implementation class given a facade method.
+ * 
+ * This class will cache the implementation class with correct invocator
+ * so duplicate searching of implementation method for multiple invocation
+ * of the same facade method is avoided.
+ * 
+ * @author Y.K. Chan
+ */
+public class FacadeEngine {
+
+    /**
+     * Get singleton instance.
+     * @return  Instance of facade engine.
+     */
+    public static FacadeEngine getInstance() {
+        return INSTANCE;
+    }
+
+    /**
+     * Construct a new Facade engine.
+     */
+    public FacadeEngine() {
+        this.invocators = Collections.synchronizedMap(new HashMap<>());
+    }
+        
+    /**
+     * Clear the cached methods.
+     * Cleanup is advised for using in a application container.
+     */
+    public void clearCache() {
+        this.invocators.clear();
+    }
+    
+    /**
+     * Invoke a facade method.
+     * @param method  Facade method
+     * @param target  Facade argument
+     * @param args  Facade method argument(s)
+     * @return   Method result returned.
+     */
+    public Object invoke(Method method, Object target, Object[] args) {
+        Invocator invocator = this.invocators.get(method);
+        if(invocator == null){
+            // get creating multiple invocator yields the same result
+            // whole class synchronization is omitted
+            invocator = this.createInvocator(method);
+            this.invocators.put(method, invocator);
+        }
+        return invocator.invoke(target, args);
+    }
+    
+    /**
+     * Create invocator for a facade method.
+     * @param method  Facade method.
+     * @return   New instance of proper invocator
+     * @throws IllegalArgumentException 
+     *             if no Implementation annotation
+     */
+    private Invocator createInvocator(Method method) {
+        Throw.when()
+            .isFalse(
+                () -> method.isAnnotationPresent(Implementation.class),
+                () -> method.getDeclaringClass().getName()
+                    + "::"
+                    + method.getName()
+                    + " is not implemented."
+            );
+        Class<?> implClass = method.getAnnotation(Implementation.class).value();
+        return new Functor(method, implClass);
+    }
+    
+    private Map<Method, Invocator> invocators;
+    
+    private static final FacadeEngine INSTANCE = new FacadeEngine();
+}
