@@ -26,7 +26,6 @@ import java.util.function.Supplier;
 public final class Throw {
     
     private Throw() { 
-        throw new UnsupportedOperationException("Do not instaniate.");
     }
     
     /**
@@ -78,6 +77,7 @@ public final class Throw {
         }
         return this;
     }
+    
     
     /**
      * Singleton instance. 
