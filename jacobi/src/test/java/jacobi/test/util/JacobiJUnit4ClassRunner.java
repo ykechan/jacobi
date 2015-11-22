@@ -129,7 +129,6 @@ public class JacobiJUnit4ClassRunner extends BlockJUnit4ClassRunner {
     }
     
     private void detectInjection(Class<?> clazz) {
-        System.out.println("detect injection");
         Arrays.asList(clazz.getFields())
             .stream()
             .filter( (f) -> f.isAnnotationPresent(JacobiInject.class) 
@@ -142,7 +141,6 @@ public class JacobiJUnit4ClassRunner extends BlockJUnit4ClassRunner {
                         f);
                 }
                 if(f.isAnnotationPresent(JacobiResult.class)){
-                    System.out.println("Field " + f.getName() + " is result " + f.getAnnotation(JacobiResult.class).value());
                     this.results.put(
                         f.getAnnotation(JacobiResult.class).value(),
                         f);
