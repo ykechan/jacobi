@@ -17,8 +17,8 @@
 
 package jacobi.benchmark;
 
+import jacobi.benchmark.core.Result;
 import jacobi.benchmark.demo.StringConcat;
-import java.util.Arrays;
 
 /**
  *
@@ -32,6 +32,7 @@ public class Main {
     }
 
     private void run() {
-        new StringConcat().get();
+        Result result = new StringConcat().get();
+        new Table(result).writeCsv(System.out);
     }
 }
