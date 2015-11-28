@@ -64,14 +64,18 @@ public class Benchmark {
                 if(i == skip){
                     timers.values().forEach((t) -> t.reset());
                 }
-                int prob = k;
                 list.stream().sequential().forEach( (e) -> {
-                    e.getValue().run(prob, timers.get(e.getKey()));
+                    e.getValue().run(k, timers.get(e.getKey()));
                     this.heartbeat.accept(ticker.incrementAndGet(), total);
                 });
             }
+            timers.entrySet().stream().forEach(
+                (e) -> result.record(e.getKey(), k, e.getValue())
+            );
         });
-        this.heartbeat.accept(total, total);
+        if(ticker.get() != total){
+            this.heartbeat.accept(total, total);
+        }
         return result;
     }    
 

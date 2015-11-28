@@ -17,8 +17,9 @@
 
 package jacobi.benchmark.core;
 
+import java.util.Collections;
 import java.util.Map;
-import java.util.SortedMap;
+import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -43,6 +44,14 @@ public class Result {
             this.entries.put(problem, map);
         }
         map.put(name, new Entry(timer));
+    }
+    
+    public Set<Integer> keySet() {
+        return this.entries.keySet();
+    }
+    
+    public Map<String, Entry> getEntries(int key) {
+        return Collections.unmodifiableMap(this.entries.get(key));
     }
 
     private long hash;
