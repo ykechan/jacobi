@@ -70,6 +70,7 @@ public class JacobiJUnit4ClassRunner extends BlockJUnit4ClassRunner {
             @Override
             public void evaluate() throws Throwable {
                 Map<Integer, Matrix> data = dataSource.get(jImport.value());
+                System.out.println(injects.keySet());
                 for(Map.Entry<Integer, Field> entry : injects.entrySet()){
                     entry.getValue().set(target, data.get(entry.getKey()));
                 }
@@ -80,14 +81,11 @@ public class JacobiJUnit4ClassRunner extends BlockJUnit4ClassRunner {
     }
 
     @Override
-    protected Statement withAfters(FrameworkMethod method, Object target, Statement statement) {
+    protected Statement withAfters(FrameworkMethod method, Object target, Statement statement) {        
         Statement stmt = super.withAfters(method, target, statement);
         JacobiImport jImport = method.getAnnotation(JacobiImport.class);
-        JacobiEquals[] asserts = method.getMethod().getAnnotationsByType(JacobiEquals.class);
+        JacobiEquals[] asserts = method.getMethod().getAnnotationsByType(JacobiEquals.class);        
         if(jImport == null || asserts == null || asserts.length == 0){
-            if(jImport != null || (asserts != null && asserts.length > 0)){
-                throw new UnsupportedOperationException("Asserts and Import must both be present or absent.");
-            }
             return stmt;
         }
         return new Statement() {
@@ -97,8 +95,10 @@ public class JacobiJUnit4ClassRunner extends BlockJUnit4ClassRunner {
                 stmt.evaluate();
                 
                 Map<Integer, Matrix> data = dataSource.get(jImport.value());
-                for(JacobiEquals eq : asserts){
-                    assertEquals(eq, data, target);
+                if(asserts != null){
+                    for(JacobiEquals eq : asserts){
+                        assertEquals(eq, data, target);
+                    }
                 }
             }
             
@@ -110,7 +110,6 @@ public class JacobiJUnit4ClassRunner extends BlockJUnit4ClassRunner {
         if(!this.results.containsKey(eq.actual())){
             throw new AssertionError("No actual result #" + eq.actual());
         }
-        System.out.println("actual keys " + this.results.keySet());
         Matrix actual = (Matrix) this.results.get(eq.actual()).get(target);
         Assert.assertNotNull("No expected result #" + eq.expected(), expects);
         Assert.assertNotNull("No actual result #" + eq.actual(), actual);
