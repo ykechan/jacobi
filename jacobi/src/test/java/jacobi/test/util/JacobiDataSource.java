@@ -152,8 +152,9 @@ public class JacobiDataSource {
                                 + rowNum 
                                 + ", column " 
                                 + CellReference.convertNumToColString(colNum)) 
-                    );
+                    );                
             }
+            matrix.setRow(i, v);
         }
         return k;
     }
