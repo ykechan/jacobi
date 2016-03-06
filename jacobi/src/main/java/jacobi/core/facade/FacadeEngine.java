@@ -16,7 +16,12 @@
  */
 package jacobi.core.facade;
 
+import jacobi.api.Matrix;
+import jacobi.api.annotations.Facade;
 import jacobi.api.annotations.Implementation;
+import jacobi.api.annotations.NonPerturbative;
+import jacobi.core.impl.CopyOnWriteMatrix;
+import jacobi.core.impl.ImmutableMatrix;
 import jacobi.core.util.Throw;
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -67,9 +72,10 @@ public class FacadeEngine {
     public Object invoke(Method method, Object target, Object[] args) {
         Invocator invocator = this.invocators.get(method);
         if(invocator == null){
-            // get creating multiple invocator yields the same result
+            // getting invocator multiple times yields the same result
             // whole class synchronization is omitted
-            invocator = this.createInvocator(method);
+            Facade facade = method.getDeclaringClass().getAnnotation(Facade.class);
+            invocator = this.createInvocator(facade, method);
             this.invocators.put(method, invocator);
         }
         return invocator.invoke(target, args);
@@ -77,12 +83,13 @@ public class FacadeEngine {
     
     /**
      * Create invocator for a facade method.
+     * @param facade  Facade annotation
      * @param method  Facade method.
      * @return   New instance of proper invocator
      * @throws IllegalArgumentException 
      *             if no Implementation annotation
      */
-    private Invocator createInvocator(Method method) {
+    private Invocator createInvocator(Facade facade, Method method) {
         Throw.when()
             .isFalse(
                 () -> method.isAnnotationPresent(Implementation.class),
@@ -92,7 +99,18 @@ public class FacadeEngine {
                     + " is not implemented."
             );
         Class<?> implClass = method.getAnnotation(Implementation.class).value();
-        return new Functor(method, implClass);
+        Invocator func = new Functor(method, implClass);
+        if(facade.value() != Matrix.class
+        || (!method.isAnnotationPresent(NonPerturbative.class)
+         && !method.getDeclaringClass().isAssignableFrom(NonPerturbative.class))){
+            return func;
+        }
+        return implClass.isAssignableFrom(NonPerturbative.class)
+            ? (target, args) -> 
+                func.invoke(new ImmutableMatrix((Matrix) target), args)
+            : (target, args) -> 
+                func.invoke(new CopyOnWriteMatrix((Matrix) target), args)
+            ;
     }
     
     private Map<Method, Invocator> invocators;

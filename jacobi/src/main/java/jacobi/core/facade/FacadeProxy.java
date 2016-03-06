@@ -56,7 +56,7 @@ public class FacadeProxy implements InvocationHandler {
                 () -> isCorrectSupplierType(facadeClass),
                 () -> "Invalid supplier type argument.");
         
-        InvocationHandler handler = new FacadeProxy(FacadeEngine.getInstance(), facadeClass, target);
+        InvocationHandler handler = new FacadeProxy(DelegateEngine.getInstance(), facadeClass, target);
         return newProxy(facadeClass, handler);
     }        
 
