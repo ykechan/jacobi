@@ -104,6 +104,14 @@ public class Functor implements Invocator {
         this.inst = this.newInstance(implClass);
     }
 
+    /**
+     * Get the actual method to be invoked.
+     * @return  Actual method
+     */
+    public Method getMethod() {
+        return method;
+    }
+
     @Override
     public Object invoke(Object target, Object[] args) {
         Object[] implArgs = new Object[1 + args.length];

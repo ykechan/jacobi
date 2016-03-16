@@ -34,7 +34,8 @@ import java.util.function.Supplier;
 public class FacadeProxy implements InvocationHandler {
     
     /**
-     * Create a proxy implementation of a facade interface.
+     * Create a proxy implementation of a facade interface, which would return
+     * the argument value for Supplier interfaces.
      * This would use the common FacadeEngine
      * @param <T>  Facade interface type
      * @param facadeClass  Facade interface class
@@ -42,6 +43,19 @@ public class FacadeProxy implements InvocationHandler {
      * @return Proxy object.
      */
     public static <T> T of(Class<T> facadeClass, Object target) {
+        return FacadeProxy.of(facadeClass, target, target);
+    }
+    
+    /**
+     * Create a proxy implementation of a facade interface.
+     * This would use the common FacadeEngine
+     * @param <T>  Facade interface type
+     * @param facadeClass  Facade interface class
+     * @param target  Facade interface argument
+     * @param returnValue  Returned object for supplier interface
+     * @return Proxy object.
+     */
+    public static <T> T of(Class<T> facadeClass, Object target, Object returnValue) {
         Throw.when()
            .isNull(() -> facadeClass, () -> "No facade.")
            .isNull(() -> target, () -> "No facade argument.")
@@ -56,7 +70,12 @@ public class FacadeProxy implements InvocationHandler {
                 () -> isCorrectSupplierType(facadeClass),
                 () -> "Invalid supplier type argument.");
         
-        InvocationHandler handler = new FacadeProxy(DelegateEngine.getInstance(), facadeClass, target);
+        InvocationHandler handler = new FacadeProxy(
+                DelegateEngine.getInstance(), 
+                facadeClass, 
+                target, 
+                returnValue
+        );
         return newProxy(facadeClass, handler);
     }        
 
@@ -67,16 +86,28 @@ public class FacadeProxy implements InvocationHandler {
      * @param facadeArg   Facade argument
      */
     public FacadeProxy(FacadeEngine engine, Class<?> facadeClass, Object facadeArg) {
+        this(engine, facadeClass, facadeArg, facadeArg);
+    }
+    
+    /**
+     * Construct a new Facade proxy.
+     * @param engine  Facade engine for invocation.
+     * @param facadeClass  Facade interface class
+     * @param facadeArg   Facade argument
+     * @param returnValue   Return value for Supplier get method
+     */
+    public FacadeProxy(FacadeEngine engine, Class<?> facadeClass, Object facadeArg, Object returnValue) {
         this.facadeClass = facadeClass;
         this.facadeArg = facadeArg;
         this.engine = engine;
+        this.returnValue = returnValue;
     }
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) {
         if(GET_METHOD.equals(method.getName())
         && method.getParameterCount() == 0){
-            return this.facadeArg;
+            return this.returnValue;
         }
         Object result = this.engine.invoke(method, facadeArg, args);
         if(method.getReturnType() == this.facadeClass){
@@ -137,7 +168,7 @@ public class FacadeProxy implements InvocationHandler {
     }
     
     private Class<?> facadeClass;
-    private Object facadeArg;
+    private Object facadeArg, returnValue;
     private FacadeEngine engine;
     
     private static final String GET_METHOD = Supplier.class.getMethods()[0].getName();

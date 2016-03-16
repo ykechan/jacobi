@@ -20,8 +20,6 @@ import jacobi.api.Matrix;
 import jacobi.api.annotations.Facade;
 import jacobi.api.annotations.Implementation;
 import jacobi.api.annotations.NonPerturbative;
-import jacobi.core.impl.CopyOnWriteMatrix;
-import jacobi.core.impl.ImmutableMatrix;
 import jacobi.core.util.Throw;
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -99,17 +97,18 @@ public class FacadeEngine {
                     + " is not implemented."
             );
         Class<?> implClass = method.getAnnotation(Implementation.class).value();
-        Invocator func = new Functor(method, implClass);
+        Functor func = new Functor(method, implClass);
         if(facade.value() != Matrix.class
         || (!method.isAnnotationPresent(NonPerturbative.class)
          && !method.getDeclaringClass().isAssignableFrom(NonPerturbative.class))){
             return func;
         }
-        return implClass.isAssignableFrom(NonPerturbative.class)
+        return implClass.isAnnotationPresent(NonPerturbative.class)
+            || func.getMethod().isAnnotationPresent(NonPerturbative.class)
             ? (target, args) -> 
-                func.invoke(new ImmutableMatrix((Matrix) target), args)
+                func.invoke(target, args)
             : (target, args) -> 
-                func.invoke(new CopyOnWriteMatrix((Matrix) target), args)
+                func.invoke( ((Matrix) target).copy(), args)
             ;
     }
     
