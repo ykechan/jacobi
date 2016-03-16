@@ -19,6 +19,7 @@ package jacobi.core.impl;
 import jacobi.api.Matrix;
 import jacobi.core.facade.FacadeProxy;
 import jacobi.core.util.Throw;
+import java.util.Arrays;
 import java.util.Optional;
 
 /**
@@ -30,12 +31,23 @@ import java.util.Optional;
 public class DefaultMatrix implements Matrix {
     
     public DefaultMatrix(int m, int n) {
-        this(new double[m][n]);
+        this.rows = new double[m][n];
+        this.numCols = n;
     }
 
     public DefaultMatrix(double[][] rows) {
-        this.rows = Optional.ofNullable(rows).orElse(EMPTY);
+        this.rows = Optional.ofNullable(rows)
+                .map((r) -> Arrays.copyOf(r, r.length))
+                .orElse(EMPTY);
         this.numCols = (rows == null || rows.length == 0)? 0 : rows[0].length;
+    }
+    
+    public DefaultMatrix(Matrix matrix) {
+        this.numCols = matrix.getColCount();
+        this.rows = new double[matrix.getRowCount()][];
+        for(int i = 0; i < matrix.getRowCount(); i++){
+            this.rows[i] = Arrays.copyOf(matrix.getRow(i), numCols);
+        }
     }
 
     @Override
@@ -51,7 +63,7 @@ public class DefaultMatrix implements Matrix {
     @Override
     public double[] getRow(int index) {
         return this.rows[index];
-    }
+    }    
 
     @Override
     public Matrix setRow(int index, double[] values) {
@@ -71,6 +83,12 @@ public class DefaultMatrix implements Matrix {
         System.arraycopy(values, 0, this.rows[index], 0, this.numCols);
         return this;
     }
+    
+    @Override
+    public Matrix set(int i, int j, double value) {
+        this.rows[i][j] = value;
+        return this;
+    }
 
     @Override
     public Matrix swapRow(int i, int j) {
@@ -85,6 +103,11 @@ public class DefaultMatrix implements Matrix {
     @Override
     public <T> T ext(Class<T> clazz) {
         return FacadeProxy.of(clazz, this);
+    }
+
+    @Override
+    public Matrix copy() {
+        return new DefaultMatrix(this.rows);
     }
     
     private int numCols;
