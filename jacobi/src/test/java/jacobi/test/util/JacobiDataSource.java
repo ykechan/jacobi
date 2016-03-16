@@ -134,7 +134,7 @@ public class JacobiDataSource {
         for(int i = 0; i < matrix.getRowCount(); i++){
             Row row = sheet.getRow(k++);
             if(row == null) {
-                throw new IllegalArgumentException("No matrix element at row #" + k);
+                throw new IllegalArgumentException("No matrix element at row #" + (k + 1));
             }            
             double[] v = matrix.getRow(i);
             for(int j = 0; j < matrix.getColCount(); j++){
