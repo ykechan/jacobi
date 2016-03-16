@@ -16,7 +16,12 @@
  */
 package jacobi.api;
 
+import jacobi.core.impl.ColumnVector;
+import jacobi.core.impl.CopyOnWriteMatrix;
 import jacobi.core.impl.DefaultMatrix;
+import jacobi.core.impl.DiagonalMatrix;
+import jacobi.core.impl.Empty;
+import java.util.Arrays;
 
 /**
  * Factory for creating Matrices.
@@ -30,13 +35,91 @@ public final class Matrices {
     }
     
     /**
+     * Create a matrix by the given 2-D array.
+     * @param rows  Matrix elements.
+     * @return  Matrix instance.
+     */
+    public static Matrix of(double[][] rows) {
+        if(rows == null || rows.length == 0){
+            return Empty.getInstance();
+        }
+        int n = Arrays.stream(rows)
+                .mapToInt((r) -> r.length)
+                .reduce((i, j) -> {
+                    throw new UnsupportedOperationException(
+                        "Column count mismatch. " + i + " <> " + j
+                    );
+                })
+                .orElse(0);
+        if(n == 0){
+            return Empty.getInstance();
+        }
+        return new DefaultMatrix(rows);
+    }
+    
+    public static Matrix scalar(double value) {
+        return new DefaultMatrix(new double[][]{{ value }});
+    }
+    
+    /**
+     * Create a square matrix with all elements zero.
+     * @param n  Number of rows / columns
+     * @return  Matrix instance
+     */
+    public static Matrix zeros(int n) {
+        return Matrices.zeros(n, n);
+    }
+    
+    /**
      * Create a matrix with all elements zero.
      * @param m  Number of rows
      * @param n  Number of columns
      * @return  Matrix instance.
      */
     public static Matrix zeros(int m, int n) {
-        return new DefaultMatrix(m, n);
+        if(m < 0 || n < 0){
+            throw new IllegalArgumentException("Invalid number of rows / columns : " 
+                    + m + "x" + n);
+        }
+        return (m == 0 || n == 0)
+                ? Empty.getInstance() 
+                : (n == 1)
+                    ? new ColumnVector(m)
+                    : new DefaultMatrix(m, n);
     }
+    
+    /**
+     * Create an identity matrix.
+     * @param n  Number of rows / columns
+     * @return  Matrix instance.
+     */
+    public static Matrix identity(int n) {
+        Matrix eye = Matrices.zeros(n);
+        for(int i = 0; i < n; i++){
+            eye.set(i, i, 1.0);
+        }
+        return eye;
+    }
+    
+    /**
+     * Create a square diagonal matrix with given diagonal values.
+     * @param values  Diagonal values
+     * @return  Matrix instance.
+     */
+    public static Matrix diag(double[] values) {        
+        return Matrices.diag((values == null)? 0 : values.length, values);
+    }
+    
+    /**
+     * Create a diagonal matrix with given diagonal values.
+     * @param m  Number of rows
+     * @param values  Diagonal values
+     * @return   Matrix instance.
+     */
+    public static Matrix diag(int m, double[] values) {
+        return (values == null || values.length == 0)
+                ? Empty.getInstance()
+                : CopyOnWriteMatrix.of(new DiagonalMatrix(values));
+    }        
     
 }
