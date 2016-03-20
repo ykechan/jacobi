@@ -18,6 +18,7 @@
 package jacobi.core.solver;
 
 import jacobi.api.Matrix;
+import jacobi.core.util.Throw;
 import java.util.stream.IntStream;
 
 /**
@@ -37,6 +38,12 @@ public class Substitution {
      * @param tri  Lower/Upper triangular matrix
      */
     public Substitution(Mode mode, Matrix tri) {
+        Throw.when()
+            .isNull(() -> mode, () -> "No substitution mode.")
+            .isNull(() -> tri, () -> "No triangular matrix.")
+            .isTrue(
+                () -> tri.getColCount() > tri.getRowCount(), 
+                () -> "Triangular matrix is under-determined.");
         this.tri = tri;
         this.mode = mode;
     }
@@ -48,6 +55,16 @@ public class Substitution {
      * @return  Object rhs after substitution
      */
     public Matrix compute(Matrix rhs) {
+        Throw.when()
+            .isNull(() -> rhs, () -> "No known values for substitution")
+            .isTrue(
+                () -> rhs.getRowCount() != this.tri.getRowCount(), 
+                () -> "Dimension match. Expects " 
+                        + this.tri.getRowCount() 
+                        + ", got " 
+                        + rhs.getRowCount() 
+                        + " known values."
+            );
         return this.mode == Mode.BACKWARD ? this.backward(rhs) : this.forward(rhs);
     }
     
@@ -73,7 +90,7 @@ public class Substitution {
      * @return  Object rhs after substitution
      */
     protected Matrix backward(Matrix rhs) {
-        for(int i = rhs.getRowCount() - 1; i >= 0; i--){
+        for(int i = rhs.getColCount() - 1; i >= 0; i--){
             double[] sol = this.normalize(rhs, i);
             this.substitute(rhs, sol, i, 0, i);
             rhs.setRow(i, sol);
