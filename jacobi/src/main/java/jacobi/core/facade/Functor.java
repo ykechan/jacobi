@@ -114,10 +114,12 @@ public class Functor implements Invocator {
 
     @Override
     public Object invoke(Object target, Object[] args) {
-        Object[] implArgs = new Object[1 + args.length];
+        Object[] implArgs = new Object[1 + ((args == null) ? 0 : args.length)];
         
         implArgs[0] = target;
-        System.arraycopy(args, 0, implArgs, 1, args.length);
+        if(args != null){
+            System.arraycopy(args, 0, implArgs, 1, args.length);
+        }
         
         try {
             return this.method.invoke(this.inst, implArgs);
