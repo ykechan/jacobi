@@ -19,6 +19,8 @@ package jacobi.core.solver;
 
 import jacobi.api.Matrix;
 import jacobi.core.util.Throw;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -75,7 +77,8 @@ public class Substitution {
      * @return  Object rhs after substitution
      */
     protected Matrix forward(Matrix rhs) {
-        for(int i = 0; i < rhs.getRowCount(); i++){
+        int n = Math.min(this.tri.getRowCount(), this.tri.getColCount());
+        for(int i = 0; i < n; i++){
             double[] sol = this.normalize(rhs, i);
             this.substitute(rhs, sol, i, i + 1, rhs.getRowCount());
             rhs.setRow(i, sol);
@@ -90,7 +93,8 @@ public class Substitution {
      * @return  Object rhs after substitution
      */
     protected Matrix backward(Matrix rhs) {
-        for(int i = rhs.getColCount() - 1; i >= 0; i--){
+        int n = Math.min(this.tri.getRowCount(), this.tri.getColCount()) - 1;
+        for(int i = n; i >= 0; i--){
             double[] sol = this.normalize(rhs, i);
             this.substitute(rhs, sol, i, 0, i);
             rhs.setRow(i, sol);
