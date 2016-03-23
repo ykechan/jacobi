@@ -39,6 +39,12 @@ public interface Pair {
      */
     public Matrix getRight();
     
+    /**
+     * Create a pair of matrices &lt;A, B&gt;
+     * @param a  Matrix A
+     * @param b  Matrix B
+     * @return  A pair of matrices
+     */
     public static Pair of(Matrix a, Matrix b) {
         return new Pair(){
 
@@ -55,6 +61,12 @@ public interface Pair {
         };
     }
     
+    /**
+     * Create a pair of matrices &lt;A, B&gt;, which B is computed lazily.
+     * @param a  Matrix A
+     * @param b  Supplier of Matrix B
+     * @return  A pair of matrices
+     */
     public static Pair of(Matrix a, Supplier<Matrix> b) {
         return new Pair() {
 
@@ -72,6 +84,12 @@ public interface Pair {
         };
     }
     
+    /**
+     * Create a pair of matrices &lt;A, B&gt;, which A is computed lazily.
+     * @param a  Supplier of Matrix A
+     * @param b  Matrix B
+     * @return  A pair of matrices
+     */
     public static Pair of(Supplier<Matrix> a, Matrix b) {
         return new Pair() {
 

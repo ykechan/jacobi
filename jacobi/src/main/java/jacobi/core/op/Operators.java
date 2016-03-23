@@ -16,8 +16,8 @@
  */
 package jacobi.core.op;
 
-import jacobi.api.Matrices;
 import jacobi.api.Matrix;
+import jacobi.api.annotations.NonPerturbative;
 import jacobi.core.util.Throw;
 
 /**
@@ -30,6 +30,7 @@ public class Operators {
     /**
      * Matrix addition.
      */
+    @NonPerturbative
     public static class Add extends RowBased {
 
         public Add() {
@@ -41,6 +42,7 @@ public class Operators {
     /**
      * Matrix subtraction.
      */
+    @NonPerturbative
     public static class Sub extends RowBased {
 
         public Sub() {
@@ -52,89 +54,16 @@ public class Operators {
     /**
      * Hadamard product (element-by-element multiplication) of matrices.
      */
+    @NonPerturbative
     public static class Hadamard extends RowBased {
 
         public Hadamard() {
             super((a, b) -> a * b);
         }
-        
-    }
-    
-    /**
-     * Scalar multiplication disguised (hacked) as Matrix multiplication.
-     */
-    public static class ScalarMul extends RowBased {
-                
-        public ScalarMul() {
-            super((a, b, ans) -> {
-                for(int i = 0; i < a.length; i++){
-                    ans[i] = a[i] * b[0];
-                }
-                return null;
-            });
-        }
-        
-        public Matrix compute(Matrix a, double scalar) {
+     
+        public Matrix compute(Matrix a, double k) {
             Throw.when().isNull(() -> a, () -> "1st operand is null.");
-            if(scalar == 0.0){
-                return Matrices.zeros(a.getRowCount(), a.getColCount());
-            }
-            return super.compute(a, new ScalarAsMatrix(a.getRowCount(), a.getColCount(), scalar));
+            return super.compute(a, new Scalar(a.getRowCount(), a.getColCount(), k));
         }
-
-        /**
-         * Invalid usage. This is not a matrix-to-matrix operator.
-         * @param a  Matrix A
-         * @param b  Matrix B
-         * @return  Does not return anything.
-         * @throws  UnsupportedOperationException always
-         */
-        @Override
-        public Matrix compute(Matrix a, Matrix b) {
-            throw new UnsupportedOperationException("Invalid usage.");
-        }
-        
-    }
-    
-    private static class ScalarAsMatrix implements Matrix {
-
-        public ScalarAsMatrix(int m, int n, double scalar) {
-            this.m = m;
-            this.n = n;
-            this.value = new double[]{scalar};
-        }                
-
-        @Override
-        public int getRowCount() {
-            return this.m;
-        }
-
-        @Override
-        public int getColCount() {
-            return this.n;
-        }
-
-        @Override
-        public double[] getRow(int index) {
-            return this.value;
-        }
-
-        @Override
-        public Matrix setRow(int index, double[] values) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Matrix swapRow(int i, int j) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public <T> T ext(Class<T> clazz) {
-            throw new UnsupportedOperationException();
-        }
-        
-        private int m, n;
-        private double[] value;
-    }
+    }    
 }

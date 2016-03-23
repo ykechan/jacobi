@@ -35,12 +35,13 @@ public class Delegator implements Invocator {
         try {
             return this.method.invoke(target, args);
         } catch (IllegalAccessException | IllegalArgumentException ex) {
+            System.out.println("Invoke " + this.method.getDeclaringClass() + "::"+ this.method.getName() + " with " + target);
             throw new UnsupportedOperationException(ex);
         } catch (InvocationTargetException ex) {
             if(ex.getTargetException() instanceof RuntimeException){
                 throw (RuntimeException) ex.getTargetException();
             }
-            throw new UnsupportedOperationException(ex.getTargetException());
+            throw new UnsupportedOperationException(ex.getTargetException()); // NOPMD - intended
         }
     }
 

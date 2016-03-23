@@ -62,7 +62,7 @@ public class ColumnVector implements Matrix {
         return 1;
     }
 
-    protected double[] getVector() {
+    public double[] getVector() {
         return vector; // NOPMD - intented to be mutable
     }
     
@@ -73,7 +73,7 @@ public class ColumnVector implements Matrix {
 
     @Override
     public Matrix setRow(int index, double[] values) {        
-        this.vector[index] = values[0];
+        this.vector[index] = values[0]; // NOPMD - false positive
         return this;
     }    
 

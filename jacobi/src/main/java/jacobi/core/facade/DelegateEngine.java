@@ -92,7 +92,7 @@ public class DelegateEngine extends FacadeEngine {
      */
     private Key toKey(Method concreteMethod) {
         Method facadeMethod = this.findFacadeMethod(concreteMethod);
-        Facade facade = facadeMethod.getAnnotation(Facade.class);
+        Facade facade = facadeMethod.getDeclaringClass().getAnnotation(Facade.class);
         Throw.when()
             .isNull(
                 () -> facade, 
@@ -105,7 +105,7 @@ public class DelegateEngine extends FacadeEngine {
                     + facade.value()
                     + " is not assignable from "
                     + concreteMethod.getDeclaringClass() );
-        return new Key(concreteMethod.getDeclaringClass(), facadeMethod);
+        return new Key(concreteMethod.getDeclaringClass(), concreteMethod, facadeMethod);
     }
     
     /**
@@ -143,9 +143,9 @@ public class DelegateEngine extends FacadeEngine {
             this(clazz, null);
         }
 
-        public Key(Class<?> clazz, Method method) {
+        public Key(Class<?> clazz, Method facade) {
             this.clazz = clazz;
-            this.method = method;
+            this.facade = facade;
         }
         
         public Key(Class<?> clazz, Method method, Method facade) {
@@ -157,7 +157,7 @@ public class DelegateEngine extends FacadeEngine {
         public boolean isValid() {
             return this.facade.isAnnotationPresent(NonPerturbative.class)
                 || this.facade.getDeclaringClass().isAnnotationPresent(NonPerturbative.class)
-                == this.method.isAnnotationPresent(NonPerturbative.class);
+                == this.method.isAnnotationPresent(NonPerturbative.class);                    
         }
 
         @Override
@@ -165,25 +165,25 @@ public class DelegateEngine extends FacadeEngine {
             if(obj instanceof Key){
                 Key other = (Key) obj;
                 return Objects.equals(this.clazz, other.clazz)
-                    && Objects.equals(this.method, other.method);
+                    && Objects.equals(this.facade, other.facade);
             }
             return false;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(this.clazz, this.method);
+            return Objects.hash(this.clazz, this.facade);
         }
 
         @Override
         public String toString() {
-            return (this.method == null)
+            return (this.facade == null)
                     ? this.clazz.getName()
                     : this.clazz.getName() 
                     + "::" 
-                    + this.method.getName()
+                    + this.facade.getName()
                     + "("
-                    + Arrays.asList(this.method.getParameterTypes())
+                    + Arrays.asList(this.facade.getParameterTypes())
                     + ")";
         }
         

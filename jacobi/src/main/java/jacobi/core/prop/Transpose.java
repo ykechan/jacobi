@@ -36,7 +36,7 @@ public class Transpose {
             return new ColumnVector(matrix.getRow(0));
         }
         Matrix trans = new DefaultMatrix(matrix.getColCount(), matrix.getRowCount());
-        double[][] temp = new double[FETCH][];
+        double[][] temp = new double[FETCH_SIZE][];
         for(int i = 0; i < matrix.getRowCount(); i += temp.length){
             this.fetch(matrix, temp, i);
             int n = Math.min(matrix.getRowCount() - i, temp.length);
@@ -58,5 +58,5 @@ public class Transpose {
         }
     }
     
-    private static final int FETCH = 8;
+    private static final int FETCH_SIZE = 8;
 }

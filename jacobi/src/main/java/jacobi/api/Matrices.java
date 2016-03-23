@@ -21,6 +21,8 @@ import jacobi.core.impl.CopyOnWriteMatrix;
 import jacobi.core.impl.DefaultMatrix;
 import jacobi.core.impl.DiagonalMatrix;
 import jacobi.core.impl.Empty;
+import jacobi.core.impl.ImmutableMatrix;
+import jacobi.core.util.Throw;
 import java.util.Arrays;
 
 /**
@@ -122,4 +124,18 @@ public final class Matrices {
                 : CopyOnWriteMatrix.of(new DiagonalMatrix(values));
     }        
     
+    /**
+     * Create a copy of a matrix that is mutable.
+     * @param matrix  Matrix instance
+     * @return   A copy of the matrix
+     */
+    public static Matrix copy(Matrix matrix) {
+        if(matrix == null){
+            return null;
+        }
+        if(matrix instanceof ImmutableMatrix){
+            return new DefaultMatrix(matrix.toArray());
+        }
+        return matrix.copy();
+    }
 }

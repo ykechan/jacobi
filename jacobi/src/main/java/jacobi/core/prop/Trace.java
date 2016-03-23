@@ -15,31 +15,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package jacobi.core.util;
+package jacobi.core.prop;
 
 import jacobi.api.Matrix;
-import java.util.function.Supplier;
+import jacobi.core.util.Throw;
 
 /**
  *
  * @author Y.K. Chan
  */
-public final class Pairs {
+public class Trace {
 
-    private Pairs() {
-        throw new UnsupportedOperationException("Do not instantiate.");
+    public Trace(Matrix matrix) {
+        Throw.when()
+            .isNull(() -> matrix, () -> "No matrix to compute.")
+            .isTrue(() -> matrix.getRowCount() == 0, () -> "No matrix to compute.")
+            .isFalse(
+                () -> matrix.getRowCount() == matrix.getColCount(), 
+                () -> "Trace not exists for non-square matrices");
+        this.matrix = matrix;
     }
     
-    public static Pair of(Matrix a, Matrix b) {
-        return null;
-    }
-    
-    public static Pair of(Matrix a, Supplier<Matrix> b) {
-        return null;
-    }
-    
-    public static Pair of(Supplier<Matrix> a, Matrix b) {
-        return null;
+    public double compute() {
+        double tr = 0.0;
+        for(int i = 0; i < this.matrix.getRowCount(); i++){
+            tr += this.matrix.get(i, i);
+        }
+        return tr;
     }
 
+    private Matrix matrix;
 }

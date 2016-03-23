@@ -46,7 +46,7 @@ public abstract class ImmutableMatrix implements Matrix { // NOPMD
 
             @Override
             public Matrix copy() {
-                return ImmutableMatrix.of(base.copy());
+                return base.copy();
             }
         };
     }

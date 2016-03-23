@@ -16,6 +16,7 @@
  */
 package jacobi.core.facade;
 
+import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.api.annotations.Facade;
 import jacobi.api.annotations.Implementation;
@@ -108,7 +109,7 @@ public class FacadeEngine {
             ? (target, args) -> 
                 func.invoke(target, args)
             : (target, args) -> 
-                func.invoke( ((Matrix) target).copy(), args)
+                func.invoke( Matrices.copy((Matrix) target), args)
             ;
     }
     

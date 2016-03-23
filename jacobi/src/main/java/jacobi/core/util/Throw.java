@@ -16,6 +16,7 @@
  */
 package jacobi.core.util;
 
+import jacobi.api.Matrix;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
@@ -51,6 +52,20 @@ public final class Throw {
     }
     
     /**
+     * Throw exception if a given matrix is null, or have no element.
+     * @param matrix  Given matrix
+     * @param message  Error message
+     * @return  This
+     * @throws  IllegalArgumentException  if matrix is null or have no element.
+     */
+    public Throw isEmpty(Matrix matrix, String message) {
+        if(matrix == null || matrix.getRowCount() == 0){
+            throw new IllegalArgumentException(message);
+        }
+        return this;
+    }
+    
+    /**
      * Throw exception if the result of a given lambda evaluates to true.
      * @param cond      given lambda expression
      * @param message   lambda expression for getting error message
@@ -72,7 +87,7 @@ public final class Throw {
      * @throws IllegalArgumentException  if expression evaluates to false
      */
     public Throw isFalse(BooleanSupplier cond, Supplier<String> message) {
-        if(!cond.getAsBoolean()){
+        if(!cond.getAsBoolean()){ 
             throw new IllegalArgumentException(message.get());
         }
         return this;
