@@ -119,6 +119,17 @@ public class HouseholderReflector extends ImmutableMatrix {
     }
     
     /**
+     * Inverse of a Householder Reflector, which is a copy of itself since
+     * this matrix is orthogonal.
+     * @return  Transpose of this matrix
+     */
+    @NonPerturbative
+    @Delegate(facade = Prop.class, method = "inv")
+    public Matrix inv() {
+        return this.copy();
+    }
+    
+    /**
      * Multiplication with another matrix A, yielding H * A. This method
      * does not change the value of H and/or A.
      * @param matrix  Matrix A
