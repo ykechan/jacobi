@@ -43,14 +43,14 @@ import java.util.stream.IntStream;
  * H * A = (I - 2*v*v^t) * A = A - 2*v*(v^t * A)
  * 
  * v^t is a row vector, therefore v^t * A is also a row vector. All operations
- * takes O(n^2) time and as a whole also O(n^2).
+ * takes O(n^2) time and as a whole also takes O(n^2) time.
  * 
  * Computing row vector w = v^t * A is equivalent to multiply v^t with
- * each column in A. However column access to most matrix implementation takes
- * a lot of memory miss, since elements usually are stored in row-by-row manner.
+ * each column in A. However column access to most matrix implementations take
+ * a lot of memory miss, since elements usually are stored in a row-by-row manner.
  * Instead, compute k * u first, where k is an element in v^t, and u is a row
- * in A, for each k and u, and take the sum of all result will yield the row
- * vector w. In this case, only memory miss would be access of k, which is far
+ * in A, for each k and u, and summing all the results will yield the row
+ * vector w. In this case, the only memory misses would be access of k, which is far
  * less than O(n^2) miss previously. 
  * 
  * @author Y.K. Chan
