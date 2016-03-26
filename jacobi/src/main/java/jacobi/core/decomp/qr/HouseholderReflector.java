@@ -108,6 +108,33 @@ public class HouseholderReflector extends ImmutableMatrix {
     }
     
     /**
+     * Normalize a vector to reflector vector
+     * @return  First element after reflection
+     */
+    public double normalize() {
+        double temp = 0.0;
+        for(int i = from + 1; i < vector.length; i++){
+            temp += vector[i] * vector[i];
+        }
+        double norm = Math.sqrt(temp + vector[from] * vector[from]);
+        if(norm < EPSILON){
+            return norm;
+        }
+        if(vector[from] < 0.0){
+            vector[from] -= norm;            
+        }else{
+            vector[from] += norm;
+            norm *= -1.0;
+        }
+        double newNorm = Math.sqrt(temp + vector[from] * vector[from]);
+        
+        for(int i = from; i < vector.length; i++){
+            vector[i] /= newNorm;
+        }
+        return norm;
+    }
+    
+    /**
      * Transpose of a Householder Reflector, which is a copy of itself since
      * this matrix is symmetric.
      * @return  Transpose of this matrix
@@ -256,4 +283,5 @@ public class HouseholderReflector extends ImmutableMatrix {
     private double[] vector;
     
     private static final int DEFAULT_THRESHOLD = 8 * 1024;
+    private static final double EPSILON = 1e-10;
 }

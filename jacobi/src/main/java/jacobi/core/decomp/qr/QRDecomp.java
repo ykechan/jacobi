@@ -17,11 +17,10 @@
 
 package jacobi.core.decomp.qr;
 
+import jacobi.api.Matrices;
 import jacobi.api.Matrix;
-import jacobi.core.impl.DefaultMatrix;
 import jacobi.core.util.Pair;
 import java.util.Arrays;
-import java.util.stream.Collectors;
 
 /**
  * Implementation class for QR Decomposition.
@@ -42,11 +41,18 @@ public class QRDecomp {
      */
     public Pair computeQR(Matrix matrix) {
         double[] column = new double[matrix.getRowCount()];
-        double norm = this.getColumn(matrix, 0, 0, column);
-        HouseholderReflector refl = new HouseholderReflector(column, 0);
-        refl.applyLeft(matrix);
-        matrix.set(0, 0, norm);
-        Matrix q = new DefaultMatrix(refl.toArray());
+        this.getColumn(matrix, 0, 0, column);
+        
+        HouseholderReflector hh = new HouseholderReflector(column, 0);
+        double norm = hh.normalize();
+        
+        Matrix q = null;
+        if(Math.abs(norm) < EPSILON){
+            q = Matrices.identity(matrix.getRowCount());
+        }else{
+            hh.applyLeft(matrix);
+            matrix.set(0, 0, norm);
+        }
         if(matrix.getColCount() == 1){            
             return Pair.of(q, matrix);
         }        
@@ -65,6 +71,15 @@ public class QRDecomp {
         this.compute(matrix, partner, 0);
     }
     
+    /**
+     * Compute QR decomposition with a partner matrix, i.e. given matrix A and
+     * partner matrix B, transform A to R and B to Q^t * R, where A = Q * R, 
+     * Q is orthogonal and R is lower trianguar. This method only interests in
+     * columns beyond a certain index in A, but full matrix of B.
+     * @param matrix  Matrix A
+     * @param partner  Matrix B
+     * @param from  Start index of columns of interest
+     */
     protected void compute(Matrix matrix, Matrix partner, int from) {
         double[] column = new double[matrix.getRowCount()];
         int n = Math.min(matrix.getRowCount(), matrix.getColCount()) - 1;
@@ -79,40 +94,40 @@ public class QRDecomp {
         return;
     }
     
+    /**
+     * Eliminate a column of a matrix A such that all sub-diagonal entries
+     * of this column are zeroes.
+     * @param matrix  Matrix A
+     * @param partner Partner matrix B
+     * @param j  Column index
+     * @param column  Column buffer
+     */
     protected void eliminate(Matrix matrix, Matrix partner, int j, double[] column) {
-        double norm = this.getColumn(matrix, j, j, column);
-        HouseholderReflector refl = new HouseholderReflector(column, j);
-        refl.applyLeft(matrix, j + 1);            
+        this.getColumn(matrix, j, j, column);
+        HouseholderReflector hh = new HouseholderReflector(column, j);
+        double norm = hh.normalize();
+        if(Math.abs(norm) < EPSILON){
+            return;
+        }        
+        hh.applyLeft(matrix, j + 1);            
         matrix.set(j, j, norm);
         if(partner != null){
-            refl.applyLeft(partner);
+            hh.applyLeft(partner);
         }
     }
     
-    protected double getColumn(Matrix matrix, int fromRow, int colIndex, double[] column) {
+    /**
+     * Get the Householder reflector of a column.
+     * @param matrix  Matrix A
+     * @param fromRow  Start row index of reflection
+     * @param colIndex  Column index of column to be reflected
+     * @param column  Column reflector buffer
+     */
+    protected void getColumn(Matrix matrix, int fromRow, int colIndex, double[] column) {
         for(int i = fromRow; i < matrix.getRowCount(); i++){
             column[i] = matrix.get(i, colIndex);
         }
-        return this.normalize(column, fromRow);
     }
-
-    protected double normalize(double[] vector, int from) {
-        double temp = 0.0;
-        for(int i = from + 1; i < vector.length; i++){
-            temp += vector[i] * vector[i];
-        }
-        double norm = Math.sqrt(temp + vector[from] * vector[from]);
-        if(vector[from] < 0.0){
-            vector[from] -= norm;            
-        }else{
-            vector[from] += norm;
-            norm *= -1.0;
-        }
-        double newNorm = Math.sqrt(temp + vector[from] * vector[from]);
-        
-        for(int i = from; i < vector.length; i++){
-            vector[i] /= newNorm;
-        }
-        return norm;
-    }
+    
+    private static final double EPSILON = 1e-10;
 }

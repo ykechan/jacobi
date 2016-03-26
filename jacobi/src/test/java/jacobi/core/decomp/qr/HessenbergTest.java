@@ -22,8 +22,6 @@ import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.util.Jacobi;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
-import java.util.Arrays;
-import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -31,9 +29,9 @@ import org.junit.runner.RunWith;
  *
  * @author Y.K. Chan
  */
-@JacobiImport("/jacobi/test/data/QRDecompTest.xlsx")
+@JacobiImport("/jacobi/test/data/HessenbergTest.xlsx")
 @RunWith(JacobiJUnit4ClassRunner.class)
-public class QRDecompTest {
+public class HessenbergTest {
     
     @JacobiInject(0)
     public Matrix input;
@@ -52,52 +50,35 @@ public class QRDecompTest {
     
     @JacobiInject(5)
     public Matrix step5;
-
+    
+    @JacobiInject(6)
+    public Matrix step6;
+    
     @Test
     @JacobiImport("4x4")
     public void test4x4() {
-        this.assertEachStep(Arrays.asList(step1, step2, step3))
-                .compute(input, null);
+        this.assertByStep(step1, step2, step3, step4).compute(this.input);
     }
     
     @Test
-    @JacobiImport("6x6")
-    public void test6x6() {
-        this.assertEachStep(Arrays.asList(
-            step1, step2, step3,
-            step4, step5
-        )).compute(input, null);
+    @JacobiImport("5x5")
+    public void test5x5() {
+        this.assertByStep(step1, step2, step3, step4, step5, step6).compute(this.input);
     }
-    
-    @Test
-    @JacobiImport("9x3")
-    public void test9x3() {
-        this.assertEachStep(Arrays.asList(
-            step1, step2, step3
-        )).compute(input, null);
-    }
-    
-    @Test
-    @JacobiImport("Degen 8x3")
-    public void testDegen8x3() {
-        this.assertEachStep(Arrays.asList(
-            step1, 
-            step1, // no change after step 1
-            step2
-        )).compute(input, null);
-    }
-    
-    private QRDecomp assertEachStep(List<Matrix> expects) {
-        return new QRDecomp(){
+
+    private Hessenberg assertByStep(Matrix... step) {
+        return new Hessenberg(){
 
             @Override
-            protected void eliminate(Matrix matrix, Matrix partner, int j, double[] column) {
-                super.eliminate(matrix, partner, j, column);
-                for(int i = j + 1; i < matrix.getRowCount(); i++){
-                    matrix.set(i, j, 0.0);
+            protected void applyRight(Matrix matrix, int i, HouseholderReflector hh) {
+                for(int k = i + 2; k < matrix.getRowCount(); k++){
+                    matrix.set(k, i, 0.0);
                 }
-                Jacobi.assertEquals(expects.get(j), matrix);
+                Jacobi.assertEquals(step[2*i], matrix);
+                super.applyRight(matrix, i, hh);
+                Jacobi.assertEquals(step[2*i + 1], matrix);
             }
+            
             
         };
     }
