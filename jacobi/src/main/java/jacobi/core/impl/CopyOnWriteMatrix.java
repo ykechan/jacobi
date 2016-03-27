@@ -21,7 +21,17 @@ import jacobi.api.Matrix;
 import jacobi.core.facade.FacadeProxy;
 
 /**
- *
+ * A matrix decorator that copies the value of the underlying matrix
+ * whenever written upon.
+ * 
+ * Computational result can take some special form, for example a diagonal 
+ * matrix. It maybe advantageous to return an special immutable implementation 
+ * that does not fully realize all matrix elements. 
+ * 
+ * However user may further change the value of the return results. This class
+ * is for such cases, it would then materializes all elements to a vanilla
+ * DefaultMatrix. All operations would be transparent with respect to the user.
+ * 
  * @author Y.K. Chan
  */
 public final class CopyOnWriteMatrix implements Matrix {
@@ -29,7 +39,11 @@ public final class CopyOnWriteMatrix implements Matrix {
     public static CopyOnWriteMatrix of(Matrix matrix) {
         return matrix instanceof CopyOnWriteMatrix
                 ? (CopyOnWriteMatrix) matrix
-                : new CopyOnWriteMatrix(matrix);
+                : new CopyOnWriteMatrix(
+                    matrix instanceof ImmutableMatrix
+                    ? ImmutableMatrix.of(matrix)
+                    : matrix
+                );
     }
 
     protected CopyOnWriteMatrix(Matrix matrix) {
@@ -78,7 +92,7 @@ public final class CopyOnWriteMatrix implements Matrix {
     public Matrix copy() {
         return this.materialized
                 ? this.matrix.copy()
-                : new CopyOnWriteMatrix(this.matrix.copy());
+                : CopyOnWriteMatrix.of(this.matrix.copy());
     }
     
     private Matrix materialize() {
