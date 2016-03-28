@@ -70,7 +70,7 @@ public class ExactSolver {
                         + y.getRowCount() + " known values."
             );
         Matrix x = Matrices.copy(y);
-        new GenericGaussianElim<>(a, (op) -> new FullMatrixOperator(op, x)).compute(null);
+        new GenericGaussianElim<>((op) -> new FullMatrixOperator(op, x)).compute(a);
         return new Substitution(Mode.BACKWARD, a).compute(x);
     }
 

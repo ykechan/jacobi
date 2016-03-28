@@ -33,6 +33,9 @@ import jacobi.core.util.Throw;
  * @author Y.K. Chan
  */
 public class Inverse {
+
+    public Inverse() {
+    }
     
     public Matrix compute(Matrix a) {
         Throw.when()
@@ -52,9 +55,7 @@ public class Inverse {
                 break;
         }
         Matrix y = Matrices.identity(a.getRowCount());
-        new GenericGaussianElim<>(
-            a, (op) -> new FullMatrixOperator(op, y)
-        ).compute(null);
+        new GenericGaussianElim<>( (op) -> new FullMatrixOperator(op, y) ).compute(a);
         
         return new Substitution(Substitution.Mode.BACKWARD, a).compute(y);
     }
@@ -107,4 +108,5 @@ public class Inverse {
             }
         });
     }
+    
 }

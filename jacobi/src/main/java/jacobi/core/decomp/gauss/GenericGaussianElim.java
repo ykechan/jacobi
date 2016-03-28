@@ -31,30 +31,30 @@ public class GenericGaussianElim<T extends ElementaryOperator> {
     
     /**
      * Constructor.
-     * @param matrix  Matrix to be transformed to upper triangular
-     * @param decors  Decorators to elementary operator
+     * @param decor  Decorators to elementary operator
      */
-    public GenericGaussianElim(Matrix matrix, Function<ElementaryOperator, T> decors) {
-        this.oper = decors.apply(new FrontElementEliminator(matrix));
+    public GenericGaussianElim(Function<ElementaryOperator, T> decor) {
+        this.decor = decor;
     }
     
     /**
      * Perform Gaussian Elimination.
-     * @param arg  Dummy argument to avoid being an entry point
+     * @param matrix  Matrix to be performed
      * @return  Elementary operator after elimination
      */
-    public T compute(Void arg) {
+    public T compute(Matrix matrix) {
+        T oper = decor.apply(new FrontElementEliminator(matrix));
         int end = Math.min(
-                this.oper.getMatrix().getRowCount(), 
-                this.oper.getMatrix().getColCount()) - 1;
+                matrix.getRowCount(), 
+                matrix.getColCount()) - 1;
         int nextPivot = -1;
         for(int i = 0; i < end; i++){
             if(nextPivot < 0){
-                nextPivot = this.findPivot(this.oper.getMatrix(), i);
+                nextPivot = this.findPivot(matrix, i);
             }
             nextPivot = this.eliminate(oper, i, nextPivot);
         }
-        return this.oper;
+        return oper;
     }
     
     /**
@@ -132,7 +132,7 @@ public class GenericGaussianElim<T extends ElementaryOperator> {
         return maxIndex;
     }
     
-    private T oper;
+    private Function<ElementaryOperator, T> decor;
     
     private static class Element {
 

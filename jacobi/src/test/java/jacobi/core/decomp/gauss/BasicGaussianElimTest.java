@@ -50,60 +50,56 @@ public class BasicGaussianElimTest {
     @JacobiImport("4x4")
     public void test4x4() {
         new GenericGaussianElim<>(
-            this.input, 
             (op) -> this.assertByStep(op, Arrays.asList(
                 input,
                 step1, step2, step3,
                 step4, step5, step6
             ))
-        ).compute(null);
+        ).compute(this.input);
     }
     
     @Test
     @JacobiImport("5x5")
     public void test5x5() {
         new GenericGaussianElim<>(
-            this.input, 
             (op) -> this.assertByStep(op, Arrays.asList(
                 input,
                 step1, step2, step3,
                 step4, step5, step6,
                 step7, step8
             ))
-        ).compute(null);
+        ).compute(this.input);
     }
     
     @Test
     @JacobiImport("UnderDet 4x4")
     public void testUnderDet4x4() {
         new GenericGaussianElim<>(
-            this.input, 
             (op) -> this.assertByStep(op, Arrays.asList(
                 input,
                 step1, step2, step3,
                 step4, step5, step6
             ))
-        ).compute(null);
+        ).compute(this.input);
     }
     
     @Test
     @JacobiImport("Skip 4x4")
     public void testSkip4x4() {
         new GenericGaussianElim<>(
-            this.input, 
             (op) -> this.assertByStep(op, Arrays.asList(
                 input,
                 step1, step2, step3, step4, step5, step6
             ))
-        ).compute(null);
+        ).compute(this.input);
     }
     
     @Test
     public void testNull5x5() {
         this.input = Matrices.zeros(5, 5);
         new GenericGaussianElim<>(
-            this.input, Function.identity()
-        ).compute(null);
+            Function.identity()
+        ).compute(this.input);
         Jacobi.assertEquals(Matrices.zeros(5, 5), input);
     }
     
@@ -111,13 +107,12 @@ public class BasicGaussianElimTest {
     @JacobiImport("7x3")
     public void test7x3() {
         new GenericGaussianElim<>(
-            this.input, 
             (op) -> this.assertByStep(op, Arrays.asList(
                 input,
                 step1, step2, step3, 
                 step4, step5, step6
             ))
-        ).compute(null);
+        ).compute(this.input);
     }
 
     private ElementaryOperator assertByStep(ElementaryOperator op, List<Matrix> steps) {
