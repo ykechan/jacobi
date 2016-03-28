@@ -25,24 +25,21 @@ import java.util.stream.IntStream;
  * Perform Gaussian Elimination with given elementary operator.
  * 
  * @author Y.K. Chan
- * @param <T>
  */
-public class GenericGaussianElim<T extends ElementaryOperator> {
+public class GenericGaussianElim {
     
-    /**
-     * Constructor.
-     * @param decor  Decorators to elementary operator
-     */
-    public GenericGaussianElim(Function<ElementaryOperator, T> decor) {
-        this.decor = decor;
+    public void compute(Matrix matrix) {
+        this.compute(matrix, Function.identity());
     }
     
     /**
      * Perform Gaussian Elimination.
+     * @param <T>  Type after decorating
      * @param matrix  Matrix to be performed
+     * @param decor  Decorating function
      * @return  Elementary operator after elimination
      */
-    public T compute(Matrix matrix) {
+    public <T extends ElementaryOperator> T compute(Matrix matrix, Function<ElementaryOperator, T> decor) {
         T oper = decor.apply(new FrontElementEliminator(matrix));
         int end = Math.min(
                 matrix.getRowCount(), 
@@ -131,8 +128,6 @@ public class GenericGaussianElim<T extends ElementaryOperator> {
         }
         return maxIndex;
     }
-    
-    private Function<ElementaryOperator, T> decor;
     
     private static class Element {
 

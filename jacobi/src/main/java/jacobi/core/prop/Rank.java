@@ -30,7 +30,7 @@ import java.util.function.Function;
 public class Rank {
 
     public Rank() {
-        this.gaussElim = new GenericGaussianElim<>(Function.identity());
+        this.gaussElim = new GenericGaussianElim();
     }
     
     public int compute(Matrix a) {
@@ -53,7 +53,7 @@ public class Rank {
         return Math.abs(a.get(0, 0)) < EPSILON ? 0 : 1;
     }
     
-    private GenericGaussianElim<?> gaussElim;
+    private GenericGaussianElim gaussElim;
 
     private static final double EPSILON = 1e-12;
 }

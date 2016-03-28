@@ -35,6 +35,7 @@ import jacobi.core.util.Throw;
 public class Inverse {
 
     public Inverse() {
+        this.gaussElim = new GenericGaussianElim();
     }
     
     public Matrix compute(Matrix a) {
@@ -55,7 +56,7 @@ public class Inverse {
                 break;
         }
         Matrix y = Matrices.identity(a.getRowCount());
-        new GenericGaussianElim<>( (op) -> new FullMatrixOperator(op, y) ).compute(a);
+        this.gaussElim.compute(a, (op) -> new FullMatrixOperator(op, y));
         
         return new Substitution(Substitution.Mode.BACKWARD, a).compute(y);
     }
@@ -109,4 +110,5 @@ public class Inverse {
         });
     }
     
+    private GenericGaussianElim gaussElim;
 }

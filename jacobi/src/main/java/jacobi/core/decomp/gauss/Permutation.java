@@ -23,6 +23,8 @@ import jacobi.api.annotations.Delegate;
 import jacobi.api.annotations.NonPerturbative;
 import jacobi.api.ext.Op;
 import jacobi.api.ext.Prop;
+import jacobi.core.facade.FacadeProxy;
+import jacobi.core.impl.ImmutableMatrix;
 import jacobi.core.util.Throw;
 import java.util.Arrays;
 
@@ -30,7 +32,7 @@ import java.util.Arrays;
  *
  * @author Y.K. Chan
  */
-public class Permutation implements Matrix {
+public class Permutation extends ImmutableMatrix {
 
     public Permutation(int length) {
         this.indices = new int[length];
@@ -39,20 +41,9 @@ public class Permutation implements Matrix {
         }
     }
 
-    private Permutation(int[] indices, int order) { // NOPMD - private usage
+    protected Permutation(int[] indices, int order) { // NOPMD - private usage
         this.indices = indices; 
         this.order = order;
-    }
-
-    @Override
-    public Matrix swapRow(int i, int j) {
-        if(i != j){            
-            int temp = this.indices[i];
-            this.indices[i] = this.indices[j];
-            this.indices[j] = temp;
-            this.order *= -1;
-        }
-        return this;
     }
     
     @NonPerturbative
@@ -90,12 +81,6 @@ public class Permutation implements Matrix {
         return ans;
     }
 
-    protected double[] getLogicalRow(int index) {
-        double[] row = new double[this.indices.length];
-        row[ this.indices[index] ] = 1.0;
-        return row;
-    }
-
     @Override
     public int getRowCount() {
         return this.indices.length;
@@ -108,12 +93,9 @@ public class Permutation implements Matrix {
     
     @Override
     public double[] getRow(int index) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Matrix setRow(int index, double[] values) {
-        throw new UnsupportedOperationException();
+        double[] row = new double[this.indices.length];
+        row[ this.indices[index] ] = 1.0;
+        return row;
     }
 
     @Override
@@ -123,7 +105,7 @@ public class Permutation implements Matrix {
 
     @Override
     public <T> T ext(Class<T> clazz) {
-        throw new UnsupportedOperationException();
+        return FacadeProxy.of(clazz, this);
     }
 
     private int[] indices;

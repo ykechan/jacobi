@@ -35,7 +35,7 @@ import jacobi.core.decomp.gauss.GenericGaussianElim;
 public class Determinant {
 
     public Determinant() {
-        this.gaussElim = new GenericGaussianElim<>((op) -> new Sign(op));
+        this.gaussElim = new GenericGaussianElim();
     }
     
     public double compute(Matrix matrix) {
@@ -49,7 +49,7 @@ public class Determinant {
             default :
                 break;
         }
-        double det = this.gaussElim.compute(matrix).get();
+        double det = this.gaussElim.compute(matrix, (op) -> new Sign(op)).get();
         for(int i = 0; i < matrix.getRowCount(); i++){            
             det *= matrix.get(i, i);
         }
@@ -81,7 +81,7 @@ public class Determinant {
                );
     }
     
-    private GenericGaussianElim<Sign> gaussElim;
+    private GenericGaussianElim gaussElim;
     
     private static class Sign extends AbstractElementaryOperatorDecor {
 

@@ -36,6 +36,7 @@ import org.junit.runner.RunWith;
 @JacobiImport("/jacobi/test/data/BasicGaussianElimTest.xlsx")
 @RunWith(JacobiJUnit4ClassRunner.class)
 public class BasicGaussianElimTest {
+    
     public @JacobiInject(0) Matrix input;
     public @JacobiInject(1) Matrix step1;
     public @JacobiInject(2) Matrix step2;
@@ -46,73 +47,73 @@ public class BasicGaussianElimTest {
     public @JacobiInject(7) Matrix step7;
     public @JacobiInject(8) Matrix step8;    
     
+    private GenericGaussianElim gaussElim;
+
+    public BasicGaussianElimTest() {
+        this.gaussElim = new GenericGaussianElim();
+    }
+    
     @Test
     @JacobiImport("4x4")
     public void test4x4() {
-        new GenericGaussianElim<>(
-            (op) -> this.assertByStep(op, Arrays.asList(
+        this.gaussElim.compute(this.input, (op) -> 
+            this.assertByStep(op, Arrays.asList(
                 input,
                 step1, step2, step3,
                 step4, step5, step6
-            ))
-        ).compute(this.input);
+            )));
     }
     
     @Test
     @JacobiImport("5x5")
     public void test5x5() {
-        new GenericGaussianElim<>(
-            (op) -> this.assertByStep(op, Arrays.asList(
+        this.gaussElim.compute(this.input, (op) -> 
+            this.assertByStep(op, Arrays.asList(
                 input,
                 step1, step2, step3,
                 step4, step5, step6,
                 step7, step8
-            ))
-        ).compute(this.input);
+            )));
     }
     
     @Test
     @JacobiImport("UnderDet 4x4")
     public void testUnderDet4x4() {
-        new GenericGaussianElim<>(
-            (op) -> this.assertByStep(op, Arrays.asList(
+        this.gaussElim.compute(this.input, (op) -> 
+            this.assertByStep(op, Arrays.asList(
                 input,
                 step1, step2, step3,
                 step4, step5, step6
-            ))
-        ).compute(this.input);
+            )));
     }
     
     @Test
     @JacobiImport("Skip 4x4")
     public void testSkip4x4() {
-        new GenericGaussianElim<>(
-            (op) -> this.assertByStep(op, Arrays.asList(
+        this.gaussElim.compute(this.input, (op) -> 
+            this.assertByStep(op, Arrays.asList(
                 input,
-                step1, step2, step3, step4, step5, step6
-            ))
-        ).compute(this.input);
+                step1, step2, step3,
+                step4, step5, step6
+            )));
     }
     
     @Test
     public void testNull5x5() {
         this.input = Matrices.zeros(5, 5);
-        new GenericGaussianElim<>(
-            Function.identity()
-        ).compute(this.input);
+        this.gaussElim.compute(this.input);
         Jacobi.assertEquals(Matrices.zeros(5, 5), input);
     }
     
     @Test
     @JacobiImport("7x3")
     public void test7x3() {
-        new GenericGaussianElim<>(
-            (op) -> this.assertByStep(op, Arrays.asList(
+        this.gaussElim.compute(this.input, (op) -> 
+            this.assertByStep(op, Arrays.asList(
                 input,
-                step1, step2, step3, 
+                step1, step2, step3,
                 step4, step5, step6
-            ))
-        ).compute(this.input);
+            )));
     }
 
     private ElementaryOperator assertByStep(ElementaryOperator op, List<Matrix> steps) {

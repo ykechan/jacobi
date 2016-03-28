@@ -19,6 +19,7 @@ package jacobi.core.decomp.gauss;
 
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
+import jacobi.core.impl.CopyOnWriteMatrix;
 import jacobi.core.util.Triplet;
 
 /**
@@ -31,22 +32,32 @@ import jacobi.core.util.Triplet;
  * @author Y.K. Chan
  */
 public class GaussianDecomp {
-    
-    public Triplet compute(Matrix matrix) {
-        return null;
+
+    public GaussianDecomp() {
+        this.gaussElim = new GenericGaussianElim();
     }
     
+    public Triplet compute(Matrix matrix) {
+        Memento mem = this.gaussElim.compute(matrix, (op) -> new Memento(op));
+        return Triplet.of(
+            CopyOnWriteMatrix.of(mem.getPermutation()), 
+            mem.getLower(), 
+            matrix);
+    }
+    
+    private GenericGaussianElim gaussElim;
 
     private static class Memento extends AbstractElementaryOperatorDecor {
 
         public Memento(ElementaryOperator op) {
             super(op);
-            this.perm = new Permutation(op.getMatrix().getRowCount());
-            this.lower = Matrices.identity(this.perm.getRowCount());
+            this.perm = new int[op.getMatrix().getRowCount()];
+            this.lower = Matrices.identity(this.perm.length);
+            this.order = 0;
         }
         
         public Permutation getPermutation() {
-            return this.perm;
+            return new Permutation(perm, order % 2 == 0 ? 1 : -1);
         }
 
         public Matrix getLower() {
@@ -57,8 +68,12 @@ public class GaussianDecomp {
         public void swapRows(int i, int j) {
             super.swapRows(i, j);
             if(i != j){
-                this.perm.swapRow(i, j);
-                this.swapLower(i, j);
+                int temp = this.perm[i];
+                this.perm[i] = this.perm[j];
+                this.perm[j] = temp;
+                
+                this.order++;
+                this.swapLower(i, j);                
             }            
         }
 
@@ -83,7 +98,8 @@ public class GaussianDecomp {
             this.lower.setRow(i, u).setRow(j, v);
         }
         
-        private Permutation perm;
+        private int order;
+        private int[] perm;
         private Matrix lower;
     }
 }

@@ -42,6 +42,10 @@ import jacobi.core.util.Throw;
  * @author Y.K. Chan
  */
 public class ExactSolver {
+
+    public ExactSolver() {
+        this.gaussElim = new GenericGaussianElim();
+    }
         
     /**
      * Solve the system of linear equation y = A * x.
@@ -70,8 +74,9 @@ public class ExactSolver {
                         + y.getRowCount() + " known values."
             );
         Matrix x = Matrices.copy(y);
-        new GenericGaussianElim<>((op) -> new FullMatrixOperator(op, x)).compute(a);
+        this.gaussElim.compute(a, (op) -> new FullMatrixOperator(op, x));
         return new Substitution(Mode.BACKWARD, a).compute(x);
     }
 
+    private GenericGaussianElim gaussElim;
 }
