@@ -102,6 +102,7 @@ public interface Decomp extends Supplier<Matrix> {
      * with a partner matrix B. This method computes A = P * L * U, 
      * where P is a permutation matrix, L is lower triangular matrix that is a 
      * product of elementary matrices, U is upper triangular.
+     * @param partner  Partner matrix B
      * @return  A triplet of matrices &lt;P, L, U&gt;
      */
     @Implementation(GaussianDecomp.class)
