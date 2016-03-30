@@ -28,12 +28,16 @@ import java.util.stream.IntStream;
  */
 public class GenericGaussianElim {
     
+    /**
+     * Perform Gaussian Elimination.
+     * @param matrix   Matrix to be performed
+     */
     public void compute(Matrix matrix) {
         this.compute(matrix, Function.identity());
     }
     
     /**
-     * Perform Gaussian Elimination.
+     * Perform Gaussian Elimination with potential listener
      * @param <T>  Type after decorating
      * @param matrix  Matrix to be performed
      * @param decor  Decorating function
