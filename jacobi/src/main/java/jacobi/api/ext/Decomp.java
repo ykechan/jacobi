@@ -19,6 +19,7 @@ package jacobi.api.ext;
 import jacobi.api.Matrix;
 import jacobi.api.annotations.Facade;
 import jacobi.api.annotations.Implementation;
+import jacobi.api.annotations.NonPerturbative;
 import jacobi.core.decomp.chol.CholeskyDecomp;
 import jacobi.core.decomp.gauss.GaussianDecomp;
 import jacobi.core.decomp.qr.QRDecomp;
@@ -53,6 +54,7 @@ public interface Decomp extends Supplier<Matrix> {
      * @return  Lower triangular matrix L
      * @throws  UnsupportedOperationException  if matrix is not positive-definite.
      */
+    @NonPerturbative
     @Implementation(CholeskyDecomp.class)
     public Decomp chol();
     
@@ -61,6 +63,7 @@ public interface Decomp extends Supplier<Matrix> {
      * @return  A pair of matrices &lt;L, L^t&gt;
      * @throws  UnsupportedOperationException  if matrix is not positive-definite.
      */
+    @NonPerturbative
     @Implementation(CholeskyDecomp.class)
     public Pair chol2();
     
@@ -69,8 +72,20 @@ public interface Decomp extends Supplier<Matrix> {
      * and R is upper triangular.
      * @return 
      */
+    @NonPerturbative
     @Implementation(QRDecomp.class)
     public Pair qr();
+    
+    /**
+     * Compute QR decomposition by transforming parameter matrix A, and
+     * with a partner matrix B. This method computes A = Q * R by
+     * transforming A to R, with a partner matrix B, which will be transformed
+     * to Q^t * B.
+     * @param partner  Partner matrix B
+     * @return  Instance of matrix A now transformed to matrix R
+     */
+    @Implementation(QRDecomp.class)
+    public Matrix qr(Matrix partner);
     
     /**
      * Compute Gaussian Decomposition, a.k.a. PLU Decomposition, i.e.
@@ -78,6 +93,17 @@ public interface Decomp extends Supplier<Matrix> {
      * matrix that is a product of elementary matrices, U is upper triangular.
      * @return  A triplet of matrices &lt;P, L, U&gt;
      */
+    @NonPerturbative
     @Implementation(GaussianDecomp.class)
     public Triplet gauss();
+    
+    /**
+     * Compute Gaussian Decomposition by transforming parameter matrix A, and
+     * with a partner matrix B. This method computes A = P * L * U, 
+     * where P is a permutation matrix, L is lower triangular matrix that is a 
+     * product of elementary matrices, U is upper triangular.
+     * @return  A triplet of matrices &lt;P, L, U&gt;
+     */
+    @Implementation(GaussianDecomp.class)
+    public Matrix gauss(Matrix partner);
 }
