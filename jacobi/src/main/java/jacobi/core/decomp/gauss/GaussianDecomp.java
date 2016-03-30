@@ -38,6 +38,26 @@ public class GaussianDecomp {
         this.gaussElim = new GenericGaussianElim();
     }
     
+    /**
+     * Performs Gaussian Elimination with a partner matrix, i.e. transform A to 
+     * R and partner matrix B to P^-1 * B, where A = P * L * R s.t. P is a permutation
+     * matrix, L is lower triangular and R upper triangular.
+     * @param matrix  Matrix A
+     * @param partner  Partner matrix B
+     * @return  Instance of A, transformed into R
+     */
+    public Matrix compute(Matrix matrix, Matrix partner) {
+        this.gaussElim.compute(matrix, (op) -> new FullMatrixOperator(op, partner));
+        return matrix;
+    }
+    
+    /**
+     * Performs Gaussian Elimination i.e. transform A to 
+     * R and returns &lt;P, L, U&gt;, where A = P * L * R s.t. P is a permutation
+     * matrix, L is lower triangular and R upper triangular.
+     * @param matrix  Matrix A
+     * @return  Instance of A, transformed into R
+     */
     public Triplet compute(Matrix matrix) {
         Memento mem = this.gaussElim.compute(matrix, (op) -> new Memento(op));
         return Triplet.of(
