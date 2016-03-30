@@ -21,6 +21,7 @@ import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.core.impl.CopyOnWriteMatrix;
 import jacobi.core.util.Triplet;
+import java.util.Arrays;
 
 /**
  * 
@@ -40,7 +41,7 @@ public class GaussianDecomp {
     public Triplet compute(Matrix matrix) {
         Memento mem = this.gaussElim.compute(matrix, (op) -> new Memento(op));
         return Triplet.of(
-            CopyOnWriteMatrix.of(mem.getPermutation()), 
+            CopyOnWriteMatrix.of(mem.getPermutation().inv()), 
             mem.getLower(), 
             matrix);
     }
@@ -52,11 +53,15 @@ public class GaussianDecomp {
         public Memento(ElementaryOperator op) {
             super(op);
             this.perm = new int[op.getMatrix().getRowCount()];
+            for(int i = 0; i < this.perm.length; i++){
+                this.perm[i] = i;
+            }
             this.lower = Matrices.identity(this.perm.length);
             this.order = 0;
         }
         
         public Permutation getPermutation() {
+            System.out.println("perm = " + Arrays.toString(perm));
             return new Permutation(perm, order % 2 == 0 ? 1 : -1);
         }
 
@@ -81,7 +86,7 @@ public class GaussianDecomp {
         public void rowOp(int i, double a, int j) {            
             super.rowOp(i, a, j);
             double[] row = this.lower.getRow(i);
-            row[j] = a;
+            row[j] = -a;
             this.lower.setRow(i, row);
         }
         
