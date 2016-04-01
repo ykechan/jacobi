@@ -24,6 +24,7 @@ import jacobi.api.annotations.NonPerturbative;
 import jacobi.api.ext.Op;
 import jacobi.api.ext.Prop;
 import jacobi.core.facade.FacadeProxy;
+import jacobi.core.impl.CopyOnWriteMatrix;
 import jacobi.core.impl.ImmutableMatrix;
 import jacobi.core.util.Throw;
 import java.util.Arrays;
@@ -100,7 +101,7 @@ public class Permutation extends ImmutableMatrix {
 
     @Override
     public Matrix copy() {
-        return new Permutation(Arrays.copyOf(this.indices, this.getRowCount()), order);
+        return CopyOnWriteMatrix.of(new Permutation(Arrays.copyOf(this.indices, this.getRowCount()), order));
     }
 
     @Override

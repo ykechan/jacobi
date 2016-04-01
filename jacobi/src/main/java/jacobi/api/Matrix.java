@@ -99,7 +99,7 @@ public interface Matrix {
     public <T> T ext(Class<T> clazz);
     
     /**
-     * Copy the content of current matrix to another matrix.
+     * Copy the content of current matrix to another mutable matrix.
      * 
      * Returned matrix may not be the same type as the original matrix, but
      * must have the same dimension and value in each elements and mutable.
@@ -107,7 +107,7 @@ public interface Matrix {
      * Returned matrix is independent from the original matrix, i.e. when
      * the value of the original matrix changes, the returned matrix will
      * not be affected.
-     * @return 
+     * @return  A mutable copy of original matrix
      */
     public Matrix copy();
     

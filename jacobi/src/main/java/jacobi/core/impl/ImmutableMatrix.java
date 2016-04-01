@@ -105,6 +105,11 @@ public abstract class ImmutableMatrix implements Matrix { // NOPMD
         return FacadeProxy.of(clazz, this);
     }
 
+    @Override
+    public Matrix copy() {
+        return new DefaultMatrix(this);
+    }
+
     private Matrix throwUnsupported() {
         throw new UnsupportedOperationException(this.getClass() + " is immutable.");
     }

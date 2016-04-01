@@ -62,7 +62,7 @@ public class DiagonalMatrix extends ImmutableMatrix {
 
     @Override
     public Matrix copy() {
-        return new DiagonalMatrix(this.vector);
+        return CopyOnWriteMatrix.of(new DiagonalMatrix(this.vector));
     }
     
     @Delegate(facade = Prop.class, method = "det")
