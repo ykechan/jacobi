@@ -17,17 +17,23 @@
 
 package jacobi.core.decomp.qr;
 
+import jacobi.api.Matrices;
 import jacobi.api.Matrix;
+import jacobi.core.impl.CopyOnWriteMatrix;
+import jacobi.core.prop.Transpose;
+import jacobi.core.util.Pair;
 import jacobi.core.util.Throw;
 import jacobi.core.util.Triplet;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 /**
  * Hessenberg decomposition is decompose a matrix A into Q * U * Q^t, where
- * Q is orthogonal and U is almost upper triangular. Almost triangular here refers to
- * almost upper triangular, in that all elements under sub-diagonal are zero. 
+ * Q is orthogonal and U is almost triangular. Almost triangular here refers to
+ * almost upper triangular, in that all elements below the sub-diagonal are zero. 
  * Sub-diagonal is not necessarily zeroes though.
  * 
- * Hessenberg decomposition may not have much interest invested in itself, but
+ * Hessenberg decomposition may not attract much interest invested in itself, but
  * it is the first step of optimization of QR algorithm.
  * 
  * Hessenberg decomposition can be easily computed using Householder reflections.
@@ -36,17 +42,61 @@ import jacobi.core.util.Triplet;
  */
 public class Hessenberg {
     
+    /**
+     * Reduce a matrix A into a almost upper triangular matrix.
+     * @param a  Matrix A
+     * @return   Instance of matrix A transformed in upper sub-diagonal.
+     */
     public Matrix compute(Matrix a) {        
-        this.compute(a, null);
+        this.compute(a, (hh) -> {});
         return a;
     }
     
-    public Triplet compute3(Matrix matrix) {
-        // ...
-        return null;
+    /**
+     * Compute A = Q * U * Q^t and gets &lt;Q, U&gt;, Q is orthogonal
+     * and U is almost upper triangular. Since Q^t is somewhat
+     * redundant and can easily computed from Q, its value is omitted.
+     * @param a  Matrix A
+     * @return   A pair of matrices &lt;Q, U&gt;
+     */
+    public Pair computeQH(Matrix a) {
+        AtomicBoolean first = new AtomicBoolean(true);
+        Matrix q = Matrices.zeros(a.getColCount());        
+        this.compute(a, (hh) -> {
+            if(first.getAndSet(false)){
+                for(int i = 0; i < q.getRowCount(); i++){
+                    q.setRow(i, hh.getRow(i));
+                }
+            }else{
+                hh.applyLeft(q);
+            }
+        });
+        
+        return Pair.of(CopyOnWriteMatrix.of(q), a);
     }
     
-    protected void compute(Matrix matrix, Matrix partner) {
+    /**
+     * Compute A = Q * U * Q^t and gets &lt;Q, U, Q^t&gt;, Q is orthogonal
+     * and U is almost upper triangular. Q^t is somewhat redundant but included
+     * here for mathematical wholeness.
+     * @param a  Matrix A
+     * @return   A pair of matrices &lt;Q, U&gt;
+     */
+    public Triplet computeQHQ(Matrix a) {
+        Pair qh = this.computeQH(a);
+        return Triplet.of(
+            qh.getLeft(),
+            a,
+            new Transpose().compose(qh.getRight()) );
+    }
+    
+    /**
+     * Reduce a matrix A into a almost upper triangular matrix, and listen
+     * to each reflector operation.
+     * @param matrix  Matrix A
+     * @param listener   Listener of reflector operation
+     */
+    protected void compute(Matrix matrix, Consumer<HouseholderReflector> listener) {
         this.validate(matrix);
         if(matrix.getRowCount() < 3){
             return;
@@ -54,11 +104,18 @@ public class Hessenberg {
         int n = matrix.getColCount() - 2;
         double[] columnBuffer = new double[matrix.getRowCount()];
         for(int i = 0; i < n; i++){
-            this.eliminate(matrix, partner, i, columnBuffer);
+            this.eliminate(matrix, i, columnBuffer, listener);
         }
     }
     
-    protected void eliminate(Matrix matrix, Matrix partner, int i, double[] column) {
+    /**
+     * Eliminate all entries below sub-diagonal of a column in matrix A.
+     * @param matrix  Matrix A
+     * @param i  Column index 
+     * @param column  Column buffer 
+     * @param listener  Reflection listener
+     */
+    protected void eliminate(Matrix matrix, int i, double[] column, Consumer<HouseholderReflector> listener) {
         this.getColumn(matrix, i + 1, i, column);
         HouseholderReflector hh = new HouseholderReflector(column, i + 1);
         double norm = hh.normalize();
@@ -66,20 +123,10 @@ public class Hessenberg {
             return;
         }
         matrix.set(i + 1, i, norm);
-        this.applyLeft(matrix, partner, i, hh);
-        this.applyRight(matrix, i, hh);
-    }
-    
-    protected void applyLeft(Matrix matrix, Matrix partner, int i, HouseholderReflector hh) {
         hh.applyLeft(matrix, i + 1);
-        if(partner != null){
-            hh.applyLeft(partner);
-        }
-    }
-    
-    protected void applyRight(Matrix matrix, int i, HouseholderReflector hh) {
         hh.applyRight(matrix);
-    }
+        listener.accept(hh);
+    }    
 
     /**
      * Get the Householder reflector of a column.

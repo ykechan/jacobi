@@ -22,6 +22,7 @@ import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.util.Jacobi;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
+import java.util.function.Consumer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -70,15 +71,13 @@ public class HessenbergTest {
         return new Hessenberg(){
 
             @Override
-            protected void applyRight(Matrix matrix, int i, HouseholderReflector hh) {
+            protected void eliminate(Matrix matrix, int i, double[] column, Consumer<HouseholderReflector> listener) {
+                super.eliminate(matrix, i, column, listener);
                 for(int k = i + 2; k < matrix.getRowCount(); k++){
                     matrix.set(k, i, 0.0);
                 }
-                Jacobi.assertEquals(step[2*i], matrix);
-                super.applyRight(matrix, i, hh);
                 Jacobi.assertEquals(step[2*i + 1], matrix);
             }
-            
             
         };
     }
