@@ -21,6 +21,8 @@ import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.core.util.Pair;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 /**
  * Implementation class for QR Decomposition.
@@ -40,23 +42,17 @@ public class QRDecomp {
      * @return  A pair of matrix &lt;Q, R&gt;
      */
     public Pair computeQR(Matrix matrix) {
-        double[] column = new double[matrix.getRowCount()];
-        this.getColumn(matrix, 0, 0, column);
-        
-        HouseholderReflector hh = new HouseholderReflector(column, 0);
-        double norm = hh.normalize();
-        
-        Matrix q = null;
-        if(Math.abs(norm) < EPSILON){
-            q = Matrices.identity(matrix.getRowCount());
-        }else{
-            hh.applyLeft(matrix);
-            matrix.set(0, 0, norm);
-        }
-        if(matrix.getColCount() == 1){            
-            return Pair.of(q, matrix);
-        }        
-        this.compute(matrix, q, 1);
+        AtomicBoolean first = new AtomicBoolean(true);
+        Matrix q = Matrices.zeros(matrix.getRowCount(), matrix.getRowCount());
+        this.compute(matrix, (hh) -> {
+            if(first.getAndSet(false)){
+                for(int i = 0; i < q.getRowCount(); i++){
+                    q.setRow(i, hh.getRow(i));
+                }
+            }else{
+                hh.applyRight(q);
+            }
+        });
         return Pair.of(q, matrix);
     }
     
@@ -66,25 +62,38 @@ public class QRDecomp {
      * Q is orthogonal and R is lower trianguar.
      * @param matrix  Matrix A
      * @param partner  Partner matrix B
+     * @return  Instance of A, now containing value of R
      */
-    public void compute(Matrix matrix, Matrix partner) {
-        this.compute(matrix, partner, 0);
+    public Matrix compute(Matrix matrix, Matrix partner) {
+        this.compute(matrix, (hh) -> hh.applyLeft(partner));
+        return matrix;
     }
     
     /**
-     * Compute QR decomposition with a partner matrix, i.e. given matrix A and
-     * partner matrix B, transform A to R and B to Q^t * R, where A = Q * R, 
-     * Q is orthogonal and R is lower trianguar. This method only interests in
-     * columns beyond a certain index in A, but full matrix of B.
-     * @param matrix  Matrix A
-     * @param partner  Matrix B
-     * @param from  Start index of columns of interest
+     * Compute QR decomposition which only R is interested.
+     * @param matrix  Matrix A to be transformed to R
+     * @return  Instance of matrix A that is transformed to R
      */
-    protected void compute(Matrix matrix, Matrix partner, int from) {
-        double[] column = new double[matrix.getRowCount()];
-        int n = Math.min(matrix.getRowCount(), matrix.getColCount()) - 1;
-        for(int j = from; j < n; j++){
-            this.eliminate(matrix, partner, j, column);
+    public Matrix compute(Matrix matrix) {
+        this.compute(matrix, (hh) -> {});
+        return matrix;
+    }
+    
+    /**
+     * Compute QR decomposition with a listener listening each Householder
+     * Reflection operation done.
+     * @param matrix  Matrix A
+     * @param listener  Householder reflection listener
+     */
+    protected void compute(Matrix matrix, Consumer<HouseholderReflector> listener) {        
+        
+        int n = Math.min(matrix.getRowCount(), matrix.getColCount());
+        if(matrix.getRowCount() == matrix.getColCount()){
+            n--; // last 1x1 matrix need no elimination
+        }
+        
+        for(int j = 0; j < n; j++){
+            this.eliminate(matrix, listener, j);
         }
         for(int i = 0; i < matrix.getRowCount(); i++){
             double[] row = matrix.getRow(i);
@@ -92,28 +101,26 @@ public class QRDecomp {
             matrix.setRow(i, row);
         }
         return;
-    }
+    }    
     
     /**
-     * Eliminate a column of a matrix A such that all sub-diagonal entries
-     * of this column are zeroes.
-     * @param matrix  Matrix A
-     * @param partner Partner matrix B
-     * @param j  Column index
-     * @param column  Column buffer
+     * Eliminate all sub-diagonal entries of a column 
+     * in a matrix A by Householder reflection. 
+     * @param matrix  Matrix  A
+     * @param listener  Householder reflection listener
+     * @param j   Column index of column to be eliminated
      */
-    protected void eliminate(Matrix matrix, Matrix partner, int j, double[] column) {
+    protected void eliminate(Matrix matrix, Consumer<HouseholderReflector> listener, int j) {
+        double[] column = new double[matrix.getRowCount()];
         this.getColumn(matrix, j, j, column);
         HouseholderReflector hh = new HouseholderReflector(column, j);
         double norm = hh.normalize();
         if(Math.abs(norm) < EPSILON){
             return;
-        }        
+        }
         hh.applyLeft(matrix, j + 1);            
         matrix.set(j, j, norm);
-        if(partner != null){
-            hh.applyLeft(partner);
-        }
+        listener.accept(hh);        
     }
     
     /**
