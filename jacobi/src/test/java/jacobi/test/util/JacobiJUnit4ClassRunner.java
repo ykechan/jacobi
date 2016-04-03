@@ -36,7 +36,15 @@ import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 
 /**
- *
+ * Utility class for running tests in Jacobi.
+ * 
+ * Most of the time tests in Jacobi involves accept an input matrix, or input
+ * matrices, perform computation and check the result. Or check the intermediate
+ * results step-by-step. It would be convenient to automatically load input data
+ * and check output data. This class does just that.
+ * 
+ * 
+ * 
  * @author Y.K. Chan
  */
 public class JacobiJUnit4ClassRunner extends BlockJUnit4ClassRunner {
@@ -70,7 +78,6 @@ public class JacobiJUnit4ClassRunner extends BlockJUnit4ClassRunner {
             @Override
             public void evaluate() throws Throwable {
                 Map<Integer, Matrix> data = dataSource.get(jImport.value());
-                System.out.println(injects.keySet());
                 for(Map.Entry<Integer, Field> entry : injects.entrySet()){
                     entry.getValue().set(target, data.get(entry.getKey()));
                 }
