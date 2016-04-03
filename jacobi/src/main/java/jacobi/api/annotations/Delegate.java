@@ -29,14 +29,31 @@ import java.lang.annotation.Target;
  * implementation specified by the Implementation annotation, but applicable
  * only for this child-class of parameter.<p>
  * 
+ * <p>The facade engine should match by annotated facade interface and method
+ * name, and find the method with the same signature in case of overloading.</p>
+ * 
+ * <p>It is advised that though it may be tempting to implement all
+ * trivial operations, this may turn the matrix implementation into an God 
+ * object. Moreover, some silly cases with no actual practical usage,
+ * such as finding determinant of an identity matrix, are not recommended to be
+ * implemented.</p>
+ * 
  * @author Y.K. Chan
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Delegate {
     
+    /**
+     * Facade interface of the delegating method
+     * @return  Facade interface
+     */
     public Class<?> facade();
     
+    /**
+     * Method name of the delegating method
+     * @return  Method name
+     */
     public String method();
     
 }
