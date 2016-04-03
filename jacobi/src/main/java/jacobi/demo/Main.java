@@ -16,6 +16,12 @@
  */
 package jacobi.demo;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
+
 /**
  *
  * @author Y.K. Chan
@@ -26,10 +32,26 @@ public final class Main {
         
     }
     
-    public static void main(String[] args) {
-        String s = "";
-        System.out.println(s.charAt(0) == 'a');
+    public static void main(String[] args) {        
+        new Main().run(System.out);
         return;
     }
     
+    private void run(PrintStream out) {
+        this.printFile(out, README);
+    }
+    
+    private void printFile(PrintStream out, String path) {
+        try(InputStream in = this.getClass().getResourceAsStream(path);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in))){ 
+            String line = null;
+            while((line = reader.readLine()) != null){
+                out.println(line);
+            }
+        }catch(IOException ex){
+           throw new IllegalStateException("Unable to find classpath:" + path);
+        }
+    }
+    
+    private static final String README = "/jacobi/demo/readme.txt";
 }
