@@ -22,6 +22,7 @@ import jacobi.api.annotations.Implementation;
 import jacobi.api.annotations.NonPerturbative;
 import jacobi.core.decomp.chol.CholeskyDecomp;
 import jacobi.core.decomp.gauss.GaussianDecomp;
+import jacobi.core.decomp.qr.Hessenberg;
 import jacobi.core.decomp.qr.QRDecomp;
 import jacobi.core.util.Pair;
 import jacobi.core.util.Triplet;
@@ -107,4 +108,30 @@ public interface Decomp extends Supplier<Matrix> {
      */
     @Implementation(GaussianDecomp.class)
     public Matrix gauss(Matrix partner);
+    
+    /**
+     * Compute Hessenberg Decomposition of parameter matrix A into Q * H * Q^t,
+     * where Q is orthogonal, and H is upper Hessenberg, and gets H only.
+     * @return   Upper Hessenberg matrix H
+     */
+    @NonPerturbative
+    @Implementation(Hessenberg.class)
+    public Matrix hess();
+    
+    /**
+     * Compute Hessenberg Decomposition of parameter matrix A into Q * H * Q^t,
+     * where Q is orthogonal, and H is upper Hessenberg, and gets &lt;Q, H&gt; only.
+     * @return   A pair of matrices &lt;Q, H&gt;
+     */
+    @NonPerturbative
+    @Implementation(Hessenberg.class)
+    public Pair hessQH();        
+    
+    /**
+     * Compute Hessenberg Decomposition of parameter matrix A into Q * H * Q^t,
+     * where Q is orthogonal, and H is upper Hessenberg, and gets &lt;Q, H, Q^t&gt;.
+     * @return   A triplet of matrices &lt;Q, H, Q^t&gt;
+     */
+    @Implementation(Hessenberg.class)
+    public Triplet hessQHQt();
 }
