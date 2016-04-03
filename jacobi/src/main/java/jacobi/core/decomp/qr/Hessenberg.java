@@ -24,12 +24,13 @@ import jacobi.core.prop.Transpose;
 import jacobi.core.util.Pair;
 import jacobi.core.util.Throw;
 import jacobi.core.util.Triplet;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 /**
- * Hessenberg decomposition is decompose a matrix A into Q * U * Q^t, where
- * Q is orthogonal and U is almost triangular. Almost triangular here refers to
+ * Hessenberg decomposition is decomposing a matrix A into Q * H * Q^t, where
+ * Q is orthogonal and H is almost triangular. Almost triangular here refers to
  * almost upper triangular, in that all elements below the sub-diagonal are zero. 
  * Sub-diagonal is not necessarily zeroes though.
  * 
@@ -53,8 +54,8 @@ public class Hessenberg {
     }
     
     /**
-     * Compute A = Q * U * Q^t and gets &lt;Q, U&gt;, Q is orthogonal
-     * and U is almost upper triangular. Since Q^t is somewhat
+     * Compute A = Q * H * Q^t and gets &lt;Q, H&gt;, Q is orthogonal
+     * and H is almost upper triangular. Since Q^t is somewhat
      * redundant and can easily computed from Q, its value is omitted.
      * @param a  Matrix A
      * @return   A pair of matrices &lt;Q, U&gt;
@@ -76,13 +77,13 @@ public class Hessenberg {
     }
     
     /**
-     * Compute A = Q * U * Q^t and gets &lt;Q, U, Q^t&gt;, Q is orthogonal
-     * and U is almost upper triangular. Q^t is somewhat redundant but included
+     * Compute A = Q * H * Q^t and gets &lt;Q, H, Q^t&gt;, Q is orthogonal
+     * and H is almost upper triangular. Q^t is somewhat redundant but included
      * here for mathematical wholeness.
      * @param a  Matrix A
      * @return   A pair of matrices &lt;Q, U&gt;
      */
-    public Triplet computeQHQ(Matrix a) {
+    public Triplet computeQHQt(Matrix a) {
         Pair qh = this.computeQH(a);
         return Triplet.of(
             qh.getLeft(),
@@ -105,6 +106,11 @@ public class Hessenberg {
         double[] columnBuffer = new double[matrix.getRowCount()];
         for(int i = 0; i < n; i++){
             this.eliminate(matrix, i, columnBuffer, listener);
+        }
+        for(int i = 2; i < matrix.getRowCount(); i++){
+            double[] row = matrix.getRow(i);
+            Arrays.fill(row, 0, i - 1, 0.0);
+            matrix.setRow(i, row);
         }
     }
     
