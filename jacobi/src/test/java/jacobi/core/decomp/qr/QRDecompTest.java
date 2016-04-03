@@ -18,12 +18,15 @@
 package jacobi.core.decomp.qr;
 
 import jacobi.api.Matrix;
+import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
+import jacobi.test.annotations.JacobiResult;
 import jacobi.test.util.Jacobi;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -52,49 +55,57 @@ public class QRDecompTest {
     
     @JacobiInject(5)
     public Matrix step5;
+    
+    @JacobiResult(100)
+    public Matrix q;
 
     @Test
     @JacobiImport("4x4")
+    @JacobiEquals(expected = 100, actual = 100)
     public void test4x4() {
-        this.assertEachStep(Arrays.asList(step1, step2, step3))
-                .compute(input, null);
+        this.q = this.assertEachStep(
+                Arrays.asList(step1, step2, step3)
+        ).computeQR(input).getLeft();
     }
     
     @Test
     @JacobiImport("6x6")
+    @JacobiEquals(expected = 100, actual = 100)
     public void test6x6() {
-        this.assertEachStep(Arrays.asList(
+        this.q = this.assertEachStep(Arrays.asList(
             step1, step2, step3,
             step4, step5
-        )).compute(input, null);
+        )).computeQR(input).getLeft();
     }
     
     @Test
     @JacobiImport("9x3")
+    @JacobiEquals(expected = 100, actual = 100)
     public void test9x3() {
-        this.assertEachStep(Arrays.asList(
+        this.q = this.assertEachStep(Arrays.asList(
             step1, step2, step3
-        )).compute(input, null);
+        )).computeQR(input).getLeft();
     }
     
     @Test
     @JacobiImport("Degen 8x3")
+    @JacobiEquals(expected = 100, actual = 100)
     public void testDegen8x3() {
-        this.assertEachStep(Arrays.asList(
+        this.q = this.assertEachStep(Arrays.asList(
             step1, 
             step1, // no change after step 1
             step2
-        )).compute(input, null);
+        )).computeQR(input).getLeft();
     }
     
     private QRDecomp assertEachStep(List<Matrix> expects) {
         return new QRDecomp(){
 
             @Override
-            protected void eliminate(Matrix matrix, Matrix partner, int j, double[] column) {
-                super.eliminate(matrix, partner, j, column);
-                for(int i = j + 1; i < matrix.getRowCount(); i++){
-                    matrix.set(i, j, 0.0);
+            protected void eliminate(Matrix matrix, Consumer<HouseholderReflector> listener, int j) {
+                super.eliminate(matrix, listener, j);
+                for(int k = j + 1; k < matrix.getRowCount(); k++){
+                    matrix.set(k, j, 0.0);
                 }
                 Jacobi.assertEquals(expects.get(j), matrix);
             }
