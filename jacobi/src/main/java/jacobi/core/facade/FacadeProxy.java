@@ -69,7 +69,6 @@ public class FacadeProxy implements InvocationHandler {
            .isFalse(
                 () -> isCorrectSupplierType(facadeClass),
                 () -> "Invalid supplier type argument.");
-        
         InvocationHandler handler = new FacadeProxy(
                 DelegateEngine.getInstance(), 
                 facadeClass, 
@@ -105,7 +104,8 @@ public class FacadeProxy implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) {
-        if(GET_METHOD.equals(method.getName())
+        if(proxy instanceof Supplier 
+        && GET_METHOD.equals(method.getName())
         && method.getParameterCount() == 0){
             return this.returnValue;
         }
@@ -139,7 +139,7 @@ public class FacadeProxy implements InvocationHandler {
                 .filter((t) -> t == facade.value())
                 .findAny()
                 .isPresent();
-    }
+    }    
     
     /**
      * Create new proxy object with given invocation handler.

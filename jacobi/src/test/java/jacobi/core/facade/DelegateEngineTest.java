@@ -20,6 +20,7 @@ package jacobi.core.facade;
 import jacobi.api.annotations.Delegate;
 import jacobi.api.annotations.Facade;
 import jacobi.api.annotations.Implementation;
+import java.util.function.Supplier;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -50,6 +51,15 @@ public class DelegateEngineTest {
                 new Object[]{ 911 });
         
         Assert.assertEquals("You did 911.", result.toString());
+    }
+    
+    @Test
+    public void testDuplicatedMethodKeys() throws Exception {
+        Integer result = (Integer) DelegateEngine.getInstance().invoke(
+                SpecificSupplier.class.getMethod("get"), 
+                new ConcreteDelegate("I"), 
+                new Object[]{});
+        Assert.assertEquals(1337, result.intValue());
     }
     
     public static class NonFinalString {
@@ -98,6 +108,37 @@ public class DelegateEngineTest {
         @Delegate(facade = StringFacade.class, method = "doSth")
         public NonFinalString compute(NonFinalString str) {
             return new NonFinalString(this.toString() + " did " + str.toString() + " easily.");
+        }
+        
+    }
+    
+    /**
+     * Java reflection would include two instance of get() method in the following
+     * example. One returns object coming from Supplier, and one returns Integer
+     * coming from SpecificSupplier. Both leads to the same implementation. 
+     * Delegate engine should cater this by choosing the more specific one, by 
+     * determining if one return type is the sub-class of the other. If two return
+     * types are siblings, though no way in Java to code it explicitly, exception
+     * would occur.
+     */
+    @Facade(NonFinalString.class)
+    public interface SpecificSupplier extends Supplier<Integer> {
+
+        @Override
+        public Integer get();
+        
+    }
+    
+    public static class ConcreteDelegate extends NonFinalString implements SpecificSupplier {
+
+        public ConcreteDelegate(String string) {
+            super(string);
+        }
+
+        @Override
+        @Delegate(facade = SpecificSupplier.class, method = "get")
+        public Integer get() {
+            return 1337;
         }
         
     }

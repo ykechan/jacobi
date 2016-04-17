@@ -68,16 +68,30 @@ public class DelegateEngine extends FacadeEngine {
      * Add methods annotated with @Delegate and corresponding facade method
      * @param clazz  Concrete class of target object
      */
-    private void addDelegates(Class<?> clazz) {
+    private void addDelegates(Class<?> clazz) {        
         this.delegates.putAll(
             Arrays.asList(clazz.getMethods())
                 .stream()
-                .filter((m) -> m.isAnnotationPresent(Delegate.class))                
+                .filter((m) -> m.isAnnotationPresent(Delegate.class))
                 .map((m) -> this.toKey(m))
                 .filter((k) -> k.isValid())
                 .collect(Collectors.toMap(
                     Function.identity(), 
-                    (k) -> new Delegator(k.method)
+                    (k) -> new Delegator(k.method),
+                    (k0, k1) -> {
+                        if(k0.getReturnType().isAssignableFrom(k1.getReturnType())){
+                            return k1;
+                        }
+                        if(k1.getReturnType().isAssignableFrom(k0.getReturnType())){
+                            return k0;
+                        }
+                        throw new UnsupportedOperationException(
+                            "Unable to resolve between " 
+                            + this.toString(k0.getMethod())
+                            + " and "
+                            + this.toString(k1.getMethod())
+                        );
+                    }
                 ))
         );
         this.delegates.put(new Key(clazz), NULL);
@@ -127,6 +141,15 @@ public class DelegateEngine extends FacadeEngine {
         } catch (NoSuchMethodException | SecurityException ex) {
             throw new IllegalArgumentException(ex);
         }
+    }
+    
+    private String toString(Method method) {
+        return method.getDeclaringClass().getName() 
+            + "::"
+            + method.getName()
+            + '(' + Arrays.asList(method.getParameterTypes()) + ')'
+            + " returns "
+            + method.getReturnType().getName();
     }
     
     private Map<Key, Invocator> delegates;

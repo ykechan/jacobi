@@ -30,12 +30,19 @@ public class Delegator implements Invocator {
         this.method = method;
     }
 
+    public Method getMethod() {
+        return method;
+    }
+    
+    public Class<?> getReturnType() {
+        return method.getReturnType();
+    }
+
     @Override
     public Object invoke(Object target, Object[] args) {
         try {
             return this.method.invoke(target, args);
         } catch (IllegalAccessException | IllegalArgumentException ex) {
-            System.out.println("Invoke " + this.method.getDeclaringClass() + "::"+ this.method.getName() + " with " + target);
             throw new UnsupportedOperationException(ex);
         } catch (InvocationTargetException ex) {
             if(ex.getTargetException() instanceof RuntimeException){
