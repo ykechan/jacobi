@@ -162,6 +162,8 @@ public class Functor implements Invocator {
             .filter((m) -> m.getDeclaringClass() != Object.class)
             .filter((m) -> m.getReturnType() == facadeMethod.getReturnType()
                         || m.getReturnType() == facade.value() )
+            .filter((m) -> m.getReturnType() == facade.value()
+                        || m.getGenericReturnType().equals(facadeMethod.getGenericReturnType()))
             .filter((m) -> this.argumentMatches(m, facade.value(), facadeMethod.getParameterTypes())) 
             .reduce((a, b) -> {
                 throw new UnsupportedOperationException(
