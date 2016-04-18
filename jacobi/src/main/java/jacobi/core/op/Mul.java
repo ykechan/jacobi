@@ -51,6 +51,7 @@ public class Mul {
             double[] u = a.getRow(i);
             double[] v = ans.getRow(i);
             this.compute(u, b, v);
+            ans.setRow(i, v);
         }
     }
     
@@ -82,7 +83,7 @@ public class Mul {
                     for(int j = 0; j < v.length; j++){
                         w[j] = k * v[j];
                     }
-                    return v;
+                    return w;
                 })
                 .reduce((x, y) -> {
                     for(int j = 0; j < x.length; j++){
