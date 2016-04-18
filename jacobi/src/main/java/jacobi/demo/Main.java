@@ -16,6 +16,7 @@
  */
 package jacobi.demo;
 
+import jacobi.api.ext.Data;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,7 +33,7 @@ public final class Main {
         
     }
     
-    public static void main(String[] args) {        
+    public static void main(String[] args) {
         new Main().run(System.out);
         return;
     }
@@ -49,7 +50,7 @@ public final class Main {
                 out.println(line);
             }
         }catch(IOException ex){
-           throw new IllegalStateException("Unable to find classpath:" + path);
+           throw new IllegalStateException("Unable to find classpath:" + path, ex);
         }
     }
     
