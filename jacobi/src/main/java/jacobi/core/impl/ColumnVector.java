@@ -40,7 +40,7 @@ public class ColumnVector implements Matrix {
      * @param n   Number of dimension/rows
      */
     public ColumnVector(int n) {
-        this(new double[n]);
+        this.vector = new double[n];
     }
 
     /**
@@ -48,8 +48,16 @@ public class ColumnVector implements Matrix {
      * @param vector   Vector elements
      */
     public ColumnVector(double[] vector) {
+        this(vector, vector == null ? 0 : vector.length);
+    }
+    
+    /**
+     * Construct a column vector with given values.
+     * @param vector   Vector elements
+     */
+    public ColumnVector(double[] vector, int n) {
         Throw.when().isNull(() -> vector, () -> "Unable to use null array as vector.");
-        this.vector = Arrays.copyOf(vector, vector.length);
+        this.vector = Arrays.copyOf(vector, n);
     }
 
     @Override
@@ -72,8 +80,8 @@ public class ColumnVector implements Matrix {
     }
 
     @Override
-    public Matrix setRow(int index, double[] values) {        
-        this.vector[index] = values[0]; // NOPMD - false positive
+    public Matrix setRow(int index, double[] values) { // NOPMD - false positive
+        this.vector[index] = values[0]; 
         return this;
     }    
 
