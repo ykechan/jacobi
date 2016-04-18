@@ -87,18 +87,18 @@ public class Determinant {
 
         public Sign(ElementaryOperator op) {
             super(op);
-            this.sign = 1;
+            this.sgn = 1;
         }
         
         public int get() {
-            return this.sign;
+            return this.sgn;
         }
 
         @Override
         public void swapRows(int i, int j) {
             super.swapRows(i, j);            
             if(i != j){
-                this.sign *= -1;
+                this.sgn *= -1;
             }
         }
 
@@ -107,6 +107,6 @@ public class Determinant {
             super.rowOp(i, a, j);
         }
         
-        private int sign;
+        private int sgn;
     }
 }
