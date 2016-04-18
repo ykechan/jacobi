@@ -20,7 +20,6 @@ import jacobi.api.Matrix;
 import jacobi.core.facade.FacadeProxy;
 import jacobi.core.util.Throw;
 import java.util.Arrays;
-import java.util.Optional;
 
 /**
  *
@@ -35,10 +34,8 @@ public class DefaultMatrix implements Matrix {
         this.numCols = n;
     }
 
-    public DefaultMatrix(double[][] rows) {
-        this.rows = Optional.ofNullable(rows)
-                .map((r) -> Arrays.copyOf(r, r.length))
-                .orElse(EMPTY);
+    public DefaultMatrix(double[][] rows) { // NOPMD - intended
+        this.rows = rows;
         this.numCols = (rows == null || rows.length == 0)? 0 : rows[0].length;
     }
     
