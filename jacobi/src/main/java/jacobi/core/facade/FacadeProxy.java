@@ -104,7 +104,7 @@ public class FacadeProxy implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) {
-        if(proxy instanceof Supplier 
+        if(method.getDeclaringClass() == Supplier.class
         && GET_METHOD.equals(method.getName())
         && method.getParameterCount() == 0){
             return this.returnValue;
