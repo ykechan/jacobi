@@ -46,6 +46,10 @@ public class JacobiJUnit4ClassRunnerTest {
     @JacobiResult(4)
     public Matrix c;
     
+    @JacobiInject(0)
+    @JacobiResult(0)
+    public Matrix u;
+    
     @Test
     @JacobiImport("testReadEquals3x3")
     @JacobiEquals(expected = 1, actual = 3)
@@ -60,4 +64,10 @@ public class JacobiJUnit4ClassRunnerTest {
         System.out.println(this.c);
     }
     
+    @Test
+    @JacobiImport("testReadEquals5x5")
+    @JacobiEquals(expected = 0, actual = 0)
+    public void testReadDuplicates() {
+        System.out.println(this.c);
+    }
 }

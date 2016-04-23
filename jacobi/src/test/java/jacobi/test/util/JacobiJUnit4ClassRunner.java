@@ -24,7 +24,10 @@ import jacobi.test.annotations.JacobiResult;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -59,11 +62,11 @@ public class JacobiJUnit4ClassRunner extends BlockJUnit4ClassRunner {
             this.dataSource = new JacobiDataSource(WorkbookFactory.create(in));
         } catch(IOException | InvalidFormatException ex) {
             throw new InitializationError(ex);
-        }
-        
-        this.injects = new TreeMap<>();
+        } 
+        this.injects = new ArrayList<>();
         this.results = new TreeMap<>();
-        this.detectInjection(clazz);
+        this.detectInjection(clazz);        
+        System.out.println("injected " + this.injects);
     }
 
     @Override
@@ -78,8 +81,12 @@ public class JacobiJUnit4ClassRunner extends BlockJUnit4ClassRunner {
             @Override
             public void evaluate() throws Throwable {
                 Map<Integer, Matrix> data = dataSource.get(jImport.value());
-                for(Map.Entry<Integer, Field> entry : injects.entrySet()){
-                    entry.getValue().set(target, data.get(entry.getKey()));
+                for(Field entry : injects){
+                    if(entry.getType() == Map.class){
+                        entry.set(target, Collections.unmodifiableMap(data));
+                    }else{
+                        entry.set(target, data.get(entry.getAnnotation(JacobiInject.class).value()));
+                    }                    
                 }
                 stmt.evaluate();
             }
@@ -142,9 +149,7 @@ public class JacobiJUnit4ClassRunner extends BlockJUnit4ClassRunner {
             )
             .forEach((f) -> {
                 if(f.isAnnotationPresent(JacobiInject.class)){
-                    this.injects.put(
-                        f.getAnnotation(JacobiInject.class).value(),
-                        f);
+                    this.injects.add(f);
                 }
                 if(f.isAnnotationPresent(JacobiResult.class)){
                     this.results.put(
@@ -155,5 +160,6 @@ public class JacobiJUnit4ClassRunner extends BlockJUnit4ClassRunner {
     }
     
     private JacobiDataSource dataSource;
-    private Map<Integer, Field> injects, results;
+    private Map<Integer, Field> results;
+    private List<Field> injects;
 }
