@@ -116,12 +116,15 @@ public class HouseholderReflector extends ImmutableMatrix {
         for(int i = from + 1; i < vector.length; i++){
             temp += vector[i] * vector[i];
         }
+        if(temp < EPSILON){
+            return 0.0;
+        }
         double norm = Math.sqrt(temp + vector[from] * vector[from]);
         if(norm < EPSILON){
-            return norm;
+            return 0.0;
         }
         if(vector[from] < 0.0){
-            vector[from] -= norm;            
+            vector[from] -= norm;
         }else{
             vector[from] += norm;
             norm *= -1.0;

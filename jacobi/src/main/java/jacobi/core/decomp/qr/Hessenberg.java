@@ -125,7 +125,7 @@ public class Hessenberg {
         this.getColumn(matrix, i + 1, i, column);
         HouseholderReflector hh = new HouseholderReflector(column, i + 1);
         double norm = hh.normalize();
-        if(Math.abs(norm) < EPSILON){
+        if(norm == 0.0){
             return;
         }
         matrix.set(i + 1, i, norm);

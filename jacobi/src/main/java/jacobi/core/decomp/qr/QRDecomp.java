@@ -115,7 +115,7 @@ public class QRDecomp {
         this.getColumn(matrix, j, j, column);
         HouseholderReflector hh = new HouseholderReflector(column, j);
         double norm = hh.normalize();
-        if(Math.abs(norm) < EPSILON){
+        if(norm == 0.0){
             return;
         }
         hh.applyLeft(matrix, j + 1);            
