@@ -197,7 +197,7 @@ public class HouseholderReflector extends ImmutableMatrix {
         for(int i = from; i < matrix.getRowCount(); i++){
             double[] row = matrix.getRow(i);
             double k = this.vector[i];
-            for(int j = startCol; j < row.length; j++){
+            for(int j = startCol; j < matrix.getColCount(); j++){
                 row[j] -= 2.0 * k * partial[j];
             }
             matrix.setRow(i, row);
