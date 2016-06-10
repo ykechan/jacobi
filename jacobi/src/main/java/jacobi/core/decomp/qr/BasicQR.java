@@ -17,6 +17,7 @@
 
 package jacobi.core.decomp.qr;
 
+import jacobi.core.decomp.qr.step.QRStep;
 import jacobi.api.Matrix;
 import jacobi.core.util.Throw;
 
@@ -50,7 +51,7 @@ public class BasicQR implements QRStrategy {
     }
 
     @Override
-    public void compute(Matrix matrix, Matrix partner, boolean fullUpper) {
+    public Matrix compute(Matrix matrix, Matrix partner, boolean fullUpper) {
         Throw.when()
             .isNull(() -> matrix, () -> "No matrix to compute.")
             .isTrue(
@@ -66,6 +67,7 @@ public class BasicQR implements QRStrategy {
                 () -> partner != null && matrix.getRowCount() != partner.getRowCount(), 
                 () -> "Mismatch partner matrix having " + partner.getRowCount() + " rows.");
         this.compute(matrix, partner, 0, matrix.getRowCount(), fullUpper);
+        return matrix;
     }
     
     /**
