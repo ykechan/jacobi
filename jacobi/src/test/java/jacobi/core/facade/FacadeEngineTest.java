@@ -19,6 +19,7 @@ package jacobi.core.facade;
 import jacobi.api.annotations.Facade;
 import jacobi.api.annotations.Implementation;
 import java.util.Date;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Assert;
 import org.junit.Before;
@@ -91,6 +92,16 @@ public class FacadeEngineTest {
         
         Assert.assertEquals(1, DoSthImpl.COUNT.get());
         Assert.assertEquals(1, DoSthElseImpl.COUNT.get());
+        
+        Assert.assertEquals(
+                Optional.of(Math.PI),
+                engine.invoke(DoSomethingWithString.class.getMethod("doSthMayYieldDouble"), str, new Object[]{} )
+        );
+        
+        Assert.assertEquals(
+                Optional.of((long) str.length()),
+                engine.invoke(DoSomethingWithString.class.getMethod("doSthMayYieldLong"),
+                str, new Object[]{} ));
     }
         
     @Test
@@ -127,6 +138,12 @@ public class FacadeEngineTest {
         @Implementation(DoSthElseImpl.class)
         public double doSthElse();
         
+        @Implementation(DoSthMayYieldDouble.class)
+        public Optional<Double> doSthMayYieldDouble();
+        
+        @Implementation(DoSthMayYieldLong.class)
+        public Optional<Long> doSthMayYieldLong();
+        
         public Date dunnoHowToDo();
     }
     
@@ -160,4 +177,21 @@ public class FacadeEngineTest {
         
         public static final AtomicInteger COUNT = new AtomicInteger(0);
     }
+    
+    public static class DoSthMayYieldDouble {
+        
+        public Optional<Double> itIsAPie(String str) {        
+            return Optional.of(Math.PI);
+        }
+        
+    }
+    
+    public static class DoSthMayYieldLong {
+        
+        public Optional<Long> itIsLength(String str) {        
+            return Optional.of(Long.valueOf(str.length()));
+        }
+        
+    }
+    
 }
