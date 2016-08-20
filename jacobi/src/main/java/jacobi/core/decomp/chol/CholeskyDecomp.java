@@ -24,6 +24,7 @@ import jacobi.core.impl.CopyOnWriteMatrix;
 import jacobi.core.util.Pair;
 import jacobi.core.util.Throw;
 import jacobi.core.util.Triplet;
+import java.util.Optional;
 
 /**
  *
@@ -43,12 +44,7 @@ public class CholeskyDecomp {
      * @return  True if A is positive-definite, false otherwise
      */
     public boolean isPositiveDefinite(Matrix matrix) {
-        try {
-            this.compute(matrix);
-            return true;
-        }catch(UnsupportedOperationException ex){
-            return false;
-        }
+        return this.compute(matrix).isPresent();
     }
     
     /**
@@ -56,13 +52,11 @@ public class CholeskyDecomp {
      * @param matrix  Matrix A
      * @return  A pair of matrix, L and L^t
      */
-    public Pair computeBoth(Matrix matrix) {
-        Matrix lower = this.compute(matrix);
-        return Pair.of(
-            CopyOnWriteMatrix.of(lower),
-            () -> this.transpose(lower)
-        );
-        
+    public Optional<Pair> computeBoth(Matrix matrix) {        
+        return this.compute(matrix)
+                .map((lower) -> Pair.of(CopyOnWriteMatrix.of(lower), () -> this.transpose(lower)))
+                .map((pair) -> Optional.of(pair))
+                .orElse(Optional.empty());
     }
     
     public Triplet computeLDL() {
@@ -77,7 +71,7 @@ public class CholeskyDecomp {
      *     IllegalArgumentException if A is null or A is not square
      *     UnsupportedOperationException if A is not positive-definite
      */
-    public Matrix compute(Matrix matrix) { 
+    public Optional<Matrix> compute(Matrix matrix) { 
         Throw.when()
             .isNull(() -> matrix, () -> "No matrix to decompose.")
             .isTrue(
@@ -94,12 +88,12 @@ public class CholeskyDecomp {
             int n = i;
             double sumOfSquares = this.compute(target, lower, row, n);
             if(target[n] < sumOfSquares){
-                throw new UnsupportedOperationException("Matrix is not positive definite.");
+                return Optional.empty();
             }
             row[n] = Math.sqrt(target[n] - sumOfSquares);
             lower.setRow(i, row);
         }
-        return lower;
+        return Optional.of(lower);
     }            
 
     /**
