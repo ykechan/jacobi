@@ -44,13 +44,13 @@ public class CholeskyDecompTest {
     @JacobiImport("3x3")
     @JacobiEquals(expected = 1, actual = 1)
     public void test3x3() {
-        this.lower = new CholeskyDecomp().compute(this.input);
+        this.lower = new CholeskyDecomp().compute(this.input).get();
     }
 
     @Test
     @JacobiImport("4x4")
     @JacobiEquals(expected = 1, actual = 1)
     public void test4x4() {
-        this.lower = new CholeskyDecomp().compute(this.input);
+        this.lower = new CholeskyDecomp().compute(this.input).get();
     }
 }
