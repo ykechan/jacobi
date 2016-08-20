@@ -55,7 +55,7 @@ public class HouseholderReflectorTest {
     public void test5x5Elements() {
         this.output = new HouseholderReflector(new Transpose().compose(this.input).getRow(0), 0);
         Jacobi.assertEquals(this.output, this.output.copy());
-        Jacobi.assertEquals(this.output, this.output.ext(Prop.class).inv());
+        Jacobi.assertEquals(this.output, this.output.ext(Prop.class).inv().get());
     }
 
     @Test
