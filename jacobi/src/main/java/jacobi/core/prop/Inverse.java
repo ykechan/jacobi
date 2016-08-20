@@ -24,6 +24,7 @@ import jacobi.core.decomp.gauss.GenericGaussianElim;
 import jacobi.core.impl.DefaultMatrix;
 import jacobi.core.solver.Substitution;
 import jacobi.core.util.Throw;
+import java.util.Optional;
 
 /**
  * Implementation for finding inverse.
@@ -38,15 +39,17 @@ public class Inverse {
         this.gaussElim = new GenericGaussianElim();
     }
     
+    public Optional<Matrix> compureMaybe(Matrix a) {
+        return Optional.ofNullable(this.compute(a));
+    }
+    
     public Matrix compute(Matrix a) {
         Throw.when()
-            .isNull(() -> a, () -> "No matrix to invert.")
-            .isTrue(
-                () -> a.getRowCount() != a.getColCount(), 
-                () -> "Non-square matrix is not invertible.")
-            .isTrue(
-                () -> a.getRowCount() == 0,
-                () -> "Empty matrix has no inverse.");
+            .isNull(() -> a, () -> "No matrix to invert.");
+        if(a.getRowCount() != a.getColCount()
+        || a.getRowCount() == 0){
+            return null;
+        }
         switch(a.getRowCount()){
             case 0 : throw new IllegalStateException();
             case 1 : return this.inverse1x1(a);
