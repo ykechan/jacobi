@@ -26,6 +26,7 @@ import jacobi.core.decomp.qr.Hessenberg;
 import jacobi.core.decomp.qr.QRDecomp;
 import jacobi.core.util.Pair;
 import jacobi.core.util.Triplet;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -57,7 +58,7 @@ public interface Decomp extends Supplier<Matrix> {
      */
     @NonPerturbative
     @Implementation(CholeskyDecomp.class)
-    public Decomp chol();
+    public Optional<Decomp> chol();
     
     /**
      * Compute Cholesky decomposition, i.e. A = L * L^t where L is lower triangular
@@ -66,7 +67,7 @@ public interface Decomp extends Supplier<Matrix> {
      */
     @NonPerturbative
     @Implementation(CholeskyDecomp.class)
-    public Pair chol2();
+    public Optional<Pair> chol2();
     
     /**
      * Compute QR decomposition, i.e. A = Q * R where Q is orthogonal 
@@ -134,4 +135,6 @@ public interface Decomp extends Supplier<Matrix> {
      */
     @Implementation(Hessenberg.class)
     public Triplet hessQHQt();
+    
+    
 }
