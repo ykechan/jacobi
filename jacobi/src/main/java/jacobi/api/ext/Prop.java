@@ -25,6 +25,9 @@ import jacobi.core.prop.Determinant;
 import jacobi.core.prop.Inverse;
 import jacobi.core.prop.Rank;
 import jacobi.core.prop.Transpose;
+import jacobi.core.util.Pair;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Extension for getting a property of a matrix, e.g. determinant and trace.
@@ -63,10 +66,9 @@ public interface Prop {
     /**
      * Inverse of a matrix, i.e. B = A^-1 s.t. A * B = I
      * @return  Matrix inverse.
-     * @throws  UnsupportedOperationException if underlying matrix is not a square matrix
      */
     @Implementation(Inverse.class)
-    public Matrix inv();
+    public Optional<Matrix> inv();
     
     /**
      * Transpose of a matrix, i.e. exchanging rows and columns.
@@ -81,4 +83,7 @@ public interface Prop {
      */
     @Implementation(CholeskyDecomp.class)
     public boolean isPositiveDefinite();
+    
+    
+    public List<Pair> eig();
 }
