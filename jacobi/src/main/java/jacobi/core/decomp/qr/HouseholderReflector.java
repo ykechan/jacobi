@@ -28,6 +28,7 @@ import jacobi.core.impl.CopyOnWriteMatrix;
 import jacobi.core.impl.ImmutableMatrix;
 import jacobi.core.util.Throw;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 /**
@@ -155,8 +156,8 @@ public class HouseholderReflector extends ImmutableMatrix {
      */
     @NonPerturbative
     @Delegate(facade = Prop.class, method = "inv")
-    public Matrix inv() {
-        return this.copy();
+    public Optional<Matrix> inv() {
+        return Optional.of(this.copy());
     }
     
     /**
