@@ -17,6 +17,7 @@
 
 package jacobi.core.decomp.qr;
 
+import jacobi.core.decomp.qr.step.QRStep;
 import jacobi.api.Matrix;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
