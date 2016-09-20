@@ -114,23 +114,6 @@ public class GivensQR {
         return givens;
     }
     
-    /**
-     * Reduce an almost Hessenberg matrix into Hessenberg form. This is essentially
-     * the bulge-chasing algorithm, which the input matrix is almost Hessenberg
-     * in the sense that only the first column of 3rd row is non-zero.
-     * @param matrix  Input matrix in almost Hessenberg form
-     * @param beginRow  Start of row of interest
-     * @param endRow   End of row of interest
-     * @return List of Givens rotation applied
-     */
-    public List<Givens> computeQHQt(Matrix matrix, int beginRow, int endRow) {
-        return null;
-    }
-    
-    protected List<Givens> chaseDiag(Matrix matrix, int beginRow, int endRow) {
-        return null;
-    }
-    
     protected void computeRA(Matrix matrix, List<Givens> givens, int beginRow, int endRow) {
         for(int i = beginRow; i < endRow; i++){
             double[] row = matrix.getRow(i);
