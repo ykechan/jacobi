@@ -24,6 +24,7 @@ import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.annotations.JacobiResult;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -98,15 +99,13 @@ public class SubstitutionTest {
         }.compute(rhs);
     }
     
-    @Test(expected = UnsupportedOperationException.class)
     @JacobiImport("Upper 4x4x2")
     public void testUpperUnderDet4x4x2() {
-        new Substitution(Mode.BACKWARD, this.tri).compute(rhs);
+        Assert.assertNull(new Substitution(Mode.BACKWARD, this.tri).compute(rhs));
     }
     
-    @Test(expected = UnsupportedOperationException.class)
     @JacobiImport("Lower 5x5x1")
     public void testLowerUnderDet5x5x1() {
-        new Substitution(Mode.BACKWARD, this.tri).compute(rhs);
+        Assert.assertNull(new Substitution(Mode.BACKWARD, this.tri).compute(rhs));
     }
 }
