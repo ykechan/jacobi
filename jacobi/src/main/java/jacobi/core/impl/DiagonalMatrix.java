@@ -23,6 +23,7 @@ import jacobi.api.ext.Op;
 import jacobi.api.ext.Prop;
 import jacobi.core.util.Throw;
 import java.util.Arrays;
+import java.util.Optional;
 
 /**
  *
@@ -75,15 +76,15 @@ public class DiagonalMatrix extends ImmutableMatrix {
     }
     
     @Delegate(facade = Prop.class, method = "inv")
-    public Matrix inv() {
+    public Optional<Matrix> inv() {
         double[] diag = new double[this.vector.length];
         for(int i = 0; i < diag.length; i++){
             if(Math.abs(this.vector[i]) < 1e-12){
-                throw new UnsupportedOperationException("Matrix is not invertible.");
+                return Optional.empty();
             }
             diag[i] = 1.0 / this.vector[i];
         }
-        return CopyOnWriteMatrix.of(new DiagonalMatrix(diag));
+        return Optional.of(CopyOnWriteMatrix.of(new DiagonalMatrix(diag)));
     }
     
     @Delegate(facade = Op.class, method = "mul")
