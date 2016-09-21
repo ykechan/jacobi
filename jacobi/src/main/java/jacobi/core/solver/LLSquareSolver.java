@@ -21,6 +21,7 @@ import jacobi.api.Matrix;
 import jacobi.core.decomp.qr.QRDecomp;
 import jacobi.core.solver.Substitution.Mode;
 import jacobi.core.util.Throw;
+import java.util.Optional;
 
 /**
  * Solve a over-determined system of linear equations in a linear-least
@@ -60,11 +61,9 @@ public class LLSquareSolver {
      * Solve the system of linear equation y = A * x.
      * @param a  Matrix A
      * @param y  Matrix y
-     * @return   Solution x
-     * @throws   UnsupportedOperationException  
-     *           if A is not over-determined
+     * @return   Solution x or empty if A is not over-determined
      */
-    public Matrix solve(Matrix a, Matrix y) {
+    public Optional<Matrix> solve(Matrix a, Matrix y) {
         Throw.when()
             .isNull(() -> a, () -> "No system of linear equations. (A in y = A * x) ")
             .isNull(() -> y, () -> "No known values. (y in y = A * x)")
@@ -83,7 +82,7 @@ public class LLSquareSolver {
                         + y.getRowCount() + " known values."
             );
         new QRDecomp().compute(a, y);
-        return new Substitution(Mode.BACKWARD, a).compute(y);
+        return Optional.ofNullable(new Substitution(Mode.BACKWARD, a).compute(y));
     }
 
 }

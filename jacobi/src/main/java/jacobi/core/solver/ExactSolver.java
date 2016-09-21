@@ -23,6 +23,7 @@ import jacobi.core.decomp.gauss.FullMatrixOperator;
 import jacobi.core.decomp.gauss.GenericGaussianElim;
 import jacobi.core.solver.Substitution.Mode;
 import jacobi.core.util.Throw;
+import java.util.Optional;
 
 /**
  * Solve a determined system of linear equation y = A * x. Although y and x 
@@ -51,11 +52,9 @@ public class ExactSolver {
      * Solve the system of linear equation y = A * x.
      * @param a  Matrix A
      * @param y  Matrix y
-     * @return   Solution x
-     * @throws   UnsupportedOperationException  
-     *           if A is not square, or not in full rank
+     * @return   Solution x, or empty if A is not full rank
      */
-    public Matrix solve(Matrix a, Matrix y) {
+    public Optional<Matrix> solve(Matrix a, Matrix y) {
         Throw.when()
             .isNull(() -> a, () -> "No system of linear equations. (A in y = A * x) ")
             .isNull(() -> y, () -> "No known values. (y in y = A * x)")
@@ -75,7 +74,7 @@ public class ExactSolver {
             );
         Matrix x = Matrices.copy(y);
         this.gaussElim.compute(a, (op) -> new FullMatrixOperator(op, x));
-        return new Substitution(Mode.BACKWARD, a).compute(x);
+        return Optional.ofNullable(new Substitution(Mode.BACKWARD, a).compute(x));
     }
 
     private GenericGaussianElim gaussElim;

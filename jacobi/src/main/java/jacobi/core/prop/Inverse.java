@@ -39,7 +39,7 @@ public class Inverse {
         this.gaussElim = new GenericGaussianElim();
     }
     
-    public Optional<Matrix> compureMaybe(Matrix a) {
+    public Optional<Matrix> computeMaybe(Matrix a) {
         return Optional.ofNullable(this.compute(a));
     }
     
@@ -65,7 +65,7 @@ public class Inverse {
     }
 
     private Matrix inverse1x1(Matrix a) {
-        return Matrices.scalar(1.0 / a.get(0, 0));
+        return Math.abs(a.get(0, 0)) < 1e-12 ? null : Matrices.scalar(1.0 / a.get(0, 0));
     }
     
     private Matrix inverse2x2(Matrix a) {
@@ -73,7 +73,7 @@ public class Inverse {
         double[] r1 = a.getRow(0);
         double det = r0[0] * r1[1] - r0[1] * r1[0];
         if(Math.abs(det) < 1e-12){
-            throw new UnsupportedOperationException("Matrix is not invertible.");
+            return null;
         }
         return new DefaultMatrix(new double[][]{
             {-r1[1] / det,  r0[0] / det },
@@ -84,7 +84,7 @@ public class Inverse {
     private Matrix inverse3x3(Matrix a) {
         double det = new Determinant().compute3x3(a);
         if(Math.abs(det) < 1e-12){
-            throw new UnsupportedOperationException("Matrix is not invertible.");
+            return null;
         }
         double[] r0 = a.getRow(0);
         double[] r1 = a.getRow(1);

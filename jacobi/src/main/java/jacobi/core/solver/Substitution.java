@@ -42,10 +42,7 @@ public class Substitution {
     public Substitution(Mode mode, Matrix tri) {
         Throw.when()
             .isNull(() -> mode, () -> "No substitution mode.")
-            .isNull(() -> tri, () -> "No triangular matrix.")
-            .isTrue(
-                () -> tri.getColCount() > tri.getRowCount(), 
-                () -> "Triangular matrix is under-determined.");
+            .isNull(() -> tri, () -> "No triangular matrix.");
         this.tri = tri;
         this.mode = mode;
     }
@@ -54,7 +51,7 @@ public class Substitution {
      * Compute substitution. This method is perturbative, i.e. it transforms 
      * the input into the output.
      * @param rhs  Right-hand side of the equation
-     * @return  Object rhs after substitution
+     * @return  Object rhs after substitution, or null if unable to substitute
      */
     public Matrix compute(Matrix rhs) {
         Throw.when()
@@ -66,20 +63,27 @@ public class Substitution {
                         + ", got " 
                         + rhs.getRowCount() 
                         + " known values."
-            );
-        return this.mode == Mode.BACKWARD ? this.backward(rhs) : this.forward(rhs);
+            );        
+        return this.tri.getRowCount() < this.tri.getColCount()
+                ? null
+                : this.mode == Mode.BACKWARD 
+                    ? this.backward(rhs) 
+                    : this.forward(rhs);
     }
     
     /**
      * Forward substitution. This method is perturbative, i.e. it transforms 
      * the input into the output.
      * @param rhs  Right-hand side of the equation
-     * @return  Object rhs after substitution
+     * @return  Object rhs after substitution, or null if unable to substitute
      */
     protected Matrix forward(Matrix rhs) {
         int n = Math.min(this.tri.getRowCount(), this.tri.getColCount());
         for(int i = 0; i < n; i++){
             double[] sol = this.normalize(rhs, i);
+            if(sol == null){
+                return null;
+            }
             this.substitute(rhs, sol, i, i + 1, rhs.getRowCount());
             rhs.setRow(i, sol);
         }
@@ -90,12 +94,15 @@ public class Substitution {
      * Backward substitution. This method is perturbative, i.e. it transforms 
      * the input into the output.
      * @param rhs  Right-hand side of the equation
-     * @return  Object rhs after substitution
+     * @return  Object rhs after substitution, or null if unable to substitute
      */
     protected Matrix backward(Matrix rhs) {
         int n = Math.min(this.tri.getRowCount(), this.tri.getColCount()) - 1;
         for(int i = n; i >= 0; i--){
             double[] sol = this.normalize(rhs, i);
+            if(sol == null){
+                return null;
+            }
             this.substitute(rhs, sol, i, 0, i);
             rhs.setRow(i, sol);
         }
@@ -176,7 +183,7 @@ public class Substitution {
     protected double[] normalize(Matrix rhs, int rowIndex) {        
         double denom = this.tri.get(rowIndex, rowIndex);
         if(Math.abs(denom) < EPSILON){
-            throw new UnsupportedOperationException("Matrix is not full rank.");
+            return null;
         }
         double[] row = rhs.getRow(rowIndex);
         for(int i = 0; i < rhs.getColCount(); i++){

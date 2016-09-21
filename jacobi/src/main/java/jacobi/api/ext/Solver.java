@@ -22,6 +22,7 @@ import jacobi.api.annotations.Implementation;
 import jacobi.api.annotations.NonPerturbative;
 import jacobi.core.solver.ExactSolver;
 import jacobi.core.solver.LLSquareSolver;
+import java.util.Optional;
 
 /**
  * Solving a system of linear equations, either exactly or in linear-least
@@ -41,7 +42,7 @@ public interface Solver {
      * @return  Solution x
      */
     @Implementation(ExactSolver.class)
-    public Matrix exact(Matrix y);
+    public Optional<Matrix> exact(Matrix y);
     
     /**
      * Solve a over-determined system of linear equations y = A * x. y and x though
@@ -52,6 +53,6 @@ public interface Solver {
      * @return  Solution x
      */
     @Implementation(LLSquareSolver.class)
-    public Matrix llsquare(Matrix y);
+    public Optional<Matrix> llsquare(Matrix y);
     
 }
