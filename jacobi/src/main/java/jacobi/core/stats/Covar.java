@@ -19,6 +19,7 @@ package jacobi.core.stats;
 
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
+import jacobi.api.ext.Op;
 
 /**
  * Computation of covariance matrix.
@@ -46,13 +47,14 @@ public class Covar {
         double[] mean = this.meanFunc.compute(matrix);
         Matrix cov = Matrices.zeros(mean.length);
         this.serial(matrix, 0, matrix.getRowCount(), mean, cov);
+        this.normalize(cov, matrix.getRowCount());
         
-        // copy upper-trangular entries
+        // copy upper-trangular entries        
         for(int i = 1; i < cov.getRowCount(); i++){
             double[] row = cov.getRow(i);
             for(int j = 0; j < i; j++){
                 row[j] = cov.get(j, i);
-            }
+            }            
             cov.setRow(i, row);
         }
         return cov;
@@ -82,6 +84,23 @@ public class Covar {
                 }
                 cov.setRow(i, covRow);
             }
+        }
+        return cov;
+    }
+    
+    /**
+     * Normalize over the number of population for upper-triangular part of the covariance matrix
+     * @param cov  Covariance matrix
+     * @param length  Number of population
+     * @return  cov
+     */
+    protected Matrix normalize(Matrix cov, int length) {
+        for(int i = 0; i < cov.getRowCount(); i++){
+            double[] row = cov.getRow(i);
+            for(int j = i; j < row.length; j++){
+                row[j] /= length;
+            }
+            cov.setRow(i, row);
         }
         return cov;
     }
