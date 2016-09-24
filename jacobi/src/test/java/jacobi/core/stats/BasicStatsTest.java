@@ -51,17 +51,27 @@ public class BasicStatsTest {
     @JacobiResult(4)
     public Matrix var;
     
+    @JacobiResult(5)
+    public Matrix stddev;
+    
+    @JacobiResult(6)
+    public Matrix covar;
+    
     @Test
     @JacobiImport("12x3")
     @JacobiEquals(expected = 1, actual = 1)
     @JacobiEquals(expected = 2, actual = 2)
     @JacobiEquals(expected = 3, actual = 3)
     @JacobiEquals(expected = 4, actual = 4)
+    @JacobiEquals(expected = 5, actual = 5)
+    @JacobiEquals(expected = 6, actual = 6)
     public void test12x3() {
         this.min = Matrices.of(new double[][]{this.data.ext(Stats.class).min()});
         this.max = Matrices.of(new double[][]{this.data.ext(Stats.class).max()});
         this.mean = Matrices.of(new double[][]{this.data.ext(Stats.class).mean()});
-        this.var = Matrices.of(new double[][]{this.data.ext(Stats.class).var()});
+        this.var = Matrices.of(new double[][]{this.data.ext(Stats.class).var()});        
+        this.stddev = Matrices.of(new double[][]{this.data.ext(Stats.class).stdDev()});
+        this.covar = this.data.ext(Stats.class).covar();
     }
     
     @Test
@@ -70,6 +80,8 @@ public class BasicStatsTest {
     @JacobiEquals(expected = 2, actual = 2)
     @JacobiEquals(expected = 3, actual = 3)
     @JacobiEquals(expected = 4, actual = 4)
+    @JacobiEquals(expected = 5, actual = 5)
+    @JacobiEquals(expected = 6, actual = 6)
     public void test30x5() {
         this.min = Matrices.of(new double[][]{
             new RowReduce.Min().compute(this.data)
@@ -83,6 +95,10 @@ public class BasicStatsTest {
         this.var = Matrices.of(new double[][]{
             new Variance().compute(this.data)
         });
+        this.stddev = Matrices.of(new double[][]{
+            new Variance.StdDev().compute(this.data)
+        });
+        this.covar = new Covar().compute(this.data);
     }
 
 }
