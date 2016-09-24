@@ -75,6 +75,22 @@ public class ShiftedQR3x3Test {
     }
     
     @Test
+    @JacobiImport("step-test-1")
+    @JacobiEquals(expected = 1, actual = 1, epsilon = 1e-10)
+    public void test1() {
+        new ShiftedQR3x3(new DefaultQRStep()).compute(this.input, null, 0, 3, true);
+        this.output = this.input;
+    }
+    
+    @Test
+    @JacobiImport("step-test-2")
+    @JacobiEquals(expected = 1, actual = 1, epsilon = 1e-10)
+    public void test2() {
+        new ShiftedQR3x3(new DefaultQRStep()).compute(this.input, null, 0, 3, true);
+        this.output = this.input;
+    }
+    
+    @Test
     public void testSolvingDepressed() {
         this.solveDepressedCubicTest(6, -20);
         this.solveDepressedCubicTest(6, 20);
