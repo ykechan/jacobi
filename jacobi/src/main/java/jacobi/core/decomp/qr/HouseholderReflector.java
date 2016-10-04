@@ -195,7 +195,7 @@ public class HouseholderReflector extends ImmutableMatrix {
      */
     public void applyLeft(Matrix matrix, int startCol) {
         double[] partial = this.partialApply(matrix, startCol);
-        for(int i = from; i < matrix.getRowCount(); i++){
+        for(int i = from; i < this.vector.length; i++){
             double[] row = matrix.getRow(i);
             double k = this.vector[i];
             for(int j = startCol; j < matrix.getColCount(); j++){
@@ -252,13 +252,14 @@ public class HouseholderReflector extends ImmutableMatrix {
     }
     
     protected double[] partialApply(Matrix matrix, int startCol) {
-        int len = matrix.getColCount() - startCol;
+        int len = matrix.getColCount() - startCol; 
+        int n = matrix.getColCount();
         if((matrix.getRowCount() - from) * len < DEFAULT_THRESHOLD){
-            double[] sum = new double[matrix.getColCount()];
+            double[] sum = new double[n];
             for(int i = from; i < this.vector.length; i++){
                 double k = this.vector[i];
                 double[] row = matrix.getRow(i);
-                for(int j = startCol; j < row.length; j++){
+                for(int j = startCol; j < n; j++){
                     sum[j] += k * row[j];
                 }
             }
@@ -267,9 +268,9 @@ public class HouseholderReflector extends ImmutableMatrix {
         return IntStream.range(from, matrix.getRowCount())
                 .mapToObj((i) -> {
                     double k = this.vector[i];
-                    double[] sum = new double[matrix.getColCount()];
+                    double[] sum = new double[n];
                     double[] row = matrix.getRow(i);
-                    for(int j = startCol; j < row.length; j++){
+                    for(int j = startCol; j < n; j++){
                         sum[j] += k * row[j];
                     }
                     return sum;
