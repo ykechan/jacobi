@@ -47,7 +47,10 @@ public final class Matrices {
         }
         int n = Arrays.stream(rows)
                 .mapToInt((r) -> r.length)
-                .reduce((i, j) -> {
+                .reduce((i, j) -> { 
+                    if(i == j){
+                        return i;
+                    }
                     throw new UnsupportedOperationException(
                         "Column count mismatch. " + i + " <> " + j
                     );
