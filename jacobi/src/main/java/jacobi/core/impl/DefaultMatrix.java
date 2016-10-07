@@ -104,11 +104,9 @@ public class DefaultMatrix implements Matrix {
 
     @Override
     public Matrix copy() {
-        return new DefaultMatrix(this.rows);
+        return new DefaultMatrix(this);
     }
     
     private int numCols;
     private double[][] rows;
-    
-    private static final double[][] EMPTY = {};
 }
