@@ -95,7 +95,6 @@ public class DelegateEngine extends FacadeEngine {
                 ))
         );
         this.delegates.put(new Key(clazz), NULL);
-        System.out.println(this.delegates);
     }
     
     /**
@@ -180,7 +179,7 @@ public class DelegateEngine extends FacadeEngine {
         public boolean isValid() {
             return !this.facade.isAnnotationPresent(NonPerturbative.class)
                 || this.facade.getDeclaringClass().isAnnotationPresent(NonPerturbative.class)
-                == this.method.isAnnotationPresent(NonPerturbative.class);                    
+                == this.method.isAnnotationPresent(NonPerturbative.class); 
         }
 
         @Override
