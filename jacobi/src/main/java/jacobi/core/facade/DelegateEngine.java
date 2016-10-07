@@ -178,7 +178,7 @@ public class DelegateEngine extends FacadeEngine {
         }
         
         public boolean isValid() {
-            return this.facade.isAnnotationPresent(NonPerturbative.class)
+            return !this.facade.isAnnotationPresent(NonPerturbative.class)
                 || this.facade.getDeclaringClass().isAnnotationPresent(NonPerturbative.class)
                 == this.method.isAnnotationPresent(NonPerturbative.class);                    
         }
