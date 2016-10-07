@@ -19,11 +19,13 @@ package jacobi.core.impl;
 
 import jacobi.api.Matrix;
 import jacobi.api.annotations.Delegate;
+import jacobi.api.annotations.NonPerturbative;
 import jacobi.api.ext.Op;
 import jacobi.api.ext.Prop;
 import jacobi.core.util.Throw;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.stream.DoubleStream;
 
 /**
  *
@@ -53,7 +55,9 @@ public class DiagonalMatrix extends ImmutableMatrix {
 
     @Override
     public double[] getRow(int index) {
-        return new double[]{this.vector[index]};
+        double[] row = new double[this.getColCount()];
+        row[index] = this.vector[index];
+        return row;
     }        
 
     @Override
@@ -66,15 +70,13 @@ public class DiagonalMatrix extends ImmutableMatrix {
         return CopyOnWriteMatrix.of(new DiagonalMatrix(this.vector));
     }
     
+    @NonPerturbative
     @Delegate(facade = Prop.class, method = "det")
     public double det() {
-        double ans = 1.0;
-        for(int i = 0; i < this.vector.length; i++){
-            ans *= this.vector[i];
-        }
-        return ans;
+        return DoubleStream.of(this.vector).reduce(1.0, (a, b) -> a * b);
     }
     
+    @NonPerturbative
     @Delegate(facade = Prop.class, method = "inv")
     public Optional<Matrix> inv() {
         double[] diag = new double[this.vector.length];
@@ -87,6 +89,7 @@ public class DiagonalMatrix extends ImmutableMatrix {
         return Optional.of(CopyOnWriteMatrix.of(new DiagonalMatrix(diag)));
     }
     
+    @NonPerturbative
     @Delegate(facade = Op.class, method = "mul")
     public Matrix mul(Matrix b) {
         Throw.when()
