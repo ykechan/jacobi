@@ -47,6 +47,7 @@ public interface QRStrategy {
      * @param partner  Partner matrix B
      * @param fullUpper True if whole upper triangular matrix is needed, false if only
      *          diagonal entries, which are eigenvalues, are interested.
+     * @return Upper triangular matrix D
      */
     public Matrix compute(Matrix matrix, Matrix partner, boolean fullUpper);
     

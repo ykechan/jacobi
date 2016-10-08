@@ -19,6 +19,7 @@ package jacobi.core.decomp.qr;
 
 import jacobi.core.decomp.qr.step.QRStep;
 import jacobi.api.Matrix;
+import jacobi.core.decomp.qr.step.SingleStep2x2;
 import jacobi.core.util.Throw;
 
 /**
@@ -47,7 +48,7 @@ public class BasicQR implements QRStrategy {
      * @param step  Implementation to perform an iteration.
      */
     public BasicQR(QRStep step) {
-        this.step = step;
+        this.step = new SingleStep2x2(step);
     }
 
     @Override
@@ -82,9 +83,13 @@ public class BasicQR implements QRStrategy {
         if(endRow - beginRow < 2){
             return;
         }
+        if(endRow - beginRow == 2){
+            this.step.compute(matrix, partner, beginRow, endRow, fullUpper);
+            return;
+        }
         int limit = LIMIT * (endRow - beginRow);
         int end = this.deflate(matrix, beginRow, endRow);
-        for(int k = 0; k < limit; k++){
+        for(int k = 0; k < limit; k++){            
             this.step.compute(matrix, partner, beginRow, end, fullUpper);
             int conv = this.getConverged(matrix, beginRow, endRow);
             if (conv >= 0) {

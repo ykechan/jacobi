@@ -41,7 +41,7 @@ import java.util.function.Consumer;
  * 
  * @author Y.K. Chan
  */
-public class Hessenberg {
+public class HessenbergDecomp {
     
     /**
      * Reduce a matrix A into a almost upper triangular matrix.
