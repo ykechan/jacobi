@@ -19,9 +19,6 @@ package jacobi.core.decomp.qr.step;
 
 import jacobi.api.Matrix;
 import jacobi.core.decomp.qr.HouseholderReflector;
-import jacobi.core.decomp.qr.step.GivensQR.Givens;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Implementation of Francis double-shifted QR algorithm.
@@ -60,61 +57,46 @@ import java.util.List;
  */
 public class FrancisQR implements QRStep {
 
-    public FrancisQR() {
-        this.givensQR = new GivensQR();
+    /**
+     * Constructor.
+     * @param base  Base implementation for fall through.
+     */
+    public FrancisQR(QRStep base) {
+        this.bulgeChaser = new BulgeChaser();
+        this.base = base;
     }
 
     @Override
     public void compute(Matrix matrix, Matrix partner, int beginRow, int endRow, boolean fullUpper) {
-        if(endRow - beginRow < 3){
-            throw new UnsupportedOperationException("Unable to double-shift of 2x2 or smaller matrices.");
+        if(endRow - beginRow < 4){
+            this.base.compute(matrix, partner, beginRow, endRow, fullUpper);
+            return;
         }
-        
+        this.createBulge(matrix, partner, beginRow, endRow, fullUpper);
+        this.bulgeChaser.compute(matrix, partner, beginRow, endRow, fullUpper);
     }
     
+    /**
+     * Create initial bulge by computing Q*H*Q.
+     * @param matrix  Input matrix H
+     * @param partner  Partner matrix
+     * @param begin  Begin index of rows of interest
+     * @param end  End index of rows of interest
+     * @param full   True if full upper triangular matrix needed, false otherwise
+     */
     protected void createBulge(Matrix matrix, Matrix partner, int begin, int end, boolean full) {
         HouseholderReflector hh = this.getDoubleShift1stCol(matrix, begin, end);
-        Matrix subMat = this.subMatrix(matrix, begin, end, full);
-        hh.applyLeft(subMat);
-        hh.applyRight(subMat);
-    }
-    
-    protected void chaseBulge(Matrix matrix, Matrix partner, int begin, int end, boolean full) {
-        //
-        //  x x x x x
-        //  x x x x x
-        //  x x x x x
-        //  x x x x x
-        //  0 0 0 x x
-        //
-        
-    }
-    
-    protected List<Givens> chaseBulgeByDiag(Matrix matrix, int begin, int end, boolean full) {
-        int last = end - 2;
-        Givens[] gs = new Givens[last - begin];
-        int endCol = full ? matrix.getColCount() : end;
-        for(int i = begin; i < last; i++){
-            double[] upper = matrix.getRow(i + 1);
-            double[] lower = matrix.getRow(i + 2);
-            
-            gs[i] = this.givensQR.computeQR(upper, lower, i, endCol);
-            matrix.setRow(i + 1, upper);
-            matrix.setRow(i + 2, lower);
-            
-            if(i + 3 >= end){
-                continue;
-            }
-            double[] next = matrix.getRow(i + 3);
-            double a = -next[i + 2] * gs[i].getSin();
-            double b =  next[i + 2] * gs[i].getCos();
-            next[i + 1] = a;
-            next[i + 2] = b;
-            matrix.setRow(i + 3, next);
-        }
-        return Arrays.asList(gs);
+        hh.applyLeft(matrix);
+        hh.applyRight(matrix);        
     }
 
+    /**
+     * Create Householder reflector Q for double shift.
+     * @param matrix  Input matrix H
+     * @param beginRow  Begin index of rows of interest
+     * @param endRow  End index of rows of interest
+     * @return   Householder reflector Q
+     */
     protected HouseholderReflector getDoubleShift1stCol(Matrix matrix, int beginRow, int endRow) {
         double a = matrix.get(endRow - 2, endRow - 2);
         double b = matrix.get(endRow - 2, endRow - 1);
@@ -127,63 +109,20 @@ public class FrancisQR implements QRStep {
         double u = matrix.get(beginRow, beginRow);
         double v = matrix.get(beginRow + 1, beginRow);
         
-        double[] col = {
-              u * u
+        double[] col = new double[beginRow + 3];
+        col[beginRow    ] = u * u
             + matrix.get(beginRow, beginRow + 1) * v
             - tr * u
-            + det,
-            
-              v * u
+            + det;
+        col[beginRow + 1] = v * u
             + matrix.get(beginRow + 1, beginRow + 1) * v
-            - tr * v,
-              
-              matrix.get(beginRow + 2, beginRow + 1) * v
-        };
-        HouseholderReflector hh = new HouseholderReflector(col, 0);
+            - tr * v;
+        col[beginRow + 2] = matrix.get(beginRow + 2, beginRow + 1) * v;
+        HouseholderReflector hh = new HouseholderReflector(col, beginRow);
         hh.normalize();
         return hh;
-    }
+    }    
     
-    protected Matrix subMatrix(Matrix matrix, int begin, int end, boolean fullUpper) {
-        return new Matrix() {
-
-            @Override
-            public int getRowCount() {
-                return 3;
-            }
-
-            @Override
-            public int getColCount() {
-                return fullUpper ? matrix.getColCount() : (end - begin);
-            }
-
-            @Override
-            public double[] getRow(int index) {
-                return matrix.getRow(begin + index);
-            }
-
-            @Override
-            public Matrix setRow(int index, double[] values) {
-                matrix.setRow(begin + index, values);
-                return this;
-            }
-
-            @Override
-            public Matrix swapRow(int i, int j) {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public <T> T ext(Class<T> clazz) {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public Matrix copy() {
-                throw new UnsupportedOperationException();
-            }
-        };
-    }
-    
-    private GivensQR givensQR;
+    private BulgeChaser bulgeChaser;
+    private QRStep base;
 }

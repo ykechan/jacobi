@@ -104,7 +104,19 @@ public class GivensQR {
      * @return  Applied Givens rotation
      */
     public Givens computeQR(double[] upper, double[] lower, int begin, int end) {
-        Givens givens = this.of(upper[begin], lower[begin]);
+        return this.apply(this.of(upper[begin], lower[begin]), upper, lower, begin, end);
+    }
+    
+    /**
+     * Apply givens rotation on two rows.
+     * @param givens Givens rotation
+     * @param upper  Upper row
+     * @param lower  Lower row
+     * @param begin  Begin index of element of interest
+     * @param end  End index of element of interest
+     * @return  Applied Givens rotation
+     */
+    protected Givens apply(Givens givens, double[] upper, double[] lower, int begin, int end) {
         for(int i = begin; i < end; i++){
             double a = upper[i];
             double b = lower[i];

@@ -43,7 +43,7 @@ public class PureQR implements QRStep {
     public void compute(Matrix matrix, Matrix partner, int beginRow, int endRow, boolean fullUpper) {
         int endCol = fullUpper ? matrix.getColCount() : endRow;
         List<GivensQR.Givens> givens = this.givensQR.computeQR(matrix, beginRow, endRow, endCol);
-        this.givensQR.computeRQ(matrix, givens);
+        this.givensQR.computeRQ(matrix, givens, fullUpper ? 0 : beginRow, endRow, endCol);
         if(partner != null){
             // TODO: compute partner matrix
             // ...
