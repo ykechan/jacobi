@@ -30,9 +30,9 @@ import org.junit.runner.RunWith;
  *
  * @author Y.K. Chan
  */
-@JacobiImport("/jacobi/test/data/HessenbergTest.xlsx")
+@JacobiImport("/jacobi/test/data/HessenbergDecompTest.xlsx")
 @RunWith(JacobiJUnit4ClassRunner.class)
-public class HessenbergTest {
+public class HessenbergDecompTest {
     
     @JacobiInject(0)
     public Matrix input;
@@ -67,8 +67,8 @@ public class HessenbergTest {
         this.assertByStep(step1, step2, step3, step4, step5, step6).compute(this.input);
     }
 
-    private Hessenberg assertByStep(Matrix... step) {
-        return new Hessenberg(){
+    private HessenbergDecomp assertByStep(Matrix... step) {
+        return new HessenbergDecomp(){
 
             @Override
             protected void eliminate(Matrix matrix, int i, double[] column, Consumer<HouseholderReflector> listener) {

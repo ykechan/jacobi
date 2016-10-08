@@ -18,6 +18,7 @@
 package jacobi.core.decomp.qr;
 
 import jacobi.api.Matrix;
+import jacobi.api.ext.Op;
 import jacobi.api.ext.Prop;
 import jacobi.core.prop.Transpose;
 import jacobi.test.annotations.JacobiEquals;
@@ -26,6 +27,8 @@ import jacobi.test.annotations.JacobiInject;
 import jacobi.test.annotations.JacobiResult;
 import jacobi.test.util.Jacobi;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
+import java.util.concurrent.atomic.AtomicInteger;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -89,6 +92,14 @@ public class HouseholderReflectorTest {
     public void testApply7x1() {
         HouseholderReflector h = new HouseholderReflector(new Transpose().compose(this.input).getRow(0), 0);
         this.output = h;
-        this.verify = h.mul(this.column);
+        this.verify = h.ext(Op.class).mul(this.column).get();
     }
+    
+    @Test
+    @JacobiImport("Apply Left 7x1")
+    public void testInverse() {
+        HouseholderReflector h = new HouseholderReflector(new Transpose().compose(this.input).getRow(0), 0);
+        Jacobi.assertEquals(h, h.ext(Prop.class).inv().get());
+    }
+    
 }

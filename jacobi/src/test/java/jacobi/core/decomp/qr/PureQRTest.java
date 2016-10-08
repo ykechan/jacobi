@@ -50,6 +50,15 @@ public class PureQRTest {
             Jacobi.assertEquals(steps.get(k), input);
         }
     }
+    
+    @Test
+    @JacobiImport("3x3(2)")
+    public void test3x3Two() {
+        QRStep qrStep = new PureQR();
+        Matrix input = this.steps.get(1);
+        qrStep.compute(input, null, 0, input.getRowCount(), true);
+        Jacobi.assertEquals(steps.get(2), input);
+    }
 
     @Test
     @JacobiImport("4x4")
