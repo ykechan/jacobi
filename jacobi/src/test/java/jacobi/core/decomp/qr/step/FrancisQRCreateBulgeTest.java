@@ -18,7 +18,6 @@
 package jacobi.core.decomp.qr.step;
 
 import jacobi.api.Matrix;
-import jacobi.core.decomp.qr.step.FrancisQR;
 import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
@@ -39,26 +38,42 @@ public class FrancisQRCreateBulgeTest {
     public Matrix input;
     
     @JacobiResult(2)
-    public Matrix reflector;
+    public Matrix output;
     
     @Test
     @JacobiImport("5x5")
     @JacobiEquals(expected = 2, actual = 2)
     public void test5x5() {
-        this.reflector = new FrancisQR().getDoubleShift1stCol(input, 0, input.getRowCount());
+        this.output = new FrancisQR(new DefaultQRStep()).getDoubleShift1stCol(input, 0, input.getRowCount());
     }
 
     @Test
     @JacobiImport("5x5(2)")
     @JacobiEquals(expected = 2, actual = 2)
     public void test2nd5x5() {
-        this.reflector = new FrancisQR().getDoubleShift1stCol(input, 0, input.getRowCount());
+        this.output = new FrancisQR(new DefaultQRStep()).getDoubleShift1stCol(input, 0, input.getRowCount());
     }
     
     @Test
     @JacobiImport("Step2 6x6")
     @JacobiEquals(expected = 2, actual = 2)
     public void testStepTwo6x6() {
-        this.reflector = new FrancisQR().getDoubleShift1stCol(input, 1, input.getRowCount() - 1);
+        this.output = new FrancisQR(new DefaultQRStep()).getDoubleShift1stCol(input, 1, input.getRowCount() - 1);
+    }
+    
+    @Test
+    @JacobiImport("Bulge 5x5")
+    @JacobiEquals(expected = 2, actual = 2)
+    public void testBulge5x5() {
+        new FrancisQR(new DefaultQRStep()).createBulge(input, null, 0, input.getRowCount(), true);
+        this.output = this.input;
+    }
+    
+    @Test
+    @JacobiImport("Bulge Step 2 6x6")
+    @JacobiEquals(expected = 2, actual = 2)
+    public void testBulgeStepTwo6x6() {
+        new FrancisQR(new DefaultQRStep()).createBulge(input, null, 1, input.getRowCount() - 1, true);
+        this.output = this.input;
     }
 }
