@@ -36,14 +36,15 @@ import jacobi.core.facade.FacadeProxy;
  */
 public final class CopyOnWriteMatrix implements Matrix {
     
+    /**
+     * Decorate a matrix to a Copy-on-write matrix
+     * @param matrix  Base matrix
+     * @return  A copy-on-write matrix
+     */
     public static CopyOnWriteMatrix of(Matrix matrix) {
         return matrix instanceof CopyOnWriteMatrix
                 ? (CopyOnWriteMatrix) matrix
-                : new CopyOnWriteMatrix(
-                    matrix instanceof ImmutableMatrix
-                    ? ImmutableMatrix.of(matrix)
-                    : matrix
-                );
+                : new CopyOnWriteMatrix( ImmutableMatrix.of(matrix) );
     }
 
     protected CopyOnWriteMatrix(Matrix matrix) {
@@ -90,19 +91,21 @@ public final class CopyOnWriteMatrix implements Matrix {
 
     @Override
     public Matrix copy() {
-        return this.materialized
-                ? this.matrix.copy()
-                : CopyOnWriteMatrix.of(this.matrix.copy());
+        return CopyOnWriteMatrix.of(this.matrix);
     }
     
     private Matrix materialize() {
         if(!this.materialized){
-            this.matrix = new DefaultMatrix(this.matrix);
-            this.materialized = true;
+            synchronized(this) {
+                if(!this.materialized){
+                    this.matrix = new DefaultMatrix(this.matrix);
+                    this.materialized = true;
+                }
+            }
         }
         return this.matrix;
     }
-
-    private boolean materialized;
+    
     private Matrix matrix;
+    private volatile boolean materialized;
 }
