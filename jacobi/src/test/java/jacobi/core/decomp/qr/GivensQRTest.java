@@ -117,23 +117,43 @@ public class GivensQRTest {
         new GivensQR().computeRQ(this.input, givens);
         this.rq = this.input;
     }
+    
+    @Test
+    @JacobiImport("4x4 in 6x6")
+    @JacobiEquals(expected = 100, actual = 100)
+    public void test4x4In6x6() {
+        List<GivensQR.Givens> givens = this.assertBySteps(step1, step2, step3).computeQR(this.input, 1, 5, 6);
+        new GivensQR().computeRQ(this.input, givens, 0, 5, 1);
+        this.rq = this.input;
+    }
+    
+    @Test
+    @JacobiImport("4x4 in 6x6 Partial")
+    @JacobiEquals(expected = 100, actual = 100)
+    public void test4x4In6x6Partial() {
+        List<GivensQR.Givens> givens = this.assertBySteps(step1, step2, step3).computeQR(this.input, 2, 6, 6);
+        new GivensQR().computeRQ(this.input, givens, 2, 6, 2);
+        this.rq = this.input;
+    }
 
     private GivensQR assertBySteps(Matrix... after) {
         return new GivensQR(){
 
             @Override
-            public List<GivensQR.Givens> computeQR(Matrix matrix) {
+            public List<GivensQR.Givens> computeQR(Matrix matrix, int beginRow, int endRow, int endCol) {
                 this.matrix = matrix;
-                return super.computeQR(matrix);
+                this.index = 0;
+                return super.computeQR(matrix, beginRow, endRow, endCol);
             }
 
             @Override
             public GivensQR.Givens computeQR(double[] upper, double[] lower, int begin, int end) {
                 GivensQR.Givens g = super.computeQR(upper, lower, begin, end);
-                Jacobi.assertEquals(after[begin], matrix);
+                Jacobi.assertEquals(after[index++], matrix);
                 return g;
             }
             
+            private int index;
             private Matrix matrix;
         };
     }

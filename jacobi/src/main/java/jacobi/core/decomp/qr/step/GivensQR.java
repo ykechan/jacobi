@@ -58,11 +58,12 @@ public class GivensQR {
      */
     public List<Givens> computeQR(Matrix matrix, int beginRow, int endRow, int endCol) {
         int n = endRow - 1;
-        Givens[] givens = new Givens[n];
+        Givens[] givens = new Givens[n - beginRow];
+        int k = 0;
         for(int i = beginRow; i < n; i++){
             double[] upper = matrix.getRow(i);
             double[] lower = matrix.getRow(i + 1);
-            givens[i] = this.computeQR(upper, lower, i, endCol);
+            givens[k++] = this.computeQR(upper, lower, i, endCol);
             matrix.setRow(i, upper).setRow(i + 1, lower);
         }
         return Arrays.asList(givens);
@@ -74,7 +75,7 @@ public class GivensQR {
      * @param givens  List of Givens rotation s.t. Q^t = G[n] * G[n - 1] * ...
      */
     public void computeRQ(Matrix matrix, List<Givens> givens) {
-        this.computeRQ(matrix, givens, 0, matrix.getRowCount(), matrix.getColCount());
+        this.computeRQ(matrix, givens, 0, matrix.getRowCount(), 0);
     }
     
     /**
@@ -84,12 +85,14 @@ public class GivensQR {
      * @param givens  List of Givens rotation s.t. Q^t = G[n] * G[n - 1] * ...
      * @param beginRow  Begin index of rows of interest
      * @param endRow  End index of rows of interest
-     * @param endCol  End index of columns of interest
+     * @param beginCol  Begin index of columns of interest
      */
-    public void computeRQ(Matrix matrix, List<Givens> givens, int beginRow, int endRow, int endCol) {
+    public void computeRQ(Matrix matrix, List<Givens> givens, int beginRow, int endRow, int beginCol) {
         for(int i = beginRow; i < endRow; i++){
             double[] row = matrix.getRow(i);
-            this.computeRA(row, givens, i < 1 ? 0 : i - 1, givens.size());
+            int skip = i < beginCol + 1 ? 0 : i - beginCol - 1;
+            List<Givens> rot = givens.subList(skip, givens.size());
+            this.computeRA(row, rot, beginCol + skip);
             matrix.setRow(i, row);
         }
     }
@@ -129,7 +132,7 @@ public class GivensQR {
     protected void computeRA(Matrix matrix, List<Givens> givens, int beginRow, int endRow) {
         for(int i = beginRow; i < endRow; i++){
             double[] row = matrix.getRow(i);
-            this.computeRA(row, givens, 0, row.length);
+            this.computeRA(row, givens, 0);
             matrix.setRow(i, row);
         }
     }
@@ -138,16 +141,17 @@ public class GivensQR {
      * Apply a list of Givens rotation on the right of a row.
      * @param row  Input row
      * @param givens  List of Givens rotation
-     * @param begin  Begin index of element of interest
-     * @param end   End index of element of interest
+     * @param beginCol
      */
-    protected void computeRA(double[] row, List<Givens> givens, int begin, int end) { 
-        for(int i = begin; i < end; i++){
+    protected void computeRA(double[] row, List<Givens> givens, int beginCol) {         
+        for(int i = 0; i < givens.size(); i++){
             Givens g = givens.get(i);
-            double a = row[i];
-            double b = row[i + 1];   
-            row[i]    =  g.transRevRotX(a, b);
-            row[i + 1] = g.transRevRotY(a, b);
+            int k = beginCol + i;
+            double a = row[k];
+            double b = row[k + 1]; 
+            row[k]    =  g.transRevRotX(a, b);
+            row[k + 1] = g.transRevRotY(a, b);
+            k++;
         }
     }        
     
@@ -242,6 +246,11 @@ public class GivensQR {
          */
         public double transRevRotY(double a, double b) {
             return this.getSin() * a + this.getCos() * b;
+        }
+
+        @Override
+        public String toString() {
+            return "[" + cos + "," + sin + "]";
         }
         
         private double mag, cos, sin;
