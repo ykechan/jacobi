@@ -19,7 +19,6 @@ package jacobi.core.stats;
 
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
-import jacobi.api.ext.Op;
 
 /**
  * Computation of covariance matrix.

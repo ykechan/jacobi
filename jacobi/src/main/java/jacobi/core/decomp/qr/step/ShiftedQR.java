@@ -18,14 +18,12 @@
 package jacobi.core.decomp.qr.step;
 
 import jacobi.api.Matrix;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Decorator for single-shifted QR algorithm.
  * 
  * Without going too deep into formal mathematical proof, here is a simple 
- * illustration of how Shifting works.
+ * illustration of how shifting works.
  * 
  * A "pure" QR algorithm computes A = Q * R, and compute A' = R * Q.
  * A "shifted" QR algorithm computes A - kI = Q * R, and computes A' = R * Q + kI
@@ -45,110 +43,82 @@ import java.util.concurrent.atomic.AtomicLong;
  * Rayleigh-quotient shifting uses the bottom-leftmost element to be a guess
  * to be a eigenvalue. It is proven to have cubic convergence rate. However 
  * Rayleigh-quotient shifts may fail in certain cases, e.g. [0 1; 1 0].
- * Wilkinson shifting uses the eigenvalue of the bottom-leftmost 2x2 submatrix
+ * Wilkinson shifting uses the eigenvalue of the bottom-leftmost 2x2 sub-matrix
  * whichever is closer to the Rayleigh-quotient shift. Wilkinson shift ensures
  * convergence but the not always real, and convergence rate is not as good.
  * 
- * This class uses a mixed approach: it uses Rayleigh-quotient shifts for most
- * of the time but randomly switches to using Wilkinson shift, if real, to break
- * symmetry.
+ * Normal a Francis QR double-shift step is superior (see FrancisQR), but it can
+ * converge very slowly when the first column is almost converged. In that case
+ * double-shifts was deflated to a pure QR algorithm. However in such cases a 
+ * good candidate of real shift is found: the 1st element. 
+ * 
+ * This class picks up such cases and perform single-shift instead of double-shifts.
  * 
  * @author Y.K. Chan
  */
 public class ShiftedQR implements QRStep {
 
     /**
-     * Constructor.
-     * @param base  Implementation to be decorated on
+     * Constructor. 
+     * @param base  Base implementation to fall through
+     * @param threshold  Threshold on accepting the shift value.
      */
-    public ShiftedQR(QRStep base) {
+    public ShiftedQR(QRStep base, double threshold) {
         this.base = base;
-        this.spin = new AtomicLong(0);
+        this.impl = new PureQR();
+        this.threshold = threshold;
     }
 
     @Override
     public void compute(Matrix matrix, Matrix partner, int beginRow, int endRow, boolean fullUpper) {
+        if(endRow - beginRow < 3){
+            this.base.compute(matrix, partner, beginRow, endRow, fullUpper);
+            return;
+        }
         double shift = this.getShift(matrix, beginRow, endRow);
+        if(shift == 0.0){
+            this.base.compute(matrix, partner, beginRow, endRow, fullUpper);
+            return;
+        }
         this.shiftDiag(matrix, beginRow, endRow, -shift);
-        this.base.compute(matrix, partner, beginRow, endRow, fullUpper);
+        this.impl.compute(matrix, partner, beginRow, endRow, fullUpper);
         this.shiftDiag(matrix, beginRow, endRow, shift);
-    }
+    }        
     
     /**
-     * Compute A = A + kI. 
-     * @param matrix  Input matrix A
-     * @param beginRow  Start of row of interest
-     * @param endRow  Finish of row of interest
-     * @param shift   Shift value k.
+     * Shift diagonal elements by given value
+     * @param matrix  Input matrix
+     * @param begin  Begin index of rows of interest
+     * @param end  End index of rows of interest
+     * @param shift  Shift value
      */
-    protected void shiftDiag(Matrix matrix, int beginRow, int endRow, double shift) {
-        for(int i = beginRow; i < endRow; i++){
+    protected void shiftDiag(Matrix matrix, int begin, int end, double shift) {
+        for(int i = begin; i < end; i++){
             double elem = matrix.get(i, i);
             matrix.set(i, i, elem + shift);
         }
     }
     
     /**
-     * Get shift value.
+     * Find shift value.
      * @param matrix  Input matrix
-     * @param beginRow  Start of row of interest
-     * @param endRow  Finish of row of interest
-     * @return  Shift value k
+     * @param begin  Begin index of rows of interest
+     * @param end  End index of rows of interest
+     * @return  Shift value, or 0 if criteria is not met
      */
-    protected double getShift(Matrix matrix, int beginRow, int endRow) {         
-        return this.useWilkinson() 
-                ? this.wilkinson(matrix, beginRow, endRow)
-                    .orElse(this.rayleighQuotient(matrix, beginRow, endRow))
-                : this.rayleighQuotient(matrix, beginRow, endRow);
-    }
-    
-    /**
-     * Compute Rayleigh-Quotient shift.
-     * @param matrix  Input matrix A
-     * @param beginRow  Start of row of interest
-     * @param endRow  Finish of row of interest
-     * @return  Rayleigh-Quotient shift value
-     */
-    protected double rayleighQuotient(Matrix matrix, int beginRow, int endRow) {
-        return matrix.get(endRow - 1, endRow - 1); 
-    }
-    
-    /**
-     * Compute Wilkinson shift.
-     * @param matrix  Input matrix A
-     * @param beginRow  Start of row of interest
-     * @param endRow  Finish of row of interest
-     * @return   Wilkinson shift
-     */
-    protected Optional<Double> wilkinson(Matrix matrix, int beginRow, int endRow) {
-        double a = matrix.get(endRow - 2, endRow - 2);
-        double b = matrix.get(endRow - 2, endRow - 1);
-        double c = matrix.get(endRow - 1, endRow - 2);
-        double d = matrix.get(endRow - 1, endRow - 1);
-        
-        double tr = a + d;
-        double det = a * d - b * c;
-        
-        double delta = tr * tr - 4 * det;
-        if(delta < 0.0){
-            return Optional.empty();
+    protected double getShift(Matrix matrix, int begin, int end) {
+        double lastBulge = matrix.get(end - 1, end - 2);
+        if(Math.abs(matrix.get(end - 1, end - 1) / lastBulge) > this.threshold){
+            return matrix.get(end - 1, end - 1);
         }
-        delta = Math.sqrt(delta);
-        double eig0 = (-b + delta) / 2.0;
-        double eig1 = (-b - delta) / 2.0;
-        return Optional.of( Math.abs(eig0 - d) < Math.abs(eig1 - d) ? eig0 : eig1 );
+        double firstBulge = matrix.get(begin + 1, begin);
+        if(Math.abs(matrix.get(begin, begin) / firstBulge) > this.threshold){
+            return matrix.get(begin, begin);
+        }
+        return 0.0;
     }
     
-    /**
-     * Determine to use Wilkinson shift or not.
-     * @return   True if wilkinson shift should be used, false otherwise.
-     */
-    protected boolean useWilkinson() {
-        return this.spin.incrementAndGet() % PERIOD == 0;
-    }
-
-    private AtomicLong spin;
-    private QRStep base;
+    private QRStep base, impl;
+    private double threshold;
     
-    private static final int PERIOD = 3;
 }

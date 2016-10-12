@@ -19,7 +19,7 @@ package jacobi.api.ext;
 import jacobi.api.Matrix;
 import jacobi.api.annotations.Facade;
 import jacobi.api.annotations.Implementation;
-import jacobi.api.annotations.NonPerturbative;
+import jacobi.api.annotations.Immutate;
 import jacobi.core.solver.ExactSolver;
 import jacobi.core.solver.LLSquareSolver;
 import java.util.Optional;
@@ -30,7 +30,7 @@ import java.util.Optional;
  * 
  * @author Y.K. Chan
  */
-@NonPerturbative
+@Immutate
 @Facade
 public interface Solver {
     

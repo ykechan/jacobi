@@ -66,6 +66,25 @@ public class GaussainDecompTest {
     }
     
     @Test
+    @JacobiImport("5x5")
+    @JacobiEquals(expected = 100, actual = 100)
+    @JacobiEquals(expected = 101, actual = 101)
+    @JacobiEquals(expected = 102, actual = 102)
+    public void test5x5ByStream() {        
+        Triplet plu = new GaussianDecomp(new GenericGaussianElim(){
+
+            @Override
+            protected int serial(ElementaryOperator op, int from, double pivot, double next) {
+                return this.stream(op, from, pivot, next);
+            }
+            
+        }).compute(this.input);
+        this.perm = plu.getLeft();
+        this.lower = plu.getMiddle();
+        this.upper = plu.getRight();
+    }
+    
+    @Test
     @JacobiImport("Degen 4x4")
     @JacobiEquals(expected = 100, actual = 100)
     @JacobiEquals(expected = 101, actual = 101)

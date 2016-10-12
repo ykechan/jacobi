@@ -22,7 +22,6 @@ import jacobi.core.impl.DefaultMatrix;
 import jacobi.core.impl.DiagonalMatrix;
 import jacobi.core.impl.Empty;
 import jacobi.core.impl.ImmutableMatrix;
-import jacobi.core.util.Throw;
 import java.util.Arrays;
 
 /**

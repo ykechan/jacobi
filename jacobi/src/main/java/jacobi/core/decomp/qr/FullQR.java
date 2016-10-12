@@ -38,14 +38,25 @@ public class FullQR implements QRStrategy {
      * Constructor.
      */
     public FullQR() {
-        QRStep step = Optional.of(new DefaultQRStep())
+        this( Optional.of(new DefaultQRStep())
                 .map((s) -> new FrancisQR(s))
                 .map((s) -> new ShiftedQR3x3(s))
-                .get();
+                .get() );
+    }
+    
+    protected FullQR(QRStep step) {
         this.impl = Optional.of(new BasicQR(step))
                 .map((q) -> new SymmTriDiagQR(q))
                 .get();
         this.hess = new HessenbergDecomp();
+    }
+
+    /**
+     * Set main QR strategy implementation. For mock test.
+     * @param impl  Main QR strategy implementation
+     */
+    protected void setImpl(QRStrategy impl) {
+        this.impl = impl;
     }
 
     @Override

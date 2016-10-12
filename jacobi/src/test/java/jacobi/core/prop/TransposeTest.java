@@ -26,6 +26,7 @@ import jacobi.test.annotations.JacobiInject;
 import jacobi.test.annotations.JacobiResult;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
 import java.util.Arrays;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -85,14 +86,14 @@ public class TransposeTest {
     @JacobiImport("1x7_1")
     @JacobiEquals(expected = 2, actual = 2)
     public void test1x7_1() {
-        this.output = new Transpose().compose(this.input);
-        for(int i = 0; i < this.expects.getRowCount(); i++){
-            double[] row = this.expects.getRow(i);
-            for(int j = 0; j < row.length; j++){
-                System.out.print(" " + row[j]);
-            }
-            System.out.println();
-        }
+        this.output = new Transpose().compose(this.input);        
+    }
+    
+    @Test
+    @JacobiImport("11x9")
+    @JacobiEquals(expected = 2, actual = 2)
+    public void test11x9() {
+        this.output = new Transpose().compose(this.input);        
     }
     
     @Test(expected = IllegalArgumentException.class)
@@ -102,6 +103,6 @@ public class TransposeTest {
     
     @Test
     public void testEmpty() {
-        new Transpose().compose(Empty.getInstance());
+        Assert.assertTrue(new Transpose().compose(Empty.getInstance()) == Empty.getInstance());
     }
 }

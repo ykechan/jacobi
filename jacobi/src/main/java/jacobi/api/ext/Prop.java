@@ -19,8 +19,9 @@ package jacobi.api.ext;
 import jacobi.api.Matrix;
 import jacobi.api.annotations.Facade;
 import jacobi.api.annotations.Implementation;
-import jacobi.api.annotations.NonPerturbative;
+import jacobi.api.annotations.Immutate;
 import jacobi.core.decomp.chol.CholeskyDecomp;
+import jacobi.core.decomp.eigen.EigenFinder;
 import jacobi.core.prop.Determinant;
 import jacobi.core.prop.Inverse;
 import jacobi.core.prop.Rank;
@@ -38,7 +39,7 @@ import java.util.Optional;
  * @author Y.K. Chan
  */
 @Facade
-@NonPerturbative
+@Immutate
 public interface Prop {
     
     /**
@@ -84,6 +85,11 @@ public interface Prop {
     @Implementation(CholeskyDecomp.class)
     public boolean isPositiveDefinite();
     
-    
-    public List<Pair> eig();
+    /**
+     * Eigenvalues of this matrix.
+     * @return  A pair of column vectors A and B s.t. each row of A + Bi is a eigenvalue of the underlying matrix
+     * @throws  UnsupportedOperationException if underlying matrix is not a square matrix
+     */
+    @Implementation(EigenFinder.class)
+    public Pair eig();
 }

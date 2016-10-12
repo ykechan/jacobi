@@ -52,6 +52,19 @@ public class PaddingPlanTest {
     }
     
     @Test
+    public void testAppendPrependSelect() {
+        // transfrorm <x, y> into <1.0, x, x^2>
+        PaddingPlan pp = PaddingPlan.builder(2)
+                .append((r) -> r.get(0) * r.get(0))
+                .prepend((r) -> 1.0)
+                .select(0, 1, 3)
+                .build();
+        double[] u = {3.0, 4.0};
+        double[] v = pp.apply(pp.createBuffer(), u);
+        Assert.assertArrayEquals(new double[]{1.0, 3.0, 3.0 * 3.0}, v, 1e-16);        
+    }
+    
+    @Test
     public void testPrepareAppendPrependSelect() {
         PaddingPlan pp = PaddingPlan.builder(3)
                 .append((r) -> 1.0)

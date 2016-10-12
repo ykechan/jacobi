@@ -38,6 +38,7 @@ public class BufferTest {
         Assert.assertArrayEquals(new double[]{-2.0, -1.0, 1.0, 2.0, 3.0, 11.0}, buf.getArray(), 1e-16);
         buf.insert(0, -3.0);
         Assert.assertArrayEquals(new double[]{-3.0, -2.0, -1.0, 1.0, 2.0, 3.0, 11.0}, buf.getArray(), 1e-16);
+        Assert.assertEquals(7, buf.size());
     }
 
     @Test

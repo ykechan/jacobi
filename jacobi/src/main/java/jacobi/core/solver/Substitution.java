@@ -58,7 +58,7 @@ public class Substitution {
             .isNull(() -> rhs, () -> "No known values for substitution")
             .isTrue(
                 () -> rhs.getRowCount() != this.tri.getRowCount(), 
-                () -> "Dimension match. Expects " 
+                () -> "Dimension mismatch. Expects " 
                         + this.tri.getRowCount() 
                         + ", got " 
                         + rhs.getRowCount() 

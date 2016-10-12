@@ -20,7 +20,7 @@ package jacobi.api.ext;
 import jacobi.api.Matrix;
 import jacobi.api.annotations.Facade;
 import jacobi.api.annotations.Implementation;
-import jacobi.api.annotations.NonPerturbative;
+import jacobi.api.annotations.Immutate;
 import jacobi.core.data.Augmented;
 import java.util.List;
 import java.util.function.Function;
@@ -42,7 +42,7 @@ import java.util.function.Supplier;
  * 
  * @author Y.K. Chan
  */
-@NonPerturbative
+@Immutate
 @Facade
 public interface Data extends Supplier<Matrix> {
     

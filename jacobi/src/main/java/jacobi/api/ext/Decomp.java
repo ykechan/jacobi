@@ -19,10 +19,10 @@ package jacobi.api.ext;
 import jacobi.api.Matrix;
 import jacobi.api.annotations.Facade;
 import jacobi.api.annotations.Implementation;
-import jacobi.api.annotations.NonPerturbative;
+import jacobi.api.annotations.Immutate;
 import jacobi.core.decomp.chol.CholeskyDecomp;
 import jacobi.core.decomp.gauss.GaussianDecomp;
-import jacobi.core.decomp.qr.Hessenberg;
+import jacobi.core.decomp.qr.HessenbergDecomp;
 import jacobi.core.decomp.qr.QRDecomp;
 import jacobi.core.util.Pair;
 import jacobi.core.util.Triplet;
@@ -56,7 +56,7 @@ public interface Decomp extends Supplier<Matrix> {
      * @return  Lower triangular matrix L
      * @throws  UnsupportedOperationException  if matrix is not positive-definite.
      */
-    @NonPerturbative
+    @Immutate
     @Implementation(CholeskyDecomp.class)
     public Optional<Decomp> chol();
     
@@ -65,7 +65,7 @@ public interface Decomp extends Supplier<Matrix> {
      * @return  A pair of matrices &lt;L, L^t&gt;
      * @throws  UnsupportedOperationException  if matrix is not positive-definite.
      */
-    @NonPerturbative
+    @Immutate
     @Implementation(CholeskyDecomp.class)
     public Optional<Pair> chol2();
     
@@ -74,7 +74,7 @@ public interface Decomp extends Supplier<Matrix> {
      * and R is upper triangular.
      * @return 
      */
-    @NonPerturbative
+    @Immutate
     @Implementation(QRDecomp.class)
     public Pair qr();
     
@@ -95,7 +95,7 @@ public interface Decomp extends Supplier<Matrix> {
      * matrix that is a product of elementary matrices, U is upper triangular.
      * @return  A triplet of matrices &lt;P, L, U&gt;
      */
-    @NonPerturbative
+    @Immutate
     @Implementation(GaussianDecomp.class)
     public Triplet gauss();
     
@@ -115,8 +115,8 @@ public interface Decomp extends Supplier<Matrix> {
      * where Q is orthogonal, and H is upper Hessenberg, and gets H only.
      * @return   Upper Hessenberg matrix H
      */
-    @NonPerturbative
-    @Implementation(Hessenberg.class)
+    @Immutate
+    @Implementation(HessenbergDecomp.class)
     public Matrix hess();
     
     /**
@@ -124,8 +124,8 @@ public interface Decomp extends Supplier<Matrix> {
      * where Q is orthogonal, and H is upper Hessenberg, and gets &lt;Q, H&gt; only.
      * @return   A pair of matrices &lt;Q, H&gt;
      */
-    @NonPerturbative
-    @Implementation(Hessenberg.class)
+    @Immutate
+    @Implementation(HessenbergDecomp.class)
     public Pair hessQH();        
     
     /**
@@ -133,8 +133,16 @@ public interface Decomp extends Supplier<Matrix> {
      * where Q is orthogonal, and H is upper Hessenberg, and gets &lt;Q, H, Q^t&gt;.
      * @return   A triplet of matrices &lt;Q, H, Q^t&gt;
      */
-    @Implementation(Hessenberg.class)
+    @Implementation(HessenbergDecomp.class)
     public Triplet hessQHQt();
+    
+    /**
+     * Compute the Schur form S of the underlying matrix A, s.t. S = Q * A * Q^t for some orthogonal
+     * matrix Q and almost upper triangular matrix S. Almost upper triangular here refers to a matrix
+     * that contains all zeros below the sub-diagonal.
+     * @return  Schur form S of the underlying matrix A, or empty if computation failed.
+     */
+    public Matrix schur();
     
     
 }

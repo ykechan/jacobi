@@ -20,7 +20,7 @@ package jacobi.core.decomp.gauss;
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.api.annotations.Delegate;
-import jacobi.api.annotations.NonPerturbative;
+import jacobi.api.annotations.Immutate;
 import jacobi.api.ext.Op;
 import jacobi.api.ext.Prop;
 import jacobi.core.facade.FacadeProxy;
@@ -47,13 +47,13 @@ public class Permutation extends ImmutableMatrix {
         this.order = order;
     }
     
-    @NonPerturbative
+    @Immutate
     @Delegate(facade = Prop.class, method = "det")
     public double det() {
         return this.order;
     }
     
-    @NonPerturbative
+    @Immutate
     @Delegate(facade = Prop.class, method = "inv")
     public Matrix inv() {
         int[] inverse = new int[this.indices.length];
@@ -63,7 +63,7 @@ public class Permutation extends ImmutableMatrix {
         return new Permutation(inverse, this.order);
     }
     
-    @NonPerturbative
+    @Immutate
     @Delegate(facade = Op.class, method = "mul")
     public Matrix mul(Matrix b) {
         Throw.when()

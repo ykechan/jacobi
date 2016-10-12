@@ -19,7 +19,7 @@ package jacobi.core.op;
 
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
-import jacobi.api.annotations.NonPerturbative;
+import jacobi.api.annotations.Immutate;
 import jacobi.core.util.Throw;
 import java.util.stream.IntStream;
 
@@ -27,7 +27,7 @@ import java.util.stream.IntStream;
  *
  * @author Y.K. Chan
  */
-@NonPerturbative
+@Immutate
 public class Mul {
     
     public Matrix compute(Matrix a, Matrix b) {

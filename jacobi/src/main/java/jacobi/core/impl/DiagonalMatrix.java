@@ -19,7 +19,7 @@ package jacobi.core.impl;
 
 import jacobi.api.Matrix;
 import jacobi.api.annotations.Delegate;
-import jacobi.api.annotations.NonPerturbative;
+import jacobi.api.annotations.Immutate;
 import jacobi.api.ext.Op;
 import jacobi.api.ext.Prop;
 import jacobi.core.util.Throw;
@@ -70,13 +70,13 @@ public class DiagonalMatrix extends ImmutableMatrix {
         return CopyOnWriteMatrix.of(new DiagonalMatrix(this.vector));
     }
     
-    @NonPerturbative
+    @Immutate
     @Delegate(facade = Prop.class, method = "det")
     public double det() {
         return DoubleStream.of(this.vector).reduce(1.0, (a, b) -> a * b);
     }
     
-    @NonPerturbative
+    @Immutate
     @Delegate(facade = Prop.class, method = "inv")
     public Optional<Matrix> inv() {
         double[] diag = new double[this.vector.length];
@@ -89,7 +89,7 @@ public class DiagonalMatrix extends ImmutableMatrix {
         return Optional.of(CopyOnWriteMatrix.of(new DiagonalMatrix(diag)));
     }
     
-    @NonPerturbative
+    @Immutate
     @Delegate(facade = Op.class, method = "mul")
     public Matrix mul(Matrix b) {
         Throw.when()

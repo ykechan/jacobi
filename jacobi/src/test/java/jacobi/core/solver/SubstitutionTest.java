@@ -17,6 +17,7 @@
 
 package jacobi.core.solver;
 
+import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.core.solver.Substitution.Mode;
 import jacobi.test.annotations.JacobiEquals;
@@ -99,13 +100,21 @@ public class SubstitutionTest {
         }.compute(rhs);
     }
     
+    @Test
     @JacobiImport("Upper 4x4x2")
     public void testUpperUnderDet4x4x2() {
         Assert.assertNull(new Substitution(Mode.BACKWARD, this.tri).compute(rhs));
     }
     
+    @Test
     @JacobiImport("Lower 5x5x1")
     public void testLowerUnderDet5x5x1() {
-        Assert.assertNull(new Substitution(Mode.BACKWARD, this.tri).compute(rhs));
+        Assert.assertNull(new Substitution(Mode.FORWARD, this.tri).compute(rhs));
     }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testRowCountMismatch() {
+        new Substitution(Mode.BACKWARD, Matrices.zeros(5, 3)).compute(Matrices.zeros(2));
+    }
+    
 }

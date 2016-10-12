@@ -17,7 +17,7 @@
 package jacobi.core.op;
 
 import jacobi.api.Matrix;
-import jacobi.api.annotations.NonPerturbative;
+import jacobi.api.annotations.Immutate;
 import jacobi.core.util.Throw;
 
 /**
@@ -30,7 +30,7 @@ public class Operators {
     /**
      * Matrix addition.
      */
-    @NonPerturbative
+    @Immutate
     public static class Add extends RowBased {
 
         public Add() {
@@ -42,7 +42,7 @@ public class Operators {
     /**
      * Matrix subtraction.
      */
-    @NonPerturbative
+    @Immutate
     public static class Sub extends RowBased {
 
         public Sub() {
@@ -54,7 +54,7 @@ public class Operators {
     /**
      * Hadamard product (element-by-element multiplication) of matrices.
      */
-    @NonPerturbative
+    @Immutate
     public static class Hadamard extends RowBased {
 
         public Hadamard() {

@@ -19,7 +19,7 @@ package jacobi.core.data;
 
 import jacobi.api.Matrix;
 import jacobi.api.annotations.Delegate;
-import jacobi.api.annotations.NonPerturbative;
+import jacobi.api.annotations.Immutate;
 import jacobi.api.ext.Data;
 import jacobi.core.impl.DefaultMatrix;
 import jacobi.core.impl.ImmutableMatrix;
@@ -33,7 +33,7 @@ import java.util.function.Function;
  */
 public class Augmented extends ImmutableMatrix implements Data {        
     
-    @NonPerturbative
+    @Immutate
     public static class Append {
         
         public Data compute(Matrix matrix, Function<List<Double>, Double> func) {
@@ -42,7 +42,7 @@ public class Augmented extends ImmutableMatrix implements Data {
         
     }
     
-    @NonPerturbative
+    @Immutate
     public static class Prepend {
         
         public Data compute(Matrix matrix, Function<List<Double>, Double> func) {
@@ -51,7 +51,7 @@ public class Augmented extends ImmutableMatrix implements Data {
         
     }
     
-    @NonPerturbative
+    @Immutate
     public static class Insert {
         
         public Data compute(Matrix matrix, int at, Function<List<Double>, Double> func) {
@@ -60,7 +60,7 @@ public class Augmented extends ImmutableMatrix implements Data {
         
     }
     
-    @NonPerturbative
+    @Immutate
     public static class Select {
         
         public Data compute(Matrix matrix, int... cols) {
@@ -95,34 +95,34 @@ public class Augmented extends ImmutableMatrix implements Data {
     }
 
     @Override
-    @NonPerturbative
+    @Immutate
     @Delegate(facade = Data.class, method = "append")
     public Data append(Function<List<Double>, Double> func) {
         return new Augmented(this, this.builder.copy().append(func));
     }
 
     @Override
-    @NonPerturbative
+    @Immutate
     @Delegate(facade = Data.class, method = "prepend")
     public Data prepend(Function<List<Double>, Double> func) {
         return new Augmented(this, this.builder.copy().prepend(func));
     }
     
     @Override
-    @NonPerturbative
+    @Immutate
     @Delegate(facade = Data.class, method = "insert")
     public Data insert(int at, Function<List<Double>, Double> func) {
         return new Augmented(this, this.builder.copy().insert(at, func));
     }
 
     @Override
-    @NonPerturbative
+    @Immutate
     @Delegate(facade = Data.class, method = "select")
     public Data select(int... cols) {
         return new Augmented(this, this.builder.copy().select(cols));
     }
 
-    @NonPerturbative
+    @Immutate
     @Delegate(facade = Data.class, method = "get")
     public Matrix build() {
         PaddingPlan plan = this.builder.build();

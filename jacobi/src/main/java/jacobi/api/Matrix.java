@@ -147,4 +147,6 @@ public interface Matrix {
     public default void getAndSet(int rowIndex, Consumer<double[]> f) {
         this.getApplySet(rowIndex, (r) -> { f.accept(r); return null; });
     }
+    
+    
 }

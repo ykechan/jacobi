@@ -34,8 +34,19 @@ import java.util.Arrays;
  */
 public class GaussianDecomp {
 
+    /**
+     * Default constructor
+     */
     public GaussianDecomp() {
-        this.gaussElim = new GenericGaussianElim();
+        this(new GenericGaussianElim());
+    }    
+
+    /**
+     * Constructor with injection.
+     * @param gaussElim  Generic Gaussian elimination base
+     */
+    protected GaussianDecomp(GenericGaussianElim gaussElim) {
+        this.gaussElim = gaussElim;
     }
     
     /**

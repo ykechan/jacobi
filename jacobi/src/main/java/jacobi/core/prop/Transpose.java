@@ -17,45 +17,46 @@
 
 package jacobi.core.prop;
 
+import jacobi.api.Matrices;
 import jacobi.api.Matrix;
-import jacobi.api.annotations.NonPerturbative;
+import jacobi.api.annotations.Immutate;
 import jacobi.core.impl.ColumnVector;
-import jacobi.core.impl.DefaultMatrix;
 import jacobi.core.util.Throw;
 
 /**
  * 
  * @author Y.K. Chan
  */
-@NonPerturbative
+@Immutate
 public class Transpose {
     
     public Matrix compose(Matrix matrix) {
         Throw.when().isNull(() -> matrix, () -> "No matrix to transpose.");
         if(matrix.getRowCount() == 1){
             return new ColumnVector(matrix.getRow(0));
-        }
-        Matrix trans = new DefaultMatrix(matrix.getColCount(), matrix.getRowCount());
+        }        
+        Matrix trans = Matrices.zeros(matrix.getColCount(), matrix.getRowCount());
         double[][] temp = new double[FETCH_SIZE][];
         for(int i = 0; i < matrix.getRowCount(); i += temp.length){
-            this.fetch(matrix, temp, i);
-            int n = Math.min(matrix.getRowCount() - i, temp.length);
+            int n = this.fetch(matrix, temp, i);
             
             for(int j = 0; j < trans.getRowCount(); j++){
                 double[] row = trans.getRow(j);
                 for(int k = 0; k < n; k++){
                     row[i + k] = temp[k][j];
                 }
+                trans.setRow(j, row);
             }
         }
         return trans;
     }
     
-    protected void fetch(Matrix matrix, double[][] temp, int from) {
+    protected int fetch(Matrix matrix, double[][] temp, int from) {
         int n = Math.min(matrix.getRowCount() - from, temp.length);
         for(int i = 0; i < n; i++){
             temp[i] = matrix.getRow(from + i);
         }
+        return n;
     }
     
     private static final int FETCH_SIZE = 8;

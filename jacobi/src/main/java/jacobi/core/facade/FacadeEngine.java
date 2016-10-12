@@ -20,7 +20,7 @@ import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.api.annotations.Facade;
 import jacobi.api.annotations.Implementation;
-import jacobi.api.annotations.NonPerturbative;
+import jacobi.api.annotations.Immutate;
 import jacobi.core.util.Throw;
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -100,12 +100,12 @@ public class FacadeEngine {
         Class<?> implClass = method.getAnnotation(Implementation.class).value();
         Functor func = new Functor(method, implClass);
         if(facade.value() != Matrix.class
-        || (!method.isAnnotationPresent(NonPerturbative.class)
-         && !method.getDeclaringClass().isAssignableFrom(NonPerturbative.class))){
+        || (!method.isAnnotationPresent(Immutate.class)
+         && !method.getDeclaringClass().isAssignableFrom(Immutate.class))){
             return func;
         }
-        return implClass.isAnnotationPresent(NonPerturbative.class)
-            || func.getMethod().isAnnotationPresent(NonPerturbative.class)
+        return implClass.isAnnotationPresent(Immutate.class)
+            || func.getMethod().isAnnotationPresent(Immutate.class)
             ? (target, args) -> 
                 func.invoke(target, args)
             : (target, args) -> 

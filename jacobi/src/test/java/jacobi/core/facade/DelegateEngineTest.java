@@ -20,6 +20,9 @@ package jacobi.core.facade;
 import jacobi.api.annotations.Delegate;
 import jacobi.api.annotations.Facade;
 import jacobi.api.annotations.Implementation;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 import org.junit.Assert;
 import org.junit.Test;
@@ -62,6 +65,40 @@ public class DelegateEngineTest {
         Assert.assertEquals(1337, result.intValue());
     }
     
+    @Test(expected = RuntimeException.class)
+    public void testTargetException() throws Exception {
+        AtomicLong count = new AtomicLong(0);
+        try {
+            DelegateEngine.getInstance().invoke(
+                StringFacade.class.getMethod("doSth", AtomicLong.class), 
+                new StringFailsToDoSth("I"), 
+                new Object[]{count});        
+        } finally {
+            Assert.assertEquals(1L, count.get());
+        }
+    }
+    
+    @Test(expected = RuntimeException.class)
+    public void testTargetLoudException() throws Exception {
+        AtomicLong count = new AtomicLong(0);
+        try {
+            DelegateEngine.getInstance().invoke(
+                StringFacade.class.getMethod("doSth", AtomicLong.class), 
+                new StringFailsToDoSthLoudly("I"), 
+                new Object[]{count});        
+        } finally {
+            Assert.assertEquals(1L, count.get());
+        }
+    }
+    
+    @Test(expected = RuntimeException.class)
+    public void testInvalidMethod() throws Exception {
+        Method method = StringDoSthSecretly.class.getDeclaredMethod("secretMethod");
+        Delegator delegate = new Delegator(method);
+        Assert.assertEquals(method, delegate.getMethod());
+        delegate.invoke(new StringDoSthSecretly(""), new Object[0]);
+    }
+    
     public static class NonFinalString {
 
         public NonFinalString(String string) {
@@ -85,6 +122,7 @@ public class DelegateEngineTest {
         @Implementation(DoSomethingImpl.class)
         public NonFinalString doSth(int i);
         
+        public NonFinalString doSth(AtomicLong i);
     }
     
     public static class DoSomethingImpl {
@@ -108,6 +146,46 @@ public class DelegateEngineTest {
         @Delegate(facade = StringFacade.class, method = "doSth")
         public NonFinalString compute(NonFinalString str) {
             return new NonFinalString(this.toString() + " did " + str.toString() + " easily.");
+        }
+        
+    }
+    
+    public static class StringFailsToDoSth extends NonFinalString {
+        
+        public StringFailsToDoSth(String string) {
+            super(string);
+        }
+        
+        @Delegate(facade = StringFacade.class, method = "doSth")
+        public NonFinalString doSth(AtomicLong num) {
+            num.incrementAndGet();
+            throw new UnsupportedOperationException("Failed");
+        }
+        
+    }
+    
+    public static class StringFailsToDoSthLoudly extends NonFinalString {
+        
+        public StringFailsToDoSthLoudly(String string) {
+            super(string);
+        }
+        
+        @Delegate(facade = StringFacade.class, method = "doSth")
+        public NonFinalString doSth(AtomicLong num) throws IOException {
+            num.incrementAndGet();
+            throw new IOException("Failed");
+        }
+        
+    }
+    
+    public static class StringDoSthSecretly extends NonFinalString {
+
+        public StringDoSthSecretly(String string) {
+            super(string);
+        }
+        
+        private NonFinalString secretMethod() {
+            return null;
         }
         
     }

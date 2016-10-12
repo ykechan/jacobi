@@ -18,6 +18,7 @@ package jacobi.core.op;
 
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
+import jacobi.core.stats.RowReduce;
 import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
@@ -171,5 +172,24 @@ public class RowBasedTest {
         new Operators.Hadamard().stream(a, b, this.hstream);
         this.hfork = Matrices.zeros(this.a.getRowCount(), this.a.getColCount());
         new Operators.Hadamard().forkJoin(a, b, this.hfork, 3);
+    }
+    
+    @Test(expected = IllegalStateException.class)
+    public void testInvalidRowRange() {
+        new RowReduce( (a, b) -> {} ){
+
+            @Override
+            public double[] compute(Matrix matrix) {
+                return this.serial(matrix, 0, 0);
+            }
+            
+        }.compute(Matrices.identity(1));
+        
+    }
+    
+    @Test(expected = IllegalArgumentException.class)    
+    public void testInvalidMatrix() {
+        new RowReduce.Max().compute(null);
+        
     }
 }

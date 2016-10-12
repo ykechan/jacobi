@@ -23,7 +23,6 @@ import jacobi.core.decomp.qr.step.GivensQR;
 import jacobi.core.decomp.qr.step.GivensQR.Givens;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.DoubleStream;
 
 /**
  * QR algorithm for symmetric Hessenberg matrices.
@@ -90,7 +89,7 @@ public class SymmTriDiagQR implements QRStrategy {
                 return;
             }
         }
-        throw new IllegalStateException("Unable to deflate.");
+        throw new UnsupportedOperationException("Unable to deflate.");
     }
     
     /**

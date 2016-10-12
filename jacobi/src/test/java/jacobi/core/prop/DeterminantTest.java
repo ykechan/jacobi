@@ -24,6 +24,7 @@ import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.annotations.JacobiResult;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -64,6 +65,11 @@ public class DeterminantTest {
     
     @JacobiResult(401)
     public Matrix det4x4; 
+    
+    @Test
+    public void test1x1() {
+        Assert.assertEquals(Math.E, new Determinant().compute(this.single(Math.E)), 1e-14);
+    }
 
     @Test
     @JacobiImport("3x3_1")

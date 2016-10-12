@@ -19,7 +19,7 @@ package jacobi.core.facade;
 
 import jacobi.api.annotations.Delegate;
 import jacobi.api.annotations.Facade;
-import jacobi.api.annotations.NonPerturbative;
+import jacobi.api.annotations.Immutate;
 import jacobi.core.util.Throw;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -177,9 +177,9 @@ public class DelegateEngine extends FacadeEngine {
         }
         
         public boolean isValid() {
-            return !this.facade.isAnnotationPresent(NonPerturbative.class)
-                || this.facade.getDeclaringClass().isAnnotationPresent(NonPerturbative.class)
-                == this.method.isAnnotationPresent(NonPerturbative.class); 
+            return !this.facade.isAnnotationPresent(Immutate.class)
+                || this.facade.getDeclaringClass().isAnnotationPresent(Immutate.class)
+                == this.method.isAnnotationPresent(Immutate.class); 
         }
 
         @Override
