@@ -136,5 +136,4 @@ public class QRDecomp {
         }
     }
     
-    private static final double EPSILON = 1e-10;
 }

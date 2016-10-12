@@ -161,5 +161,4 @@ public class HessenbergDecomp {
                     + " matrix.");
     }
     
-    private static final double EPSILON = 1e-10;
 }

@@ -39,16 +39,6 @@ public class GivensQR {
     
     /**
      * Compute QR decomposition on a Hessenberg matrix H, and transform it
-     * into R
-     * @param matrix  Input Hesseberg matrix H
-     * @return  List of Givens rotations applied
-     */
-    public List<Givens> computeQR(Matrix matrix) {
-        return this.computeQR(matrix, 0, matrix.getRowCount(), matrix.getColCount());
-    }
-    
-    /**
-     * Compute QR decomposition on a Hessenberg matrix H, and transform it
      * into R, with given limited range.
      * @param matrix  Input Hessenberg matrix H
      * @param beginRow  Begin index of rows of interest
@@ -74,9 +64,11 @@ public class GivensQR {
      * @param matrix  Input matrix R
      * @param givens  List of Givens rotation s.t. Q^t = G[n] * G[n - 1] * ...
      */
+    /*
     public void computeRQ(Matrix matrix, List<Givens> givens) {
         this.computeRQ(matrix, givens, 0, matrix.getRowCount(), 0);
     }
+    */
     
     /**
      * Given a lower triangular matrix R, multiply it with Q, within given 
@@ -127,15 +119,7 @@ public class GivensQR {
             lower[i] = givens.rotateY(a, b); //givens.getSin() * a + givens.getCos() * b;
         }
         return givens;
-    }
-    
-    protected void computeRA(Matrix matrix, List<Givens> givens, int beginRow, int endRow) {
-        for(int i = beginRow; i < endRow; i++){
-            double[] row = matrix.getRow(i);
-            this.computeRA(row, givens, 0);
-            matrix.setRow(i, row);
-        }
-    }
+    }    
     
     /**
      * Apply a list of Givens rotation on the right of a row.

@@ -50,8 +50,7 @@ class PaddingPlan {
      * @param supplier
      * @param list 
      */
-    protected PaddingPlan(int resultLength, Supplier<Buffer> supplier, List<Consumer<Buffer>> list) {
-        this.resultLength = resultLength;
+    protected PaddingPlan(Supplier<Buffer> supplier, List<Consumer<Buffer>> list) {
         this.supplier = supplier;
         this.list = list;
     }    
@@ -78,7 +77,6 @@ class PaddingPlan {
         return buffer.getArray();
     }
     
-    private int resultLength;
     private Supplier<Buffer> supplier;
     private List<Consumer<Buffer>> list;
     
@@ -169,7 +167,7 @@ class PaddingPlan {
         public PaddingPlan build() {
             int prep = this.maxPrepend;
             int max = this.maxLength;
-            return new PaddingPlan(this.currentLength, () -> new Buffer(prep, max), this.funcs);
+            return new PaddingPlan(() -> new Buffer(prep, max), this.funcs);
         }
         
         /**
