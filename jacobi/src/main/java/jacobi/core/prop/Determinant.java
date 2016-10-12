@@ -34,12 +34,22 @@ import jacobi.core.decomp.gauss.GenericGaussianElim;
  */
 public class Determinant {
 
+    /**
+     * Constructor.
+     */
     public Determinant() {
         this.gaussElim = new GenericGaussianElim();
     }
     
+    /**
+     * Find the determinant of the input matrix A.
+     * @param matrix  Input matrix A
+     * @return  det(A)
+     */
     public double compute(Matrix matrix) {
         switch(matrix.getRowCount()){
+            case 0 :
+                return 0.0;
             case 1 :
                 return this.compute1x1(matrix);
             case 2 :
@@ -56,16 +66,31 @@ public class Determinant {
         return det;
     }
     
+    /**
+     * Find the determinant of the input 1x1 matrix A.
+     * @param m  Input 1x1 matrix
+     * @return  det(A)
+     */
     protected double compute1x1(Matrix m) {        
         return m.get(0, 0);
     }
     
+    /**
+     * Find the determinant of the input 2x2 matrix A.
+     * @param m  Input 2x2 matrix
+     * @return  det(A)
+     */
     protected double compute2x2(Matrix m) { 
         double[] u = m.getRow(0);
         double[] v = m.getRow(1);
         return u[0]*v[1] - v[0]*u[1];
     }
     
+    /**
+     * Find the determinant of the input 3x3 matrix A.
+     * @param m  Input 3x3 matrix
+     * @return  det(A)
+     */
     protected double compute3x3(Matrix m) {        
         double[] u = m.getRow(0);
         double[] v = m.getRow(1);

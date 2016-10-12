@@ -231,11 +231,6 @@ public class GivensQR {
         public double transRevRotY(double a, double b) {
             return this.getSin() * a + this.getCos() * b;
         }
-
-        @Override
-        public String toString() {
-            return "[" + cos + "," + sin + "]";
-        }
         
         private double mag, cos, sin;
     }

@@ -19,6 +19,7 @@ package jacobi.core.prop;
 
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
+import jacobi.core.impl.Empty;
 import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
@@ -131,6 +132,11 @@ public class DeterminantTest {
     @Test(expected = RuntimeException.class)
     public void testNonSquareMatrix() {
         new Determinant().compute(Matrices.zeros(5, 4));
+    }
+    
+    @Test
+    public void testEmptyMatrix() {
+        Assert.assertEquals(0.0, new Determinant().compute(Empty.getInstance()), 1e-12);
     }
     
     private Matrix single(double elem) {

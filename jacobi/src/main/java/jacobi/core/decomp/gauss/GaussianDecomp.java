@@ -21,7 +21,6 @@ import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.core.impl.CopyOnWriteMatrix;
 import jacobi.core.util.Triplet;
-import java.util.Arrays;
 
 /**
  * 
@@ -92,7 +91,6 @@ public class GaussianDecomp {
         }
         
         public Permutation getPermutation() {
-            System.out.println("perm = " + Arrays.toString(perm));
             return new Permutation(perm, order % 2 == 0 ? 1 : -1);
         }
 

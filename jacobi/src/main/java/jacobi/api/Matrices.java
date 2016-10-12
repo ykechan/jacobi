@@ -136,7 +136,7 @@ public final class Matrices {
             return null;
         }
         if(matrix instanceof ImmutableMatrix){
-            return new DefaultMatrix(matrix.toArray());
+            return new DefaultMatrix(matrix);
         }
         return matrix.copy();
     }

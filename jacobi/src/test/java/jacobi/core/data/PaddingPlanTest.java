@@ -98,4 +98,31 @@ public class PaddingPlanTest {
         Assert.assertEquals(3, buffer.getStartingPosition());
         Assert.assertEquals(7, buffer.getMaximumLength());
     }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testSelectNull() {
+        PaddingPlan.builder(3)
+                .append((r) -> 1.0)
+                .prepend((r) -> 2.0)
+                .insert(3, (r) -> 5.0)
+                .select(null);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testSelectEmpty() {
+        PaddingPlan.builder(3)
+                .append((r) -> 1.0)
+                .prepend((r) -> 2.0)
+                .insert(3, (r) -> 5.0)
+                .select(new int[0]);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testSelectInvalid() {
+        PaddingPlan.builder(3)
+                .append((r) -> 1.0)
+                .prepend((r) -> 2.0)
+                .insert(3, (r) -> 5.0)
+                .select(100);
+    }
 }

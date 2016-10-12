@@ -158,7 +158,6 @@ public class ShiftedQR3x3 implements QRStep {
         if(p3q2 < 0.0){
             double tan = -Math.sqrt(-1.0 - (p/q)*(p/q)*p);
             double x = 2.0 * Math.sqrt(-p) * Math.cos(Math.atan(tan) / 3.0);
-            System.out.println("x = " + x);
             if(p > 0.0){
                 return b > 0.0 ? x : -x;
             }            

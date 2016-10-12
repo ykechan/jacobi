@@ -51,58 +51,58 @@ public class TransposeTest {
     @JacobiImport("5x5_1")
     @JacobiEquals(expected = 2, actual = 2)
     public void test5x5_1() {
-        this.output = new Transpose().compose(this.input);
+        this.output = new Transpose().compute(this.input);
     }
 
     @Test
     @JacobiImport("5x5_2")
     @JacobiEquals(expected = 2, actual = 2)
     public void test5x5_2() {
-        this.output = new Transpose().compose(this.input);
+        this.output = new Transpose().compute(this.input);
     }
     
     @Test
     @JacobiImport("3x5_1")
     @JacobiEquals(expected = 2, actual = 2)
     public void test3x5_1() {
-        this.output = new Transpose().compose(this.input);
+        this.output = new Transpose().compute(this.input);
     }
     
     @Test
     @JacobiImport("5x3_1")
     @JacobiEquals(expected = 2, actual = 2)
     public void test5x3_1() {
-        this.output = new Transpose().compose(this.input);
+        this.output = new Transpose().compute(this.input);
     }
     
     @Test
     @JacobiImport("7x1_1")
     @JacobiEquals(expected = 2, actual = 2)
     public void test7x1_1() {
-        this.output = new Transpose().compose(this.input);
+        this.output = new Transpose().compute(this.input);
     }
     
     @Test
     @JacobiImport("1x7_1")
     @JacobiEquals(expected = 2, actual = 2)
     public void test1x7_1() {
-        this.output = new Transpose().compose(this.input);        
+        this.output = new Transpose().compute(this.input);        
     }
     
     @Test
     @JacobiImport("11x9")
     @JacobiEquals(expected = 2, actual = 2)
     public void test11x9() {
-        this.output = new Transpose().compose(this.input);        
+        this.output = new Transpose().compute(this.input);        
     }
     
     @Test(expected = IllegalArgumentException.class)
     public void testNull() {
-        new Transpose().compose(null);
+        new Transpose().compute(null);
     }
     
     @Test
     public void testEmpty() {
-        Assert.assertTrue(new Transpose().compose(Empty.getInstance()) == Empty.getInstance());
+        Assert.assertTrue(new Transpose().compute(Empty.getInstance()) == Empty.getInstance());
     }
 }

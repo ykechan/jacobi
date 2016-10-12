@@ -21,28 +21,31 @@ import jacobi.api.Matrix;
 import jacobi.core.util.Throw;
 
 /**
- *
+ * Find the trace of an input matrix A.
+ * 
+ * The trace of a matrix A tr(A) is the sum of its diagonal elements.
+ * 
  * @author Y.K. Chan
  */
 public class Trace {
-
-    public Trace(Matrix matrix) {
+    
+    /**
+     * Find the trace of an input matrix A.
+     * @param matrix  Input matrix A
+     * @return  tr(A)
+     * @throws  IllegalArgumentException if A is null or A is not a square matrix.
+     */
+    public double compute(Matrix matrix) {
         Throw.when()
             .isNull(() -> matrix, () -> "No matrix to compute.")
-            .isTrue(() -> matrix.getRowCount() == 0, () -> "No matrix to compute.")
             .isFalse(
                 () -> matrix.getRowCount() == matrix.getColCount(), 
                 () -> "Trace not exists for non-square matrices");
-        this.matrix = matrix;
-    }
-    
-    public double compute() {
         double tr = 0.0;
-        for(int i = 0; i < this.matrix.getRowCount(); i++){
-            tr += this.matrix.get(i, i);
+        for(int i = 0; i < matrix.getRowCount(); i++){
+            tr += matrix.get(i, i);
         }
         return tr;
     }
-
-    private Matrix matrix;
+    
 }

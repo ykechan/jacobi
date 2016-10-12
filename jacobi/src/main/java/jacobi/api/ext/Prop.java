@@ -21,13 +21,12 @@ import jacobi.api.annotations.Facade;
 import jacobi.api.annotations.Implementation;
 import jacobi.api.annotations.Immutate;
 import jacobi.core.decomp.chol.CholeskyDecomp;
-import jacobi.core.decomp.eigen.EigenFinder;
 import jacobi.core.prop.Determinant;
 import jacobi.core.prop.Inverse;
 import jacobi.core.prop.Rank;
+import jacobi.core.prop.Trace;
 import jacobi.core.prop.Transpose;
 import jacobi.core.util.Pair;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -47,6 +46,7 @@ public interface Prop {
      * @return  Trace value
      * @throws  UnsupportedOperationException if underlying matrix is not a square matrix
      */
+    @Implementation(Trace.class)
     public double tr();
     
     /**
@@ -90,6 +90,6 @@ public interface Prop {
      * @return  A pair of column vectors A and B s.t. each row of A + Bi is a eigenvalue of the underlying matrix
      * @throws  UnsupportedOperationException if underlying matrix is not a square matrix
      */
-    @Implementation(EigenFinder.class)
+    //@Implementation(EigenFinder.class)
     public Pair eig();
 }

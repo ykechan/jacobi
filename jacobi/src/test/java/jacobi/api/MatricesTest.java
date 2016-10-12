@@ -17,6 +17,7 @@
 package jacobi.api;
 
 import jacobi.core.impl.DefaultMatrix;
+import jacobi.core.impl.DiagonalMatrix;
 import jacobi.core.impl.Empty;
 import jacobi.core.impl.ImmutableMatrix;
 import jacobi.test.util.Jacobi;
@@ -42,7 +43,8 @@ public class MatricesTest {
     public void testCreateEmptyMatrix() {
         Assert.assertTrue(Matrices.of(null) == Empty.getInstance());
         Assert.assertTrue(Matrices.of(new double[0][]) == Empty.getInstance());
-        Assert.assertTrue(Empty.getInstance().copy() == Empty.getInstance());        
+        Assert.assertTrue(Matrices.of(new double[10][0]) == Empty.getInstance());
+        Assert.assertTrue(Empty.getInstance().copy() == Empty.getInstance());  
     }        
     
     @Test(expected = RuntimeException.class)
@@ -87,7 +89,7 @@ public class MatricesTest {
     
     @Test
     public void testCopyImmutableMatrix() {
-        Assert.assertFalse(Matrices.copy(Matrices.diag(new double[]{1.0, 2.0, 3.0})) instanceof ImmutableMatrix);
+        Assert.assertFalse(Matrices.copy(new DiagonalMatrix(new double[]{1.0, 2.0, 3.0})) instanceof ImmutableMatrix);
     }
     
 }

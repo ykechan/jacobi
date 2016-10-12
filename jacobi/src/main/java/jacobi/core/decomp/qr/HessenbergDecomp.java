@@ -88,7 +88,7 @@ public class HessenbergDecomp {
         return Triplet.of(
             qh.getLeft(),
             a,
-            new Transpose().compose(qh.getRight()) );
+            new Transpose().compute(qh.getRight()) );
     }
     
     /**

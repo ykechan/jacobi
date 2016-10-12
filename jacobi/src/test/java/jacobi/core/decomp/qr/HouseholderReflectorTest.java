@@ -27,8 +27,6 @@ import jacobi.test.annotations.JacobiInject;
 import jacobi.test.annotations.JacobiResult;
 import jacobi.test.util.Jacobi;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
-import java.util.concurrent.atomic.AtomicInteger;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -56,7 +54,7 @@ public class HouseholderReflectorTest {
     @JacobiImport("5x5")
     @JacobiEquals(expected = 2, actual = 2, epsilon = 1e-12)
     public void test5x5Elements() {
-        this.output = new HouseholderReflector(new Transpose().compose(this.input).getRow(0), 0);
+        this.output = new HouseholderReflector(new Transpose().compute(this.input).getRow(0), 0);
         Jacobi.assertEquals(this.output, this.output.copy());
         Jacobi.assertEquals(this.output, this.output.ext(Prop.class).inv().get());
     }
@@ -65,14 +63,14 @@ public class HouseholderReflectorTest {
     @JacobiImport("Unit 5x5")
     @JacobiEquals(expected = 2, actual = 2, epsilon = 1e-12)
     public void testUnit5x5Elements() {
-        this.output = new HouseholderReflector(new Transpose().compose(this.input).getRow(0), 0);
+        this.output = new HouseholderReflector(new Transpose().compute(this.input).getRow(0), 0);
     }
     
     @Test
     @JacobiImport("7x7 From 2")
     @JacobiEquals(expected = 2, actual = 2, epsilon = 1e-12)
     public void test7x7From2Elements() {
-        this.output = new HouseholderReflector(new Transpose().compose(this.input).getRow(0), 2);
+        this.output = new HouseholderReflector(new Transpose().compute(this.input).getRow(0), 2);
     }
     
     @Test
@@ -80,7 +78,7 @@ public class HouseholderReflectorTest {
     @JacobiEquals(expected = 2, actual = 2, epsilon = 1e-12)
     @JacobiEquals(expected = 4, actual = 4, epsilon = 1e-12)
     public void testApply5x1() {
-        HouseholderReflector h = new HouseholderReflector(new Transpose().compose(this.input).getRow(0), 0);
+        HouseholderReflector h = new HouseholderReflector(new Transpose().compute(this.input).getRow(0), 0);
         this.output = h;
         this.verify = h.mul(this.column);
     }
@@ -90,7 +88,7 @@ public class HouseholderReflectorTest {
     @JacobiEquals(expected = 2, actual = 2, epsilon = 1e-12)
     @JacobiEquals(expected = 4, actual = 4, epsilon = 1e-12)
     public void testApply7x1() {
-        HouseholderReflector h = new HouseholderReflector(new Transpose().compose(this.input).getRow(0), 0);
+        HouseholderReflector h = new HouseholderReflector(new Transpose().compute(this.input).getRow(0), 0);
         this.output = h;
         this.verify = h.ext(Op.class).mul(this.column).get();
     }
@@ -98,7 +96,7 @@ public class HouseholderReflectorTest {
     @Test
     @JacobiImport("Apply Left 7x1")
     public void testInverse() {
-        HouseholderReflector h = new HouseholderReflector(new Transpose().compose(this.input).getRow(0), 0);
+        HouseholderReflector h = new HouseholderReflector(new Transpose().compute(this.input).getRow(0), 0);
         Jacobi.assertEquals(h, h.ext(Prop.class).inv().get());
     }
     

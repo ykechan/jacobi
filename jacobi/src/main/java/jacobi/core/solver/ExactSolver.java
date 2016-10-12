@@ -58,7 +58,6 @@ public class ExactSolver {
         Throw.when()
             .isNull(() -> a, () -> "No system of linear equations. (A in y = A * x) ")
             .isNull(() -> y, () -> "No known values. (y in y = A * x)")
-            .isTrue(() -> a.getRowCount() == 0, () -> "No equations.")
             .isTrue(
                 () -> a.getRowCount() != a.getColCount(), 
                 () -> "Matrix A is not a square matrix. (" 
@@ -72,6 +71,9 @@ public class ExactSolver {
                         + " equations and " 
                         + y.getRowCount() + " known values."
             );
+        if(a.getRowCount() == 0){
+            return Optional.of(y);
+        }
         Matrix x = Matrices.copy(y);
         this.gaussElim.compute(a, (op) -> new FullMatrixOperator(op, x));
         return Optional.ofNullable(new Substitution(Mode.BACKWARD, a).compute(x));

@@ -20,11 +20,13 @@ package jacobi.core.stats;
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.api.ext.Stats;
+import jacobi.core.impl.Empty;
 import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.annotations.JacobiResult;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -101,4 +103,12 @@ public class BasicStatsTest {
         this.covar = new Covar().compute(this.data);
     }
 
+    @Test
+    public void testEmpty() {
+        Assert.assertArrayEquals(new double[0], new RowReduce.Min().compute(Empty.getInstance()), 1e-16);
+        Assert.assertArrayEquals(new double[0], new RowReduce.Max().compute(Empty.getInstance()), 1e-16);
+        Assert.assertArrayEquals(new double[0], new RowReduce.Mean().compute(Empty.getInstance()), 1e-16);
+        Assert.assertArrayEquals(new double[0], new Variance().compute(Empty.getInstance()), 1e-16);
+        Assert.assertArrayEquals(new double[0], new Variance.StdDev().compute(Empty.getInstance()), 1e-16);
+    }
 }

@@ -56,6 +56,10 @@ import java.util.Optional;
  * @author Y.K. Chan
  */
 public class LLSquareSolver {
+
+    public LLSquareSolver() {
+        this.qrDecomp = new QRDecomp();
+    }
         
     /**
      * Solve the system of linear equation y = A * x.
@@ -67,7 +71,6 @@ public class LLSquareSolver {
         Throw.when()
             .isNull(() -> a, () -> "No system of linear equations. (A in y = A * x) ")
             .isNull(() -> y, () -> "No known values. (y in y = A * x)")
-            .isTrue(() -> a.getRowCount() == 0, () -> "No equations.")
             .isTrue(
                 () -> a.getRowCount() < a.getColCount(), 
                 () -> "Matrix A is not over-determined. (" 
@@ -81,8 +84,12 @@ public class LLSquareSolver {
                         + " equations and " 
                         + y.getRowCount() + " known values."
             );
-        new QRDecomp().compute(a, y);
+        if(a.getRowCount() == 0){
+            return Optional.of(y);
+        }
+        this.qrDecomp.compute(a, y);
         return Optional.ofNullable(new Substitution(Mode.BACKWARD, a).compute(y));
     }
 
+    private QRDecomp qrDecomp;
 }

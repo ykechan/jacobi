@@ -24,13 +24,21 @@ import jacobi.core.impl.ColumnVector;
 import jacobi.core.util.Throw;
 
 /**
+ * Create the transpose of the input matrix.
+ * 
+ * The transpose matrix A^t of matrix A can be obtained by reflect A over its diagonal.
  * 
  * @author Y.K. Chan
  */
 @Immutate
 public class Transpose {
     
-    public Matrix compose(Matrix matrix) {
+    /**
+     * Create the transpose of the input matrix.
+     * @param matrix  Input matrix A
+     * @return  Transpose matrix A^T
+     */
+    public Matrix compute(Matrix matrix) {
         Throw.when().isNull(() -> matrix, () -> "No matrix to transpose.");
         if(matrix.getRowCount() == 1){
             return new ColumnVector(matrix.getRow(0));
@@ -51,6 +59,13 @@ public class Transpose {
         return trans;
     }
     
+    /**
+     * Fetch rows from input matrix into temp buffer.
+     * @param matrix  Input matrix A
+     * @param temp  Temp buffer
+     * @param from  Index to start fetching rows
+     * @return  Number of rows fetched
+     */
     protected int fetch(Matrix matrix, double[][] temp, int from) {
         int n = Math.min(matrix.getRowCount() - from, temp.length);
         for(int i = 0; i < n; i++){

@@ -18,13 +18,11 @@
 package jacobi.core.prop;
 
 import jacobi.api.Matrix;
-import jacobi.core.decomp.gauss.ElementaryOperator;
 import jacobi.core.decomp.gauss.GenericGaussianElim;
 import jacobi.core.util.Throw;
-import java.util.function.Function;
 
 /**
- *
+ * 
  * @author Y.K. Chan
  */
 public class Rank {
@@ -35,10 +33,7 @@ public class Rank {
     
     public int compute(Matrix a) {
         Throw.when()
-            .isNull(() -> a, () -> "No matrix to rank.")
-            .isTrue(
-                () -> a.getRowCount() == 0, 
-                () -> "Empty matrix has no rank.");
+            .isNull(() -> a, () -> "No matrix to rank.");
         this.gaussElim.compute(a);
         int rank = 0;
         for(int i = 0; i < a.getRowCount(); i++){

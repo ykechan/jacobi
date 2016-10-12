@@ -86,8 +86,8 @@ public class RowReduce {
      * @return  Reduction result.
      */
     public double[] compute(Matrix matrix) {
-        Throw.when().isEmpty(matrix, "No matrix to compute.");
-        return this.serial(matrix, 0, matrix.getRowCount());
+        Throw.when().isNull(() -> matrix, () -> "No matrix to compute.");
+        return matrix.getRowCount() == 0 ? EMPTY : this.serial(matrix, 0, matrix.getRowCount());
     }
     
     /**
@@ -142,4 +142,6 @@ public class RowReduce {
     }
     
     private BiConsumer<double[], double[]> reduce;
+    
+    private static final double[] EMPTY = new double[0];
 }
