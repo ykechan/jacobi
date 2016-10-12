@@ -34,58 +34,5 @@ import org.junit.runner.RunWith;
  */
 @JacobiImport("/jacobi/test/data/BasicQRTest.xlsx")
 @RunWith(JacobiJUnit4ClassRunner.class)
-public class BasicQRTest {
-    
-    @JacobiInject(1)
-    public Matrix input5x5;
-    
-    @JacobiInject(2)
-    public Matrix input7x7;
-    
-    @Test
-    public void generateOrderings() {
-        int n = 20;
-        int m = 5;
-        for(int i = 0; i < n; i++){
-           int[] array = IntStream.range(1, m).toArray();
-           for(int k = 0; k < m * m ; k++){
-               int a = (int) Math.floor(Math.random() * array.length);
-               int b = (int) Math.floor(Math.random() * array.length);
-               int temp = array[a];
-               array[a] = array[b];
-               array[b] = temp;
-           } 
-           System.out.println(Arrays.toString(array));
-        }
-        
-    }
-    
-    @Test
-    @JacobiImport("Data")
-    public void test5x5() {
-        QRStrategy impl = new BasicQR(this.mockStep(
-           1, 2, 3, 4
-        ));
-        impl.compute(input5x5, null, true);
-        for(int i = 1; i < this.input5x5.getRowCount(); i++){
-            Assert.assertEquals(0.0, this.input5x5.get(i, i - 1), 1e-16);
-        }
-    }
-   
-
-    private QRStep mockStep(int... order) {
-        return (m, p, begin, end, full) -> {
-            for(int i = 0; i < order.length; i++){
-                if(order[i] > begin && order[i] < end){ 
-                    int k = order[i];
-                    order[i] = -1;
-                    m.set(k, k - 1, 0.0);
-                    return;
-                }
-            }
-            throw new UnsupportedOperationException("Unable to find converge point in " 
-                    + Arrays.toString(order)
-                    + " within [" + begin + "," + end + ").");
-        };
-    }
+public class BasicQRTest {    
 }
