@@ -19,15 +19,25 @@ library that complex computational logic at the fingertip of the developer.
   Matrix x = matrix.ext(Solver.class).exact(y); // load Solver extension and solve for x
 ```
 
-#Motivation
-Currently popular matrix library like JAMA is a bit dated if not legacy. I 
-want to fill in the gap to provide a library that employs more modern practices
-and style, like test-driven development and borderline functional approach.
-The goal is to provide Java developers a matrix library that is easy-of-use,
-tested, efficient, and extensible. This project introduces a little built-in
-Facade framework (matrix.ext(...) in the above code) to separate functionality
-and implementation. Switching implementation would be easy and backward 
-compatibility archived by switching to new facade altogether if change is great.
+#Functionality
+
+###Algebra
+- Addition, Subtraction, Scalar Multiplication, Matrix Multiplication etc
+
+###Properties
+- Trace, Rank, Determintant, Inverse, Tranpose, Eigenvalues etc.
+
+###Decomposition
+- Cholesky, Gaussian, QR, Hessenberg, Schur, SVD etc.
+
+###System of linear equations
+- Solve for exact value, Linear Regression
+
+###Statistics
+- Min, Max, Mean, Standard Deviation, Co-variance etc.
+
+###Kernel Trick
+- Insert constant column, insert computed values, select certain columns etc.
 
 #License
 Jacobi will be licensed under GNU GPL and shall keep on to be a free software in the 
