@@ -12,6 +12,8 @@ Jacobi is a comprehensive library for computations involving matrices for
 Java programmers. The goal of this project is to provide easy to use matrix 
 library that complex computational logic at the fingertip of the developer.
 
+This library is still under development.
+
 #Code Example
 ```java
   Matrix matrix = Matrices.of({ {3.0, 2.0, -1.0}, {2.0, -2.0, 4.0}, {-1.0, 0.5, -1.0} });
@@ -19,7 +21,7 @@ library that complex computational logic at the fingertip of the developer.
   Matrix x = matrix.ext(Solver.class).exact(y); // load Solver extension and solve for x
 ```
 
-#Functionality
+#Functionalities
 
 ###Algebra
 - Addition, Subtraction, Scalar Multiplication, Matrix Multiplication etc
