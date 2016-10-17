@@ -16,8 +16,8 @@ This library is still under development.
 
 #Code Example
 ```java
-  Matrix matrix = Matrices.of({ {3.0, 2.0, -1.0}, {2.0, -2.0, 4.0}, {-1.0, 0.5, -1.0} });
-  Matrix y = Matrices.of({ {1.0}, {-2.0}, {-2.0} });
+  Matrix matrix = Matrices.of(new double[][]{ {3.0, 2.0, -1.0}, {2.0, -2.0, 4.0}, {-1.0, 0.5, -1.0} });
+  Matrix y = Matrices.of(new double[][]{ {1.0}, {-2.0}, {-2.0} });
   Matrix x = matrix.ext(Solver.class).exact(y); // load Solver extension and solve for x
 ```
 
