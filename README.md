@@ -5,7 +5,9 @@
     \________(____  /\___  >____/|___  /__|
                   \/     \/          \/    
 
-  Jacobi Java Matrix Library  vers 1.0.0.SNAPSHOT
+  Jacobi Java Matrix Library  vers 1.0.0.SNAPSHOT 
+  
+![Travis Latest Build](https://travis-ci.org/ykechan/jacobi.svg?branch=master)
 
 #Synopsis
 Jacobi is a comprehensive library for computations involving matrices for
