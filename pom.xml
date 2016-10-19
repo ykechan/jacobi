@@ -23,11 +23,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 -->
 <project>
-  <parent>
-    <groupId>jacobi</groupId>
-    <artifactId>jacboi</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
-  </parent>
   <modelVersion>4.0.0</modelVersion>
+  <groupId>jacobi</groupId>
   <artifactId>jacobi</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+ 
+  <modules>
+    <module>./jacobi</module>
+  </modules>
 </project>
