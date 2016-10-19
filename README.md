@@ -42,6 +42,6 @@ This library is still under development.
 - Insert constant column, insert computed values, select certain columns etc.
 
 #License
-Jacobi will be licensed under GNU GPL and shall keep on to be a free software in the 
+Jacobi will be licensed under MIT and shall keep on to be a free software in the 
 foreseeable future. 
 
