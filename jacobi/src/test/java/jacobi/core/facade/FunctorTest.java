@@ -25,6 +25,7 @@ package jacobi.core.facade;
 
 import jacobi.api.annotations.Facade;
 import jacobi.api.annotations.Implementation;
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import org.junit.Assert;
@@ -65,15 +66,15 @@ public class FunctorTest {
     
     @Test
     public void testAmbiguousImpl() throws Exception {
-        this.expected.expect(RuntimeException.class);
-        Invocator func = new Functor(NotAFacade.class.getMethod("doSth", int.class),
+        this.expected.expect(UnsupportedOperationException.class);
+        Invocator func = new Functor(TestInterface.class.getMethod("doSth", int.class),
             ConfusedImpl.class);
     }
     
     @Test
     public void testNoImpl() throws Exception {
         this.expected.expect(RuntimeException.class);
-        Invocator func = new Functor(NotAFacade.class.getMethod("doSth", int.class),
+        Invocator func = new Functor(TestInterface.class.getMethod("doSth", int.class),
             NoImpl.class);
     }
     
@@ -102,6 +103,12 @@ public class FunctorTest {
         this.expected.expect(RuntimeException.class);
         Invocator func = new Functor(TestInterface.class.getMethod("doSth", int.class),
             CantCreateImpl.class);
+    }
+    
+    @Test(expected = UnsupportedOperationException.class)
+    public void testWithExceptionThrown() throws Exception {
+        Invocator func = new Functor(TestInterface.class.getMethod("doSth", int.class),
+            CantUseThis.class);
     }
  
     @Facade(String.class)
@@ -158,6 +165,18 @@ public class FunctorTest {
         
         public int canUseThis(String str, int value) {
             return 10;
+        }
+
+    }
+    
+    public static class CantUseThis {
+        
+        public CantUseThis() {
+            throw new UnsupportedOperationException("Cant create me");
+        }
+        
+        public int cantUseThis(String str, int value) throws IOException {
+            throw new IOException();
         }
 
     }

@@ -25,10 +25,12 @@ package jacobi.core.facade;
 
 import jacobi.api.annotations.Delegate;
 import jacobi.api.annotations.Facade;
+import jacobi.api.annotations.Immutate;
 import jacobi.api.annotations.Implementation;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import org.junit.Assert;
 import org.junit.Test;
@@ -60,6 +62,8 @@ public class DelegateEngineTest {
                 new Object[]{ 911 });
         
         Assert.assertEquals("You did 911.", result.toString());
+        
+        DelegateEngine.getInstance().clearCache();
     }
     
     @Test
@@ -105,6 +109,46 @@ public class DelegateEngineTest {
         delegate.invoke(new StringDoSthSecretly(""), new Object[0]);
     }
     
+    @Test(expected = UnsupportedOperationException.class)
+    public void testAmbiguousDelegate() throws Exception {
+        DelegateEngine.getInstance().invoke(
+                StringFacade.class.getMethod("doSth", double.class), 
+                new AmbiguousDelegate("I"), 
+                new Object[]{Math.E});        
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testDelegateToANonFacade() throws Exception {
+        DelegateEngine.getInstance().invoke(
+                StringFacade.class.getMethod("doSth", int.class), 
+                new DelegateToNonFacade("I"), 
+                new Object[]{ 0 });        
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testDelegateToMismatchFacadeVariable() throws Exception {
+        DelegateEngine.getInstance().invoke(
+                StringFacade.class.getMethod("doSth", int.class), 
+                new DelegateToMatrixFacade("I"), 
+                new Object[]{ 0 });        
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testDelegateToNonExistantMethod() throws Exception {
+        DelegateEngine.getInstance().invoke(
+                StringFacade.class.getMethod("doSth", int.class), 
+                new DelegateToNonExistantMethod("I"), 
+                new Object[]{ 0 });        
+    }
+    
+    @Test
+    public void testMutatingDelegateToImmutateFacade() throws Exception {
+        DelegateEngine.getInstance().invoke(
+                ImmutateStringFacade.class.getMethod("doSth", String.class), 
+                new MutatingDelegate("I"), 
+                new Object[]{ " do not mutate." });        
+    }
+    
     public static class NonFinalString {
 
         public NonFinalString(String string) {
@@ -116,7 +160,7 @@ public class DelegateEngineTest {
             return this.string;
         }
         
-        private String string;
+        protected String string;
     }        
     
     @Facade(NonFinalString.class)
@@ -129,6 +173,30 @@ public class DelegateEngineTest {
         public NonFinalString doSth(int i);
         
         public NonFinalString doSth(AtomicLong i);
+        
+        public Object doSth(double d);
+    }
+    
+    @Immutate
+    @Facade(NonFinalString.class)
+    public interface ImmutateStringFacade {
+        
+        public NonFinalString doSth(String i);
+        
+    }
+    
+    public interface NotAFacade {
+        
+        @Implementation(DoSomethingImpl.class)
+        public NonFinalString iNeedImpl(int i);
+        
+    }
+    
+    @Facade
+    public interface MismatchFacadeVariable {
+        
+        public NonFinalString doSth(int i);
+        
     }
     
     public static class DoSomethingImpl {
@@ -226,4 +294,82 @@ public class DelegateEngineTest {
         }
         
     }
+    
+    public static class AmbiguousDelegate extends NonFinalString {
+        
+        public AmbiguousDelegate(String string) {
+            super(string);
+        }
+        
+        @Delegate(facade = StringFacade.class, method = "doSth")
+        public String callMe(double i) {
+            return "Call Me did " + i + ".";
+        }
+        
+        @Delegate(facade = StringFacade.class, method = "doSth")
+        public NonFinalString noCallMe(double i) {
+            return new NonFinalString("Call Me did " + i + ".");
+        }
+    }
+    
+    public static class DelegateToNonFacade extends NonFinalString {
+        
+        public DelegateToNonFacade(String string) {
+            super(string);
+        }
+        
+        @Delegate(facade = NotAFacade.class, method = "iNeedImpl")
+        public NonFinalString dontDelegateToPureInterface(int i) {
+            return new NonFinalString("Call Me did " + i + ".");
+        }
+        
+        @Delegate(facade = StringFacade.class, method = "doSth")
+        public NonFinalString doSth(int num) throws IOException {
+            return new NonFinalString("I can");
+        }
+    }
+    
+    public static class DelegateToMatrixFacade extends NonFinalString {
+        
+        public DelegateToMatrixFacade(String string) {
+            super(string);
+        }
+        
+        @Delegate(facade = MismatchFacadeVariable.class, method = "doSth")
+        public NonFinalString doSth(int num) throws IOException {
+            return new NonFinalString("I fails");
+        }
+    }
+    
+    public static class DelegateToNonExistantMethod extends NonFinalString {
+        
+        public DelegateToNonExistantMethod(String string) {
+            super(string);
+        }
+        
+        @Delegate(facade = StringFacade.class, method = "doSth")
+        public NonFinalString doSth(Function<?, ?> f) {
+            return new NonFinalString("Delegate to what?");
+        }
+        
+        @Delegate(facade = StringFacade.class, method = "doSth")
+        public NonFinalString doSth(int i) {
+            return new NonFinalString("I fails too.");
+        }
+    }
+    
+    public static class MutatingDelegate extends NonFinalString {
+        
+        public MutatingDelegate(String string) {
+            super(string);
+        }
+        
+        @Immutate
+        @Delegate(facade = ImmutateStringFacade.class, method = "doSth")
+        public NonFinalString doSth(String str) {
+            this.string = str;
+            return new NonFinalString("I trusted you.");
+        }
+    }
+    
 }

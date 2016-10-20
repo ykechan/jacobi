@@ -113,14 +113,14 @@ public class FacadeEngineTest {
         
     @Test
     public void testNoMethod() throws Exception {
-        FacadeEngine engine = new FacadeEngine();
+        FacadeEngine engine = FacadeEngine.getInstance();
         this.expected.expect(RuntimeException.class);
         engine.invoke(null, this, new Object[]{});
     }
     
     @Test
     public void testNoArgs() throws Exception {
-        FacadeEngine engine = new FacadeEngine();
+        FacadeEngine engine = FacadeEngine.getInstance();
         this.expected.expect(RuntimeException.class);
         engine.invoke(DoSomethingWithString.class.getMethod("doSth", int.class),
                 "123",

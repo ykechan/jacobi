@@ -23,8 +23,11 @@
  */
 package jacobi.core.impl;
 
+import jacobi.api.Matrices;
 import jacobi.api.Matrix;
+import jacobi.api.ext.Prop;
 import jacobi.test.util.Jacobi;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -52,5 +55,23 @@ public class CopyOnWriteMatrixTest {
         }), base);
     }
 
-    
+    @Test
+    public void testCopy() {
+        Matrix base = new DiagonalMatrix(new double[]{Math.E, Math.PI});
+        Matrix diag = new CopyOnWriteMatrix(base);
+        
+        Matrix copy = diag.copy();
+        Assert.assertFalse(diag == copy);
+        Jacobi.assertEquals(diag, copy);
+        
+        diag.swapRow(0, 1);
+        Jacobi.assertEquals(Matrices.of(new double[][]{
+            {0.0, Math.PI},
+            {Math.E, 0.0}
+        }), diag);
+        Jacobi.assertEquals(new DiagonalMatrix(new double[]{Math.E, Math.PI}), copy);
+        
+        Matrix transpose = copy.ext(Prop.class).transpose();        
+        Jacobi.assertEquals(copy, transpose);
+    }
 }
