@@ -113,11 +113,6 @@ public class DelegateEngine extends FacadeEngine {
         Method facadeMethod = this.findFacadeMethod(concreteMethod);
         Facade facade = facadeMethod.getDeclaringClass().getAnnotation(Facade.class);
         Throw.when()
-            .isNull(
-                () -> facade, 
-                () -> "Marked facade " 
-                    + facadeMethod.getDeclaringClass().getName()
-                    + " is not annotated with @" + Facade.class.getName())
             .isFalse(
                 () -> facade.value().isAssignableFrom(concreteMethod.getDeclaringClass()), 
                 () -> "Facade parameter " 
@@ -141,7 +136,7 @@ public class DelegateEngine extends FacadeEngine {
                     + " is not annotated with @Facade.");
         }
         String name = delegate.method();
-        try {            
+        try { 
             return facade.getMethod(name, concreteMethod.getParameterTypes());
         } catch (NoSuchMethodException | SecurityException ex) {
             throw new IllegalArgumentException(ex);
@@ -182,10 +177,10 @@ public class DelegateEngine extends FacadeEngine {
             this.facade = facade;
         }
         
-        public boolean isValid() {
-            return !this.facade.isAnnotationPresent(Immutate.class)
-                || this.facade.getDeclaringClass().isAnnotationPresent(Immutate.class)
-                == this.method.isAnnotationPresent(Immutate.class); 
+        public boolean isValid() { 
+            boolean needImmutate = this.facade.isAnnotationPresent(Immutate.class)
+                    || this.facade.getDeclaringClass().isAnnotationPresent(Immutate.class);
+            return !needImmutate || this.method.isAnnotationPresent(Immutate.class); 
         }
 
         @Override
@@ -201,18 +196,6 @@ public class DelegateEngine extends FacadeEngine {
         @Override
         public int hashCode() {
             return Objects.hash(this.clazz, this.facade);
-        }
-
-        @Override
-        public String toString() {
-            return (this.facade == null)
-                    ? this.clazz.getName()
-                    : this.clazz.getName() 
-                    + "::" 
-                    + this.facade.getName()
-                    + "("
-                    + Arrays.asList(this.facade.getParameterTypes())
-                    + ")";
         }
         
         private Class<?> clazz;
