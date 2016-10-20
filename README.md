@@ -5,7 +5,9 @@
     \________(____  /\___  >____/|___  /__|
                   \/     \/          \/    
 
-  Jacobi Java Matrix Library  vers 1.0.0.SNAPSHOT
+  Jacobi Java Matrix Library  vers 1.0.0.SNAPSHOT 
+  
+![Travis Latest Build](https://travis-ci.org/ykechan/jacobi.svg?branch=master)
 
 #Synopsis
 Jacobi is a comprehensive library for computations involving matrices for
@@ -42,6 +44,6 @@ This library is still under development.
 - Insert constant column, insert computed values, select certain columns etc.
 
 #License
-Jacobi will be licensed under GNU GPL and shall keep on to be a free software in the 
+Jacobi will be licensed under MIT and shall keep on to be a free software in the 
 foreseeable future. 
 
