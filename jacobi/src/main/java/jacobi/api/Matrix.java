@@ -150,9 +150,11 @@ public interface Matrix {
      * Get a row, apply a consumer on it, and set the row values back.
      * @param rowIndex  Row index
      * @param f  Row consumer
+     * @return  This matrix
      */
-    public default void getAndSet(int rowIndex, Consumer<double[]> f) {
+    public default Matrix getAndSet(int rowIndex, Consumer<double[]> f) {
         this.getApplySet(rowIndex, (r) -> { f.accept(r); return null; });
+        return this;
     }
     
     

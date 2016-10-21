@@ -1,4 +1,4 @@
-/* 
+/*
  * The MIT License
  *
  * Copyright 2016 Y.K. Chan
@@ -21,40 +21,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jacobi.core.op;
+package jacobi.core.util;
 
+import jacobi.api.Matrices;
 import jacobi.api.Matrix;
-import jacobi.core.impl.ImmutableMatrix;
-import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  *
  * @author Y.K. Chan
  */
-class Scalar extends ImmutableMatrix {
+public class TripletTest {
     
-    public Scalar(int m, int n, double value) {
-        this.m = m;
-        this.n = n;
-        this.row = new double[n];
-        Arrays.fill(this.row, value);
+    @Test
+    public void testEager() {
+        Matrix a = Matrices.identity(2);
+        Matrix b = Matrices.identity(3);
+        Matrix c = Matrices.identity(4);
+        Triplet tri = Triplet.of(a, b, c);
+        Assert.assertTrue(tri.getLeft() == a);
+        Assert.assertTrue(tri.getMiddle() == b);
+        Assert.assertTrue(tri.getRight() == c);
     }
-
-    @Override
-    public int getRowCount() {
-        return this.m;
+    
+    @Test
+    public void testLazyRight() {
+        Matrix a = Matrices.identity(2);
+        Matrix b = Matrices.identity(3);
+        Matrix c = Matrices.identity(4);
+        AtomicInteger count = new AtomicInteger(0);
+        Triplet tri = Triplet.of(a, b, () -> { count.incrementAndGet(); return c; });
+        Assert.assertTrue(tri.getLeft() == a);
+        Assert.assertTrue(tri.getMiddle() == b);
+        Assert.assertEquals(0, count.get());
+        Assert.assertTrue(tri.getRight() == c);
+        Assert.assertEquals(1, count.get());
     }
-
-    @Override
-    public int getColCount() {
-        return this.n;
-    }
-
-    @Override
-    public double[] getRow(int index) {
-        return this.row; // NOPMD - Controlled usage
-    }
-
-    private int m, n;    
-    private double[] row;
+    
 }

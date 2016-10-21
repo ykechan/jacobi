@@ -23,8 +23,11 @@
  */
 package jacobi.core.facade;
 
+import jacobi.api.Matrix;
 import jacobi.api.annotations.Facade;
+import jacobi.api.annotations.Immutate;
 import jacobi.api.annotations.Implementation;
+import jacobi.core.impl.DefaultMatrix;
 import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -199,6 +202,113 @@ public class FacadeEngineTest {
             return Optional.of(Long.valueOf(str.length()));
         }
         
+    }
+    
+    /*
+    The Facade engine centers around Matrix. One key feature is support Immutate
+    annotation, which specifies this facade method does not mutates the values of
+    the underlying matrix, or specifies this implementation class operates without
+    changing the value. 
+    */
+    
+    @Immutate
+    @Facade
+    public interface FindFromMatrix {
+        
+        @Implementation(ImmutateImpl.class)
+        public int findLies();
+        
+        @Implementation(MutatingImpl.class)
+        public int findHonest();
+        
+    }
+    
+    @Facade
+    public interface DeriveFromMatrix {
+        
+        @Immutate
+        @Implementation(ImmutateImpl.class)
+        public String deriveLies();
+        
+        @Immutate
+        @Implementation(MutatingImpl.class)
+        public String deriveHonest();
+        
+    }    
+    
+    @Immutate
+    public static class ImmutateImpl {
+        
+        public int find(Matrix matrix) {
+            // i lied
+            matrix.setRow(0, new double[matrix.getColCount()]);
+            return matrix.getRowCount();
+        }
+        
+        public String derive(Matrix matrix) {
+            // you can't stop me
+            matrix.setRow(0, new double[matrix.getColCount()]);
+            return String.valueOf(matrix.getRowCount());
+        }
+        
+    }
+        
+    public static class MutatingImpl {
+        
+        public int find(Matrix matrix) {
+            // at least I'm honest            
+            matrix.setRow(0, new double[matrix.getColCount()]);
+            return matrix.getRowCount();
+        }
+        
+        public String derive(Matrix matrix) {
+            // at least I'm honest
+            matrix.setRow(0, new double[matrix.getColCount()]);
+            return String.valueOf(matrix.getRowCount());
+        }
+        
+    }
+    
+    @Test
+    public void testImmutateFacade() throws Exception {
+        FacadeEngine engine = FacadeEngine.getInstance();
+        double[] array = {Math.sqrt(2.0), Math.PI, Math.E};
+        Matrix matrix = new DefaultMatrix(new double[][]{array});
+        
+        engine.invoke(FindFromMatrix.class.getMethod("findLies"), 
+                matrix, 
+                new Object[0]);
+        
+        Assert.assertArrayEquals(matrix.getRow(0), new double[array.length], 1e-16);
+        
+        matrix.setRow(0, array);
+        
+        Assert.assertArrayEquals(matrix.getRow(0), array, 1e-16);
+        
+        engine.invoke(FindFromMatrix.class.getMethod("findHonest"), 
+                matrix, 
+                new Object[0]);
+        
+        Assert.assertArrayEquals(matrix.getRow(0), array, 1e-16);
+        
+        matrix.setRow(0, array);
+        Assert.assertArrayEquals(matrix.getRow(0), array, 1e-16);
+        
+        engine.invoke(DeriveFromMatrix.class.getMethod("deriveLies"), 
+                matrix, 
+                new Object[0]);
+        
+        Assert.assertArrayEquals(matrix.getRow(0), new double[array.length], 1e-16);
+        
+        matrix.setRow(0, array);
+        
+        Assert.assertArrayEquals(matrix.getRow(0), array, 1e-16);
+        
+        engine.invoke(DeriveFromMatrix.class.getMethod("deriveHonest"), 
+                matrix, 
+                new Object[0]);
+        
+        Assert.assertArrayEquals(matrix.getRow(0), array, 1e-16);
     }
     
 }

@@ -92,4 +92,36 @@ public class MulTest {
         this.matrixB = Matrices.zeros(4, 3);
         this.ans = this.matrixA.ext(Op.class).mul(this.matrixB).get();
     }
+    
+    @Test
+    @JacobiImport("7x7 mul 7x7")
+    @JacobiEquals(expected = 2, actual = 2)
+    public void test7x7Mul7x7ByStream() {
+        this.ans = this.mockToUseStream().compute(this.matrixA, this.matrixB);
+    }
+
+    @Test
+    @JacobiImport("7x3 mul 3x5")
+    @JacobiEquals(expected = 2, actual = 2)
+    public void test7x3Mul3x5ByStream() {
+        this.ans = this.mockToUseStream().compute(this.matrixA, this.matrixB);
+    }
+    
+    @Test
+    @JacobiImport("2x9 mul 9x1")
+    @JacobiEquals(expected = 2, actual = 2)
+    public void test2x9Mul9x1ByStream() {
+        this.ans = this.mockToUseStream().compute(this.matrixA, this.matrixB);
+    }
+    
+    protected Mul mockToUseStream() {
+        return new Mul(){
+
+            @Override
+            protected void serial(double[] u, Matrix b, double[] v) {
+                System.arraycopy(this.stream(u, b), 0, v, 0, v.length);
+            }
+            
+        };
+    }
 }

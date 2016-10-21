@@ -76,18 +76,7 @@ public class DataTest {
             data = data.append((r) -> Math.log(r.get(target)));
         }
         this.output = data.select(IntStream.range(input.getColCount(), 2*input.getColCount()).toArray()).get();
-    }    
-    
-    @Test
-    public void test() {
-        for(Method m : ConcreteSupplier.class.getMethods()){
-            System.out.println(m.getDeclaringClass() + "::" + m.getName() 
-                    + "("
-                    + Arrays.asList(m.getParameterTypes())
-                    + ") : "
-                    + m.getReturnType());
-        }
-    }
+    }        
     
     public interface MatrixSuppler extends Supplier<Matrix> {
 

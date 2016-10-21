@@ -78,4 +78,17 @@ public class DefaultMatrixTest {
         Assert.assertArrayEquals(rows[1], elem, 1e-14);
     }
     
+    @Test
+    public void testCopy() {
+        double[][] rows = {
+            {Math.PI, Math.E, Math.sqrt(2.0)},
+            {Math.E, Math.PI, Math.sqrt(5.0)}
+        };
+        Matrix matrix = new DefaultMatrix(rows);
+        Matrix copy = new DefaultMatrix(matrix.toArray());
+        
+        Jacobi.assertEquals(matrix, copy);
+        Jacobi.assertEquals(matrix, matrix.copy());
+    }
+    
 }

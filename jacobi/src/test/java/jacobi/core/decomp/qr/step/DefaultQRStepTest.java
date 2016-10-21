@@ -1,4 +1,4 @@
-/* 
+/*
  * The MIT License
  *
  * Copyright 2016 Y.K. Chan
@@ -21,40 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jacobi.core.op;
+package jacobi.core.decomp.qr.step;
 
-import jacobi.api.Matrix;
-import jacobi.core.impl.ImmutableMatrix;
-import java.util.Arrays;
+import jacobi.api.Matrices;
+import org.junit.Test;
 
 /**
  *
  * @author Y.K. Chan
  */
-class Scalar extends ImmutableMatrix {
+public class DefaultQRStepTest {
     
-    public Scalar(int m, int n, double value) {
-        this.m = m;
-        this.n = n;
-        this.row = new double[n];
-        Arrays.fill(this.row, value);
+    @Test(expected = IllegalStateException.class)
+    public void test() {
+        // Default QR Step is a dummy signalling no implementaion
+        new DefaultQRStep().compute(Matrices.zeros(0), null, 0, 0, true);
     }
-
-    @Override
-    public int getRowCount() {
-        return this.m;
-    }
-
-    @Override
-    public int getColCount() {
-        return this.n;
-    }
-
-    @Override
-    public double[] getRow(int index) {
-        return this.row; // NOPMD - Controlled usage
-    }
-
-    private int m, n;    
-    private double[] row;
+    
 }

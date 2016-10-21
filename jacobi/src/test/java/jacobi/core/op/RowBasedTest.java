@@ -197,6 +197,18 @@ public class RowBasedTest {
     @Test(expected = IllegalArgumentException.class)    
     public void testInvalidMatrix() {
         new RowReduce.Max().compute(null);
-        
     }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testRowCountMismatch() {
+        new RowBased((u, v, w) -> null)
+                .compute(Matrices.identity(3), Matrices.identity(4));
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testColCountMismatch() {
+        new RowBased((u, v, w) -> null)
+                .compute(Matrices.zeros(1, 3), Matrices.zeros(1, 4));
+    }
+    
 }

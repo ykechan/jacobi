@@ -51,7 +51,7 @@ public class RowBased {
      * @param op   Element-wise function of g
      */
     public RowBased(DoubleBinaryOperator op) {
-        this.oper = RowOperation.forEach(op);
+        this(RowOperation.forEach(op));
     }
 
     /**

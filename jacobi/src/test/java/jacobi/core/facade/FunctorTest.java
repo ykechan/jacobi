@@ -25,6 +25,7 @@ package jacobi.core.facade;
 
 import jacobi.api.annotations.Facade;
 import jacobi.api.annotations.Implementation;
+import jacobi.core.impl.Empty;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
@@ -54,6 +55,8 @@ public class FunctorTest {
         int num = 17;
         Object result = func.invoke(str, new Object[]{num});
         Assert.assertTrue(result instanceof Integer);
+        Assert.assertEquals(DoSthImpl.class.getMethod("implOfDoSth", String.class, int.class)
+                , ((Functor) func).getMethod());
         Assert.assertEquals(str.length() + 17, ((Integer) result).intValue());
     }
     
@@ -97,7 +100,7 @@ public class FunctorTest {
         this.expected.expect(RuntimeException.class);
         Object result = func.invoke(str, new Object[]{num});
     }
-    
+        
     @Test
     public void testWithoutNoArgConstructor() throws Exception {
         this.expected.expect(RuntimeException.class);
@@ -109,8 +112,15 @@ public class FunctorTest {
     public void testWithExceptionThrown() throws Exception {
         Invocator func = new Functor(TestInterface.class.getMethod("doSth", int.class),
             CantUseThis.class);
+        func.invoke("", new Object[]{0});
     }
- 
+    
+    @Test
+    public void testNoImplMethod() throws Exception {
+        Invocator func = new Functor(TestInterface.class.getMethod("doSth", int.class),
+            CantUseThis.class);
+    }
+    
     @Facade(String.class)
     public interface TestInterface {
 
@@ -154,6 +164,14 @@ public class FunctorTest {
         public Object cantUseThis(String str, int i) {
             return str.length() + i;
         }
+        
+        public int cantUseThis(String str) {
+            return str.length() + 0;
+        }
+        
+        public int cantUseThis(Object str, double value) {
+            return str.hashCode() + (int) value;
+        }
 
     }
     
@@ -171,13 +189,10 @@ public class FunctorTest {
     
     public static class CantUseThis {
         
-        public CantUseThis() {
-            throw new UnsupportedOperationException("Cant create me");
-        }
-        
         public int cantUseThis(String str, int value) throws IOException {
             throw new IOException();
         }
 
-    }
+    }    
+    
 }
