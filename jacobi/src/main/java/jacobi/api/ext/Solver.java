@@ -28,7 +28,7 @@ import jacobi.api.annotations.Facade;
 import jacobi.api.annotations.Implementation;
 import jacobi.api.annotations.Immutate;
 import jacobi.core.solver.ExactSolver;
-import jacobi.core.solver.LLSquareSolver;
+import jacobi.core.solver.LLSquaresSolver;
 import java.util.Optional;
 
 /**
@@ -59,7 +59,7 @@ public interface Solver {
      * @param y  Matrix y.
      * @return  Solution x
      */
-    @Implementation(LLSquareSolver.class)
+    @Implementation(LLSquaresSolver.class)
     public Optional<Matrix> llsquare(Matrix y);
     
 }
