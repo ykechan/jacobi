@@ -31,6 +31,13 @@ import jacobi.api.Matrix;
  * 
  * This serves as a NULL object for matrix.
  * 
+ * Instead of simple null value of Java which screams annoyingly each time 
+ * developers ever touches it no matter how slightly, Empty matrix serves 
+ * to cause as little error as possible. All operations are encouraged to 
+ * define a default behaviour whenever an Empty matrix is encountered.
+ * 
+ * Nonetheless, computation result with Empty should not be relied upon.
+ * 
  * @author Y.K. Chan
  */
 public final class Empty implements Matrix{

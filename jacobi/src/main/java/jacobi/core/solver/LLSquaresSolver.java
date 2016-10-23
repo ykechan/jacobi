@@ -23,6 +23,7 @@
  */
 package jacobi.core.solver;
 
+import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.core.decomp.qr.QRDecomp;
 import jacobi.core.solver.Substitution.Mode;
@@ -93,8 +94,28 @@ public class LLSquaresSolver {
         if(a.getRowCount() == 0){
             return Optional.of(y);
         }
-        this.qrDecomp.compute(a, y);
-        return Optional.ofNullable(new Substitution(Mode.BACKWARD, a).compute(y));
+        Matrix x = y.copy();
+        this.qrDecomp.compute(a, x);
+        x = new Substitution(Mode.BACKWARD, a).compute(x);
+        if(x == null){
+            return Optional.empty();
+        } 
+        return Optional.of(this.trim(x, a.getColCount()));
+    }
+    
+    /**
+     * For a m-by-n matrix which m > n, trim the matrix to a k-by-k matrix
+     * by discarding other rows.
+     * @param matrix  Input m-by-n matrix
+     * @param k  Number of rows to keep
+     * @return   A n-by-n matrix with top n rows of input matrix
+     */
+    protected Matrix trim(Matrix matrix, int k) { 
+        Matrix output = Matrices.zeros(k, matrix.getColCount());
+        for(int i = 0; i < k; i++){
+            output.setRow(i, matrix.getRow(i));
+        }
+        return output;
     }
 
     private QRDecomp qrDecomp;

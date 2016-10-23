@@ -75,7 +75,7 @@ public class HessenbergDecomp {
                     q.setRow(i, hh.getRow(i));
                 }
             }else{
-                hh.applyLeft(q);
+                hh.applyRight(q);
             }
         });
         
@@ -85,7 +85,7 @@ public class HessenbergDecomp {
     /**
      * Compute A = Q * H * Q^t and gets &lt;Q, H, Q^t&gt;, Q is orthogonal
      * and H is almost upper triangular. Q^t is somewhat redundant but included
-     * here for mathematical wholeness.
+     * here for mathematical completeness.
      * @param a  Matrix A
      * @return   A pair of matrices &lt;Q, U&gt;
      */

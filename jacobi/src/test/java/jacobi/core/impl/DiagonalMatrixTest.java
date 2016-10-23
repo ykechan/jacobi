@@ -27,15 +27,32 @@ import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.api.ext.Op;
 import jacobi.api.ext.Prop;
+import jacobi.test.annotations.JacobiEquals;
+import jacobi.test.annotations.JacobiImport;
+import jacobi.test.annotations.JacobiInject;
+import jacobi.test.annotations.JacobiResult;
 import jacobi.test.util.Jacobi;
+import jacobi.test.util.JacobiJUnit4ClassRunner;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  *
  * @author Y.K. Chan
  */
+@JacobiImport("/jacobi/test/data/DiagonalMatrixTest.xlsx")
+@RunWith(JacobiJUnit4ClassRunner.class)
 public class DiagonalMatrixTest {
+    
+    @JacobiInject(1)
+    public Matrix input;
+    
+    @JacobiInject(2)
+    public Matrix matrix;
+    
+    @JacobiResult(3)
+    public Matrix result;
 
     @Test
     public void testConstruct() {
@@ -86,9 +103,43 @@ public class DiagonalMatrixTest {
         Matrix diag2 = new DiagonalMatrix(new double[]{ 2.0, 5.0, 7.0 });
         Jacobi.assertEquals(Matrices.of(new double[][]{
             {2.0 * Math.PI, 0.0, 0.0},
-            {0.0, 5.0 * Math.E, 0.0},
+            {0.0, 5.0 * Math.E, 0.0}, 
             {0.0, 0.0, 7.0 * Math.sqrt(2.0)},
         }), diag.ext(Op.class).mul(diag2).get());
+    }
+    
+    @Test
+    @JacobiImport("5x5 mul 5x3")
+    @JacobiEquals(expected = 3, actual = 3)
+    public void testMulWithNormalMatrix() {
+        this.result = new DiagonalMatrix(this.input.getRow(0)).mul(this.matrix);
+    }
+    
+    @Test
+    @JacobiImport("4x4 mul 4x7")
+    @JacobiEquals(expected = 3, actual = 3)
+    public void test4x4Mul4x7() {
+        this.result = new DiagonalMatrix(this.input.getRow(0)).mul(this.matrix);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testMulDimensionMismatch() {
+        new DiagonalMatrix(new double[]{Math.E, Math.PI}).mul(Matrices.zeros(3, 3));
+    }
+    
+    @Test
+    public void testSingularDiagonalMatrix() {
+        Assert.assertFalse(new DiagonalMatrix(new double[]{0.0, 1.0}).inv().isPresent());
+    }
+    
+    @Test
+    public void testCopy() {
+        Matrix diag = new DiagonalMatrix(new double[]{Math.PI, Math.E});
+        Matrix copy = diag.copy().set(0, 0, 1.0);
+        Jacobi.assertEquals(Matrices.of(new double[][]{
+            {1.0, 0.0},
+            {0.0, Math.E},
+        }), copy);
     }
     
 }

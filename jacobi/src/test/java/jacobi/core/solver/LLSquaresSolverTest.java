@@ -1,4 +1,4 @@
-/* 
+/*
  * The MIT License
  *
  * Copyright 2016 Y.K. Chan
@@ -21,16 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jacobi.core.prop;
+package jacobi.core.solver;
 
+import jacobi.api.Matrices;
 import jacobi.api.Matrix;
-import jacobi.api.ext.Prop;
-import jacobi.core.impl.Empty;
 import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.annotations.JacobiResult;
-import jacobi.test.util.Jacobi;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
 import org.junit.Assert;
 import org.junit.Test;
@@ -40,76 +38,75 @@ import org.junit.runner.RunWith;
  *
  * @author Y.K. Chan
  */
-@JacobiImport("/jacobi/test/data/TransposeTest.xlsx")
+@JacobiImport("/jacobi/test/data/LLSquaresSolverTest.xlsx")
 @RunWith(JacobiJUnit4ClassRunner.class)
-public class TransposeTest {
+public class LLSquaresSolverTest {
     
-    @JacobiInject(1)
+    @JacobiInject(0)
     public Matrix input;
     
-    @JacobiInject(2)
-    public Matrix expects;
+    @JacobiInject(1)
+    public Matrix target;
     
     @JacobiResult(2)
-    public Matrix output;
+    public Matrix ans;
     
-    @Test
-    @JacobiImport("5x5_1")
-    @JacobiEquals(expected = 2, actual = 2)
-    public void test5x5_1() {
-        this.output = new Transpose().compute(this.input);
-    }
+    private LLSquaresSolver solver;
 
-    @Test
-    @JacobiImport("5x5_2")
-    @JacobiEquals(expected = 2, actual = 2)
-    public void test5x5_2() {
-        this.output = new Transpose().compute(this.input);
+    public LLSquaresSolverTest() {
+        this.solver = new LLSquaresSolver();
     }
     
     @Test
-    @JacobiImport("3x5_1")
+    @JacobiImport("13x3x1")
     @JacobiEquals(expected = 2, actual = 2)
-    public void test3x5_1() {
-        this.output = new Transpose().compute(this.input);
+    public void test13x3x1() {
+        this.ans = this.solver.solve(this.input, this.target).get();
     }
     
     @Test
-    @JacobiImport("5x3_1")
+    @JacobiImport("Simple Regression")
     @JacobiEquals(expected = 2, actual = 2)
-    public void test5x3_1() {
-        this.output = new Transpose().compute(this.input);
+    public void testSimpleRegression() {
+        this.ans = this.solver.solve(this.input, this.target).get();
     }
     
     @Test
-    @JacobiImport("7x1_1")
-    @JacobiEquals(expected = 2, actual = 2)
-    public void test7x1_1() {
-        this.output = new Transpose().compute(this.input);
-        Jacobi.assertEquals(this.output, this.input.ext(Prop.class).transpose());
+    @JacobiImport("Degen 7x4x1")
+    public void testDegen7x4x1() {
+        Assert.assertFalse(this.solver.solve(this.input, this.target).isPresent());
     }
     
     @Test
-    @JacobiImport("1x7_1")
-    @JacobiEquals(expected = 2, actual = 2)
-    public void test1x7_1() {
-        this.output = new Transpose().compute(this.input);        
-    }
-    
-    @Test
-    @JacobiImport("11x9")
-    @JacobiEquals(expected = 2, actual = 2)
-    public void test11x9() {
-        this.output = new Transpose().compute(this.input);        
+    @JacobiImport("Degen 11x3x1")
+    public void testDegen11x3x1() {
+        Assert.assertFalse(this.solver.solve(this.input, this.target).isPresent());
     }
     
     @Test(expected = IllegalArgumentException.class)
-    public void testNull() {
-        new Transpose().compute(null);
+    public void testNullSystem() {
+        this.ans = this.solver.solve(null, Matrices.zeros(0)).get();
     }
     
-    @Test
-    public void testEmpty() {
-        Assert.assertTrue(new Transpose().compute(Empty.getInstance()) == Empty.getInstance());
+    @Test(expected = IllegalArgumentException.class)
+    public void testNullTarget() {
+        this.ans = this.solver.solve(Matrices.zeros(0), null).get();
     }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testUnderDetermined() {
+        this.ans = this.solver.solve(Matrices.zeros(3, 5), Matrices.zeros(3)).get();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testDimensionMismatch() {
+        this.ans = this.solver.solve(Matrices.zeros(13, 3), Matrices.zeros(10, 1)).get();
+    }    
+    
+    @Test
+    public void testEmptySystem() {
+        this.ans = this.solver.solve(Matrices.zeros(0), Matrices.zeros(0)).get();
+        Assert.assertEquals(0, this.ans.getRowCount());
+    }
+    
 }

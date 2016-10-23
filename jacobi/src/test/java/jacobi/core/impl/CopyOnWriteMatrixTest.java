@@ -74,4 +74,5 @@ public class CopyOnWriteMatrixTest {
         Matrix transpose = copy.ext(Prop.class).transpose();        
         Jacobi.assertEquals(copy, transpose);
     }
+    
 }

@@ -114,6 +114,20 @@ public class MulTest {
         this.ans = this.mockToUseStream().compute(this.matrixA, this.matrixB);
     }
     
+    @Test
+    @JacobiImport("Scalar mul 7x7")
+    @JacobiEquals(expected = 2, actual = 2)
+    public void testScalarMul7x7() {
+        this.ans = this.matrixA.ext(Op.class).mul(this.matrixB.get(0, 0)).get();
+    }
+    
+    @Test
+    @JacobiImport("Scalar mul 13x2")
+    @JacobiEquals(expected = 2, actual = 2)
+    public void testScalarMul13x2() {
+        this.ans = this.matrixA.ext(Op.class).mul(this.matrixB.get(0, 0)).get();
+    }
+    
     protected Mul mockToUseStream() {
         return new Mul(){
 

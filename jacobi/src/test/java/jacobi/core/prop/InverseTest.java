@@ -1,4 +1,4 @@
-/* 
+/*
  * The MIT License
  *
  * Copyright 2016 Y.K. Chan
@@ -30,9 +30,7 @@ import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.annotations.JacobiResult;
-import jacobi.test.util.Jacobi;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -40,76 +38,56 @@ import org.junit.runner.RunWith;
  *
  * @author Y.K. Chan
  */
-@JacobiImport("/jacobi/test/data/TransposeTest.xlsx")
+@JacobiImport("/jacobi/test/data/InverseTest.xlsx")
 @RunWith(JacobiJUnit4ClassRunner.class)
-public class TransposeTest {
+public class InverseTest {
     
-    @JacobiInject(1)
+    @JacobiInject(0)
     public Matrix input;
     
-    @JacobiInject(2)
-    public Matrix expects;
-    
-    @JacobiResult(2)
-    public Matrix output;
+    @JacobiResult(1)
+    public Matrix ans;
     
     @Test
-    @JacobiImport("5x5_1")
-    @JacobiEquals(expected = 2, actual = 2)
-    public void test5x5_1() {
-        this.output = new Transpose().compute(this.input);
-    }
-
-    @Test
-    @JacobiImport("5x5_2")
-    @JacobiEquals(expected = 2, actual = 2)
-    public void test5x5_2() {
-        this.output = new Transpose().compute(this.input);
+    @JacobiImport("4x4")
+    @JacobiEquals(expected = 1, actual = 1)
+    public void test4x4() {
+        ans = new Inverse().compute(this.input);
     }
     
     @Test
-    @JacobiImport("3x5_1")
-    @JacobiEquals(expected = 2, actual = 2)
-    public void test3x5_1() {
-        this.output = new Transpose().compute(this.input);
+    @JacobiImport("5x5")
+    @JacobiEquals(expected = 1, actual = 1)
+    public void test5x5() {
+        ans = new Inverse().compute(this.input);
     }
     
     @Test
-    @JacobiImport("5x3_1")
-    @JacobiEquals(expected = 2, actual = 2)
-    public void test5x3_1() {
-        this.output = new Transpose().compute(this.input);
+    @JacobiImport("6x6")
+    @JacobiEquals(expected = 1, actual = 1)
+    public void test6x6() {
+        ans = new Inverse().compute(this.input);
     }
     
     @Test
-    @JacobiImport("7x1_1")
-    @JacobiEquals(expected = 2, actual = 2)
-    public void test7x1_1() {
-        this.output = new Transpose().compute(this.input);
-        Jacobi.assertEquals(this.output, this.input.ext(Prop.class).transpose());
+    @JacobiImport("3x3")
+    @JacobiEquals(expected = 1, actual = 1)
+    public void test3x3() {
+        ans = new Inverse().compute(this.input);
     }
     
     @Test
-    @JacobiImport("1x7_1")
-    @JacobiEquals(expected = 2, actual = 2)
-    public void test1x7_1() {
-        this.output = new Transpose().compute(this.input);        
+    @JacobiImport("2x2")
+    @JacobiEquals(expected = 1, actual = 1)
+    public void test2x2() {
+        ans = new Inverse().compute(this.input);
     }
     
     @Test
-    @JacobiImport("11x9")
-    @JacobiEquals(expected = 2, actual = 2)
-    public void test11x9() {
-        this.output = new Transpose().compute(this.input);        
+    @JacobiImport("1x1")
+    @JacobiEquals(expected = 1, actual = 1)
+    public void test1x1() {
+        ans = new Inverse().compute(this.input);
     }
     
-    @Test(expected = IllegalArgumentException.class)
-    public void testNull() {
-        new Transpose().compute(null);
-    }
-    
-    @Test
-    public void testEmpty() {
-        Assert.assertTrue(new Transpose().compute(Empty.getInstance()) == Empty.getInstance());
-    }
 }

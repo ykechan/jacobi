@@ -211,4 +211,9 @@ public class RowBasedTest {
                 .compute(Matrices.zeros(1, 3), Matrices.zeros(1, 4));
     }
     
+    @Test
+    public void testConstructor(){
+        Operators op = new Operators();
+    }
+    
 }

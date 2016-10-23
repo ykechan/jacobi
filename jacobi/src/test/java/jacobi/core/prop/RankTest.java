@@ -1,4 +1,4 @@
-/* 
+/*
  * The MIT License
  *
  * Copyright 2016 Y.K. Chan
@@ -23,39 +23,51 @@
  */
 package jacobi.core.prop;
 
+import jacobi.api.Matrices;
 import jacobi.api.Matrix;
-import jacobi.core.decomp.gauss.GenericGaussianElim;
-import jacobi.core.util.Throw;
+import jacobi.test.annotations.JacobiImport;
+import jacobi.test.annotations.JacobiInject;
+import jacobi.test.util.JacobiJUnit4ClassRunner;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
- * 
+ *
  * @author Y.K. Chan
  */
-public class Rank {
-
-    public Rank() {
-        this.gaussElim = new GenericGaussianElim();
+@JacobiImport("/jacobi/test/data/RankTest.xlsx")
+@RunWith(JacobiJUnit4ClassRunner.class)
+public class RankTest {
+    
+    @JacobiInject(1)
+    public Matrix input;
+    
+    @Test
+    @JacobiImport("5x5 Rank 3")
+    public void test5x5Rank3() {
+        Assert.assertEquals(3, new Rank().compute(this.input));
     }
     
-    public int compute(Matrix a) {
-        Throw.when()
-            .isNull(() -> a, () -> "No matrix to rank.");
-        this.gaussElim.compute(a);
-        int rank = 0;
-        int n = Math.min(a.getRowCount(), a.getColCount());
-        for(int i = 0; i < n; i++){
-            if(Math.abs(a.get(i, i)) >= EPSILON){
-                rank++;
-            }
-        }
-        return rank;
+    @Test
+    @JacobiImport("7x3 Rank 2")
+    public void test7x3Rank2() {
+        Assert.assertEquals(2, new Rank().compute(this.input));
+    }        
+    
+    @Test
+    public void test1x1() {
+        Assert.assertEquals(0, new Rank().compute(Matrices.scalar(1e-24)));
+        Assert.assertEquals(1, new Rank().compute(Matrices.scalar(1.0)));
     }
     
-    protected int compute1x1(Matrix a) {
-        return Math.abs(a.get(0, 0)) < EPSILON ? 0 : 1;
+    @Test(expected = IllegalArgumentException.class)
+    public void testNullMatrix() {
+        new Rank().compute(null);
     }
     
-    private GenericGaussianElim gaussElim;
-
-    private static final double EPSILON = 1e-12;
+    @Test
+    public void testEmptyMatrix() {
+        Assert.assertEquals(0, new Rank().compute(Matrices.zeros(0)));
+    }
 }

@@ -71,7 +71,7 @@ public class QRDecomp {
      * @return  Instance of A, now containing value of R
      */
     public Matrix compute(Matrix matrix, Matrix partner) {
-        this.compute(matrix, (hh) -> hh.applyLeft(partner));
+        this.compute(matrix, (hh) -> hh.applyLeft(partner) );
         return matrix;
     }
     

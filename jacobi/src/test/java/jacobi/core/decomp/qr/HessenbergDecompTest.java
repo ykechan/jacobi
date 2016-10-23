@@ -23,9 +23,13 @@
  */
 package jacobi.core.decomp.qr;
 
+import jacobi.api.Matrices;
 import jacobi.api.Matrix;
+import jacobi.core.util.Pair;
+import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
+import jacobi.test.annotations.JacobiResult;
 import jacobi.test.util.Jacobi;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
 import java.util.function.Consumer;
@@ -61,6 +65,9 @@ public class HessenbergDecompTest {
     @JacobiInject(6)
     public Matrix step6;
     
+    @JacobiResult(100)
+    public Matrix q;
+    
     @Test
     @JacobiImport("4x4")
     public void test4x4() {
@@ -71,6 +78,37 @@ public class HessenbergDecompTest {
     @JacobiImport("5x5")
     public void test5x5() {
         this.assertByStep(step1, step2, step3, step4, step5, step6).compute(this.input);
+    }
+    
+    @Test
+    @JacobiImport("4x4 with Q")
+    @JacobiEquals(expected = 100, actual = 100)
+    public void test4x4WithQ() {
+        this.q = this.assertByStep(step1, step2, step3, step4)
+                .computeQH(this.input)
+                .getLeft();
+    }
+    
+    @Test
+    @JacobiImport("5x5 with Q")
+    @JacobiEquals(expected = 100, actual = 100)
+    public void test5x5WithQ() {
+        this.q = this.assertByStep(step1, step2, step3, step4, step5, step6)
+                .computeQH(this.input)
+                .getLeft();
+    }
+    
+    @Test
+    public void test1x1To2x2() {
+        // the Hessenberg form of 1x1 and 2x2 matrices are themselves
+        Matrix scalar = Matrices.scalar(Math.E);
+        Jacobi.assertEquals(scalar, new HessenbergDecomp().compute(scalar));
+        
+        Matrix matrix = Matrices.of(new double[][]{
+            {Math.E, Math.PI} ,
+            {Math.sqrt(2.0), Math.sqrt(5.0)} ,
+        });
+        Jacobi.assertEquals(matrix, new HessenbergDecomp().compute(matrix.copy()));
     }
 
     private HessenbergDecomp assertByStep(Matrix... step) {

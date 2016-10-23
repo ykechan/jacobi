@@ -35,6 +35,7 @@ import jacobi.core.impl.ImmutableMatrix;
 import jacobi.core.util.Throw;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
 /**
@@ -84,7 +85,7 @@ public class HouseholderReflector extends ImmutableMatrix {
     @Override
     public int getColCount() {
         return this.vector.length;
-    }
+    }        
 
     @Override
     public double[] getRow(int index) {

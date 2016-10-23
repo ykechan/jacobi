@@ -1,4 +1,4 @@
-/* 
+/*
  * The MIT License
  *
  * Copyright 2016 Y.K. Chan
@@ -23,14 +23,13 @@
  */
 package jacobi.core.prop;
 
+import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.api.ext.Prop;
-import jacobi.core.impl.Empty;
 import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.annotations.JacobiResult;
-import jacobi.test.util.Jacobi;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
 import org.junit.Assert;
 import org.junit.Test;
@@ -40,76 +39,49 @@ import org.junit.runner.RunWith;
  *
  * @author Y.K. Chan
  */
-@JacobiImport("/jacobi/test/data/TransposeTest.xlsx")
+@JacobiImport("/jacobi/test/data/TraceTest.xlsx")
 @RunWith(JacobiJUnit4ClassRunner.class)
-public class TransposeTest {
+public class TraceTest {
     
     @JacobiInject(1)
     public Matrix input;
     
-    @JacobiInject(2)
-    public Matrix expects;
-    
     @JacobiResult(2)
-    public Matrix output;
+    public Matrix ans;
     
     @Test
-    @JacobiImport("5x5_1")
+    @JacobiImport("5x5")
     @JacobiEquals(expected = 2, actual = 2)
-    public void test5x5_1() {
-        this.output = new Transpose().compute(this.input);
-    }
-
-    @Test
-    @JacobiImport("5x5_2")
-    @JacobiEquals(expected = 2, actual = 2)
-    public void test5x5_2() {
-        this.output = new Transpose().compute(this.input);
+    public void test5x5() {
+        this.ans = Matrices.scalar(new Trace().compute(this.input));
     }
     
     @Test
-    @JacobiImport("3x5_1")
+    @JacobiImport("7x7")
     @JacobiEquals(expected = 2, actual = 2)
-    public void test3x5_1() {
-        this.output = new Transpose().compute(this.input);
+    public void test7x7() {
+        this.ans = Matrices.scalar(new Trace().compute(this.input));
     }
     
     @Test
-    @JacobiImport("5x3_1")
+    @JacobiImport("Diag 6x6")
     @JacobiEquals(expected = 2, actual = 2)
-    public void test5x3_1() {
-        this.output = new Transpose().compute(this.input);
-    }
-    
-    @Test
-    @JacobiImport("7x1_1")
-    @JacobiEquals(expected = 2, actual = 2)
-    public void test7x1_1() {
-        this.output = new Transpose().compute(this.input);
-        Jacobi.assertEquals(this.output, this.input.ext(Prop.class).transpose());
-    }
-    
-    @Test
-    @JacobiImport("1x7_1")
-    @JacobiEquals(expected = 2, actual = 2)
-    public void test1x7_1() {
-        this.output = new Transpose().compute(this.input);        
-    }
-    
-    @Test
-    @JacobiImport("11x9")
-    @JacobiEquals(expected = 2, actual = 2)
-    public void test11x9() {
-        this.output = new Transpose().compute(this.input);        
+    public void testDiag6x6() {
+        this.ans = Matrices.scalar(new Trace().compute(Matrices.diag(this.input.getRow(0))));
     }
     
     @Test(expected = IllegalArgumentException.class)
-    public void testNull() {
-        new Transpose().compute(null);
+    public void testNotSquareMatrix() {
+        new Trace().compute(Matrices.zeros(3, 2));
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testNullMatrix() {
+        new Trace().compute(null);
     }
     
     @Test
-    public void testEmpty() {
-        Assert.assertTrue(new Transpose().compute(Empty.getInstance()) == Empty.getInstance());
+    public void testEmptyMatrix() {
+        Assert.assertEquals(0.0, new Trace().compute(Matrices.zeros(0)), 1e-24);
     }
 }

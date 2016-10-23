@@ -120,7 +120,7 @@ public class DiagonalMatrix extends ImmutableMatrix {
             for(int j = 0; j < row.length; j++){
                 row[j] *= k;
             }
-            ans.setRow(i, vector);
+            ans.setRow(i, row);
         }
         return ans;
     }

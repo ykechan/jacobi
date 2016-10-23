@@ -23,10 +23,8 @@
  */
 package jacobi.core.solver;
 
-import jacobi.api.Matrices;
 import jacobi.api.Matrix;
-import jacobi.core.decomp.gauss.FullMatrixOperator;
-import jacobi.core.decomp.gauss.GenericGaussianElim;
+import jacobi.core.decomp.gauss.GaussianDecomp;
 import jacobi.core.solver.Substitution.Mode;
 import jacobi.core.util.Throw;
 import java.util.Optional;
@@ -51,7 +49,7 @@ import java.util.Optional;
 public class ExactSolver {
 
     public ExactSolver() {
-        this.gaussElim = new GenericGaussianElim();
+        this.gaussDecomp = new GaussianDecomp();
     }
         
     /**
@@ -80,10 +78,20 @@ public class ExactSolver {
         if(a.getRowCount() == 0){
             return Optional.of(y);
         }
-        Matrix x = Matrices.copy(y);
-        this.gaussElim.compute(a, (op) -> new FullMatrixOperator(op, x));
-        return Optional.ofNullable(new Substitution(Mode.BACKWARD, a).compute(x));
+        Matrix x = y.copy();
+        this.gaussDecomp.compute(a, x);
+        return this.backwardSubs(a, x);
+    }
+    
+    /**
+     * Compute backward substitution on Ax = y, where A is upper triangular.
+     * @param a  Input matrix A in Ax = y
+     * @param y  Input matrix y in Ax = y
+     * @return  Instance of y, transformed to x
+     */
+    protected Optional<Matrix> backwardSubs(Matrix a, Matrix y) {
+        return Optional.ofNullable(new Substitution(Mode.BACKWARD, a).compute(y));
     }
 
-    private GenericGaussianElim gaussElim;
+    private GaussianDecomp gaussDecomp;
 }

@@ -120,7 +120,7 @@ public class ColumnVector implements Matrix {
         return new DefaultMatrix(new double[][]{
             Arrays.copyOf(this.vector, this.vector.length)
         });
-    }        
+    }
     
     private double[] vector;
 
