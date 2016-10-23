@@ -67,11 +67,8 @@ public class Inverse {
         if(a.getRowCount() != a.getColCount()){
             return null;
         }
-        if(a.getRowCount() == 0){
-            return a;
-        }
         switch(a.getRowCount()){
-            case 0 : throw new IllegalStateException();
+            case 0 : return Matrices.zeros(0);
             case 1 : return this.inverse1x1(a);
             case 2 : return this.inverse2x2(a);
             case 3 : return this.inverse3x3(a);

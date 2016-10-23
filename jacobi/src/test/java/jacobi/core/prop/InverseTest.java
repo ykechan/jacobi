@@ -23,14 +23,14 @@
  */
 package jacobi.core.prop;
 
+import jacobi.api.Matrices;
 import jacobi.api.Matrix;
-import jacobi.api.ext.Prop;
-import jacobi.core.impl.Empty;
 import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.annotations.JacobiResult;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -90,4 +90,36 @@ public class InverseTest {
         ans = new Inverse().compute(this.input);
     }
     
+    @Test
+    @JacobiImport("Singular 3x3")
+    public void testSingular3x3() {
+        Assert.assertFalse(new Inverse().computeMaybe(this.input).isPresent());
+    }
+    
+    @Test
+    @JacobiImport("Singular 2x2")
+    public void testSingular2x2() {
+        Assert.assertFalse(new Inverse().computeMaybe(this.input).isPresent());
+    }
+    
+    @Test
+    @JacobiImport("Singular 1x1")
+    public void testSingular1x1() {
+        Assert.assertFalse(new Inverse().computeMaybe(this.input).isPresent());
+    }
+    
+    @Test
+    public void testEmptyMatrix() {
+        Assert.assertTrue(new Inverse().compute(Matrices.zeros(0)).getRowCount() == 0);
+    }
+    
+    @Test
+    public void testNonSquaredMatrix() {
+        new Inverse().compute(Matrices.zeros(3, 2));
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testNullMatrix() {
+        new Inverse().compute(null);
+    }
 }
