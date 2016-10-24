@@ -128,7 +128,7 @@ public class BulgeChaser implements QRStep {
         int begin = fullUpper ? 0 : beginRow;
         for(int i = begin; i < endRow; i++){
             double[] row = matrix.getRow(i);
-            
+            this.batchRotate(row, beginRow, i, rotList);
             this.revGivens(row, endRow - 2, last);
             matrix.setRow(i, row);
         }
@@ -142,10 +142,10 @@ public class BulgeChaser implements QRStep {
      * @param rotList   List of Givens rotation
      */
     protected void batchRotate(double[] row, int beginRow, int index, List<GivensPair> rotList) {
-        int skip = index < beginRow ? 0 : index - beginRow - 1;
-        int begin = beginRow + skip;
+        int skip = index <= beginRow ? 0 : index - beginRow - 1;
+        int begin = beginRow + skip + 1;
         for(int i = skip; i < rotList.size(); i++){
-            this.doubleGivens(row, begin + i + 1, rotList.get(i));
+            this.doubleGivens(row, begin + (i - skip), rotList.get(i));
         }
     }
     
