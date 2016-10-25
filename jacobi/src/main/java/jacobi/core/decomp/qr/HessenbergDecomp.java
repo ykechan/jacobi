@@ -94,7 +94,7 @@ public class HessenbergDecomp {
         return Triplet.of(
             qh.getLeft(),
             a,
-            new Transpose().compute(qh.getRight()) );
+            new Transpose().compute(qh.getLeft()) );
     }
     
     /**
@@ -156,10 +156,6 @@ public class HessenbergDecomp {
     private void validate(Matrix matrix) {
         Throw.when()
             .isNull(() -> matrix, () -> "No matrix to decompose.")
-            .isTrue(
-                () -> matrix.getRowCount() == 0, 
-                () -> "Unable to decompose an empty matrix."
-            )
             .isTrue(
                 () -> matrix.getRowCount() != matrix.getColCount(),
                 () -> "Hessenburg decomposition not exists for non-square "
