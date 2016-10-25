@@ -35,7 +35,6 @@ import jacobi.core.impl.ImmutableMatrix;
 import jacobi.core.util.Throw;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
 /**
@@ -272,6 +271,11 @@ public class HouseholderReflector extends ImmutableMatrix {
             }
             return sum;
         }
+        return this.partialApplyByStream(matrix, startCol);
+    }
+    
+    protected double[] partialApplyByStream(Matrix matrix, int startCol) {
+        int n = matrix.getColCount();
         return IntStream.range(from, matrix.getRowCount())
                 .mapToObj((i) -> {
                     double k = this.vector[i];
