@@ -62,10 +62,6 @@ public class BasicQR implements QRStrategy {
         Throw.when()
             .isNull(() -> matrix, () -> "No matrix to compute.")
             .isTrue(
-                () -> matrix.getRowCount() == 0, 
-                () -> "Unable to compute an empty matrix."
-            )
-            .isTrue(
                 () -> matrix.getRowCount() != matrix.getColCount(), 
                 () -> "Unable to compute a non-square "
                     + matrix.getRowCount() + "x" + matrix.getColCount()
