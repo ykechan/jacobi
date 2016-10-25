@@ -53,10 +53,10 @@ import jacobi.api.Matrix;
  * whichever is closer to the Rayleigh-quotient shift. Wilkinson shift ensures
  * convergence but the not always real, and convergence rate is not as good.
  * 
- * Normal a Francis QR double-shift step is superior (see FrancisQR), but it can
- * converge very slowly when the first column is almost converged. In that case
- * double-shifts was deflated to a pure QR algorithm. However in such cases a 
- * good candidate of real shift is found: the 1st element. 
+ * Normally a Francis QR double-shift step is more preferable (see FrancisQR), but it may
+ * converge very slowly when the first column is almost deflated. In that case
+ * double-shifts was reverted to a pure QR algorithm. However in such cases a 
+ * good candidate of a real shift is found: the 1st element. 
  * 
  * This class picks up such cases and perform single-shift instead of double-shifts.
  * 

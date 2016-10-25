@@ -27,6 +27,7 @@ import jacobi.api.Matrix;
 import jacobi.core.decomp.qr.step.DefaultQRStep;
 import jacobi.core.decomp.qr.step.FrancisQR;
 import jacobi.core.decomp.qr.step.QRStep;
+import jacobi.core.decomp.qr.step.ShiftedQR;
 import jacobi.core.decomp.qr.step.ShiftedQR3x3;
 import java.util.Optional;
 
@@ -46,11 +47,17 @@ public class FullQR implements QRStrategy {
     public FullQR() {
         this( Optional.of(new DefaultQRStep())
                 .map((s) -> new FrancisQR(s))
+                .map((s) -> new ShiftedQR(s, 1e3))
                 .map((s) -> new ShiftedQR3x3(s))
                 .get() );
     }
     
+    /**
+     * Constructor with injected QR step. 
+     * @param step  QR step
+     */
     protected FullQR(QRStep step) {
+        this.step = step;
         this.impl = Optional.of(new BasicQR(step))
                 .map((q) -> new SymmTriDiagQR(q))
                 .get();
@@ -58,11 +65,11 @@ public class FullQR implements QRStrategy {
     }
 
     /**
-     * Set main QR strategy implementation. For mock test.
-     * @param impl  Main QR strategy implementation
+     * Get implementation for QR iteration.
+     * @return   QR step.
      */
-    protected void setImpl(QRStrategy impl) {
-        this.impl = impl;
+    protected QRStep getStep() {
+        return step;
     }
 
     @Override
@@ -75,4 +82,5 @@ public class FullQR implements QRStrategy {
 
     private HessenbergDecomp hess;
     private QRStrategy impl;
+    private QRStep step;
 }
