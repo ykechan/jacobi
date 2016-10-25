@@ -23,6 +23,7 @@
  */
 package jacobi.core.decomp.gauss;
 
+import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
@@ -130,6 +131,16 @@ public class FullMatrixOperatorTest {
         double k = this.rowOp.get(2, 0);
         new FullMatrixOperator(this.mock(this.input), this.input).rowOp(i, k, 5);
         this.actual = this.input;
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testNullPartnerMatrix() {
+        new FullMatrixOperator(this.mock(Matrices.zeros(3, 2)), null).rowOp(0, 1.0, 0);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testMismatchPartnerMatrix() {
+        new FullMatrixOperator(this.mock(Matrices.zeros(3, 2)), Matrices.zeros(4, 2)).rowOp(0, 1.0, 0);
     }
     
     private ElementaryOperator mock(Matrix base) {

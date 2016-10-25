@@ -181,6 +181,12 @@ public class RowBasedTest {
         new Operators.Hadamard().forkJoin(a, b, this.hfork, 3);
     }
     
+    @Test(expected = IllegalArgumentException.class)
+    @JacobiImport("rand7x5")
+    public void testUnderLimitForkJoin() {
+        new Operators.Hadamard().forkJoin(a, b, this.hfork, 2);
+    }
+    
     @Test(expected = IllegalStateException.class)
     public void testInvalidRowRange() {
         new RowReduce( (a, b) -> {} ){

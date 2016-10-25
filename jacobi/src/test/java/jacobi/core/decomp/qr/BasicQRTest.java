@@ -23,13 +23,15 @@
  */
 package jacobi.core.decomp.qr;
 
+import jacobi.api.Matrices;
 import jacobi.core.decomp.qr.step.QRStep;
 import jacobi.api.Matrix;
+import jacobi.core.decomp.qr.step.DefaultQRStep;
+import jacobi.core.impl.Empty;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
 import java.util.Arrays;
-import java.util.stream.IntStream;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,6 +62,25 @@ public class BasicQRTest {
         }
     }
    
+    @Test
+    public void testEmptyMatrix() {
+        new BasicQR(new DefaultQRStep()).compute(Empty.getInstance(), null, true);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testNullMatrix() {
+        new BasicQR(new DefaultQRStep()).compute(null, null, true);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testNonSquareMatrix() {
+        new BasicQR(new DefaultQRStep()).compute(Matrices.zeros(3, 4), null, true);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testMismatchParnerMatrix() {
+        new BasicQR(new DefaultQRStep()).compute(Matrices.zeros(3, 3), Matrices.zeros(4, 4), true);
+    }
 
     private QRStep mockStep(int... order) {
         return (m, p, begin, end, full) -> {

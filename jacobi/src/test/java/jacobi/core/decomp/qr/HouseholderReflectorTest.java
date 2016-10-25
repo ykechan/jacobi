@@ -26,6 +26,7 @@ package jacobi.core.decomp.qr;
 import jacobi.api.Matrix;
 import jacobi.api.ext.Op;
 import jacobi.api.ext.Prop;
+import jacobi.core.impl.ColumnVector;
 import jacobi.core.prop.Transpose;
 import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
@@ -33,6 +34,7 @@ import jacobi.test.annotations.JacobiInject;
 import jacobi.test.annotations.JacobiResult;
 import jacobi.test.util.Jacobi;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -90,6 +92,23 @@ public class HouseholderReflectorTest {
     }
     
     @Test
+    @JacobiImport("Apply Left 5x1")
+    @JacobiEquals(expected = 2, actual = 2, epsilon = 1e-12)
+    @JacobiEquals(expected = 4, actual = 4, epsilon = 1e-12)
+    public void testApply5x1ByStream() {
+        HouseholderReflector h = new HouseholderReflector(new Transpose().compute(this.input).getRow(0), 0){
+
+            @Override
+            protected double[] partialApply(Matrix matrix, int startCol) {
+                return this.partialApplyByStream(matrix, startCol);
+            }
+            
+        };
+        this.output = h;
+        this.verify = h.mul(this.column);
+    }
+    
+    @Test
     @JacobiImport("Apply Left 7x1")
     @JacobiEquals(expected = 2, actual = 2, epsilon = 1e-12)
     @JacobiEquals(expected = 4, actual = 4, epsilon = 1e-12)
@@ -100,10 +119,51 @@ public class HouseholderReflectorTest {
     }
     
     @Test
+    @JacobiImport("Apply Left 5x3")
+    @JacobiEquals(expected = 2, actual = 2, epsilon = 1e-12)
+    @JacobiEquals(expected = 4, actual = 4, epsilon = 1e-12)
+    public void testApply5x3() {
+        HouseholderReflector h = new HouseholderReflector(new Transpose().compute(this.input).getRow(0), 0);
+        this.output = h;
+        this.verify = h.mul(this.column);
+    }
+    
+    @Test
+    @JacobiImport("Apply Left 5x3")
+    @JacobiEquals(expected = 2, actual = 2, epsilon = 1e-12)
+    @JacobiEquals(expected = 4, actual = 4, epsilon = 1e-12)
+    public void testApply5x3ByStream() {
+        HouseholderReflector h = new HouseholderReflector(new Transpose().compute(this.input).getRow(0), 0){
+
+            @Override
+            protected double[] partialApply(Matrix matrix, int startCol) {
+                return this.partialApplyByStream(matrix, startCol);
+            }
+            
+        };
+        this.output = h;
+        this.verify = h.mul(this.column);
+    }
+    
+    @Test
     @JacobiImport("Apply Left 7x1")
     public void testInverse() {
         HouseholderReflector h = new HouseholderReflector(new Transpose().compute(this.input).getRow(0), 0);
-        Jacobi.assertEquals(h, h.ext(Prop.class).inv().get());
+        Jacobi.assertEquals(h, h.inv().get());
+        Jacobi.assertEquals(h, h.transpose());
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    @JacobiImport("Apply Left 7x1")
+    public void testMismatchWithColumnVector() {
+        HouseholderReflector h = new HouseholderReflector(new Transpose().compute(this.input).getRow(0), 0);
+        h.applyLeft(new ColumnVector(new double[]{1.0, 2.0, 3.0}));
+    }
+    
+    @Test
+    public void testNormalizeWithZeroVector() {
+        HouseholderReflector h = new HouseholderReflector(new double[5], 0);
+        Assert.assertEquals(0.0, h.normalize(), 1e-16);
     }
     
 }

@@ -25,7 +25,9 @@ package jacobi.core.decomp.qr;
 
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
+import jacobi.core.prop.Transpose;
 import jacobi.core.util.Pair;
+import jacobi.core.util.Triplet;
 import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
@@ -86,7 +88,7 @@ public class HessenbergDecompTest {
     public void test4x4WithQ() {
         this.q = this.assertByStep(step1, step2, step3, step4)
                 .computeQH(this.input)
-                .getLeft();
+                .getLeft();                
     }
     
     @Test
@@ -96,6 +98,16 @@ public class HessenbergDecompTest {
         this.q = this.assertByStep(step1, step2, step3, step4, step5, step6)
                 .computeQH(this.input)
                 .getLeft();
+    }
+    
+    @Test
+    @JacobiImport("5x5 with Q")
+    @JacobiEquals(expected = 100, actual = 100)
+    public void test5x5WithQByQHQ() {
+        Triplet triplet = this.assertByStep(step1, step2, step3, step4, step5, step6)
+                .computeQHQt(this.input);
+        this.q = triplet.getLeft();
+        Jacobi.assertEquals(triplet.getRight(), new Transpose().compute(this.q));
     }
     
     @Test
@@ -109,6 +121,11 @@ public class HessenbergDecompTest {
             {Math.sqrt(2.0), Math.sqrt(5.0)} ,
         });
         Jacobi.assertEquals(matrix, new HessenbergDecomp().compute(matrix.copy()));
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testNonSquareMatrices() {
+        new HessenbergDecomp().compute(Matrices.zeros(3, 2));
     }
 
     private HessenbergDecomp assertByStep(Matrix... step) {

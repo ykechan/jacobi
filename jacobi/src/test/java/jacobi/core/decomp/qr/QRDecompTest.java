@@ -94,6 +94,14 @@ public class QRDecompTest {
     }
     
     @Test
+    @JacobiImport("9x3")
+    public void test9x3ROnly() {
+        this.q = this.assertEachStep(Arrays.asList(
+            step1, step2, step3
+        )).compute(input);
+    }
+    
+    @Test
     @JacobiImport("Degen 8x3")
     @JacobiEquals(expected = 100, actual = 100)
     public void testDegen8x3() {

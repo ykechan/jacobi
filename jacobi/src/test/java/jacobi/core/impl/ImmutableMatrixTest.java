@@ -113,6 +113,11 @@ public class ImmutableMatrixTest {
         new ImmutableRowVector(array).swapRow(0, 0);
     }
     
+    @Test(expected = ArrayIndexOutOfBoundsException.class)
+    public void testEmptyGetRow() {
+        Empty.getInstance().getRow(0);
+    }
+    
     @Immutate
     @Facade
     public interface SampleFacade {
