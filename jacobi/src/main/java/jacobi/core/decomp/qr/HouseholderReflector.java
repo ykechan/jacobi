@@ -216,14 +216,18 @@ public class HouseholderReflector extends ImmutableMatrix {
      * @param matrix  Matrix A
      */
     public void applyRight(Matrix matrix) {
+        this.applyRight(matrix, 0);
+    }
+    
+    public void applyRight(Matrix matrix, int fromRow) {
         int len = this.vector.length - this.from;
         if(matrix.getRowCount() * len >= DEFAULT_THRESHOLD){
-            IntStream.range(0, matrix.getRowCount())
+            IntStream.range(fromRow, matrix.getRowCount())
                 .parallel()
-                .forEach((i) -> this.applyRight(matrix, i));
+                .forEach((i) -> this.applyRightAt(matrix, i));
         }else{
-            for(int i = 0; i < matrix.getRowCount(); i++){
-                this.applyRight(matrix, i);
+            for(int i = fromRow; i < matrix.getRowCount(); i++){
+                this.applyRightAt(matrix, i);
             }
         }
     }
@@ -245,7 +249,12 @@ public class HouseholderReflector extends ImmutableMatrix {
         }
     }
     
-    protected void applyRight(Matrix matrix, int i) {
+    /**
+     * Apply Householder reflector on the right side on a given row.
+     * @param matrix  Input matrix
+     * @param i  Given row index
+     */
+    protected void applyRightAt(Matrix matrix, int i) {
         double[] row = matrix.getRow(i);
         double sum = 0.0;
         for(int k = from; k < this.vector.length; k++){
@@ -257,6 +266,12 @@ public class HouseholderReflector extends ImmutableMatrix {
         matrix.setRow(i, row);
     }
     
+    /**
+     * Apply Householder reflector partially, i.e. compute v^t*A
+     * @param matrix  Input matrix A
+     * @param startCol  Begin index of column of interest
+     * @return   v^t*A
+     */
     protected double[] partialApply(Matrix matrix, int startCol) {
         int len = matrix.getColCount() - startCol; 
         int n = matrix.getColCount();
@@ -274,6 +289,12 @@ public class HouseholderReflector extends ImmutableMatrix {
         return this.partialApplyByStream(matrix, startCol);
     }
     
+    /**
+     * Apply Householder reflector partially by stream, i.e. compute v^t*A
+     * @param matrix  Input matrix A
+     * @param startCol  Begin index of column of interest
+     * @return   v^t*A
+     */
     protected double[] partialApplyByStream(Matrix matrix, int startCol) {
         int n = matrix.getColCount();
         return IntStream.range(from, matrix.getRowCount())
