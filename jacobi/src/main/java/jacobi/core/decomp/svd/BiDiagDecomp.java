@@ -44,7 +44,9 @@ import java.util.function.Consumer;
  * 
  * B can also be lower-triangular, in which the sub-diagonal elements are b1, b2, ... etc. Note that the dimension
  * of B is not necessarily n-by-n, but m-by-n. Superfluous rows/columns are all zeros and omitted.
- * Also, bN maybe present in some circumstances.
+ * Also, bN maybe present in some circumstances. 
+ * 
+ * For development convenience, a 0 is padded s.t. the length of Z is always even, same as the case when bN is present.
  * 
  * This class disturb the value of the input matrix A and the resultant value is in-determined. Only the returned
  * bi-diagonal elements should be relied upon.
@@ -84,19 +86,15 @@ public class BiDiagDecomp {
                 .isNull(() -> vFunc, () -> "No right listener function.");
         double[] row = new double[input.getColCount()];
         double[] col = new double[input.getRowCount()];
-        double[] biDiag = new double[this.getZLength(input)];
+        double[] biDiag = new double[2*Math.min(input.getRowCount(), input.getColCount())];
         int n = Math.min(input.getRowCount(), input.getColCount());
         for(int i = 0; i < n; i++){
             if(this.mode == Mode.UPPER){
                 biDiag[2*i] = this.applyLeft(input, i, col, qFunc);
-                if(2*i + 1 < biDiag.length){
-                    biDiag[2*i + 1] = this.applyRight(input, i, row, vFunc);
-                }
+                biDiag[2*i + 1] = this.applyRight(input, i, row, vFunc);
             }else{
                 biDiag[2*i] = this.applyRight(input, i, row, qFunc);
-                if(2*i + 1 < biDiag.length){
-                    biDiag[2*i + 1] = this.applyLeft(input, i, col, qFunc);
-                }
+                biDiag[2*i + 1] = this.applyLeft(input, i, col, qFunc);
             }
         }
         return biDiag;
@@ -116,7 +114,7 @@ public class BiDiagDecomp {
         HouseholderReflector hh = new HouseholderReflector(col, at + offset);
         double norm = hh.normalize();        
         if(norm == 0.0){
-            return col[at + offset];
+            return at + offset < col.length ? col[at + offset] : 0.0;
         }
         if(at < Math.min(input.getRowCount(), input.getColCount())){
             hh.applyLeft(input, at + 1);
@@ -140,7 +138,7 @@ public class BiDiagDecomp {
         HouseholderReflector hh = new HouseholderReflector(row, index);
         double norm = hh.normalize();
         if(norm == 0.0){
-            return row[index];
+            return index < row.length ? row[index] : 0.0;
         }
         if(at < Math.min(input.getRowCount(), input.getColCount())){
             hh.applyRight(input, at + 1);
@@ -148,19 +146,6 @@ public class BiDiagDecomp {
         vFunc.accept(hh);
         return norm;
     }
-    
-    /**
-     * Get length for Z-notation of bi-diagonal elements of input matrix A.
-     * @param input  Input matrix A
-     * @return  Length for Z-notation
-     */
-    protected int getZLength(Matrix input) { 
-        return 2*Math.min(input.getRowCount(), input.getColCount())
-                - ( (input.getRowCount() == input.getColCount())
-                || (input.getRowCount() > input.getColCount()) == (this.mode == Mode.UPPER)
-                    ? 1
-                    : 0);
-    }        
     
     /**
      * Get the Householder reflector of a column.
