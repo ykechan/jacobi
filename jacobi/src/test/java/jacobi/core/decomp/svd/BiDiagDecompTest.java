@@ -61,48 +61,48 @@ public class BiDiagDecompTest {
     @JacobiImport("Upper Thin 10x3")
     @JacobiEquals(expected = 100, actual = 100)
     public void testUpperThin10x3() {
-        double[] biDiag = this.upper.compute(input, (hh) -> {}, (hh) -> {});
-        this.output = Matrices.of(new double[][]{biDiag});
+        double[][] biDiag = this.upper.compute(input, (hh) -> {}, (hh) -> {});
+        this.output = Matrices.of(biDiag);
     }
     
     @Test
     @JacobiImport("Upper Fat 3x5")
     @JacobiEquals(expected = 100, actual = 100)
     public void testUpperFat3x5() {
-        double[] biDiag = this.upper.compute(input, (hh) -> {}, (hh) -> {});
-        this.output = Matrices.of(new double[][]{biDiag});
+        double[][] biDiag = this.upper.compute(input, (hh) -> {}, (hh) -> {});
+        this.output = Matrices.of(biDiag);
     }
     
     @Test
     @JacobiImport("Lower Thin 5x4")
     @JacobiEquals(expected = 100, actual = 100)
     public void testLowerThin5x4() {
-        double[] biDiag = this.lower.compute(input, (hh) -> {}, (hh) -> {});
-        this.output = Matrices.of(new double[][]{biDiag});
+        double[][] biDiag = this.lower.compute(input, (hh) -> {}, (hh) -> {});
+        this.output = Matrices.of(biDiag);
     }
     
     @Test
     @JacobiImport("Lower Fat 4x6")
     @JacobiEquals(expected = 100, actual = 100)
     public void testLowerFat4x6() {
-        double[] biDiag = this.lower.compute(input, (hh) -> {}, (hh) -> {});
-        this.output = Matrices.of(new double[][]{biDiag});
+        double[][] biDiag = this.lower.compute(input, (hh) -> {}, (hh) -> {});
+        this.output = Matrices.of(biDiag);
     }
     
     @Test
     @JacobiImport("Upper 5x5")
     @JacobiEquals(expected = 100, actual = 100)
     public void testUpper5x5() {
-        double[] biDiag = this.upper.compute(input, (hh) -> {}, (hh) -> {});
-        this.output = Matrices.of(new double[][]{biDiag});
+        double[][] biDiag = this.upper.compute(input, (hh) -> {}, (hh) -> {});
+        this.output = Matrices.of(biDiag);
     }
     
     @Test
     @JacobiImport("Lower 5x5")
     @JacobiEquals(expected = 100, actual = 100)
     public void testLower5x5() {
-        double[] biDiag = this.lower.compute(input, (hh) -> {}, (hh) -> {});
-        this.output = Matrices.of(new double[][]{biDiag});
+        double[][] biDiag = this.lower.compute(input, (hh) -> {}, (hh) -> {});
+        this.output = Matrices.of(biDiag);
     }
     
     private BiDiagDecomp upper, lower;

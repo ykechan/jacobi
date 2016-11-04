@@ -27,26 +27,13 @@ package jacobi.core.decomp.svd;
 import jacobi.api.Matrix;
 import jacobi.core.decomp.qr.HouseholderReflector;
 import jacobi.core.util.Throw;
-import java.util.Arrays;
 import java.util.function.Consumer;
 
 /**
  * Bi-Diagonal decomposition is to decompose a m-by-n matrix A into Q*E*V s.t. Q and V are othogonal, and E
  * is a bi-diagonal matrix. E can be chosen to be upper triangular and lower triangular.
  * 
- * E is returned in Z-notation, i.e. Given Z = {a1, b1, a2, b2..., aN}, it corresponds to a matrix e.g.
- *
- *      [a1 b1 0  0 ...            ]
- *      [ 0 a2 b2 0 ...            ]
- * B =  [ ...       ...            ]
- *      [ ...       0 0 aN-1 bN-1  ]
- *      [ ...       0 0    0  aN   ]
  * 
- * B can also be lower-triangular, in which the sub-diagonal elements are b1, b2, ... etc. Note that the dimension
- * of B is not necessarily n-by-n, but m-by-n. Superfluous rows/columns are all zeros and omitted.
- * Also, bN maybe present in some circumstances. 
- * 
- * For development convenience, a 0 is padded s.t. the length of Z is always even, same as the case when bN is present.
  * 
  * This class disturb the value of the input matrix A and the resultant value is in-determined. Only the returned
  * bi-diagonal elements should be relied upon.
@@ -68,7 +55,7 @@ public class BiDiagDecomp {
      * @param input  Input matrix A
      * @return  Bi-diagonal elements in Z-notation.
      */
-    public double[] compute(Matrix input) {
+    public double[][] compute(Matrix input) {
         return this.compute(input, (hh) -> {}, (hh) -> {});
     }
 
@@ -79,25 +66,27 @@ public class BiDiagDecomp {
      * @param vFunc  Accepts Householder reflection applied to A on the right, i.e. a component of V^t.
      * @return  Bi-diagonal elements in Z-notation.
      */
-    public double[] compute(Matrix input, Consumer<HouseholderReflector> qFunc, Consumer<HouseholderReflector> vFunc) {
+    public double[][] compute(Matrix input, Consumer<HouseholderReflector> qFunc, Consumer<HouseholderReflector> vFunc) {
         Throw.when()
                 .isNull(() -> input, () -> "No matrix to compute.")
                 .isNull(() -> qFunc, () -> "No left listener function.")
                 .isNull(() -> vFunc, () -> "No right listener function.");
         double[] row = new double[input.getColCount()];
-        double[] col = new double[input.getRowCount()];
-        double[] biDiag = new double[2*Math.min(input.getRowCount(), input.getColCount())];
+        double[] col = new double[input.getRowCount()];        
+        //double[] biDiag = new double[2*Math.min(input.getRowCount(), input.getColCount())];
         int n = Math.min(input.getRowCount(), input.getColCount());
+        double[] diag = new double[n];
+        double[] offDiag = new double[n];
         for(int i = 0; i < n; i++){
             if(this.mode == Mode.UPPER){
-                biDiag[2*i] = this.applyLeft(input, i, col, qFunc);
-                biDiag[2*i + 1] = this.applyRight(input, i, row, vFunc);
+                diag[i] = this.applyLeft(input, i, col, qFunc);
+                offDiag[i] = this.applyRight(input, i, row, vFunc);
             }else{
-                biDiag[2*i] = this.applyRight(input, i, row, qFunc);
-                biDiag[2*i + 1] = this.applyLeft(input, i, col, qFunc);
+                diag[i] = this.applyRight(input, i, row, qFunc);
+                offDiag[i] = this.applyLeft(input, i, col, qFunc);
             }
         }
-        return biDiag;
+        return new double[][]{diag, offDiag};
     }
     
     /**
