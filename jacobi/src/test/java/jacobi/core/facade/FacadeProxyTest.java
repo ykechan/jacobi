@@ -25,6 +25,7 @@ package jacobi.core.facade;
 
 import jacobi.api.annotations.Facade;
 import jacobi.api.annotations.Implementation;
+import java.io.Serializable;
 import java.util.function.Supplier;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -54,6 +55,16 @@ public class FacadeProxyTest {
     public void testFluentWrongSupplier() {
         this.expected.expect(RuntimeException.class);
         TestFluentWrongSupplier facade = FacadeProxy.of(TestFluentWrongSupplier.class, "I am a string");
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testNotAFacade() {
+        FacadeProxy.of(Serializable.class, "Unsupported interface.");
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testFacadeParameterMismatch() {
+        FacadeProxy.of(TestFluentWrongSupplier.class, 1337L);
     }
     
     @Facade(String.class)

@@ -23,12 +23,14 @@
  */
 package jacobi.core.decomp.qr.step;
 
+import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.util.Jacobi;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -80,4 +82,15 @@ public class ShiftedQRTest {
         }.compute(input, null, 1, 5, false);
     }
     
+    @Test
+    public void testFallThroughOnSmallMatrices() {
+        AtomicInteger call1x1 = new AtomicInteger(0);
+        AtomicInteger call2x2 = new AtomicInteger(0);
+        new ShiftedQR( (m, p, i, j, up) -> { call1x1.incrementAndGet(); }, 100.0 )
+                .compute(Matrices.zeros(3, 3), null, 2, 3, true);
+        new ShiftedQR( (m, p, i, j, up) -> { call2x2.incrementAndGet(); }, 100.0 )
+                .compute(Matrices.zeros(3, 3), null, 1, 3, true);
+        Assert.assertEquals(1, call1x1.get());
+        Assert.assertEquals(1, call2x2.get());
+    }
 }

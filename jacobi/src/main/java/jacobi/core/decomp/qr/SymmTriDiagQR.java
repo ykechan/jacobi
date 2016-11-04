@@ -25,8 +25,8 @@ package jacobi.core.decomp.qr;
 
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
-import jacobi.core.decomp.qr.step.GivensQR;
-import jacobi.core.decomp.qr.step.GivensQR.Givens;
+import jacobi.core.givens.GivensQR;
+import jacobi.core.givens.Givens;
 import java.util.Arrays;
 import java.util.List;
 
@@ -111,7 +111,7 @@ public class SymmTriDiagQR implements QRStrategy {
             return;
         }
         double shift = this.preCompute(diag, subDiag, begin, end);
-        List<GivensQR.Givens> rot = this.qrDecomp(diag, subDiag, begin, end - 1);
+        List<Givens> rot = this.qrDecomp(diag, subDiag, begin, end - 1);
         this.computeRQ(diag, subDiag, begin, end - 1, rot);
         this.postCompute(diag, subDiag, begin, end, shift);
     }
@@ -155,10 +155,10 @@ public class SymmTriDiagQR implements QRStrategy {
      * @return  List of Givens rotation applied
      */
     protected List<Givens> qrDecomp(double[] diag, double[] subDiag, int begin, int end) {
-        GivensQR.Givens[] rot = new GivensQR.Givens[end - begin];
+        Givens[] rot = new Givens[end - begin];
         double up = subDiag[begin];
         for(int i = begin; i < end; i++){
-            GivensQR.Givens giv = this.givensQR.of(diag[i], subDiag[i]);
+            Givens giv = this.givensQR.of(diag[i], subDiag[i]);
             diag[i] = giv.getMag();            
             double upper = giv.rotateX(up, diag[i + 1]);
             double lower = giv.rotateY(up, diag[i + 1]);
@@ -178,9 +178,9 @@ public class SymmTriDiagQR implements QRStrategy {
      * @param end   End index of elements of interest
      * @param rot  List of Givens rotation applied
      */
-    protected void computeRQ(double[] diag, double[] subDiag, int begin, int end, List<GivensQR.Givens> rot) {         
+    protected void computeRQ(double[] diag, double[] subDiag, int begin, int end, List<Givens> rot) {         
         for(int i = begin; i < end; i++){
-            GivensQR.Givens giv = rot.get(i - begin);
+            Givens giv = rot.get(i - begin);
             diag[i] = giv.transRevRotX(diag[i], subDiag[i]);
             double left = giv.transRevRotX(0.0, diag[i + 1]);
             double right = giv.transRevRotY(0.0, diag[i + 1]);
@@ -244,8 +244,6 @@ public class SymmTriDiagQR implements QRStrategy {
             return b;
         }        
         double a = diag[at];
-        System.out.println("tr = " + (a + b));
-        System.out.println("det = " + ((a - b) * (a - b) + 4*c*c));
         return (a + b + Math.sqrt((a - b) * (a - b) + 4*c*c));
     }
     

@@ -25,11 +25,9 @@ package jacobi.core.decomp.qr;
 
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
-import jacobi.core.decomp.qr.step.GivensQR;
-import jacobi.core.decomp.qr.step.GivensQR.Givens;
+import jacobi.core.givens.Givens;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
-import jacobi.test.annotations.JacobiResult;
 import jacobi.test.util.Jacobi;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
 import java.util.List;
@@ -142,6 +140,5 @@ public class SymmTriDiagQRTest {
             }            
             
         };
-    }
-    
+    }    
 }

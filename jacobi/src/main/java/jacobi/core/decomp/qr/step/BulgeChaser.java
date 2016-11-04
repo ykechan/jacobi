@@ -23,8 +23,9 @@
  */
 package jacobi.core.decomp.qr.step;
 
+import jacobi.core.givens.GivensQR;
 import jacobi.api.Matrix;
-import jacobi.core.decomp.qr.step.GivensQR.Givens;
+import jacobi.core.givens.Givens;
 import java.util.ArrayList;
 import java.util.List;
 

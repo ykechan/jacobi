@@ -40,6 +40,9 @@ public class Rank {
     public int compute(Matrix a) {
         Throw.when()
             .isNull(() -> a, () -> "No matrix to rank.");
+        if(a.getRowCount() == 1){
+            return this.compute1x1(a);
+        }
         this.gaussElim.compute(a);
         int rank = 0;
         int n = Math.min(a.getRowCount(), a.getColCount());
