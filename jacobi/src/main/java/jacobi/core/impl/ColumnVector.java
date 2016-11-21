@@ -53,7 +53,7 @@ public class ColumnVector implements Matrix {
      * Construct a column vector with given values.
      * @param vector   Vector elements
      */
-    public ColumnVector(double[] vector) {
+    public ColumnVector(double... vector) {
         this(vector, vector == null ? 0 : vector.length);
     }
     
