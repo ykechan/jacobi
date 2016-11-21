@@ -158,7 +158,7 @@ public class SymmTriDiagQR implements QRStrategy {
         Givens[] rot = new Givens[end - begin];
         double up = subDiag[begin];
         for(int i = begin; i < end; i++){
-            Givens giv = this.givensQR.of(diag[i], subDiag[i]);
+            Givens giv = Givens.of(diag[i], subDiag[i]);
             diag[i] = giv.getMag();            
             double upper = giv.rotateX(up, diag[i + 1]);
             double lower = giv.rotateY(up, diag[i + 1]);
@@ -181,9 +181,9 @@ public class SymmTriDiagQR implements QRStrategy {
     protected void computeRQ(double[] diag, double[] subDiag, int begin, int end, List<Givens> rot) {         
         for(int i = begin; i < end; i++){
             Givens giv = rot.get(i - begin);
-            diag[i] = giv.transRevRotX(diag[i], subDiag[i]);
-            double left = giv.transRevRotX(0.0, diag[i + 1]);
-            double right = giv.transRevRotY(0.0, diag[i + 1]);
+            diag[i] = giv.rotateX(diag[i], subDiag[i]);
+            double left = giv.rotateX(0.0, diag[i + 1]);
+            double right = giv.rotateY(0.0, diag[i + 1]);
             subDiag[i] = left;
             diag[i + 1] = right;
         }

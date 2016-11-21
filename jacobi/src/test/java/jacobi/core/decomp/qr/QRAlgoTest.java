@@ -24,7 +24,7 @@
 package jacobi.core.decomp.qr;
 
 import jacobi.api.Matrix;
-import jacobi.core.decomp.qr.step.QRStep;
+import jacobi.core.decomp.qr.step.QRSteps;
 import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
@@ -40,9 +40,9 @@ import org.junit.runner.RunWith;
  *
  * @author Y.K. Chan
  */
-@JacobiImport("/jacobi/test/data/FullQRTest.xlsx")
+@JacobiImport("/jacobi/test/data/QRAlgoTest.xlsx")
 @RunWith(JacobiJUnit4ClassRunner.class)
-public class FullQRTest {
+public class QRAlgoTest {
     
     @JacobiInject(-1)
     public Map<Integer, Matrix> steps;
@@ -59,16 +59,14 @@ public class FullQRTest {
         this.result = input;
     }
     
-    protected FullQR mock() {
-        AtomicInteger count = new AtomicInteger(0);
-        QRStep step = new FullQR().getStep();
-        return new FullQR((m, p, begin, end, full) -> {
+    protected QRStrategy mock() {
+        AtomicInteger count = new AtomicInteger(0);                
+        return new QRAlgo((m, p, begin, end, full) -> {
             int k = count.incrementAndGet(); 
-            if(steps.containsKey(k)){                
+            if(steps.containsKey(k)){ 
                 Jacobi.assertEquals(steps.get(k), m);
             }
-            step.compute(m, p, begin, end, full);
-            
+            return QRSteps.getStandard().compute(m, p, begin, end, full);
         });
     }
 }

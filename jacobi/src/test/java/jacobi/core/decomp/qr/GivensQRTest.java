@@ -33,6 +33,7 @@ import jacobi.test.annotations.JacobiResult;
 import jacobi.test.util.Jacobi;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
 import java.util.List;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -148,6 +149,28 @@ public class GivensQRTest {
         List<Givens> givens = this.assertBySteps(step1, step2, step3).computeQR(this.input, 2, 6, 6);
         new GivensQR().computeRQ(this.input, givens, 2, 6, 2);
         this.rq = this.input;
+    }
+    
+    @Test
+    @JacobiImport("4x4 in 6x6 Deflated At 3")
+    @JacobiEquals(expected = 100, actual = 100)
+    public void test4x4In6x6DeflatedAt3() {
+        List<Givens> givens = this.assertBySteps(step1, step2, step3).computeQR(this.input, 1, 5, 6);
+        int next = new GivensQR(1e-10).computeRQ(this.input, givens, 0, 5, 1);
+        this.rq = this.input;
+        Assert.assertEquals(3, next);
+        
+    }
+    
+    @Test
+    @JacobiImport("4x4 in 6x6 Deflated At 4")
+    @JacobiEquals(expected = 100, actual = 100)
+    public void test4x4In6x6DeflatedAt4() {
+        List<Givens> givens = this.assertBySteps(step1, step2, step3).computeQR(this.input, 1, 5, 6);
+        int next = new GivensQR(1e-10).computeRQ(this.input, givens, 0, 5, 1);
+        this.rq = this.input;
+        Assert.assertEquals(4, next);
+        
     }
 
     private GivensQR assertBySteps(Matrix... after) {

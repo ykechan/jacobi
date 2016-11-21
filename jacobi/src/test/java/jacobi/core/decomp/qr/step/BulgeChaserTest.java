@@ -31,6 +31,7 @@ import jacobi.test.annotations.JacobiResult;
 import jacobi.test.util.Jacobi;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
 import java.util.Map;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -94,6 +95,25 @@ public class BulgeChaserTest {
             }
             
         }.compute(input, null, 0, input.getRowCount(), true);
+        this.output = input;
+    }
+    
+    @Test
+    @JacobiImport("Full 6x6 Deflated At 4")
+    @JacobiEquals(expected = 10, actual = 10)
+    public void testFull6x6DeflatedAt4() {
+        Matrix input = steps.get(0);
+        int next = new BulgeChaser(){
+
+            @Override
+            protected BulgeChaser.GivensPair pushBulge(Matrix matrix, int col, int endCol, int endRow) {
+                BulgeChaser.GivensPair pair = super.pushBulge(matrix, col, endCol, endRow);
+                Jacobi.assertEquals(steps.get(col + 1), matrix);
+                return pair;
+            }
+            
+        }.compute(input, null, 0, input.getRowCount(), true);
+        Assert.assertEquals(4, next);
         this.output = input;
     }
     

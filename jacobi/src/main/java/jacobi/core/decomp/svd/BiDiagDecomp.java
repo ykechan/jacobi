@@ -33,8 +33,6 @@ import java.util.function.Consumer;
  * Bi-Diagonal decomposition is to decompose a m-by-n matrix A into Q*E*V s.t. Q and V are othogonal, and E
  * is a bi-diagonal matrix. E can be chosen to be upper triangular and lower triangular.
  * 
- * 
- * 
  * This class disturb the value of the input matrix A and the resultant value is in-determined. Only the returned
  * bi-diagonal elements should be relied upon.
  * 
@@ -66,7 +64,7 @@ public class BiDiagDecomp {
      * @param vFunc  Accepts Householder reflection applied to A on the right, i.e. a component of V^t.
      * @return  Bi-diagonal elements in Z-notation.
      */
-    public double[][] compute(Matrix input, Consumer<HouseholderReflector> qFunc, Consumer<HouseholderReflector> vFunc) {
+    protected double[][] compute(Matrix input, Consumer<HouseholderReflector> qFunc, Consumer<HouseholderReflector> vFunc) {
         Throw.when()
                 .isNull(() -> input, () -> "No matrix to compute.")
                 .isNull(() -> qFunc, () -> "No left listener function.")

@@ -48,14 +48,15 @@ public class PureQR implements QRStep {
     }
 
     @Override
-    public void compute(Matrix matrix, Matrix partner, int beginRow, int endRow, boolean fullUpper) {
+    public int compute(Matrix matrix, Matrix partner, int beginRow, int endRow, boolean fullUpper) {
         int endCol = fullUpper ? matrix.getColCount() : endRow;
         List<Givens> givens = this.givensQR.computeQR(matrix, beginRow, endRow, endCol);
-        this.givensQR.computeRQ(matrix, givens, fullUpper ? 0 : beginRow, endRow, beginRow);
+        int next = this.givensQR.computeRQ(matrix, givens, fullUpper ? 0 : beginRow, endRow, beginRow);
         if(partner != null){
             // TODO: compute partner matrix
             // ...
         }
+        return next;
     }
 
     private GivensQR givensQR;

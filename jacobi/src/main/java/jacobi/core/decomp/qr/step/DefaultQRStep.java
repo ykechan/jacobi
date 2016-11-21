@@ -33,7 +33,7 @@ import jacobi.api.Matrix;
 public class DefaultQRStep implements QRStep {
 
     @Override
-    public void compute(Matrix matrix, Matrix partner, int beginRow, int endRow, boolean fullUpper) {
+    public int compute(Matrix matrix, Matrix partner, int beginRow, int endRow, boolean fullUpper) {
         throw new IllegalStateException();
     }
 

@@ -24,32 +24,34 @@
 
 package jacobi.core.decomp.qr.step;
 
-import jacobi.api.Matrices;
-import java.util.concurrent.atomic.AtomicInteger;
-import org.junit.Assert;
-import org.junit.Test;
+import java.util.Optional;
 
 /**
- * This is only a supplementary collection of tests. 
+ * Factory of common composite QR steps.
+ * 
+ * Givens the wide range of QR steps, and possibly more for further expansion and optimization, and some steps may
+ * require ordering in composing (though mostly does not), this class provide functions for building QR steps.
+ * 
  * @author Y.K. Chan
  */
-public class FrancisQRTest {
-    
-    @Test
-    @SuppressWarnings("InfiniteRecursion") 
-    public void testFallThroughOnSmallMatrices() {
-        AtomicInteger call1x1 = new AtomicInteger(0);
-        AtomicInteger call2x2 = new AtomicInteger(0);
-        AtomicInteger call3x3 = new AtomicInteger(0);
-        new FrancisQR( (m, p, i, j, up) -> { call1x1.incrementAndGet(); return 0; })
-                .compute(Matrices.zeros(3, 3), null, 2, 3, true);
-        new FrancisQR( (m, p, i, j, up) -> { call2x2.incrementAndGet(); return 0; })
-                .compute(Matrices.zeros(3, 3), null, 1, 3, true);
-        new FrancisQR( (m, p, i, j, up) -> { call3x3.incrementAndGet(); return 0; })
-                .compute(Matrices.zeros(3, 3), null, 0, 3, true);
-        Assert.assertEquals(1, call1x1.get());
-        Assert.assertEquals(1, call2x2.get());
-        Assert.assertEquals(1, call3x3.get());
+public abstract class QRSteps {
+
+    private QRSteps() {
     }
+
+    /**
+     * Get the Standard QR step, suitable up to around 100x100 matrix.
+     * @return  Instance of QR step
+     */
+    public static QRStep getStandard() {
+        return STD;
+    }
+    
+    private static final QRStep STD = Optional.of(new DefaultQRStep())
+            .map((s) -> new FrancisQR(s))
+            .map((s) -> new ShiftedQR(s))
+            .map((s) -> new ShiftedQR3x3(s))
+            .map((s) -> new SingleStep2x2(s))
+            .get();
 
 }

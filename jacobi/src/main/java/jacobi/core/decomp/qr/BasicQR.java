@@ -54,7 +54,7 @@ public class BasicQR implements QRStrategy {
      * @param step  Implementation to perform an iteration.
      */
     public BasicQR(QRStep step) {
-        this.step = new SingleStep2x2(step);
+        this.step = step;
     }
 
     @Override
@@ -82,19 +82,17 @@ public class BasicQR implements QRStrategy {
      * @param fullUpper   True is full upper triangular matrix required, false otherwise
      */
     protected void compute(Matrix matrix, Matrix partner, int beginRow, int endRow, boolean fullUpper) {
+        System.out.println("compute begin = " + beginRow + ", endRow = " + endRow );
         if(endRow - beginRow < 2){
-            return;
-        }
-        if(endRow - beginRow == 2){
-            this.step.compute(matrix, partner, beginRow, endRow, fullUpper);
             return;
         }
         int limit = LIMIT * (endRow - beginRow);
         int end = this.deflate(matrix, beginRow, endRow);
-        for(int k = 0; k < limit; k++){            
-            this.step.compute(matrix, partner, beginRow, end, fullUpper);
-            int conv = this.getConverged(matrix, beginRow, endRow);
-            if (conv >= 0) {
+        for(int k = 0; k < limit; k++){ 
+            //int conv = this.getConverged(matrix, beginRow, endRow);
+            int conv = this.step.compute(matrix, partner, beginRow, end, fullUpper);
+            System.out.println("k = " + k + ", conv = " + conv);
+            if (conv > beginRow) {
                 this.compute(matrix, partner, beginRow, conv, fullUpper);
                 this.compute(matrix, partner, conv, endRow, fullUpper);
                 return;
@@ -134,9 +132,9 @@ public class BasicQR implements QRStrategy {
             }
         }
         return k + 1;
-    }
+    }    
 
-    private QRStep step;
+    private QRStep step;        
     
     private static final double EPSILON = 1e-12;
     private static final int LIMIT = 128;

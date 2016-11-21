@@ -73,13 +73,12 @@ public class FrancisQR implements QRStep {
     }
 
     @Override
-    public void compute(Matrix matrix, Matrix partner, int beginRow, int endRow, boolean fullUpper) {
+    public int compute(Matrix matrix, Matrix partner, int beginRow, int endRow, boolean fullUpper) {
         if(endRow - beginRow < 4){
-            this.base.compute(matrix, partner, beginRow, endRow, fullUpper);
-            return;
+            return this.base.compute(matrix, partner, beginRow, endRow, fullUpper);
         }
         this.createBulge(matrix, partner, beginRow, endRow, fullUpper);
-        this.bulgeChaser.compute(matrix, partner, beginRow, endRow, fullUpper);
+        return this.bulgeChaser.compute(matrix, partner, beginRow, endRow, fullUpper);
     }
     
     /**

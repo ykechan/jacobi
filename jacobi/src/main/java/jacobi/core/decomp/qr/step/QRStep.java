@@ -39,7 +39,13 @@ public interface QRStep {
      * @param beginRow  Begin index of row of interest
      * @param endRow  End index of row of interest
      * @param fullUpper   True if full upper triangular matrix needed, false otherwise
+     * @return  The index of row that has a negligible off-diagonal entry, or negative if none are zero.
      */
-    public void compute(Matrix matrix, Matrix partner, int beginRow, int endRow, boolean fullUpper);
+    public int compute(Matrix matrix, Matrix partner, int beginRow, int endRow, boolean fullUpper);
+    
+    /**
+     * Acceptable negligible value
+     */
+    public static final double EPSILON = 1e-12;
     
 }

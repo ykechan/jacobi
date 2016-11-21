@@ -88,17 +88,19 @@ public class ShiftedQR3x3 implements QRStep {
     }
 
     @Override
-    public void compute(Matrix matrix, Matrix partner, int beginRow, int endRow, boolean fullUpper) {
+    public int compute(Matrix matrix, Matrix partner, int beginRow, int endRow, boolean fullUpper) {
         if(endRow - beginRow != 3){
             // fall through
-            this.base.compute(matrix, partner, beginRow, endRow, fullUpper);
-            return;
+            return this.base.compute(matrix, partner, beginRow, endRow, fullUpper);
         }        
+        System.out.println("shifted QR 3x3");
         double shift = this.eig3x3(matrix, beginRow);
-        System.out.println("Shifted QR 3x3 " + beginRow + "," + endRow + " shift = " + shift);
         this.shiftDiag(matrix, beginRow, endRow, -shift); 
-        this.step.compute(matrix, partner, beginRow, endRow, fullUpper);
-        this.shiftDiag(matrix, beginRow, endRow, shift);
+        try {
+            return this.step.compute(matrix, partner, beginRow, endRow, fullUpper);
+        } finally {
+            this.shiftDiag(matrix, beginRow, endRow, shift);
+        }
     }
     
     /**

@@ -68,20 +68,30 @@ public class BulgeChaser implements QRStep {
     }    
     
     @Override
-    public void compute(Matrix matrix, Matrix partner, int beginRow, int endRow, boolean fullUpper) {
+    public int compute(Matrix matrix, Matrix partner, int beginRow, int endRow, boolean fullUpper) {        
         int endCol = fullUpper ? matrix.getColCount() : endRow;
         int begin = beginRow;
         int end = endRow - 3;
+        int next = -1;
         List<GivensPair> rotList = new ArrayList<>();
         for(int i = begin; i < end; i++){
-            rotList.add(this.pushBulge(matrix, i, endCol, endRow));
+            GivensPair pair = this.pushBulge(matrix, i, endCol, endRow);
+            if(Math.abs(pair.getLower().getMag()) < QRStep.EPSILON){
+                next = begin;
+            }
+            rotList.add(pair);
         }
         double[] upper = matrix.getRow(endRow - 2);
         double[] lower = matrix.getRow(endRow - 1);
-        Givens last = this.givensQR.computeQR(upper, lower, endRow - 3, endCol);        
+        Givens last = this.givensQR.computeQR(upper, lower, endRow - 3, endCol); 
         matrix.setRow(endRow - 2, upper).setRow(endRow - 1, lower);
         
-        this.batchRotate(matrix, beginRow, endRow, rotList, last, fullUpper);
+        this.batchRotate(matrix, beginRow, endRow, rotList, last, fullUpper); 
+        return Math.abs(lower[endRow - 2]) < QRStep.EPSILON 
+                ? endRow - 1 
+                : Math.abs(last.getMag()) < QRStep.EPSILON
+                    ? endRow - 2
+                    : next;
     }
     
     /**
@@ -161,12 +171,12 @@ public class BulgeChaser implements QRStep {
         double b = row[col + 1];
         double c = row[col + 2];
         
-        double x = giv.getUpper().transRevRotX(a, b);
-        double y = giv.getUpper().transRevRotY(a, b);
+        double x = giv.getUpper().rotateX(a, b);
+        double y = giv.getUpper().rotateY(a, b);
         
-        row[col] = giv.getLower().transRevRotX(x, c);
+        row[col] = giv.getLower().rotateX(x, c);
         row[col + 1] = y;
-        row[col + 2] = giv.getLower().transRevRotY(x, c);
+        row[col + 2] = giv.getLower().rotateY(x, c);
     }
     
     /**
@@ -179,8 +189,8 @@ public class BulgeChaser implements QRStep {
         double a = row[col];
         double b = row[col + 1];
         
-        row[col] = giv.transRevRotX(a, b);
-        row[col + 1] = giv.transRevRotY(a, b);
+        row[col] = giv.rotateX(a, b);
+        row[col + 1] = giv.rotateY(a, b);
     }
     
     /**
@@ -191,8 +201,8 @@ public class BulgeChaser implements QRStep {
      * @return  A pair of Givens rotation
      */
     protected GivensPair createGivensPair(double a, double b, double c) {
-        Givens upper = this.givensQR.of(a, b);
-        Givens lower = this.givensQR.of(upper.getMag(), c);
+        Givens upper = Givens.of(a, b);
+        Givens lower = Givens.of(upper.getMag(), c);
         return new GivensPair(upper, lower);
     }
     

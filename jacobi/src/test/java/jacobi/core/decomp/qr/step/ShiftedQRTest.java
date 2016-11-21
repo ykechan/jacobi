@@ -52,7 +52,7 @@ public class ShiftedQRTest {
     @JacobiImport("Shift last element 4x4")
     public void testShiftLastElement4x4() {
         AtomicInteger shiftCount = new AtomicInteger(0);
-        new ShiftedQR((m, p, i, j, up) -> {}, 100.0){
+        new ShiftedQR((m, p, i, j, up) -> -1, 100.0){
 
             @Override
             protected void shiftDiag(Matrix matrix, int begin, int end, double shift) {
@@ -69,7 +69,7 @@ public class ShiftedQRTest {
     @JacobiImport("Shift first element 4x4 in 6x6")
     public void testShiftFirstElement4x4In6x6() {
         AtomicInteger shiftCount = new AtomicInteger(0);
-        new ShiftedQR((m, p, i, j, up) -> {}, 100.0){
+        new ShiftedQR((m, p, i, j, up) -> -1, 100.0){
 
             @Override
             protected void shiftDiag(Matrix matrix, int begin, int end, double shift) {
@@ -83,12 +83,13 @@ public class ShiftedQRTest {
     }
     
     @Test
+    @SuppressWarnings("InfiniteRecursion")
     public void testFallThroughOnSmallMatrices() {
         AtomicInteger call1x1 = new AtomicInteger(0);
         AtomicInteger call2x2 = new AtomicInteger(0);
-        new ShiftedQR( (m, p, i, j, up) -> { call1x1.incrementAndGet(); }, 100.0 )
+        new ShiftedQR( (m, p, i, j, up) -> { call1x1.incrementAndGet(); return -1; }, 100.0 )
                 .compute(Matrices.zeros(3, 3), null, 2, 3, true);
-        new ShiftedQR( (m, p, i, j, up) -> { call2x2.incrementAndGet(); }, 100.0 )
+        new ShiftedQR( (m, p, i, j, up) -> { call2x2.incrementAndGet(); return -1; }, 100.0 )
                 .compute(Matrices.zeros(3, 3), null, 1, 3, true);
         Assert.assertEquals(1, call1x1.get());
         Assert.assertEquals(1, call2x2.get());

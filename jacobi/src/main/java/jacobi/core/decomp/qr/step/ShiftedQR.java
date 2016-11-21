@@ -62,7 +62,15 @@ import jacobi.api.Matrix;
  * 
  * @author Y.K. Chan
  */
-public class ShiftedQR implements QRStep {
+public class ShiftedQR implements QRStep {    
+
+    /**
+     * Constructor.
+     * @param base  Base implementation to fall through
+     */
+    public ShiftedQR(QRStep base) {
+        this(base, 1e5);
+    }
 
     /**
      * Constructor. 
@@ -76,19 +84,20 @@ public class ShiftedQR implements QRStep {
     }
 
     @Override
-    public void compute(Matrix matrix, Matrix partner, int beginRow, int endRow, boolean fullUpper) {
+    public int compute(Matrix matrix, Matrix partner, int beginRow, int endRow, boolean fullUpper) {
         if(endRow - beginRow < 3){
-            this.base.compute(matrix, partner, beginRow, endRow, fullUpper);
-            return;
+            return this.base.compute(matrix, partner, beginRow, endRow, fullUpper);
         }
         double shift = this.getShift(matrix, beginRow, endRow);
         if(shift == 0.0){
-            this.base.compute(matrix, partner, beginRow, endRow, fullUpper);
-            return;
+            return this.base.compute(matrix, partner, beginRow, endRow, fullUpper);
         }
         this.shiftDiag(matrix, beginRow, endRow, -shift);
-        this.impl.compute(matrix, partner, beginRow, endRow, fullUpper);
-        this.shiftDiag(matrix, beginRow, endRow, shift);
+        try {
+            return this.impl.compute(matrix, partner, beginRow, endRow, fullUpper);
+        } finally {
+            this.shiftDiag(matrix, beginRow, endRow, shift);
+        }
     }        
     
     /**

@@ -34,6 +34,18 @@ package jacobi.core.givens;
  * @author Y.K. Chan
  */
 public class Givens {
+    
+    /**
+     * Get Givens rotation for reducing [a, b] -&gt; [r, 0].
+     * @param a  Upper element
+     * @param b  Lower element
+     * @return  Givens rotation
+     */
+    public static Givens of(double a, double b) {
+        double r = Math.hypot(a, b);
+        return new Givens(r, a / r, -b / r);
+    }
+    
     /**
      * Constructor.
      * @param mag  Value of r
@@ -68,7 +80,7 @@ public class Givens {
     }
     
     /**
-     * Compute G * [a b]' and return the upper element.
+     * Compute G * [a b]^t and return the upper element.
      * @param a  Upper vector element 
      * @param b  Lower vector element
      * @return  Upper element of G * [a b]'
@@ -78,7 +90,7 @@ public class Givens {
     }
     
     /**
-     * Compute G * [a b]' and return the lower element.
+     * Compute G * [a b]^t and return the lower element.
      * @param a  Upper vector element 
      * @param b  Lower vector element
      * @return  Lower element of G * [a b]'
@@ -88,24 +100,29 @@ public class Givens {
     }
     
     /**
-     * Compute [a b] * G^t and return the upper element.
-     * @param a  Upper vector element
-     * @param b  Lower vector element
-     * @return  Upper element of [a b] * G
+     * Compute G^t * [a b]^t or [a b] * G and return the upper/left element.
+     * @param a  Upper/Left vector element
+     * @param b  Lower/Right vector element
+     * @return  Upper element of G^t * [a b]^t
      */
-    public double transRevRotX(double a, double b) {
-        return this.getCos() * a - this.getSin() * b;
+    public double reverseRotX(double a, double b) {
+        return this.getCos() * a + this.getSin() * b;
     }
     
     /**
-     * Compute [a b] * G^t and return the lower element.
-     * @param a  Upper vector element
-     * @param b  Lower vector element
-     * @return  Lower element of [a b] * G
+     * Compute G^t * [a b]^t or [a b] * G and return the lower/right element.
+     * @param a  Upper/Left vector element
+     * @param b  Lower/Right vector element
+     * @return  Lower element of G^t * [a b]^t
      */
-    public double transRevRotY(double a, double b) {
-        return this.getSin() * a + this.getCos() * b;
+    public double reverseRotY(double a, double b) {
+        return this.getCos() * b - this.getSin() * a;
     }
     
-    private double mag, cos, sin;
+    @Override
+    public String toString() {
+        return "[" + cos + "," + sin + "]";
+    }
+    
+    private double mag, cos, sin;    
 }

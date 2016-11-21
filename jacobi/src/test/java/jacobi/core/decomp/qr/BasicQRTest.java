@@ -31,8 +31,7 @@ import jacobi.core.impl.Empty;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
-import java.util.Arrays;
-import org.junit.Assert;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -57,9 +56,6 @@ public class BasicQRTest {
            1, 2, 3, 4
         ));
         impl.compute(input5x5, null, true);
-        for(int i = 1; i < this.input5x5.getRowCount(); i++){
-            Assert.assertEquals(0.0, this.input5x5.get(i, i - 1), 1e-12);
-        }
     }
    
     @Test
@@ -83,18 +79,7 @@ public class BasicQRTest {
     }
 
     private QRStep mockStep(int... order) {
-        return (m, p, begin, end, full) -> {
-            for(int i = 0; i < order.length; i++){
-                if(order[i] >= begin && order[i] < end){ 
-                    int k = order[i];
-                    order[i] = -1;
-                    m.set(k, k - 1, 0.0);
-                    return;
-                }
-            }
-            throw new UnsupportedOperationException("Unable to find converge point in " 
-                    + Arrays.toString(order)
-                    + " within [" + begin + "," + end + ").");
-        };
+        AtomicInteger i = new AtomicInteger(0);
+        return (m, p, begin, end, full) -> order[i.getAndIncrement()];
     }
 }

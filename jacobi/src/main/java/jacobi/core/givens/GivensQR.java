@@ -42,6 +42,21 @@ import java.util.List;
  * @author Y.K. Chan
  */
 public class GivensQR {
+
+    /**
+     * Constructor.
+     */
+    public GivensQR() {
+        this(1e-12);
+    }
+
+    /**
+     * Constructor with given machine epsilon.
+     * @param epsilon  Machine epsilon
+     */
+    public GivensQR(double epsilon) {
+        this.epsilon = epsilon;
+    }
     
     /**
      * Compute QR decomposition on a Hessenberg matrix H, and transform it
@@ -69,12 +84,10 @@ public class GivensQR {
      * Given a lower triangular matrix R, multiply it with Q.
      * @param matrix  Input matrix R
      * @param givens  List of Givens rotation s.t. Q^t = G[n] * G[n - 1] * ...
-     */
-    /*
+     */    
     public void computeRQ(Matrix matrix, List<Givens> givens) {
         this.computeRQ(matrix, givens, 0, matrix.getRowCount(), 0);
     }
-    */
     
     /**
      * Given a lower triangular matrix R, multiply it with Q, within given 
@@ -84,15 +97,21 @@ public class GivensQR {
      * @param beginRow  Begin index of rows of interest
      * @param endRow  End index of rows of interest
      * @param beginCol  Begin index of columns of interest
+     * @return  The index of row that has a negligible off-diagonal entry, or negative if none are zero.
      */
-    public void computeRQ(Matrix matrix, List<Givens> givens, int beginRow, int endRow, int beginCol) {
+    public int computeRQ(Matrix matrix, List<Givens> givens, int beginRow, int endRow, int beginCol) {
+        int deflated = beginRow;
         for(int i = beginRow; i < endRow; i++){
             double[] row = matrix.getRow(i);
-            int skip = i < beginCol + 1 ? 0 : i - beginCol - 1;
-            List<Givens> rot = givens.subList(skip, givens.size());            
-            this.computeRA(row, rot, beginCol + skip);
+            int skip = i < beginCol + 1 ? 0 : i - beginCol - 1;                        
+            List<Givens> rot = givens.subList(skip, givens.size());
+            double off = this.computeRA(row, rot, beginCol + skip);
+            if(Math.abs(off) < this.epsilon){
+                deflated = i;
+            }
             matrix.setRow(i, row);
         }
+        return deflated == beginRow ? -1 : deflated;
     }
     
     /**
@@ -105,7 +124,7 @@ public class GivensQR {
      * @return  Applied Givens rotation
      */
     public Givens computeQR(double[] upper, double[] lower, int begin, int end) {
-        return this.apply(this.of(upper[begin], lower[begin]), upper, lower, begin, end);
+        return this.apply(Givens.of(upper[begin], lower[begin]), upper, lower, begin, end);
     }
     
     /**
@@ -132,28 +151,21 @@ public class GivensQR {
      * @param row  Input row
      * @param givens  List of Givens rotation
      * @param beginCol
+     * @return  Return newly computed off diagonal value
      */
-    protected void computeRA(double[] row, List<Givens> givens, int beginCol) { 
-        for(int i = 0; i < givens.size(); i++){            
+    protected double computeRA(double[] row, List<Givens> givens, int beginCol) { 
+        double off = givens.get(0).rotateX(row[beginCol], row[beginCol + 1]);
+        for(int i = 0; i < givens.size(); i++){ 
             Givens g = givens.get(i);            
             int k = beginCol + i;
             double a = row[k];
             double b = row[k + 1]; 
-            row[k]    =  g.transRevRotX(a, b);
-            row[k + 1] = g.transRevRotY(a, b);
+            row[k]    =  g.rotateX(a, b);
+            row[k + 1] = g.rotateY(a, b);
             k++;
         }
+        return off;
     }        
     
-    /**
-     * Get Givens rotation for reducing [a, b] -&gt; [r, 0].
-     * @param a  Upper element
-     * @param b  Lower element
-     * @return  Givens rotation
-     */
-    public Givens of(double a, double b) {
-        double r = Math.hypot(a, b);
-        return new Givens(r, a / r, -b / r);
-    }
-    
+    private double epsilon;
 }

@@ -81,16 +81,15 @@ public class SingleStep2x2 implements QRStep {
     }
 
     @Override
-    public void compute(Matrix matrix, Matrix partner, int beginRow, int endRow, boolean fullUpper) {
+    public int compute(Matrix matrix, Matrix partner, int beginRow, int endRow, boolean fullUpper) {
         if(endRow - beginRow < 2){
-            return;
+            return beginRow;
         }
         if(endRow - beginRow == 2){
-            System.out.println("single step 2x2 " + beginRow + "," + endRow);
             this.compute2x2(matrix, partner, beginRow, fullUpper);
-            return;
+            return beginRow + 1;
         }        
-        this.base.compute(matrix, partner, beginRow, endRow, fullUpper);
+        return this.base.compute(matrix, partner, beginRow, endRow, fullUpper);
     }
     
     /**
