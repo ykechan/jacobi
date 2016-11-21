@@ -25,7 +25,6 @@ package jacobi.core.decomp.qr;
 
 import jacobi.core.decomp.qr.step.QRStep;
 import jacobi.api.Matrix;
-import jacobi.core.decomp.qr.step.SingleStep2x2;
 import jacobi.core.util.Throw;
 
 /**
@@ -81,12 +80,12 @@ public class BasicQR implements QRStrategy {
      * @param endRow  End index of row of interest
      * @param fullUpper   True is full upper triangular matrix required, false otherwise
      */
-    protected void compute(Matrix matrix, Matrix partner, int beginRow, int endRow, boolean fullUpper) {
-        if(endRow - beginRow < 2){
-            return;
-        }
+    protected void compute(Matrix matrix, Matrix partner, int beginRow, int endRow, boolean fullUpper) {        
         int limit = LIMIT * (endRow - beginRow);
         int end = this.deflate(matrix, beginRow, endRow);
+        if(end - beginRow < 2){
+            return;
+        }
         for(int k = 0; k < limit; k++){ 
             int conv = this.step.compute(matrix, partner, beginRow, end, fullUpper);
             if (conv > beginRow) {
@@ -96,23 +95,7 @@ public class BasicQR implements QRStrategy {
             }
         }
         throw new UnsupportedOperationException("Exhaused to converge any entry in " + limit + " iterations.");
-    }
-    
-    /**
-     * Find the index of the first zero entry in sub-diagonal.
-     * @param matrix  Input matrix
-     * @param begin  Begin index of row of interest
-     * @param end  End index of row of interest
-     * @return   Index of first zero entry, -1 if none was found.
-     */
-    protected int getConverged(Matrix matrix, int begin, int end) {
-        for(int i = end - 1; i > begin; i--){
-            if(Math.abs(matrix.get(i, i - 1)) < EPSILON){                
-                return i;
-            }
-        }
-        return -1;
-    }
+    }    
     
     /**
      * Find the index of the last non-zero entry in sub-diagonal
@@ -127,6 +110,7 @@ public class BasicQR implements QRStrategy {
             if(Math.abs(matrix.get(k, k - 1)) > EPSILON){
                 break;
             }
+            k--;
         }
         return k + 1;
     }    
@@ -134,5 +118,5 @@ public class BasicQR implements QRStrategy {
     private QRStep step;        
     
     private static final double EPSILON = 1e-12;
-    private static final int LIMIT = 128;
+    private static final int LIMIT = 8;
 }
