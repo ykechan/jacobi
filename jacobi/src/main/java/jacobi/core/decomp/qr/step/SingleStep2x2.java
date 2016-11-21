@@ -105,13 +105,6 @@ public class SingleStep2x2 implements QRStep {
         double det = state.a * state.d - state.b * state.c;
         
         double delta = tr * tr - 4 * det;
-        System.out.println("delta = " + delta);
-        for(double[] row : matrix.toArray()){
-            for(double elem : row){
-                System.out.print(elem + " ");
-            }
-            System.out.println();
-        }
         if(delta < 0.0){
             return;
         }
