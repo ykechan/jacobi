@@ -92,8 +92,7 @@ public class ShiftedQR3x3 implements QRStep {
         if(endRow - beginRow != 3){
             // fall through
             return this.base.compute(matrix, partner, beginRow, endRow, fullUpper);
-        }        
-        System.out.println("shifted QR 3x3");
+        }
         double shift = this.eig3x3(matrix, beginRow);
         this.shiftDiag(matrix, beginRow, endRow, -shift); 
         try {
