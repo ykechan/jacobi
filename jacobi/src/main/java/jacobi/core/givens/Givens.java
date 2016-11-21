@@ -43,7 +43,9 @@ public class Givens {
      */
     public static Givens of(double a, double b) {
         double r = Math.hypot(a, b);
-        return new Givens(r, a / r, -b / r);
+        return Math.abs(r) < EPSILON
+                ? IDENTITY
+                : new Givens(r, a / r, -b / r);
     }
     
     /**
@@ -124,5 +126,9 @@ public class Givens {
         return "[" + cos + "," + sin + "]";
     }
     
-    private double mag, cos, sin;    
+    private double mag, cos, sin; 
+    
+    private static final Givens IDENTITY = new Givens(0.0, 1.0, 0.0);
+    
+    private static final double EPSILON = 2e-24;
 }
