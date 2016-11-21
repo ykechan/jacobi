@@ -82,16 +82,13 @@ public class BasicQR implements QRStrategy {
      * @param fullUpper   True is full upper triangular matrix required, false otherwise
      */
     protected void compute(Matrix matrix, Matrix partner, int beginRow, int endRow, boolean fullUpper) {
-        System.out.println("compute begin = " + beginRow + ", endRow = " + endRow );
         if(endRow - beginRow < 2){
             return;
         }
         int limit = LIMIT * (endRow - beginRow);
         int end = this.deflate(matrix, beginRow, endRow);
         for(int k = 0; k < limit; k++){ 
-            //int conv = this.getConverged(matrix, beginRow, endRow);
             int conv = this.step.compute(matrix, partner, beginRow, end, fullUpper);
-            System.out.println("k = " + k + ", conv = " + conv);
             if (conv > beginRow) {
                 this.compute(matrix, partner, beginRow, conv, fullUpper);
                 this.compute(matrix, partner, conv, endRow, fullUpper);
