@@ -1,7 +1,7 @@
-/* 
+/*
  * The MIT License
  *
- * Copyright 2016 Y.K. Chan
+ * Copyright 2016 Y.K. Chan.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,50 +21,51 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jacobi.core.decomp.qr;
+package jacobi.core.decomp.eigen;
 
 import jacobi.api.Matrix;
-import jacobi.core.decomp.qr.step.QRStep;
-import jacobi.core.decomp.qr.step.QRSteps;
+import jacobi.core.decomp.qr.QRStrategy;
 import jacobi.core.util.Pair;
-import java.util.Optional;
+import jacobi.test.annotations.JacobiEquals;
+import jacobi.test.annotations.JacobiImport;
+import jacobi.test.annotations.JacobiInject;
+import jacobi.test.annotations.JacobiResult;
+import jacobi.test.util.JacobiJUnit4ClassRunner;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
- * Full suite of QR algorithm.
- * 
- * This implementation reduces the input matrix to Hessenberg form, and collects all QR strategies to further reduce
- * the Hessenberg matrix into Schur form.
- * 
+ *
  * @author Y.K. Chan
  */
-public class QRAlgo implements QRStrategy {
-
-    /**
-     * Constructor.
-     */
-    public QRAlgo() {
-        this(QRSteps.getStandard());
-    }
+@JacobiImport("/jacobi/test/data/EigenFinderTest.xlsx")
+@RunWith(JacobiJUnit4ClassRunner.class)
+public class EigenFinderTest {
     
-    /**
-     * Constructor with injected QR step. 
-     * @param step  QR step
-     */
-    protected QRAlgo(QRStep step) {
-        this.impl = Optional.of(new BasicQR(step))
-                .map((q) -> new SymmTriDiagQR(q))
-                .get();
-        this.hess = new HessenbergDecomp();
+    @JacobiInject(0)
+    public Matrix input;
+    
+    @JacobiResult(1)
+    public Matrix real;
+    
+    @JacobiResult(2)
+    public Matrix img;
+    
+    public EigenFinderTest() {
     }
 
-    @Override
-    public Matrix compute(Matrix matrix, Matrix partner, boolean fullUpper) {        
-        this.hess.compute(matrix, partner == null ? (hh) -> {} : (hh) -> {
-            hh.applyLeft(partner);
-        });
-        return this.impl.compute(matrix, partner, fullUpper);
+    @Test
+    @JacobiImport("Find Eig 5x5")
+    @JacobiEquals(expected = 1, actual = 1)
+    @JacobiEquals(expected = 2, actual = 2)
+    public void testFindEig5x5() {
+        Pair pair = this.mockDummy().compute(this.input);
+        this.real = pair.getLeft();
+        this.img = pair.getRight();
     }
-
-    private HessenbergDecomp hess;
-    private QRStrategy impl;
+        
+    protected EigenFinder mockDummy() { 
+        // assume matrices are already solved
+        return new EigenFinder((matrix, partner, fullUpper) -> matrix);
+    }
 }

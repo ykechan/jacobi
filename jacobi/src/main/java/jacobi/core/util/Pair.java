@@ -23,6 +23,7 @@
  */
 package jacobi.core.util;
 
+import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import java.util.function.Supplier;
 
@@ -112,4 +113,18 @@ public interface Pair {
             private Matrix left;
         };
     }
+    
+    public static final Pair EMPTY = new Pair() {
+
+        @Override
+        public Matrix getLeft() {
+            return Matrices.zeros(0);
+        }
+
+        @Override
+        public Matrix getRight() {
+            return Matrices.zeros(0);
+        }
+        
+    };
 }

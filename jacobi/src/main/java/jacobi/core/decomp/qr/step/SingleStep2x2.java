@@ -23,7 +23,10 @@
  */
 package jacobi.core.decomp.qr.step;
 
+import jacobi.api.Matrices;
 import jacobi.api.Matrix;
+import jacobi.core.impl.ColumnVector;
+import jacobi.core.util.Pair;
 
 /**
  * Compute Schur decomposition of a 2x2 sub-matrix in a single step.
@@ -73,6 +76,13 @@ import jacobi.api.Matrix;
 public class SingleStep2x2 implements QRStep {
 
     /**
+     * Constructor
+     */
+    public SingleStep2x2() {
+        this(new DefaultQRStep());
+    }
+
+    /**
      * Constructor. 
      * @param base  Implementation to be decorated on
      */
@@ -83,13 +93,24 @@ public class SingleStep2x2 implements QRStep {
     @Override
     public int compute(Matrix matrix, Matrix partner, int beginRow, int endRow, boolean fullUpper) {
         if(endRow - beginRow < 2){
-            return beginRow;
+            return beginRow + 1;
         }
         if(endRow - beginRow == 2){
             this.compute2x2(matrix, partner, beginRow, fullUpper);
             return beginRow + 1;
         }        
         return this.base.compute(matrix, partner, beginRow, endRow, fullUpper);
+    }
+    
+    public Pair computeEig(Matrix matrix, int at) {
+        State state = this.formulate(matrix, at);
+        if(state.delta >= 0.0){
+            this.computeRealEigs(state);
+            return Pair.of(new ColumnVector(state.eig0, state.eig1), Matrices.zeros(2, 1));
+        }
+        double re = -state.tr / 2.0;
+        double im = Math.sqrt(-state.delta) / 2.0; 
+        return Pair.of(new ColumnVector(re, re), new ColumnVector(im, -im));
     }
     
     /**
@@ -100,28 +121,27 @@ public class SingleStep2x2 implements QRStep {
      * @param fullUpper  Full upper matrix needed
      */
     protected void compute2x2(Matrix matrix, Matrix partner, int i, boolean fullUpper) {
-        State state = new State(matrix, i);
-        double tr = state.a + state.d;
-        double det = state.a * state.d - state.b * state.c;
-        
-        double delta = tr * tr - 4 * det;
-        if(delta < 0.0){
+        State state = this.formulate(matrix, i);
+        if(state.delta < 0.0){
             return;
         }
-        delta = Math.sqrt(delta);
-        state.eig0 = (tr + delta) / 2.0;
-        state.eig1 = (tr - delta) / 2.0;
-        
-        this.computeEigenvector(state);
-        
-        this.leftMultQ(state, matrix, i, i);
-        this.rightMultQ(state, matrix, 0, i + 2, i);
+        this.computeRealEigs(state)
+            .computeEigenvector(state)
+            .leftMultQ(state, matrix, i, i)
+            .rightMultQ(state, matrix, 0, i + 2, i);
         if(partner != null){
             this.leftMultQ(state, partner, i, i);
         }
     }
     
-    protected void computeEigenvector(State state) {
+    protected SingleStep2x2 computeRealEigs(State state) {
+        double det = Math.sqrt(state.delta);
+        state.eig0 = (state.tr + det) / 2.0;
+        state.eig1 = (state.tr - det) / 2.0;        
+        return this;
+    }
+    
+    protected SingleStep2x2 computeEigenvector(State state) {
         double a = Math.abs(state.b) > EPSILON ? state.a : state.c;
         double b = Math.abs(state.b) > EPSILON ? state.b : state.d;
         
@@ -130,14 +150,25 @@ public class SingleStep2x2 implements QRStep {
         
         state.x = b / Math.sqrt(denom);
         state.y = state.x*(eig - a)/b;
+        return this;
     }
     
-    protected void leftMultQ(State state, Matrix matrix, int i, int beginCol) {
+    protected State formulate(Matrix matrix, int i) {
+        State state = new State(matrix, i);
+        state.tr = state.a + state.d;
+        state.det = state.a * state.d - state.b * state.c;
+        
+        state.delta = state.tr * state.tr - 4 * state.det;
+        return state;
+    }        
+    
+    protected SingleStep2x2 leftMultQ(State state, Matrix matrix, int i, int beginCol) {
         double[] upper = matrix.getRow(i);
         double[] lower = matrix.getRow(i + 1);
         this.leftMultQ(state, upper, lower, beginCol);
         matrix.setRow(i, upper);
         matrix.setRow(i + 1, lower);
+        return this;
     }
     
     protected void leftMultQ(State state, double[] upper, double[] lower, int begin) {
@@ -149,7 +180,7 @@ public class SingleStep2x2 implements QRStep {
         }
     }
     
-    protected void rightMultQ(State state, Matrix matrix, int beginRow, int endRow, int j) {
+    protected SingleStep2x2 rightMultQ(State state, Matrix matrix, int beginRow, int endRow, int j) {
         for(int i = beginRow; i < endRow; i++){
             double[] row = matrix.getRow(i);
             double p = row[j] * state.x + row[j + 1] * state.y;
@@ -158,6 +189,7 @@ public class SingleStep2x2 implements QRStep {
             row[j + 1] = q;
             matrix.setRow(i, row);
         }
+        return this;
     }
     
     private QRStep base;
@@ -165,9 +197,11 @@ public class SingleStep2x2 implements QRStep {
     /**
      * Data object for computation intermediate state
      */
-    protected class State {
+    protected static final class State {
         
         public final double a, b, c, d;
+        
+        public double tr, det, delta;
         
         public double eig0, eig1;
         
