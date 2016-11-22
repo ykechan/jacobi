@@ -28,6 +28,7 @@ import jacobi.api.annotations.Facade;
 import jacobi.api.annotations.Implementation;
 import jacobi.api.annotations.Immutate;
 import jacobi.core.decomp.chol.CholeskyDecomp;
+import jacobi.core.decomp.eigen.EigenFinder;
 import jacobi.core.prop.Determinant;
 import jacobi.core.prop.Inverse;
 import jacobi.core.prop.Rank;
@@ -95,8 +96,8 @@ public interface Prop {
     /**
      * Eigenvalues of this matrix.
      * @return  A pair of column vectors A and B s.t. each row of A + Bi is a eigenvalue of the underlying matrix
-     * @throws  UnsupportedOperationException if underlying matrix is not a square matrix
+     * @throws  IllegalArgumentException if underlying matrix is not a square matrix
      */
-    //@Implementation(EigenFinder.class)
+    @Implementation(EigenFinder.class)
     public Pair eig();
 }
