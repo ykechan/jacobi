@@ -35,6 +35,8 @@ import jacobi.core.impl.ColumnVector;
 import jacobi.core.impl.DefaultMatrix;
 import jacobi.core.util.Pair;
 import jacobi.core.util.Throw;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * 
@@ -110,6 +112,10 @@ public class EigenFinder {
             re[k] = schur.get(k, k);
         }
         return Pair.of(new ColumnVector(re), new ColumnVector(im));
+    }    
+    
+    private boolean isEquals(double a, double b) {
+        return Math.abs(a - b) < 1e-12;
     }
 
     private QRStrategy qrImpl;
