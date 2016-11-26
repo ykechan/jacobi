@@ -86,7 +86,7 @@ public class GivensQR {
      * @param givens  List of Givens rotation s.t. Q^t = G[n] * G[n - 1] * ...
      */    
     public void computeRQ(Matrix matrix, List<Givens> givens) {
-        this.computeRQ(matrix, givens, 0, matrix.getRowCount(), 0);
+        this.computeRQ(matrix, givens, 0, matrix.getRowCount(), 0, true);
     }
     
     /**
@@ -97,15 +97,16 @@ public class GivensQR {
      * @param beginRow  Begin index of rows of interest
      * @param endRow  End index of rows of interest
      * @param beginCol  Begin index of columns of interest
+     * @param isUpper  True if input matrix is upper triangular, false otherwise
      * @return  The index of row that has a negligible off-diagonal entry, or negative if none are zero.
      */
-    public int computeRQ(Matrix matrix, List<Givens> givens, int beginRow, int endRow, int beginCol) {
+    public int computeRQ(Matrix matrix, List<Givens> givens, int beginRow, int endRow, int beginCol, boolean isUpper) {
         int deflated = beginRow;
         for(int i = beginRow; i < endRow; i++){
             double[] row = matrix.getRow(i);
-            int skip = i < beginCol + 1 ? 0 : i - beginCol - 1;                        
+            int skip = !isUpper || i < beginCol + 1 ? 0 : i - beginCol - 1; 
             List<Givens> rot = givens.subList(skip, givens.size());
-            double off = this.computeRA(row, rot, beginCol + skip);
+            double off = this.computeRQ(row, rot, beginCol + skip);
             if(Math.abs(off) < this.epsilon){
                 deflated = i;
             }
@@ -150,10 +151,10 @@ public class GivensQR {
      * Apply a list of Givens rotation on the right of a row.
      * @param row  Input row
      * @param givens  List of Givens rotation
-     * @param beginCol
+     * @param beginCol  Index of column of interest
      * @return  Return newly computed off diagonal value
      */
-    protected double computeRA(double[] row, List<Givens> givens, int beginCol) { 
+    protected double computeRQ(double[] row, List<Givens> givens, int beginCol) { 
         double off = givens.get(0).rotateX(row[beginCol], row[beginCol + 1]);
         for(int i = 0; i < givens.size(); i++){ 
             Givens g = givens.get(i);            
