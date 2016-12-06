@@ -23,8 +23,10 @@
  */
 package jacobi.core.decomp.qr.step;
 
+import jacobi.core.decomp.qr.step.shifts.BulgeChaser;
 import jacobi.api.Matrix;
 import jacobi.core.decomp.qr.HouseholderReflector;
+import jacobi.core.decomp.qr.step.shifts.DoubleShift;
 
 /**
  * Implementation of Francis double-shifted QR algorithm.
@@ -90,43 +92,13 @@ public class FrancisQR implements QRStep {
      * @param full   True if full upper triangular matrix needed, false otherwise
      */
     protected void createBulge(Matrix matrix, Matrix partner, int begin, int end, boolean full) {
-        HouseholderReflector hh = this.getDoubleShift1stCol(matrix, begin, end);
+        HouseholderReflector hh = DoubleShift.of(matrix, end - 2).getImplicitQ(matrix, begin);
         hh.applyLeft(matrix);
-        hh.applyRight(matrix);        
+        hh.applyRight(matrix); 
+        if(partner != null){
+            hh.applyRight(partner);
+        }
     }
-
-    /**
-     * Create Householder reflector Q for double shift.
-     * @param matrix  Input matrix H
-     * @param beginRow  Begin index of rows of interest
-     * @param endRow  End index of rows of interest
-     * @return   Householder reflector Q
-     */
-    protected HouseholderReflector getDoubleShift1stCol(Matrix matrix, int beginRow, int endRow) {
-        double a = matrix.get(endRow - 2, endRow - 2);
-        double b = matrix.get(endRow - 2, endRow - 1);
-        double c = matrix.get(endRow - 1, endRow - 2);
-        double d = matrix.get(endRow - 1, endRow - 1);
-        
-        double tr = a + d;
-        double det = a * d - b * c;
-        
-        double u = matrix.get(beginRow, beginRow);
-        double v = matrix.get(beginRow + 1, beginRow);
-        
-        double[] col = new double[beginRow + 3];
-        col[beginRow    ] = u * u
-            + matrix.get(beginRow, beginRow + 1) * v
-            - tr * u
-            + det;
-        col[beginRow + 1] = v * u
-            + matrix.get(beginRow + 1, beginRow + 1) * v
-            - tr * v;
-        col[beginRow + 2] = matrix.get(beginRow + 2, beginRow + 1) * v;
-        HouseholderReflector hh = new HouseholderReflector(col, beginRow);
-        hh.normalize();
-        return hh;
-    }    
     
     private BulgeChaser bulgeChaser;
     private QRStep base;

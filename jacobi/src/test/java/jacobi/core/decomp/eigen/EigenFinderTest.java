@@ -25,6 +25,7 @@ package jacobi.core.decomp.eigen;
 
 import jacobi.api.Matrix;
 import jacobi.core.decomp.qr.QRStrategy;
+import jacobi.core.decomp.qr.SchurDecomp;
 import jacobi.core.util.Pair;
 import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
@@ -90,7 +91,14 @@ public class EigenFinderTest {
         
     protected EigenFinder mockDummy() { 
         // assume matrices are already solved
-        return new EigenFinder((matrix, partner, fullUpper) -> matrix);
+        return new EigenFinder(new SchurDecomp(){
+
+            @Override
+            public Matrix compute(Matrix matrix, Matrix partner, boolean fullUpper) {
+                return matrix;
+            }
+            
+        });
     }
     
     

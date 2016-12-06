@@ -31,6 +31,7 @@ import jacobi.core.decomp.chol.CholeskyDecomp;
 import jacobi.core.decomp.gauss.GaussianDecomp;
 import jacobi.core.decomp.qr.HessenbergDecomp;
 import jacobi.core.decomp.qr.QRDecomp;
+import jacobi.core.decomp.qr.SchurDecomp;
 import jacobi.core.util.Pair;
 import jacobi.core.util.Triplet;
 import java.util.Optional;
@@ -140,6 +141,7 @@ public interface Decomp extends Supplier<Matrix> {
      * where Q is orthogonal, and H is upper Hessenberg, and gets &lt;Q, H, Q^t&gt;.
      * @return   A triplet of matrices &lt;Q, H, Q^t&gt;
      */
+    @Immutate
     @Implementation(HessenbergDecomp.class)
     public Triplet hessQHQt();
     
@@ -149,7 +151,31 @@ public interface Decomp extends Supplier<Matrix> {
      * that contains all zeros below the sub-diagonal.
      * @return  Schur form S of the underlying matrix A, or empty if computation failed.
      */
+    @Immutate
+    @Implementation(SchurDecomp.class)
     public Matrix schur();
+    
+    /**
+     * Compute the Schur form S of the underlying matrix A, s.t. S = Q * A * Q^t for some orthogonal
+     * matrix Q and almost upper triangular matrix S. Almost upper triangular here refers to a matrix
+     * that contains all zeros below the sub-diagonal.
+     * @return  Pair of matrices &lt;Q, S&gt; s.t. S is schur form of A and A = Q * S * Q^t
+     */
+    @Immutate
+    @Implementation(SchurDecomp.class)
+    public Pair schurQS();
+    
+    /**
+     * Compute the Schur form S of the underlying matrix A, s.t. S = Q * A * Q^t for some orthogonal
+     * matrix Q and almost upper triangular matrix S. Almost upper triangular here refers to a matrix
+     * that contains all zeros below the sub-diagonal.
+     * This method may incur extra memory consumption for Q^t that may not be necessary. You may want to use
+     * schurQS instead.
+     * @return  Triplet of matrices &lt;Q, S, Q^t&gt; s.t. S is schur form of A and A = Q * S * Q^t
+     */
+    @Immutate
+    @Implementation(SchurDecomp.class)
+    public Triplet schurQSQt();
     
     
 }

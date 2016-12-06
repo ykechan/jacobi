@@ -23,9 +23,8 @@
  */
 package jacobi.core.decomp.qr.step;
 
-import jacobi.api.Matrices;
 import jacobi.api.Matrix;
-import jacobi.core.impl.ColumnVector;
+import jacobi.core.decomp.qr.step.shifts.DoubleShift;
 import jacobi.core.util.Pair;
 
 /**
@@ -102,89 +101,80 @@ public class SingleStep2x2 implements QRStep {
         return this.base.compute(matrix, partner, beginRow, endRow, fullUpper);
     }
     
+    /**
+     * Compute the eigenvalues of a 2x2 sub-matrix of input matrix A.
+     * @param matrix  Input matrix A
+     * @param at  Row index of the 2x2 sub-matrix.
+     * @return  &lt;X, Y&gt; s.t. x[k] + iy[k] is an eigenvalue of A
+     */
     public Pair computeEig(Matrix matrix, int at) {
-        State state = this.formulate(matrix, at);
-        if(state.delta >= 0.0){
-            this.computeRealEigs(state);
-            return Pair.of(new ColumnVector(state.eig0, state.eig1), Matrices.zeros(2, 1));
-        }
-        double re = -state.tr / 2.0;
-        double im = Math.sqrt(-state.delta) / 2.0; 
-        return Pair.of(new ColumnVector(re, re), new ColumnVector(im, -im));
+        return DoubleShift.of(matrix, at).eig();
     }
     
     /**
      * Compute Schur decomposition for a 2x2 sub-matrix.
      * @param matrix  Input matrix
      * @param partner  Partner matrix
-     * @param i  Upper-left index
+     * @param at  Row index of the 2x2 sub-matrix
      * @param fullUpper  Full upper matrix needed
      */
-    protected void compute2x2(Matrix matrix, Matrix partner, int i, boolean fullUpper) {
-        State state = this.formulate(matrix, i);
-        if(state.delta < 0.0){
+    protected void compute2x2(Matrix matrix, Matrix partner, int at, boolean fullUpper) {        
+        DoubleShift shift = DoubleShift.of(matrix, at);
+        if(shift.isComplex()){
             return;
         }
-        this.computeRealEigs(state)
-            .computeEigenvector(state)
-            .leftMultQ(state, matrix, i, i)
-            .rightMultQ(state, matrix, 0, i + 2, i);
+        Matrix eigs = shift.eig().getLeft();
+        Vector2 eigVec = this.computeEigenvector(matrix, at, eigs.get(0, 0), eigs.get(1, 0));
+        this.leftMultQ(eigVec, matrix, at, at).rightMultQ(eigVec, matrix, 0, at + 2, at);
         if(partner != null){
-            this.leftMultQ(state, partner, i, i);
+            this.leftMultQ(eigVec, partner, at, at);
         }
-    }
+    }    
     
-    protected SingleStep2x2 computeRealEigs(State state) {
-        double det = Math.sqrt(state.delta);
-        state.eig0 = (state.tr + det) / 2.0;
-        state.eig1 = (state.tr - det) / 2.0;        
-        return this;
-    }
-    
-    protected SingleStep2x2 computeEigenvector(State state) {
-        double a = Math.abs(state.b) > EPSILON ? state.a : state.c;
-        double b = Math.abs(state.b) > EPSILON ? state.b : state.d;
+    /**
+     * Compute an eigen-vector of a 2x2 sub-matrix of input matrix A.
+     * @param matrix  Input matrix A
+     * @param at  Row index of the 2x2 sub-matrix
+     * @param eig0  First eigenvalue
+     * @param eig1  Second eigenvalue
+     * @return  An eigen-vector of the 2x2 sub-matrix.
+     */
+    protected Vector2 computeEigenvector(Matrix matrix, int at, double eig0, double eig1) {        
+        //double a = Math.abs(state.b) > EPSILON ? state.a : state.c;
+        //double b = Math.abs(state.b) > EPSILON ? state.b : state.d;
+        double a = Math.abs(matrix.get(at, at + 1)) > EPS ? matrix.get(at, at) : matrix.get(at + 1, at);
+        double b = Math.abs(matrix.get(at, at + 1)) > EPS ? matrix.get(at, at + 1) : matrix.get(at + 1, at + 1);
         
-        double eig = Math.abs(state.eig0) > Math.abs(state.eig1) ? state.eig0 : state.eig1;
+        double eig = Math.abs(eig0) > Math.abs(eig1) ? eig0 : eig1;
         double denom = eig*eig - 2*a*eig + a*a + b*b;
         
-        state.x = b / Math.sqrt(denom);
-        state.y = state.x*(eig - a)/b;
-        return this;
-    }
+        double x = b / Math.sqrt(denom);
+        double y = x*(eig - a)/b;
+        return new Vector2(x, y);
+    }    
     
-    protected State formulate(Matrix matrix, int i) {
-        State state = new State(matrix, i);
-        state.tr = state.a + state.d;
-        state.det = state.a * state.d - state.b * state.c;
-        
-        state.delta = state.tr * state.tr - 4 * state.det;
-        return state;
-    }        
-    
-    protected SingleStep2x2 leftMultQ(State state, Matrix matrix, int i, int beginCol) {
+    protected SingleStep2x2 leftMultQ(Vector2 eigVec, Matrix matrix, int i, int beginCol) {
         double[] upper = matrix.getRow(i);
         double[] lower = matrix.getRow(i + 1);
-        this.leftMultQ(state, upper, lower, beginCol);
-        matrix.setRow(i, upper);
-        matrix.setRow(i + 1, lower);
+        this.leftMultQ(eigVec, upper, lower, beginCol);
+        matrix.setRow(i, upper).setRow(i + 1, lower);
         return this;
     }
     
-    protected void leftMultQ(State state, double[] upper, double[] lower, int begin) {
+    protected void leftMultQ(Vector2 eigVec, double[] upper, double[] lower, int begin) {
         for(int i = begin; i < upper.length; i++){
-            double p = state.x * upper[i] + state.y * lower[i];
-            double q = state.y * upper[i] - state.x * lower[i];
+            double p = eigVec.x * upper[i] + eigVec.y * lower[i];
+            double q = eigVec.y * upper[i] - eigVec.x * lower[i];
             upper[i] = p;
             lower[i] = q;
         }
     }
     
-    protected SingleStep2x2 rightMultQ(State state, Matrix matrix, int beginRow, int endRow, int j) {
+    protected SingleStep2x2 rightMultQ(Vector2 eigVec, Matrix matrix, int beginRow, int endRow, int j) {
         for(int i = beginRow; i < endRow; i++){
             double[] row = matrix.getRow(i);
-            double p = row[j] * state.x + row[j + 1] * state.y;
-            double q = row[j] * state.y - row[j + 1] * state.x;
+            double p = row[j] * eigVec.x + row[j + 1] * eigVec.y;
+            double q = row[j] * eigVec.y - row[j + 1] * eigVec.x;
             row[j    ] = p;
             row[j + 1] = q;
             matrix.setRow(i, row);
@@ -194,27 +184,16 @@ public class SingleStep2x2 implements QRStep {
     
     private QRStep base;
     
-    /**
-     * Data object for computation intermediate state
-     */
-    protected static final class State {
+    protected static final class Vector2 {
         
-        public final double a, b, c, d;
-        
-        public double tr, det, delta;
-        
-        public double eig0, eig1;
-        
-        public double x, y;
-        
-        public State(Matrix matrix, int i) {
-            this.a = matrix.get(i, i);
-            this.b = matrix.get(i, i + 1);
-            this.c = matrix.get(i + 1, i);
-            this.d = matrix.get(i + 1, i + 1);
+        public final double x, y;
+
+        public Vector2(double x, double y) {
+            this.x = x;
+            this.y = y;
         }
-        
+    
     }
         
-    private static final double EPSILON = 1e-16;
+    private static final double EPS = 1e-16;
 }

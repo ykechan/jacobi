@@ -23,7 +23,9 @@
  */
 package jacobi.core.decomp.qr.step;
 
+import jacobi.api.Matrices;
 import jacobi.api.Matrix;
+import jacobi.core.decomp.qr.step.shifts.DoubleShift;
 import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
@@ -46,40 +48,47 @@ public class FrancisQRCreateBulgeTest {
     @JacobiResult(2)
     public Matrix output;
     
+    @JacobiResult(3)
+    public Matrix partner;
+    
     @Test
     @JacobiImport("5x5")
     @JacobiEquals(expected = 2, actual = 2)
     public void test5x5() {
-        this.output = new FrancisQR(new DefaultQRStep()).getDoubleShift1stCol(input, 0, input.getRowCount());
+        //this.output = new FrancisQR(new DefaultQRStep()).getDoubleShift1stCol(input, 0, input.getRowCount());
+        this.output = DoubleShift.of(input, input.getRowCount() - 2).getImplicitQ(input, 0);
     }
 
     @Test
     @JacobiImport("5x5(2)")
     @JacobiEquals(expected = 2, actual = 2)
     public void test2nd5x5() {
-        this.output = new FrancisQR(new DefaultQRStep()).getDoubleShift1stCol(input, 0, input.getRowCount());
+        this.output = DoubleShift.of(input, input.getRowCount() - 2).getImplicitQ(input, 0);
     }
     
     @Test
     @JacobiImport("Step2 6x6")
     @JacobiEquals(expected = 2, actual = 2)
     public void testStepTwo6x6() {
-        this.output = new FrancisQR(new DefaultQRStep()).getDoubleShift1stCol(input, 1, input.getRowCount() - 1);
+        this.output = DoubleShift.of(input, input.getRowCount() - 3).getImplicitQ(input, 1);
     }
     
     @Test
     @JacobiImport("Bulge 5x5")
     @JacobiEquals(expected = 2, actual = 2)
+    @JacobiEquals(expected = 3, actual = 3)
     public void testBulge5x5() {
-        new FrancisQR(new DefaultQRStep()).createBulge(input, null, 0, input.getRowCount(), true);
-        this.output = this.input;
+        this.partner = Matrices.identity(5);
+        new FrancisQR(new DefaultQRStep()).createBulge(input, partner, 0, input.getRowCount(), true);
+        this.output = this.input;        
     }
     
     @Test
     @JacobiImport("Bulge Step 2 6x6")
     @JacobiEquals(expected = 2, actual = 2)
     public void testBulgeStepTwo6x6() {
-        new FrancisQR(new DefaultQRStep()).createBulge(input, null, 1, input.getRowCount() - 1, true);
+        this.partner = Matrices.identity(6);
+        new FrancisQR(new DefaultQRStep()).createBulge(input, partner, 1, input.getRowCount() - 1, true);
         this.output = this.input;
     }
 }

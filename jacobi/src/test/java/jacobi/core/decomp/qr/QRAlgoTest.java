@@ -59,9 +59,9 @@ public class QRAlgoTest {
         this.result = input;
     }
     
-    protected QRStrategy mock() {
+    protected SchurDecomp mock() {
         AtomicInteger count = new AtomicInteger(0);                
-        return new QRAlgo((m, p, begin, end, full) -> {
+        return new SchurDecomp((m, p, begin, end, full) -> {
             int k = count.incrementAndGet(); 
             if(steps.containsKey(k)){ 
                 Jacobi.assertEquals(steps.get(k), m);

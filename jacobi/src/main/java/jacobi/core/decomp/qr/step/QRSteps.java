@@ -47,11 +47,26 @@ public abstract class QRSteps {
         return STD;
     }
     
+    /**
+     * Get QR step when only eigenvalues are desired.
+     * @return  Instance of QR step.
+     */
+    public static QRStep forEigOnly() {
+        return EIGONLY;
+    }
+    
     private static final QRStep STD = Optional.of(new DefaultQRStep())
             .map((s) -> new FrancisQR(s))
             .map((s) -> new ShiftedQR(s))
             .map((s) -> new ShiftedQR3x3(s))
             .map((s) -> new SingleStep2x2(s))
+            .get();
+    
+    private static final QRStep EIGONLY = Optional.of(new DefaultQRStep())
+            .map((s) -> new FrancisQR(s))
+            .map((s) -> new ShiftedQR(s))
+            .map((s) -> new ShiftedQR3x3(s))
+            .map((s) -> new ByPass2x2(s))
             .get();
 
 }

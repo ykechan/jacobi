@@ -27,16 +27,16 @@ package jacobi.core.decomp.eigen;
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.api.annotations.Immutate;
-import jacobi.core.decomp.qr.QRAlgo;
+import jacobi.core.decomp.qr.SchurDecomp;
 import jacobi.core.decomp.qr.QRStrategy;
 import jacobi.core.decomp.qr.step.QRStep;
+import jacobi.core.decomp.qr.step.QRSteps;
 import jacobi.core.decomp.qr.step.SingleStep2x2;
+import jacobi.core.decomp.qr.step.shifts.DoubleShift;
 import jacobi.core.impl.ColumnVector;
 import jacobi.core.impl.DefaultMatrix;
 import jacobi.core.util.Pair;
 import jacobi.core.util.Throw;
-import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * 
@@ -49,7 +49,7 @@ public class EigenFinder {
      * Constructor.
      */
     public EigenFinder() {
-        this(new QRAlgo());
+        this(new SchurDecomp(QRSteps.forEigOnly()));
     }
 
     /**
@@ -58,7 +58,6 @@ public class EigenFinder {
      */
     protected EigenFinder(QRStrategy qrImpl) {
         this.qrImpl = qrImpl;
-        this.step2x2 = new SingleStep2x2();
     }
     
     /**
@@ -71,14 +70,13 @@ public class EigenFinder {
         Throw.when()
                 .isNull(() -> matrix, () -> "No input matrix.")
                 .isFalse(() -> matrix.getRowCount() == matrix.getColCount(), () -> "Input matrix is not square.");
-        System.out.println("n = " + matrix.getRowCount());
         switch(matrix.getRowCount()){
             case 0 :                
                 return Pair.EMPTY;
             case 1 :
                 return Pair.of(Matrices.scalar(matrix.get(0, 0)), Matrices.zeros(1));
             case 2 :
-                return this.step2x2.computeEig(matrix, 0);
+                return DoubleShift.of(matrix, 0).eig();
             default :
                 break;
         }
@@ -95,12 +93,12 @@ public class EigenFinder {
         int k = 0;
         double[] re = new double[schur.getRowCount()];
         double[] im = new double[schur.getRowCount()];
-        while(k < n){
+        while(k < n){            
             if(Math.abs(schur.get(k + 1, k)) < QRStep.EPSILON){
                 re[k] = schur.get(k, k); 
                 k++;
             }else{
-                Pair eig = this.step2x2.computeEig(schur, k);
+                Pair eig = DoubleShift.of(schur, k).eig();
                 re[k] = eig.getLeft().get(0, 0);
                 re[k + 1] = eig.getLeft().get(1, 0);
                 im[k] = eig.getRight().get(0, 0);   
@@ -112,12 +110,7 @@ public class EigenFinder {
             re[k] = schur.get(k, k);
         }
         return Pair.of(new ColumnVector(re), new ColumnVector(im));
-    }    
-    
-    private boolean isEquals(double a, double b) {
-        return Math.abs(a - b) < 1e-12;
-    }
+    }        
 
     private QRStrategy qrImpl;
-    private SingleStep2x2 step2x2;
 }

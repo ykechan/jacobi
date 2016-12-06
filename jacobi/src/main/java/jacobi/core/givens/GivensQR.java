@@ -74,7 +74,7 @@ public class GivensQR {
         for(int i = beginRow; i < n; i++){
             double[] upper = matrix.getRow(i);
             double[] lower = matrix.getRow(i + 1);
-            givens[k++] = this.computeQR(upper, lower, i, endCol);
+            givens[k++] = this.applyGivens(upper, lower, i, endCol);
             matrix.setRow(i, upper).setRow(i + 1, lower);
         }
         return Arrays.asList(givens);
@@ -113,38 +113,6 @@ public class GivensQR {
             matrix.setRow(i, row);
         }
         return deflated == beginRow ? -1 : deflated;
-    }
-    
-    /**
-     * Compute QR decomposition on two rows, which equivalent to eliminate
-     * the frontal element of the lower row by the upper row.
-     * @param upper  Upper row
-     * @param lower  Lower row
-     * @param begin  Begin index of element of interest
-     * @param end  End index of element of interest
-     * @return  Applied Givens rotation
-     */
-    public Givens computeQR(double[] upper, double[] lower, int begin, int end) {
-        return this.apply(Givens.of(upper[begin], lower[begin]), upper, lower, begin, end);
-    }
-    
-    /**
-     * Apply givens rotation on two rows.
-     * @param givens Givens rotation
-     * @param upper  Upper row
-     * @param lower  Lower row
-     * @param begin  Begin index of element of interest
-     * @param end  End index of element of interest
-     * @return  Applied Givens rotation
-     */
-    public Givens apply(Givens givens, double[] upper, double[] lower, int begin, int end) {
-        for(int i = begin; i < end; i++){
-            double a = upper[i];
-            double b = lower[i];
-            upper[i] = givens.rotateX(a, b); //givens.getCos() * a - givens.getSin() * b;
-            lower[i] = givens.rotateY(a, b); //givens.getSin() * a + givens.getCos() * b;
-        }
-        return givens;
     }    
     
     /**
@@ -157,16 +125,22 @@ public class GivensQR {
     protected double computeRQ(double[] row, List<Givens> givens, int beginCol) { 
         double off = givens.get(0).rotateX(row[beginCol], row[beginCol + 1]);
         for(int i = 0; i < givens.size(); i++){ 
-            Givens g = givens.get(i);            
-            int k = beginCol + i;
-            double a = row[k];
-            double b = row[k + 1]; 
-            row[k]    =  g.rotateX(a, b);
-            row[k + 1] = g.rotateY(a, b);
-            k++;
+            givens.get(i).applyRight(row, beginCol + i);
         }
         return off;
-    }        
+    }
+    
+    /**
+     * Apply Givens rotation to two vectors to reduce the frontal element of the lower vector.
+     * @param upper  Upper vector
+     * @param lower  Lower vector
+     * @param begin  Begin of columns of interest
+     * @param end  End of columns of interest
+     * @return  The Givens rotation applied.
+     */
+    protected Givens applyGivens(double[] upper, double[] lower, int begin, int end) {
+        return Givens.of(upper[begin], lower[begin]).applyLeft(upper, lower, begin, end);
+    }
     
     private double epsilon;
 }

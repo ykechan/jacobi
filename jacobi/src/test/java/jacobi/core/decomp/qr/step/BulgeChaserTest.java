@@ -23,7 +23,10 @@
  */
 package jacobi.core.decomp.qr.step;
 
+import jacobi.core.decomp.qr.step.shifts.BulgeChaser;
+import jacobi.api.Matrices;
 import jacobi.api.Matrix;
+import jacobi.core.decomp.qr.step.shifts.GivensPair;
 import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
@@ -49,72 +52,55 @@ public class BulgeChaserTest {
     @JacobiResult(10)
     public Matrix output;
     
+    @JacobiResult(11)
+    public Matrix partner;
+    
     @Test
     @JacobiImport("By Diag 4x4")
     public void testByDiag4x4() {
-        new BulgeChaser(){
-
-            @Override
-            protected BulgeChaser.GivensPair pushBulge(Matrix matrix, int col, int endCol, int endRow) {
-                BulgeChaser.GivensPair pair = super.pushBulge(matrix, col, endCol, endRow);
-                Jacobi.assertEquals(steps.get(col + 1), matrix);
-                return pair;
-            }
-            
-        }.compute(steps.get(0), null, 0, 4, true);
+        this.mock().compute(steps.get(0), null, 0, 4, true);
     }
     
     @Test
     @JacobiImport("By Diag 6x6")
     public void testByDiag6x6() {
         Matrix input = steps.get(0);
-        new BulgeChaser(){
-
-            @Override
-            protected BulgeChaser.GivensPair pushBulge(Matrix matrix, int col, int endCol, int endRow) {
-                GivensPair pair = super.pushBulge(matrix, col, endCol, endRow);
-                Jacobi.assertEquals(steps.get(col + 1), matrix);
-                return pair;
-            }
-            
-        }.compute(input, null, 0, input.getRowCount(), true);
+        this.mock().compute(input, null, 0, input.getRowCount(), true);
     }
     
     @Test
     @JacobiImport("Full 6x6")
     @JacobiEquals(expected = 10, actual = 10)
+    @JacobiEquals(expected = 11, actual = 11)
     public void testFull6x6() {
         Matrix input = steps.get(0);
-        new BulgeChaser(){
-
-            @Override
-            protected BulgeChaser.GivensPair pushBulge(Matrix matrix, int col, int endCol, int endRow) {
-                BulgeChaser.GivensPair pair = super.pushBulge(matrix, col, endCol, endRow);
-                Jacobi.assertEquals(steps.get(col + 1), matrix);
-                return pair;
-            }
-            
-        }.compute(input, null, 0, input.getRowCount(), true);
+        this.partner = Matrices.identity(6);
+        this.mock().compute(input, partner, 0, input.getRowCount(), true);
         this.output = input;
     }
     
     @Test
     @JacobiImport("Full 6x6 Deflated At 4")
     @JacobiEquals(expected = 10, actual = 10)
+    @JacobiEquals(expected = 11, actual = 11)
     public void testFull6x6DeflatedAt4() {
         Matrix input = steps.get(0);
-        int next = new BulgeChaser(){
-
-            @Override
-            protected BulgeChaser.GivensPair pushBulge(Matrix matrix, int col, int endCol, int endRow) {
-                BulgeChaser.GivensPair pair = super.pushBulge(matrix, col, endCol, endRow);
-                Jacobi.assertEquals(steps.get(col + 1), matrix);
-                return pair;
-            }
-            
-        }.compute(input, null, 0, input.getRowCount(), true);
+        this.partner = Matrices.identity(6);
+        int next = this.mock().compute(input, partner, 0, input.getRowCount(), true);
         Assert.assertEquals(4, next);
         this.output = input;
     }
     
+    protected BulgeChaser mock() {
+        return new BulgeChaser(){
+
+            @Override
+            public GivensPair pushBulge(Matrix matrix, int endRow, int col, int endCol, Runnable listener) {
+                GivensPair pair = super.pushBulge(matrix, endRow, col, endCol, listener); 
+                Jacobi.assertEquals(steps.get(col + 1), matrix);
+                return pair;
+            }
+            
+        };
+    }
 }

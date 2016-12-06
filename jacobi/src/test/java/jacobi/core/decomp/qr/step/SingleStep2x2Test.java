@@ -79,8 +79,6 @@ public class SingleStep2x2Test {
     }
 
     protected QRStep mock() {
-        return new SingleStep2x2( (m, p, begin, end, full) -> {
-            throw new UnsupportedOperationException();
-        });
+        return new SingleStep2x2(new DefaultQRStep());
     }
 }

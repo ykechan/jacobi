@@ -25,15 +25,32 @@
 package jacobi.core.decomp.qr.step;
 
 import jacobi.api.Matrices;
+import jacobi.api.Matrix;
+import jacobi.test.annotations.JacobiEquals;
+import jacobi.test.annotations.JacobiImport;
+import jacobi.test.annotations.JacobiInject;
+import jacobi.test.annotations.JacobiResult;
+import jacobi.test.util.JacobiJUnit4ClassRunner;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
- * This is only a supplementary collection of tests. 
  * @author Y.K. Chan
  */
+@JacobiImport("/jacobi/test/data/FrancisQRTest.xlsx")
+@RunWith(JacobiJUnit4ClassRunner.class)
 public class FrancisQRTest {
+    
+    @JacobiInject(0)
+    public Matrix input;
+    
+    @JacobiResult(10)
+    public Matrix output;
+    
+    @JacobiResult(11)
+    public Matrix partner;
     
     @Test
     @SuppressWarnings("InfiniteRecursion") 
@@ -52,4 +69,13 @@ public class FrancisQRTest {
         Assert.assertEquals(1, call3x3.get());
     }
 
+    @Test
+    @JacobiImport("6x6")
+    @JacobiEquals(expected = 10, actual = 10)
+    @JacobiEquals(expected = 11, actual = 11)
+    public void test6x6() {        
+        this.partner = Matrices.identity(6);
+        new FrancisQR(new DefaultQRStep()).compute(input, partner, 0, 6, true);
+        this.output = this.input;
+    }
 }

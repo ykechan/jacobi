@@ -69,7 +69,7 @@ public class GivensQRTest {
     public void test4x4Iter1() {
         List<Givens> givens = this.assertBySteps(step1, step2, step3)
                 .computeQR(this.input, 0, this.input.getRowCount(), this.input.getColCount());        
-        new GivensQR().computeRQ(this.input, givens, 0, this.input.getRowCount(), 0);
+        new GivensQR().computeRQ(this.input, givens);
         this.rq = this.input;
     }
     
@@ -79,7 +79,7 @@ public class GivensQRTest {
     public void test4x4Iter2() {
         List<Givens> givens = this.assertBySteps(step1, step2, step3)
                 .computeQR(this.input, 0, this.input.getRowCount(), this.input.getColCount());        
-        new GivensQR().computeRQ(this.input, givens, 0, this.input.getRowCount(), 0);
+        new GivensQR().computeRQ(this.input, givens);
         this.rq = this.input;
     }
     
@@ -89,7 +89,7 @@ public class GivensQRTest {
     public void test4x4Iter3() {
         List<Givens> givens = this.assertBySteps(step1, step2, step3)
                 .computeQR(this.input, 0, this.input.getRowCount(), this.input.getColCount());        
-        new GivensQR().computeRQ(this.input, givens, 0, this.input.getRowCount(), 0);
+        new GivensQR().computeRQ(this.input, givens);
         this.rq = this.input;
     }
     
@@ -99,7 +99,7 @@ public class GivensQRTest {
     public void test4x4Iter4() {
         List<Givens> givens = this.assertBySteps(step1, step2, step3)
                 .computeQR(this.input, 0, this.input.getRowCount(), this.input.getColCount());        
-        new GivensQR().computeRQ(this.input, givens, 0, this.input.getRowCount(), 0);
+        new GivensQR().computeRQ(this.input, givens);
         this.rq = this.input;
     }
     
@@ -109,7 +109,7 @@ public class GivensQRTest {
     public void test5x5Iter1() {
         List<Givens> givens = this.assertBySteps(step1, step2, step3, step4)
                 .computeQR(this.input, 0, this.input.getRowCount(), this.input.getColCount());        
-        new GivensQR().computeRQ(this.input, givens, 0, this.input.getRowCount(), 0);
+        new GivensQR().computeRQ(this.input, givens);
         this.rq = this.input;
     }
     
@@ -119,7 +119,7 @@ public class GivensQRTest {
     public void test5x5Iter2() {
         List<Givens> givens = this.assertBySteps(step1, step2, step3, step4)
                 .computeQR(this.input, 0, this.input.getRowCount(), this.input.getColCount());        
-        new GivensQR().computeRQ(this.input, givens, 0, this.input.getRowCount(), 0);
+        new GivensQR().computeRQ(this.input, givens);
         this.rq = this.input;
     }
     
@@ -129,7 +129,7 @@ public class GivensQRTest {
     public void test5x5Iter3() {
         List<Givens> givens = this.assertBySteps(step1, step2, step3, step4)
                 .computeQR(this.input, 0, this.input.getRowCount(), this.input.getColCount());        
-        new GivensQR().computeRQ(this.input, givens, 0, this.input.getRowCount(), 0);
+        new GivensQR().computeRQ(this.input, givens);
         this.rq = this.input;
     }
     
@@ -138,7 +138,7 @@ public class GivensQRTest {
     @JacobiEquals(expected = 100, actual = 100)
     public void test4x4In6x6() {
         List<Givens> givens = this.assertBySteps(step1, step2, step3).computeQR(this.input, 1, 5, 6);
-        new GivensQR().computeRQ(this.input, givens, 0, 5, 1);
+        new GivensQR().computeRQ(this.input, givens, 0, 5, 1, true);
         this.rq = this.input;
     }
     
@@ -147,7 +147,7 @@ public class GivensQRTest {
     @JacobiEquals(expected = 100, actual = 100)
     public void test4x4In6x6Partial() {
         List<Givens> givens = this.assertBySteps(step1, step2, step3).computeQR(this.input, 2, 6, 6);
-        new GivensQR().computeRQ(this.input, givens, 2, 6, 2);
+        new GivensQR().computeRQ(this.input, givens, 2, 6, 2, true);
         this.rq = this.input;
     }
     
@@ -156,7 +156,7 @@ public class GivensQRTest {
     @JacobiEquals(expected = 100, actual = 100)
     public void test4x4In6x6DeflatedAt3() {
         List<Givens> givens = this.assertBySteps(step1, step2, step3).computeQR(this.input, 1, 5, 6);
-        int next = new GivensQR(1e-10).computeRQ(this.input, givens, 0, 5, 1);
+        int next = new GivensQR(1e-10).computeRQ(this.input, givens, 0, 5, 1, true);
         this.rq = this.input;
         Assert.assertEquals(3, next);
         
@@ -167,7 +167,7 @@ public class GivensQRTest {
     @JacobiEquals(expected = 100, actual = 100)
     public void test4x4In6x6DeflatedAt4() {
         List<Givens> givens = this.assertBySteps(step1, step2, step3).computeQR(this.input, 1, 5, 6);
-        int next = new GivensQR(1e-10).computeRQ(this.input, givens, 0, 5, 1);
+        int next = new GivensQR(1e-10).computeRQ(this.input, givens, 0, 5, 1, true);
         this.rq = this.input;
         Assert.assertEquals(4, next);
         
@@ -182,10 +182,10 @@ public class GivensQRTest {
                 this.index = 0;
                 return super.computeQR(matrix, beginRow, endRow, endCol);
             }
-
+            
             @Override
-            public Givens computeQR(double[] upper, double[] lower, int begin, int end) {
-                Givens g = super.computeQR(upper, lower, begin, end);
+            public Givens applyGivens(double[] upper, double[] lower, int begin, int end) {
+                Givens g = super.applyGivens(upper, lower, begin, end);
                 Jacobi.assertEquals(after[index++], matrix);
                 return g;
             }

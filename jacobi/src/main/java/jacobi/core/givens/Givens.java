@@ -31,9 +31,11 @@ package jacobi.core.givens;
  * [       ][   ] = [   ]
  * [ s   c ][ b ]   [ 0 ]
  * 
+ * This class is immutable.
+ * 
  * @author Y.K. Chan
  */
-public class Givens {
+public final class Givens {
     
     /**
      * Get Givens rotation for reducing [a, b] -&gt; [r, 0].
@@ -119,6 +121,38 @@ public class Givens {
      */
     public double reverseRotY(double a, double b) {
         return this.getCos() * b - this.getSin() * a;
+    }
+    
+    /**
+     * Apply Givens rotation to a pair of vector, i.e. G*[u v]^t
+     * @param upper  Upper vector u
+     * @param lower  Lower vector v
+     * @param begin  Begin of columns of interest
+     * @param end  End of columns of interest
+     * @return  This
+     */
+    public Givens applyLeft(double[] upper, double[] lower, int begin, int end) {
+        for(int i = begin; i < end; i++){
+            double a = upper[i];
+            double b = lower[i];
+            upper[i] = this.rotateX(a, b);
+            lower[i] = this.rotateY(a, b);
+        }
+        return this;
+    }
+    
+    /**
+     * Apply Givens rotation to a row vector at certain column
+     * @param vector  Row vector
+     * @param at  Column index to apply rotation
+     * @return   This
+     */
+    public Givens applyRight(double[] vector, int at) {
+        double a = vector[at];
+        double b = vector[at + 1]; 
+        vector[at]    =  this.rotateX(a, b);
+        vector[at + 1] = this.rotateY(a, b);
+        return this;
     }
     
     @Override
