@@ -1,9 +1,3 @@
-         ____.                  ___.   .__ 
-        |    |____    ____  ____\_ |__ |__|
-        |    \__  \ _/ ___\/  _ \| __ \|  |
-    /\__|    |/ __ \\  \__(  <_> ) \_\ \  |
-    \________(____  /\___  >____/|___  /__|
-                  \/     \/          \/    
 
   Jacobi Java Matrix Library  vers 1.0.0.SNAPSHOT 
   
@@ -26,22 +20,45 @@ This library is still under development.
 #Functionalities
 
 ###Algebra
-- Addition, Subtraction, Scalar Multiplication, Matrix Multiplication etc
+- [x] Addition
+- [x] Subtraction
+- [x] Scalar Multiplication
+- [x] Matrix Multiplication
+- [x] Hadamard Product
 
 ###Properties
-- Trace, Rank, Determintant, Inverse, Tranpose, Eigenvalues etc.
+- [x] Trace
+- [x] Rank
+- [x] Determintant
+- [x] Inverse
+- [x] Tranpose
+- [x] Eigenvalues
+- [ ] Singular Values
 
 ###Decomposition
-- Cholesky, Gaussian, QR, Hessenberg, Schur, SVD etc.
+- [x] Cholesky
+- [x] Gaussian (PLU)
+- [x] QR
+- [x] Hessenberg
+- [x] Schur
+- [ ] SVD
 
 ###System of linear equations
-- Solve for exact value, Linear Regression
+- [x] Exact solution
+- [x] Linear Regression
 
 ###Statistics
-- Min, Max, Mean, Standard Deviation, Co-variance etc.
+- [x] Min
+- [x] Max
+- [x] Mean
+- [ ] Median
+- [x] Variance
+- [x] Standard Deviation
+- [x] Co-variance
 
 ###Kernel Trick
-- Insert constant column, insert computed values, select certain columns etc.
+- [x] Insert computed values
+- [x] Projection (Select)
 
 #License
 Jacobi will be licensed under MIT and shall keep on to be a free software in the 
