@@ -74,6 +74,7 @@ public class SchurDecompTest {
         this.ortho = new SchurDecomp().computeBoth(input).getLeft(); 
     }
  
+    /*
     private void print(Matrix matrix){
         for(double[] row : matrix.toArray()){
             for(double elem : row){
@@ -82,4 +83,5 @@ public class SchurDecompTest {
             System.out.println();
         }
     }
+    */
 }
