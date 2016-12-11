@@ -23,12 +23,19 @@
  */
 package jacobi.core.decomp.qr;
 
+import jacobi.api.Matrices;
 import jacobi.api.Matrix;
+import jacobi.api.ext.Op;
+import jacobi.api.ext.Prop;
+import jacobi.core.decomp.qr.step.QRStep;
 import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.annotations.JacobiResult;
+import jacobi.test.util.Jacobi;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
+import java.util.stream.DoubleStream;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -52,26 +59,52 @@ public class SchurDecompTest {
     
     @Test
     @JacobiImport("4x4")
-    @JacobiEquals(expected = 1, actual = 1)
-    @JacobiEquals(expected = 2, actual = 2)
+    //@JacobiEquals(expected = 1, actual = 1)
+    //@JacobiEquals(expected = 2, actual = 2)
     public void test4x4() {
-        this.ortho = new SchurDecomp().computeBoth(input).getLeft(); 
+        Matrix orig = this.input.copy();
+        this.ortho = new SchurDecomp().computeBoth(input).getLeft();
+        this.isSchur(input);
+        Jacobi.assertEquals(Matrices.identity(4), ortho.ext(Op.class).mul(ortho.ext(Prop.class).transpose()).get());
+        Jacobi.assertEquals(orig, ortho.ext(Op.class)
+                .mul(input)
+                .mul(ortho.ext(Prop.class).transpose()).get());        
     }
     
     @Test
     @JacobiImport("5x5")
-    @JacobiEquals(expected = 1, actual = 1)
-    @JacobiEquals(expected = 2, actual = 2)
+    //@JacobiEquals(expected = 1, actual = 1)
+    //@JacobiEquals(expected = 2, actual = 2)
     public void test5x5() {
-        this.ortho = new SchurDecomp().computeBoth(input).getLeft();        
+        Matrix orig = this.input.copy();
+        this.ortho = new SchurDecomp().computeBoth(input).getLeft();
+        this.isSchur(input);
+        Jacobi.assertEquals(Matrices.identity(5), ortho.ext(Op.class).mul(ortho.ext(Prop.class).transpose()).get());
+        Jacobi.assertEquals(orig, ortho.ext(Op.class)
+                .mul(input)
+                .mul(ortho.ext(Prop.class).transpose()).get());        
     }
     
     @Test
     @JacobiImport("6x6")
-    @JacobiEquals(expected = 1, actual = 1)
-    @JacobiEquals(expected = 2, actual = 2)
+    //@JacobiEquals(expected = 1, actual = 1)
+    //@JacobiEquals(expected = 2, actual = 2)
     public void test6x6() {
-        this.ortho = new SchurDecomp().computeBoth(input).getLeft(); 
+        Matrix orig = this.input.copy();
+        this.ortho = new SchurDecomp().computeBoth(input).getLeft();
+        this.isSchur(input);
+        Jacobi.assertEquals(Matrices.identity(6), ortho.ext(Op.class).mul(ortho.ext(Prop.class).transpose()).get());
+        Jacobi.assertEquals(orig, ortho.ext(Op.class)
+                .mul(input)
+                .mul(ortho.ext(Prop.class).transpose()).get());        
+    }
+    
+    private void isSchur(Matrix matrix) { 
+        for(int i = 0; i < matrix.getRowCount(); i++){
+            double[] row = matrix.getRow(i);
+            double max = DoubleStream.of(row).limit(Math.max(0, i - 1)).map((d) -> Math.abs(d)).max().orElse(0.0);
+            Assert.assertTrue("Row " + i + ", max = " + max, max < QRStep.EPSILON);            
+        }
     }
  
     /*
