@@ -55,7 +55,7 @@ public class SchurDecompTest {
     @JacobiEquals(expected = 1, actual = 1)
     @JacobiEquals(expected = 2, actual = 2)
     public void test4x4() {
-        this.ortho = new SchurDecomp().computeBoth(input).getLeft();        
+        this.ortho = new SchurDecomp().computeBoth(input).getLeft(); 
     }
     
     @Test
@@ -73,5 +73,13 @@ public class SchurDecompTest {
     public void test6x6() {
         this.ortho = new SchurDecomp().computeBoth(input).getLeft(); 
     }
-    
+ 
+    private void print(Matrix matrix){
+        for(double[] row : matrix.toArray()){
+            for(double elem : row){
+                System.out.print(elem + "\t");
+            }
+            System.out.println();
+        }
+    }
 }
