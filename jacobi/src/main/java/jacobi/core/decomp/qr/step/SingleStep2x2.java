@@ -127,7 +127,7 @@ public class SingleStep2x2 implements QRStep {
         Vector2 eigVec = this.computeEigenvector(matrix, at, eigs.get(0, 0), eigs.get(1, 0));
         this.leftMultQ(eigVec, matrix, at, at).rightMultQ(eigVec, matrix, 0, at + 2, at);
         if(partner != null){
-            this.leftMultQ(eigVec, partner, at, at);
+            this.rightMultQ(eigVec, partner, 0, partner.getRowCount(), at);
         }
     }    
     
