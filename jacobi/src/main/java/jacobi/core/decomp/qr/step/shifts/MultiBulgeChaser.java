@@ -24,22 +24,89 @@
 
 package jacobi.core.decomp.qr.step.shifts;
 
-import jacobi.api.Matrix;
+import jacobi.core.decomp.qr.step.shifts.SingleBulgeChaser.Arguments;
+import jacobi.core.util.Threads;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 /**
- *
+ * 
  * @author Y.K. Chan
  */
 public class MultiBulgeChaser {
 
     public MultiBulgeChaser() {
-        this.chaser = new BulgeChaser();
+        this(new SingleBulgeChaser());
+    }
+
+    public MultiBulgeChaser(SingleBulgeChaser chaser) {
+        this.chaser = chaser;
     }
     
-    public int compute(Matrix input, Matrix partner, int beginRow, int endRow, List<DoubleShift> shifts) { 
-        return 0;
-    } 
+    public List<Batch> compute(Arguments args, List<DoubleShift> shifts) {        
+        return Threads.invokeAll(this.createWorkers(args, shifts));
+    }
+    
+    protected List<Supplier<Batch>> createWorkers(Arguments args, List<DoubleShift> shifts) {
+        State state = new State(shifts.size());
+        List<Supplier<Batch>> workers = new ArrayList<>();
+        for(int i = 0; i < shifts.size(); i++){
+            workers.add(this.createWorker(i, args, shifts.get(i), state));
+        }
+        return workers;
+    }
+    
+    protected Supplier<Batch> createWorker(int id, Arguments args, DoubleShift shift, State state) {
+        int skip = (state.getWorkerCount() - id - 1) * 3;
+        return () -> {
+            for(int i = 0; i < skip; i++){
+                state.reach();
+            }
+            Batch batch = this.chaser.compute(args, shift, (i) -> state.reach());
+            while(!state.isDone()){
+                if(id == 0){
+                    state.complete();
+                }
+                state.reach();
+            }
+            return batch;
+        };
+    }
 
-    private BulgeChaser chaser; 
+    private SingleBulgeChaser chaser;
+    
+    protected static class State {
+
+        public State(int numWorkers) {
+            this.barrier = new CyclicBarrier(numWorkers);
+            this.done = new AtomicBoolean(false);
+        }
+        
+        public int getWorkerCount() {
+            return this.barrier.getParties();
+        }
+        
+        public void reach() {
+            try {
+                this.barrier.await();
+            } catch (InterruptedException | BrokenBarrierException ex) {
+                throw new IllegalStateException(ex);
+            }
+        }
+        
+        public boolean isDone() {
+            return this.done.get();
+        }
+        
+        public void complete() {
+            this.done.set(true);
+        }
+        
+        private CyclicBarrier barrier;
+        private AtomicBoolean done;
+    }
 }

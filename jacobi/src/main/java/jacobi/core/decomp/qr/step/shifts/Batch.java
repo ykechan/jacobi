@@ -41,6 +41,11 @@ import java.util.List;
 public final class Batch {
     
     /**
+     * A pair of Givens rotation to create bulge.
+     */
+    public final GivensPair implicitG;
+    
+    /**
      * List of Givens rotation for chasing the bulge down to the bottom.
      */
     public final List<GivensPair> rotList;
@@ -53,7 +58,7 @@ public final class Batch {
     /**
      * Bottom off-diagonal element of the Hessenberg form.
      */
-    public final double bottom;
+    public final double bottom;        
 
     /**
      * Constructor.
@@ -62,6 +67,21 @@ public final class Batch {
      * @param bottom  Bottom off-diagonal element of the Hessenberg form.
      */
     public Batch(List<GivensPair> rotList, Givens last, double bottom) {
+        this.implicitG = null;
+        this.rotList = Collections.unmodifiableList(rotList);
+        this.last = last;
+        this.bottom = bottom;
+    }
+    
+    /**
+     * Constructor.
+     * @param implicitG  A pair of Givens rotation used to create bulge.
+     * @param rotList  List of pairs of Givens rotation
+     * @param last  Last Givens rotation to reduce the matrix into Hessenberg form.
+     * @param bottom  Bottom off-diagonal element of the Hessenberg form.
+     */
+    public Batch(GivensPair implicitG, List<GivensPair> rotList, Givens last, double bottom) {
+        this.implicitG = implicitG;
         this.rotList = Collections.unmodifiableList(rotList);
         this.last = last;
         this.bottom = bottom;

@@ -117,5 +117,10 @@ public final class GivensPair {
         return this;
     }
 
+    @Override
+    public String toString() {
+        return this.upper + ";" + this.lower;
+    }
+
     private Givens upper, lower;
 }
