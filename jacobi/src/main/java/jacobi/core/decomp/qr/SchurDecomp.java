@@ -103,21 +103,8 @@ public class SchurDecomp implements QRStrategy {
     @Override
     public Matrix compute(Matrix matrix, Matrix partner, boolean fullUpper) {        
         this.hess.compute(matrix, partner == null ? (hh) -> {} : (hh) ->  hh.applyRight(partner));
-        System.out.println("after hess");
-        this.print(matrix);
-        System.out.println();
-        this.print(partner);
         return this.impl.compute(matrix, partner, fullUpper);
-    }
-    
-    private void print(Matrix matrix){
-        for(double[] row : matrix.toArray()){
-            for(double elem : row){
-                System.out.print(elem + "\t");
-            }
-            System.out.println();
-        }
-    }
+    }    
 
     private HessenbergDecomp hess;
     private QRStrategy impl;
