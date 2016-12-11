@@ -117,12 +117,12 @@ public class FrancisGivensQR implements QRStep {
         if(Math.abs(batch.bottom) < QRStep.EPSILON){
             return endRow - 1;
         }
-        for(int i = 0; i < batch.rotList.size(); i++){
+        for(int i = 0; i < batch.rotList.size(); i++){            
             if(Math.abs(batch.rotList.get(i).getAnchor()) < QRStep.EPSILON){
                 return beginRow + i + 1;
             }
         }
-        return -1;
+        return Math.abs(batch.last.getMag()) < QRStep.EPSILON ? endRow - 2 : -1;
     }
     
     private QRStep base;    
