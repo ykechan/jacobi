@@ -25,6 +25,7 @@ package jacobi.core.decomp.qr;
 
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
+import jacobi.core.decomp.qr.step.QRStep;
 import jacobi.core.givens.GivensQR;
 import jacobi.core.givens.Givens;
 import java.util.Arrays;
@@ -50,7 +51,6 @@ public class SymmTriDiagQR implements QRStrategy {
      */
     public SymmTriDiagQR(QRStrategy base) {
         this.base = base;
-        this.givensQR = new GivensQR();
     }
 
     @Override
@@ -61,7 +61,8 @@ public class SymmTriDiagQR implements QRStrategy {
         double[][] diags = this.toTriDiag(matrix);
         if(diags == null){
             return this.base.compute(matrix, partner, fullUpper);
-        }        
+        }
+        this.compute(diags[0], diags[1], partner, 0, diags[0].length);
         return Matrices.diag(diags[0]);
     }
     
@@ -197,8 +198,8 @@ public class SymmTriDiagQR implements QRStrategy {
     protected double[][] toTriDiag(Matrix matrix) {
         for(int i = 0; i < matrix.getRowCount(); i++){
             double[] row = matrix.getRow(i);
-            boolean nonZero = Arrays.stream(row).skip(i + 2)
-                    .filter((elem) -> Math.abs(elem) > 1e-14 )
+            boolean nonZero = Arrays.stream(row).skip(i + 2)                    
+                    .filter((elem) -> Math.abs(elem) > QRStep.EPSILON )
                     .findAny()
                     .isPresent();
             if(nonZero){
@@ -210,7 +211,7 @@ public class SymmTriDiagQR implements QRStrategy {
         for(int i = 0; i < matrix.getRowCount(); i++){
             double[] row = matrix.getRow(i);
             diags[0][i] = row[i];
-            if(i > 0 && Math.abs(row[i - 1] - upper) > EPSILON){
+            if(i > 0 && Math.abs(row[i - 1] - upper) > QRStep.EPSILON){
                 return null;
             }
             upper = i + 1 < matrix.getColCount() ? row[i + 1] : 0.0; 
@@ -240,11 +241,12 @@ public class SymmTriDiagQR implements QRStrategy {
         double b = diag[at + 1];
         double c = subDiag[at];
         
-        if(Math.abs(c) < 1e-14){
+        if(Math.abs(c) < EPSILON){
             return b;
         }        
         double a = diag[at];
-        return (a + b + Math.sqrt((a - b) * (a - b) + 4*c*c));
+        double det = Math.sqrt((a - b) * (a - b) + 4*c*c);
+        return (b + a + (a < 0 ? det : -det)) / 2.0;
     }
     
     /**
@@ -258,13 +260,12 @@ public class SymmTriDiagQR implements QRStrategy {
         for(int i = begin; i < end; i++){
             if(Math.abs(subDiag[i]) < EPSILON){
                 return i;
-            }            
+            }
         }
         return end;
     }
 
     private QRStrategy base;
-    private GivensQR givensQR;
     
-    private static final double EPSILON = 1e-14;    
+    private static final double EPSILON = 1e-12;    
 }

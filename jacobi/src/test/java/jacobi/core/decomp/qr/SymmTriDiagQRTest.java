@@ -25,11 +25,13 @@ package jacobi.core.decomp.qr;
 
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
+import jacobi.core.decomp.qr.step.DefaultQRStep;
 import jacobi.core.givens.Givens;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.util.Jacobi;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
@@ -54,6 +56,9 @@ public class SymmTriDiagQRTest {
     
     @JacobiInject(4)
     public Matrix output;
+    
+    @JacobiInject(10)
+    public Matrix ans;
     
     @Test
     @JacobiImport("ToTriDiag 6x6")
@@ -114,6 +119,27 @@ public class SymmTriDiagQRTest {
         double[] diag = this.input.getRow(0);
         double[] subDiag = this.input.getRow(1);
         this.mockForStepTest(shifted, intermit, output).step(diag, subDiag, null, 0, diag.length);
+    }
+    
+    @Test
+    @JacobiImport("6x6")
+    public void test6x6() {
+        new HessenbergDecomp().compute(this.input);
+        Matrix values = this.mock().compute(this.input, null, true);
+        
+        List<Double> eigs = new ArrayList<>(values.getRowCount());
+        for(int i = 0; i < values.getRowCount(); i++){
+            eigs.add(values.get(i, i));
+        }
+        List<Double> exp = new ArrayList<>(ans.getRowCount());
+        for(int i = 0; i < ans.getRowCount(); i++){
+            exp.add(ans.get(i, 0));
+        }
+        Jacobi.assertEquals(exp, eigs, 1e-12);
+    }
+    
+    private SymmTriDiagQR mock() {
+        return new SymmTriDiagQR(new BasicQR(new DefaultQRStep()));
     }
     
     private SymmTriDiagQR mockForStepTest(Matrix afterShift, Matrix afterQR, Matrix result) {
