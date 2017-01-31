@@ -30,6 +30,7 @@ import jacobi.core.impl.DiagonalMatrix;
 import jacobi.core.impl.Empty;
 import jacobi.core.impl.ImmutableMatrix;
 import java.util.Arrays;
+import java.util.stream.IntStream;
 
 /**
  * Factory for creating Matrices.
@@ -147,4 +148,49 @@ public final class Matrices {
         }
         return matrix.copy();
     }
+    
+    /**
+     * Create a column vector of evenly distributed values in [min, max].
+     * @param min  Minimum of interval
+     * @param max  Maximum of interval
+     * @param num  Number of points
+     * @return  An column vector of evenly distributed values
+     * @throws IllegalArgumentException if number of points is negative or min &lt; max
+     */
+    public static Matrix lincol(double min, double max, int num) {        
+        return num == 0 
+                ? Empty.getInstance()
+                : new ColumnVector(Matrices.linspace(min, max, num));
+    }
+    
+    /**
+     * Create a row vector of evenly distributed values in [min, max].
+     * @param min  Minimum of interval
+     * @param max  Maximum of interval
+     * @param num  Number of points
+     * @return  An row vector of evenly distributed values
+     * @throws IllegalArgumentException if number of points is negative or min &lt; max
+     */
+    public static Matrix linrow(double min, double max, int num) {
+        return new DefaultMatrix(new double[][]{ Matrices.linspace(min, max, num) });
+    }
+    
+    /**
+     * Create an array of evenly distributed values in [min, max].
+     * @param min  Minimum of interval
+     * @param max  Maximum of interval
+     * @param num  Number of points
+     * @return  An array of evenly distributed values
+     * @throws IllegalArgumentException if number of points is negative or min &lt; max
+     */
+    protected static double[] linspace(double min, double max, int num) {
+        if(num < 0 || max < min){
+            throw new IllegalArgumentException();
+        }
+        return IntStream.range(0, num)
+                .mapToDouble((i) -> (double) i / (double) (num - 1))
+                .map((v) -> min + v * (max - min))
+                .toArray();
+    }
+    
 }
