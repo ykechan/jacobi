@@ -99,4 +99,45 @@ public class MatricesTest {
         Assert.assertFalse(Matrices.copy(new DiagonalMatrix(new double[]{1.0, 2.0, 3.0})) instanceof ImmutableMatrix);
     }
     
+    @Test
+    public void testLinspace() {
+        int num = 17;
+        Matrix col = Matrices.lincol(0.0, 1.0, num);
+        Assert.assertEquals(num, col.getRowCount());
+        Assert.assertEquals(1, col.getColCount());
+        double delta = col.get(1, 0) - col.get(0, 0);
+        for(int i = 1; i < num; i++){
+            Assert.assertEquals(delta, col.get(i, 0) - col.get(i - 1, 0), 1e-16);
+        }
+    }
+    
+    @Test
+    public void testEmptyLinspace() {
+        Matrix col = Matrices.lincol(0.0, 1.0, 0);
+        Assert.assertEquals(0, col.getRowCount());
+        Assert.assertEquals(0, col.getColCount());
+    }
+    
+    @Test
+    public void testDegenerateLinspace() {
+        int num = 10;
+        Matrix row = Matrices.linrow(1.0, 1.0, num);
+        Assert.assertEquals(1, row.getRowCount());
+        Assert.assertEquals(num, row.getColCount());
+        for(int i = 0; i < num; i++){
+            Assert.assertEquals(1.0, row.get(0, i), 1e-24);
+        }
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testLinspaceNegativeNumberOfPoints() {
+        int num = -1;
+        Matrices.linrow(0.0, 1.0, num);        
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testLinspaceNegativeMeasure() {
+        Matrices.lincol(1.0, -1.0, 10);        
+    }
+    
 }
