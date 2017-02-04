@@ -24,6 +24,7 @@
 
 package jacobi.core.decomp.qr.step.shifts;
 
+import jacobi.core.givens.GivensPair;
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.core.decomp.qr.HouseholderReflector;
@@ -55,8 +56,8 @@ public class DoubleShift {
         double a = matrix.get(at, at);
         double b = matrix.get(at, at + 1);
         double c = matrix.get(at + 1, at);
-        double d = matrix.get(at + 1, at + 1);
-        return new DoubleShift(a + d, a *d - b * c);
+        double d = matrix.get(at + 1, at + 1);        
+        return new DoubleShift(a + d, a*d - b*c);
     }
 
     /**
@@ -152,5 +153,6 @@ public class DoubleShift {
             matrix.get(at + 2, at + 1) * v);
     }
     
-    private double tr, det, delta;
+    private double tr, det;
+    protected final double delta;
 }
