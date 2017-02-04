@@ -23,10 +23,15 @@
  */
 package jacobi.core.decomp.qr.step;
 
-import jacobi.core.decomp.qr.step.shifts.BulgeChaser;
 import jacobi.api.Matrix;
-import jacobi.core.decomp.qr.HouseholderReflector;
+import jacobi.core.decomp.qr.step.shifts.BulgeMover;
 import jacobi.core.decomp.qr.step.shifts.DoubleShift;
+import jacobi.core.givens.Givens;
+import jacobi.core.givens.GivensBatchRQ;
+import jacobi.core.givens.GivensMode;
+import jacobi.core.givens.GivensPair;
+import jacobi.core.util.Real;
+import java.util.List;
 
 /**
  * Implementation of Francis double-shifted QR algorithm.
@@ -70,7 +75,6 @@ public class FrancisQR implements QRStep {
      * @param base  Base implementation for fall through.
      */
     public FrancisQR(QRStep base) {
-        this.bulgeChaser = new BulgeChaser();
         this.base = base;
     }
 
@@ -79,27 +83,82 @@ public class FrancisQR implements QRStep {
         if(endRow - beginRow < 4){
             return this.base.compute(matrix, partner, beginRow, endRow, fullUpper);
         }
-        this.createBulge(matrix, partner, beginRow, endRow, fullUpper);
-        return this.bulgeChaser.compute(matrix, partner, beginRow, endRow, fullUpper);
+        GivensPair giv = this.createBulge(matrix, beginRow, endRow, fullUpper);
+        List<GivensPair> rotList = new BulgeMover(beginRow, endRow - 3, endRow, fullUpper).compute(matrix, () -> {});
+        Givens last = this.chaseOff(matrix, endRow, fullUpper);
+        GivensBatchRQ batRq = new GivensBatchRQ(giv, rotList, last);
+        double off = batRq.compute(matrix, beginRow, endRow, fullUpper ? GivensMode.UPPER : GivensMode.DEFLATE);
+        if(partner != null){
+            batRq.compute(partner, beginRow, endRow, GivensMode.FULL);
+        }
+        return Real.isNegl(off) 
+                ? endRow - 1 
+                : this.getDeflated(rotList, beginRow, endRow);        
     }
     
     /**
      * Create initial bulge by computing Q*H*Q.
      * @param matrix  Input matrix H
-     * @param partner  Partner matrix
      * @param begin  Begin index of rows of interest
      * @param end  End index of rows of interest
      * @param full   True if full upper triangular matrix needed, false otherwise
+     * @return  The Givens rotation pair applied
      */
-    protected void createBulge(Matrix matrix, Matrix partner, int begin, int end, boolean full) {
-        HouseholderReflector hh = DoubleShift.of(matrix, end - 2).getImplicitQ(matrix, begin);
-        hh.applyLeft(matrix);
-        hh.applyRight(matrix); 
-        if(partner != null){
-            hh.applyRight(partner);
+    protected GivensPair createBulge(Matrix matrix, int begin, int end, boolean full) {
+        int endCol = full ? matrix.getColCount() : end;
+        GivensPair giv = DoubleShift.of(matrix, end - 2).getImplicitG(matrix, begin);
+        double[] upper = matrix.getRow(begin);
+        double[] mid = matrix.getRow(begin + 1);
+        double[] lower = matrix.getRow(begin + 2);
+        double[] bottom = matrix.getRow(begin + 3);
+        
+        giv.applyLeft(upper, mid, lower, begin, endCol)
+                .applyRight(upper, begin)
+                .applyRight(mid, begin)
+                .applyRight(lower, begin)
+                .applyRight(bottom, begin);
+        matrix.setRow(begin, upper).setRow(begin + 1, mid).setRow(begin + 2, lower).setRow(begin + 3, bottom);
+        
+        return giv;
+    }
+    
+    /**
+     * Chase off the bulge to return to Hessenberg form.
+     * @param matrix  Input matrix A
+     * @param end  End of rows of interest
+     * @param full  True if full upper triangular matrix needed, false otherwise
+     * @return  The Givens rotation applied
+     */
+    protected Givens chaseOff(Matrix matrix, int end, boolean full) {
+        int endCol = full ? matrix.getColCount() : end;
+        int begin = end - 3;
+        double[] upper = matrix.getRow(end - 2);
+        double[] lower = matrix.getRow(end - 1);
+        Givens giv = Givens.of(upper[begin], lower[begin]);
+        try {
+            upper[begin] = giv.getMag();
+            lower[begin] = 0.0;
+            return giv.applyLeft(upper, lower, begin + 1, endCol);
+        } finally {
+            matrix.setRow(end - 2, upper).setRow(end - 1, lower);
         }
     }
     
-    private BulgeChaser bulgeChaser;
+    /**
+     * Find the row index of deflated off-diagonal value.
+     * @param rotList  List of Givens rotation applied
+     * @param beginRow  Begin index of rows of interest
+     * @param endRow  End index of rows of interest
+     * @return  Row index of deflated off-diagonal value.
+     */
+    protected int getDeflated(List<GivensPair> rotList, int beginRow, int endRow) {
+        for(int i = 0; i < rotList.size(); i++){            
+            if(Real.isNegl(rotList.get(i).getAnchor())){
+                return beginRow + i + 1;
+            }
+        }
+        return -1;
+    }
+    
     private QRStep base;
 }

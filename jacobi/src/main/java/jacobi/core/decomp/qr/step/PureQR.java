@@ -23,9 +23,11 @@
  */
 package jacobi.core.decomp.qr.step;
 
-import jacobi.core.givens.GivensQR;
 import jacobi.api.Matrix;
 import jacobi.core.givens.Givens;
+import jacobi.core.givens.GivensMode;
+import jacobi.core.givens.GivensRQ;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -42,21 +44,38 @@ import java.util.List;
  * @author Y.K. Chan
  */
 public class PureQR implements QRStep {
-    
-    public PureQR() {
-        this.givensQR = new GivensQR();
-    }
 
     @Override
     public int compute(Matrix matrix, Matrix partner, int beginRow, int endRow, boolean fullUpper) {
         int endCol = fullUpper ? matrix.getColCount() : endRow;
-        List<Givens> givens = this.givensQR.computeQR(matrix, beginRow, endRow, endCol);
-        int next = this.givensQR.computeRQ(matrix, givens, fullUpper ? 0 : beginRow, endRow, beginRow, true);
+        List<Givens> givens = this.qrDecomp(matrix, beginRow, endRow, endCol);
+        GivensRQ rq = new GivensRQ(givens);
+        int next = rq.compute(matrix, beginRow, endRow, fullUpper ? GivensMode.UPPER : GivensMode.DEFLATE);
         if(partner != null){
-            this.givensQR.computeRQ(partner, givens, 0, partner.getRowCount(), 0, false);
-        }        
+            rq.compute(partner, beginRow, endRow, GivensMode.FULL);
+        }
         return next;
     }
+    
+    /**
+     * Compute QR decomposition of an Hessenberg matrix by Givens rotation.
+     * @param matrix  Input matrix A
+     * @param beginRow  Begin index of rows of interest
+     * @param endRow  End index of rows of interest
+     * @param endCol  End index of columns of interest
+     * @return  List of Givens rotation applied.
+     */
+    protected List<Givens> qrDecomp(Matrix matrix, int beginRow, int endRow, int endCol) {        
+        int n = endRow - 1;
+        Givens[] givens = new Givens[n - beginRow];
+        int k = 0;
+        for(int i = beginRow; i < n; i++){
+            double[] upper = matrix.getRow(i);
+            double[] lower = matrix.getRow(i + 1);
+            givens[k++] = Givens.of(upper[i], lower[i]).applyLeft(upper, lower, i, endCol);
+            matrix.setRow(i, upper).setRow(i + 1, lower);
+        }
+        return Arrays.asList(givens);
+    }
 
-    private GivensQR givensQR;
 }

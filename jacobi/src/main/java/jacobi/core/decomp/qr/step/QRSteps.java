@@ -56,8 +56,7 @@ public abstract class QRSteps {
     }
     
     private static final QRStep STD = Optional.of(new DefaultQRStep())
-            //.map((s) -> new FrancisQR(s))
-            .map((s) -> new FrancisGivensQR(s))
+            .map((s) -> new FrancisQR(s))
             .map((s) -> new ShiftedQR(s))
             .map((s) -> new ShiftedQR3x3(s))
             .map((s) -> new SingleStep2x2(s))
