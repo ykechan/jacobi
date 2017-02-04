@@ -24,6 +24,9 @@
 package jacobi.test.util;
 
 import jacobi.api.Matrix;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.Assert;
 
 /**
@@ -36,19 +39,27 @@ public final class Jacobi {
         Jacobi.assertEquals(expects, actual, 1e-8);
     }
     
-    public static void assertEquals(Matrix expects, Matrix actual, double epilson) {
+    public static void assertEquals(Matrix expects, Matrix actual, double epsilon) {
         Assert.assertNotNull("No expected result.", expects);
         Assert.assertNotNull("No actual result.", actual);
         Assert.assertEquals("Row count mismatch.", expects.getRowCount(), actual.getRowCount());
         Assert.assertEquals("Column count mismatch.", expects.getColCount(), actual.getColCount());
         for(int i = 0; i < actual.getRowCount(); i++){
             for(int j = 0; j < actual.getColCount(); j++){
-                Assert.assertEquals(
-                    " Element (" + i + "," + j + ") mismatch.",
+                Assert.assertEquals(" Element (" + i + "," + j + ") mismatch.",
                     expects.getRow(i)[j],
                     actual.getRow(i)[j],
-                    epilson );
+                    epsilon );
             }
+        }
+    }
+    
+    public static void assertEquals(Collection<Double> expects, Collection<Double> actual, double epsilon) {
+        List<Double> exp = expects.stream().sorted().collect(Collectors.toList());
+        List<Double> act = actual.stream().sorted().collect(Collectors.toList());
+        Assert.assertEquals("Expects " + exp + ", Actual " + act, exp.size(), act.size());
+        for(int i = 0; i < exp.size(); i++){
+            Assert.assertEquals("Expects " + exp + ", Actual " + act, exp.get(i), act.get(i), epsilon);
         }
     }
 
