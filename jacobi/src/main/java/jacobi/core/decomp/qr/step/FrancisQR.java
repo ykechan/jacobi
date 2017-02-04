@@ -31,6 +31,7 @@ import jacobi.core.givens.GivensBatchRQ;
 import jacobi.core.givens.GivensMode;
 import jacobi.core.givens.GivensPair;
 import jacobi.core.util.Real;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -93,7 +94,9 @@ public class FrancisQR implements QRStep {
         }
         return Real.isNegl(off) 
                 ? endRow - 1 
-                : this.getDeflated(rotList, beginRow, endRow);        
+                : Real.isNegl(last.getMag())
+                    ? endRow - 2
+                    : this.getDeflated(rotList, beginRow, endRow); 
     }
     
     /**
@@ -152,7 +155,7 @@ public class FrancisQR implements QRStep {
      * @return  Row index of deflated off-diagonal value.
      */
     protected int getDeflated(List<GivensPair> rotList, int beginRow, int endRow) {
-        for(int i = 0; i < rotList.size(); i++){            
+        for(int i = 0; i < rotList.size(); i++){ 
             if(Real.isNegl(rotList.get(i).getAnchor())){
                 return beginRow + i + 1;
             }
