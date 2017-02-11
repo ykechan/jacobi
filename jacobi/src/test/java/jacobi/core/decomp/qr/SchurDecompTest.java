@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2016 Y.K. Chan.
+ * Copyright 2017 Y.K. Chan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,7 @@ import jacobi.api.Matrix;
 import jacobi.api.ext.Op;
 import jacobi.api.ext.Prop;
 import jacobi.core.decomp.qr.step.QRStep;
-import jacobi.test.annotations.JacobiEquals;
+import jacobi.core.util.Triplet;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.annotations.JacobiResult;
@@ -79,10 +79,11 @@ public class SchurDecompTest {
         Matrix orig = this.input.copy();
         this.ortho = new SchurDecomp().computeBoth(input).getLeft();
         this.isSchur(input);
+        
         Jacobi.assertEquals(Matrices.identity(5), ortho.ext(Op.class).mul(ortho.ext(Prop.class).transpose()).get());
         Jacobi.assertEquals(orig, ortho.ext(Op.class)
                 .mul(input)
-                .mul(ortho.ext(Prop.class).transpose()).get());        
+                .mul(ortho.ext(Prop.class).transpose()).get());  
     }
     
     @Test
@@ -91,12 +92,16 @@ public class SchurDecompTest {
     //@JacobiEquals(expected = 2, actual = 2)
     public void test6x6() {
         Matrix orig = this.input.copy();
-        this.ortho = new SchurDecomp().computeBoth(input).getLeft();
+        Triplet uev = new SchurDecomp().computeAll(input);
+        this.ortho = uev.getLeft();
         this.isSchur(input);
         Jacobi.assertEquals(Matrices.identity(6), ortho.ext(Op.class).mul(ortho.ext(Prop.class).transpose()).get());
         Jacobi.assertEquals(orig, ortho.ext(Op.class)
                 .mul(input)
-                .mul(ortho.ext(Prop.class).transpose()).get());        
+                .mul(uev.getRight()).get());
+        
+        Matrix schur = new SchurDecomp().compute(orig);
+        Jacobi.assertEquals(input, schur);
     }
     
     private void isSchur(Matrix matrix) { 

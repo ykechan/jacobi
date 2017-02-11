@@ -1,7 +1,7 @@
 /* 
  * The MIT License
  *
- * Copyright 2016 Y.K. Chan
+ * Copyright 2017 Y.K. Chan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,10 +36,8 @@ import jacobi.api.Matrix;
  * Compute H2 = R * Q, and until H2 is upper triangular, repeat the process.
  * 
  * The vanilla QR algorithm, stated above, though works, takes large number 
- * of iterations to converge. Many enhancements are available, and their
- * efficiency increases with their complexity. Instead of implementing the
- * state-of-the-art QR algorithm, lesser sophisticated but simpler versions
- * are implemented experimentally.
+ * of iterations to converge. Many enhancements are available, and the
+ * efficiency increases with the complexity. 
  * 
  * @author Y.K. Chan
  */

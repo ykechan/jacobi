@@ -1,7 +1,7 @@
 /* 
  * The MIT License
  *
- * Copyright 2016 Y.K. Chan
+ * Copyright 2017 Y.K. Chan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -132,7 +132,7 @@ public class HessenbergDecompTest {
         return new HessenbergDecomp(){
 
             @Override
-            protected void eliminate(Matrix matrix, int i, double[] column, Consumer<HouseholderReflector> listener) {
+            protected void eliminate(Matrix matrix, int i, double[] column, Consumer<Householder> listener) {
                 super.eliminate(matrix, i, column, listener);
                 for(int k = i + 2; k < matrix.getRowCount(); k++){
                     matrix.set(k, i, 0.0);

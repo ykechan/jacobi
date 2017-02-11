@@ -1,7 +1,7 @@
 /* 
  * The MIT License
  *
- * Copyright 2016 Y.K. Chan
+ * Copyright 2017 Y.K. Chan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -91,7 +91,7 @@ public class QRDecomp {
      * @param matrix  Matrix A
      * @param listener  Householder reflection listener
      */
-    protected void compute(Matrix matrix, Consumer<HouseholderReflector> listener) {        
+    public void compute(Matrix matrix, Consumer<Householder> listener) {        
         
         int n = Math.min(matrix.getRowCount(), matrix.getColCount());
         if(matrix.getRowCount() == matrix.getColCount()){
@@ -116,10 +116,10 @@ public class QRDecomp {
      * @param listener  Householder reflection listener
      * @param j   Column index of column to be eliminated
      */
-    protected void eliminate(Matrix matrix, Consumer<HouseholderReflector> listener, int j) {
+    protected void eliminate(Matrix matrix, Consumer<Householder> listener, int j) {
         double[] column = new double[matrix.getRowCount()];
         this.getColumn(matrix, j, j, column);
-        HouseholderReflector hh = new HouseholderReflector(column, j);
+        Householder hh = new Householder(column, j);
         double norm = hh.normalize();
         if(norm == 0.0){
             return;

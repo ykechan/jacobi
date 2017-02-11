@@ -1,7 +1,7 @@
 /* 
  * The MIT License
  *
- * Copyright 2016 Y.K. Chan
+ * Copyright 2017 Y.K. Chan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,7 @@ import jacobi.api.Matrix;
 import jacobi.api.annotations.Immutate;
 import jacobi.core.impl.CopyOnWriteMatrix;
 import jacobi.core.util.Pair;
+import jacobi.core.util.Real;
 import jacobi.core.util.Throw;
 import jacobi.core.util.Triplet;
 import java.util.Optional;
@@ -65,17 +66,29 @@ public class CholeskyDecomp {
                 .orElse(Optional.empty());
     }
     
-    public Triplet computeLDL() {
-        return null;
+    /**
+     * Compute the Cholesky decomposition for a symmetric bi-diagonal matrix A. 
+     * @param diag  Diagonal elements of A
+     * @param supDiag  Sup/sub-diagonal elements of A
+     * @return  L in B-notation, or empty if A is not positive definite
+     */
+    public Optional<double[]> computeSquared(double[] diag, double[] supDiag) {
+        double[] elem = new double[4*diag.length];
+        for(int i = 0; i < diag.length; i++){
+            if(diag[i] < Real.EPSILON){
+                return Optional.empty();
+            }
+            elem[4*i] = diag[i];
+            elem[4*i + 1] = supDiag[i] * (supDiag[i] / diag[i]);
+        }
+        return Optional.of(elem);
     }
     
     /**
      * Find lower triangular L of a matrix A s.t. A = L * L^t.
      * @param matrix  Matrix A
-     * @return  Matrix L
-     * @throws  
-     *     IllegalArgumentException if A is null or A is not square
-     *     UnsupportedOperationException if A is not positive-definite
+     * @return  Matrix L or empty if A is not positive definite
+     * @throws  IllegalArgumentException if A is null or A is not square
      */
     public Optional<Matrix> compute(Matrix matrix) { 
         Throw.when()

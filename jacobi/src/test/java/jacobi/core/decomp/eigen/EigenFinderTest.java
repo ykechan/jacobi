@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2016 Y.K. Chan.
+ * Copyright 2017 Y.K. Chan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,8 +23,8 @@
  */
 package jacobi.core.decomp.eigen;
 
+import jacobi.api.Matrices;
 import jacobi.api.Matrix;
-import jacobi.core.decomp.qr.QRStrategy;
 import jacobi.core.decomp.qr.SchurDecomp;
 import jacobi.core.util.Pair;
 import jacobi.test.annotations.JacobiEquals;
@@ -32,11 +32,6 @@ import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.annotations.JacobiResult;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -87,6 +82,27 @@ public class EigenFinderTest {
     @JacobiImport("7x7")
     public void test7x7() {
         Pair pair = new EigenFinder().compute(this.input);
+    }
+    
+    @Test
+    public void testEmpty() {
+        Pair eig = new EigenFinder().compute(Matrices.zeros(0));
+        Assert.assertEquals(0, eig.getLeft().getRowCount());
+        Assert.assertEquals(0, eig.getLeft().getColCount());
+        Assert.assertEquals(0, eig.getRight().getRowCount());
+        Assert.assertEquals(0, eig.getRight().getColCount());
+    }
+    
+    @Test
+    public void test1x1() {
+        Matrix input = Matrices.scalar(Math.E);
+        Pair eig = new EigenFinder().compute(input);
+        Assert.assertEquals(1, eig.getLeft().getRowCount());
+        Assert.assertEquals(1, eig.getLeft().getColCount());
+        Assert.assertEquals(1, eig.getRight().getRowCount());
+        Assert.assertEquals(1, eig.getRight().getColCount());
+        Assert.assertEquals(Math.E, eig.getLeft().get(0, 0), 1e-16);
+        Assert.assertEquals(0, eig.getRight().get(0, 0), 1e-16);
     }
         
     protected EigenFinder mockDummy() { 

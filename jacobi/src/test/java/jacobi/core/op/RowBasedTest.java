@@ -1,7 +1,7 @@
 /* 
  * The MIT License
  *
- * Copyright 2016 Y.K. Chan
+ * Copyright 2017 Y.K. Chan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@ package jacobi.core.op;
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.core.stats.RowReduce;
+import jacobi.core.util.MapReducer;
 import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
@@ -76,7 +77,7 @@ public class RowBasedTest {
         this.hstream = Matrices.zeros(this.a.getRowCount(), this.a.getColCount());
         new Operators.Hadamard().stream(a, b, this.hstream);
         this.hfork = Matrices.zeros(this.a.getRowCount(), this.a.getColCount());
-        new Operators.Hadamard().forkJoin(a, b, this.hfork, 3);
+        new Operators.Hadamard().forkJoin(a, b, this.hfork, MapReducer.DEFAULT_THREAD_FLOP / 4);
     }
     
     @Test
@@ -93,7 +94,7 @@ public class RowBasedTest {
         this.hstream = Matrices.zeros(this.a.getRowCount(), this.a.getColCount());
         new Operators.Hadamard().stream(a, b, this.hstream);
         this.hfork = Matrices.zeros(this.a.getRowCount(), this.a.getColCount());
-        new Operators.Hadamard().forkJoin(a, b, this.hfork, 3);
+        new Operators.Hadamard().forkJoin(a, b, this.hfork, MapReducer.DEFAULT_THREAD_FLOP / 4);
     }
     
     @Test
@@ -110,7 +111,7 @@ public class RowBasedTest {
         this.hstream = Matrices.zeros(this.a.getRowCount(), this.a.getColCount());
         new Operators.Hadamard().stream(a, b, this.hstream);
         this.hfork = Matrices.zeros(this.a.getRowCount(), this.a.getColCount());
-        new Operators.Hadamard().forkJoin(a, b, this.hfork, 3);
+        new Operators.Hadamard().forkJoin(a, b, this.hfork, MapReducer.DEFAULT_THREAD_FLOP / 4);
     }
     
     @Test
@@ -127,7 +128,7 @@ public class RowBasedTest {
         this.hstream = Matrices.zeros(this.a.getRowCount(), this.a.getColCount());
         new Operators.Hadamard().stream(a, b, this.hstream);
         this.hfork = Matrices.zeros(this.a.getRowCount(), this.a.getColCount());
-        new Operators.Hadamard().forkJoin(a, b, this.hfork, 3);
+        new Operators.Hadamard().forkJoin(a, b, this.hfork, MapReducer.DEFAULT_THREAD_FLOP / 4);
     }
     
     @Test
@@ -144,7 +145,7 @@ public class RowBasedTest {
         this.hstream = Matrices.zeros(this.a.getRowCount(), this.a.getColCount());
         new Operators.Hadamard().stream(a, b, this.hstream);
         this.hfork = Matrices.zeros(this.a.getRowCount(), this.a.getColCount());
-        new Operators.Hadamard().forkJoin(a, b, this.hfork, 3);
+        new Operators.Hadamard().forkJoin(a, b, this.hfork, MapReducer.DEFAULT_THREAD_FLOP / 4);
     }
     
     @Test
@@ -161,7 +162,7 @@ public class RowBasedTest {
         this.hstream = Matrices.zeros(this.a.getRowCount(), this.a.getColCount());
         new Operators.Hadamard().stream(a, b, this.hstream);
         this.hfork = Matrices.zeros(this.a.getRowCount(), this.a.getColCount());
-        new Operators.Hadamard().forkJoin(a, b, this.hfork, 3);
+        new Operators.Hadamard().forkJoin(a, b, this.hfork, MapReducer.DEFAULT_THREAD_FLOP / 4);
     }
     
     @Test
@@ -178,14 +179,8 @@ public class RowBasedTest {
         this.hstream = Matrices.zeros(this.a.getRowCount(), this.a.getColCount());
         new Operators.Hadamard().stream(a, b, this.hstream);
         this.hfork = Matrices.zeros(this.a.getRowCount(), this.a.getColCount());
-        new Operators.Hadamard().forkJoin(a, b, this.hfork, 3);
-    }
-    
-    @Test(expected = IllegalArgumentException.class)
-    @JacobiImport("rand7x5")
-    public void testUnderLimitForkJoin() {
-        new Operators.Hadamard().forkJoin(a, b, this.hfork, 2);
-    }
+        new Operators.Hadamard().forkJoin(a, b, this.hfork, MapReducer.DEFAULT_THREAD_FLOP / 4);
+    }    
     
     @Test(expected = IllegalStateException.class)
     public void testInvalidRowRange() {

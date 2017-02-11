@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2016 Y.K. Chan.
+ * Copyright 2017 Y.K. Chan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,39 +21,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jacobi.core.util;
+package jacobi.core.decomp.svd;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Supplier;
-import org.junit.Test;
+import jacobi.api.Matrix;
 
 /**
- *
+ * Common interface for an iteration in SVD.
+ * 
  * @author Y.K. Chan
  */
-public class ThreadsTest {
+public interface SvdStep { 
     
-    @Test
-    public void test() {
-        AtomicInteger count = new AtomicInteger(0);        
-        int n = 10;
-        List<Integer> result = Threads.invoke(() -> count.getAndIncrement(), n);
-        boolean[] hash = new boolean[n];
-        Arrays.fill(hash, false);
-        for(Integer i : result){
-            if(hash[i]){
-                throw new UnsupportedOperationException("Duplicate entry " + i);
-            }
-            hash[i] = true;
-        }
-        for(int i = 0; i < hash.length; i++){
-            if(!hash[i]){
-                throw new UnsupportedOperationException("Missing entry " + i);
-            }
-        }
-    }
+    /**
+     * Compute the iteration.
+     * @param diag  Diagonal elements
+     * @param supDiag  Super-diagonal elements
+     * @param begin  Begin index of elements of interest
+     * @param end  End index of elements of interest
+     * @param uMat Matrix U that accepts actions applied on the left
+     * @param vMat Matrix V that accepts actions applied on the right
+     * @return Index of deflated sup-diagonal element, -1 otherwise
+     */
+    public int compute(double[] diag, double[] supDiag, int begin, int end, Matrix uMat, Matrix vMat);
+    
+    public static final double EPSILON = 1e-16;
     
 }

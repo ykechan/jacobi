@@ -1,7 +1,7 @@
 /* 
  * The MIT License
  *
- * Copyright 2016 Y.K. Chan
+ * Copyright 2017 Y.K. Chan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -69,6 +69,21 @@ public final class Matrices {
         return new DefaultMatrix(rows);
     }
     
+    /**
+     * Create a matrix by the given 2-D array. The array will be directly used, without checking if it is jagged,
+     * and mutation outside reflects the matrix value, but saving the overhead of checking and copying.
+     * @param rows  Matrix elements
+     * @return  Matrix instance
+     */
+    public static Matrix unsafe(double[][] rows) {
+        return new DefaultMatrix(rows);
+    }
+    
+    /**
+     * Create a 1x1 matrix.
+     * @param value  Matrix element
+     * @return  Matrix instance
+     */
     public static Matrix scalar(double value) {
         return new DefaultMatrix(new double[][]{{ value }});
     }

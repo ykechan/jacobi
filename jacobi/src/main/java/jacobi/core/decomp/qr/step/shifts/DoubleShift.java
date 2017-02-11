@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2016 Y.K. Chan.
+ * Copyright 2017 Y.K. Chan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,7 @@ package jacobi.core.decomp.qr.step.shifts;
 import jacobi.core.givens.GivensPair;
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
-import jacobi.core.decomp.qr.HouseholderReflector;
+import jacobi.core.decomp.qr.Householder;
 import jacobi.core.impl.ColumnVector;
 import jacobi.core.util.Pair;
 
@@ -113,7 +113,7 @@ public class DoubleShift {
      * @param at  Row/Column index of the sub-matrix
      * @return  Householder reflector for creating bulge.
      */
-    public HouseholderReflector getImplicitQ(Matrix matrix, int at) {
+    public Householder getImplicitQ(Matrix matrix, int at) {
         double u = matrix.get(at, at);
         double v = matrix.get(at + 1, at);
         
@@ -126,7 +126,7 @@ public class DoubleShift {
             + matrix.get(at + 1, at + 1) * v
             - tr * v;
         col[at + 2] = matrix.get(at + 2, at + 1) * v;
-        HouseholderReflector hh = new HouseholderReflector(col, at);
+        Householder hh = new Householder(col, at);
         hh.normalize();
         return hh;
     }    

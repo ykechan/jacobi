@@ -1,7 +1,7 @@
 /* 
  * The MIT License
  *
- * Copyright 2016 Y.K. Chan
+ * Copyright 2017 Y.K. Chan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,7 @@
  */
 package jacobi.core.data;
 
+import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.api.ext.Data;
 import jacobi.test.annotations.JacobiEquals;
@@ -76,7 +77,36 @@ public class DataTest {
             data = data.append((r) -> Math.log(r.get(target)));
         }
         this.output = data.select(IntStream.range(input.getColCount(), 2*input.getColCount()).toArray()).get();
-    }        
+    }
+    
+    @Test
+    @JacobiImport("Prepend Bias")
+    @JacobiEquals(expected = 1, actual = 1)
+    public void testPrependBias() {
+        this.output = this.input.ext(Data.class)
+                .prepend((r) -> 1.0)
+                .get();
+    }
+    
+    @Test
+    @JacobiImport("Insert SinX")
+    @JacobiEquals(expected = 1, actual = 1)
+    public void testInsertSinX() {
+        this.output = this.input.ext(Data.class)
+                .insert(1, (r) -> Math.sin(r.get(0)))
+                .get();
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testInsertNegative() {
+        Matrices.zeros(5).ext(Data.class).insert(-1, (r) -> 1.0).get();
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testInsertIndexOutOfBound() {
+        //Matrices.zeros(5).ext(Data.class).insert(5, (r) -> 1.0).get();
+        Matrices.zeros(5).ext(Data.class).insert(6, (r) -> 1.0).get();
+    }
     
     public interface MatrixSuppler extends Supplier<Matrix> {
 

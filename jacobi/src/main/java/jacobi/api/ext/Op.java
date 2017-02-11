@@ -1,7 +1,7 @@
 /* 
  * The MIT License
  *
- * Copyright 2016 Y.K. Chan
+ * Copyright 2017 Y.K. Chan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,7 @@ import jacobi.api.annotations.Facade;
 import jacobi.api.annotations.Implementation;
 import jacobi.api.annotations.Immutate;
 import jacobi.core.op.Mul;
+import jacobi.core.op.MulT;
 import jacobi.core.op.Operators;
 import java.util.function.Supplier;
 
@@ -51,7 +52,7 @@ public interface Op extends Supplier<Matrix> {
     /**
      * Matrix addition, i.e. C = A + B
      * @param b  2nd Operand. The first operand is the extension parameter.
-     * @return  Resultant matrix
+     * @return  Op instance with Resultant matrix
      */
     @Implementation(Operators.Add.class)
     public Op add(Matrix b);
@@ -59,7 +60,7 @@ public interface Op extends Supplier<Matrix> {
     /**
      * Matrix subtraction, i.e. C = A - B
      * @param b  2nd Operand. The first operand is the extension parameter.
-     * @return  Resultant matrix
+     * @return  Op instance with Resultant matrix
      */
     @Implementation(Operators.Sub.class)
     public Op sub(Matrix b);
@@ -67,15 +68,23 @@ public interface Op extends Supplier<Matrix> {
     /**
      * Matrix multiplication, i.e. C = A * B
      * @param b  2nd Operand. The first operand is the extension parameter.
-     * @return  Resultant matrix
+     * @return  Op instance with Resultant matrix
      */
     @Implementation(Mul.class)
     public Op mul(Matrix b);
     
     /**
+     * Matrix multiplication with transpose of the 2nd operand, i.e. C = A * B^t
+     * @param b  2nd Operand. The first operand is the extension parameter.
+     * @return  Op instance with Resultant matrix
+     */
+    @Implementation(MulT.class)
+    public Op mulT(Matrix b);
+    
+    /**
      * Hadamand multiplication, i.e. element-by-element multiplication.
      * @param b  2nd Operand. The first operand is the extension parameter.
-     * @return  Resultant matrix
+     * @return  Op instance with Resultant matrix
      */
     @Implementation(Operators.Hadamard.class)
     public Op hadamard(Matrix b);
@@ -83,9 +92,9 @@ public interface Op extends Supplier<Matrix> {
     /**
      * Matrix multiplication with a scalar. C = k * A
      * @param k  scalar operand. The first operand is the extension parameter.
-     * @return  Resultant matrix
+     * @return  Op instance with Resultant matrix
      */
     @Implementation(Operators.Hadamard.class)
-    public Op mul(double k);
+    public Op mul(double k);        
     
 }

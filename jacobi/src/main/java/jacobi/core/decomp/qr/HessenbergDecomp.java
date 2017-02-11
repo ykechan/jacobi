@@ -1,7 +1,7 @@
 /* 
  * The MIT License
  *
- * Copyright 2016 Y.K. Chan
+ * Copyright 2017 Y.K. Chan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -103,7 +103,7 @@ public class HessenbergDecomp {
      * @param matrix  Matrix A
      * @param listener   Listener of reflector operation
      */
-    protected void compute(Matrix matrix, Consumer<HouseholderReflector> listener) {
+    protected void compute(Matrix matrix, Consumer<Householder> listener) {
         this.validate(matrix);
         if(matrix.getRowCount() < 3){
             return;
@@ -127,9 +127,9 @@ public class HessenbergDecomp {
      * @param column  Column buffer 
      * @param listener  Reflection listener
      */
-    protected void eliminate(Matrix matrix, int i, double[] column, Consumer<HouseholderReflector> listener) {
+    protected void eliminate(Matrix matrix, int i, double[] column, Consumer<Householder> listener) {
         this.getColumn(matrix, i + 1, i, column);
-        HouseholderReflector hh = new HouseholderReflector(column, i + 1);
+        Householder hh = new Householder(column, i + 1);
         double norm = hh.normalize();
         if(norm == 0.0){
             return;

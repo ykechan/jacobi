@@ -1,7 +1,7 @@
 /* 
  * The MIT License
  *
- * Copyright 2016 Y.K. Chan
+ * Copyright 2017 Y.K. Chan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -62,7 +62,7 @@ import java.util.stream.IntStream;
  * 
  * @author Y.K. Chan
  */
-public class HouseholderReflector extends ImmutableMatrix {
+public class Householder extends ImmutableMatrix {
 
     /**
      * Constructor given column vector v.  Vector is shallow copied since this
@@ -71,7 +71,7 @@ public class HouseholderReflector extends ImmutableMatrix {
      * @param from   start of element of interest. Elements before this are
      *               assumed to be zero.
      */
-    public HouseholderReflector(double[] vector, int from) { // NOPMD - controlled usage
+    public Householder(double[] vector, int from) { // NOPMD - controlled usage
         this.from = from;        
         this.vector = vector;
     }
@@ -106,8 +106,7 @@ public class HouseholderReflector extends ImmutableMatrix {
 
     @Override
     public Matrix copy() {
-        return CopyOnWriteMatrix.of(
-            new HouseholderReflector(
+        return CopyOnWriteMatrix.of(new Householder(
                 Arrays.copyOf(vector, vector.length), 
                 from
             )

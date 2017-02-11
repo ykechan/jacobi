@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2016 Y.K. Chan
+ * Copyright 2017 Y.K. Chan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -70,5 +70,13 @@ public class PairTest {
         Assert.assertEquals(1, count.get());
         Assert.assertTrue(pair.getLeft() == a);
         Assert.assertEquals(1, count.get());
+    }
+    
+    @Test
+    public void testEmpty() {
+        Assert.assertEquals(0, Pair.EMPTY.getLeft().getRowCount());
+        Assert.assertEquals(0, Pair.EMPTY.getLeft().getColCount());
+        Assert.assertEquals(0, Pair.EMPTY.getRight().getRowCount());
+        Assert.assertEquals(0, Pair.EMPTY.getRight().getColCount());
     }
 }

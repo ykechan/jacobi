@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2016 Y.K. Chan.
+ * Copyright 2017 Y.K. Chan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,7 @@
 package jacobi.core.decomp.svd;
 
 import jacobi.api.Matrix;
-import jacobi.core.decomp.qr.HouseholderReflector;
+import jacobi.core.decomp.qr.Householder;
 import jacobi.core.util.Throw;
 import java.util.function.Consumer;
 
@@ -41,7 +41,7 @@ public class GolubKahanBDD implements BiDiagDecomp {
 
     
     @Override
-    public double[] compute(Mode mode, Matrix input, Consumer<HouseholderReflector> qFunc, Consumer<HouseholderReflector> vFunc) {
+    public double[] compute(Mode mode, Matrix input, Consumer<Householder> qFunc, Consumer<Householder> vFunc) {
         Throw.when()
                 .isNull(() -> input, () -> "No matrix to compute.")
                 .isNull(() -> qFunc, () -> "No left listener function.")
@@ -71,10 +71,10 @@ public class GolubKahanBDD implements BiDiagDecomp {
      * @param qFunc  Accepts Householder reflection applied to A
      * @return  First element of reflection resultant
      */
-    protected double applyLeft(Mode mode, Matrix input, int at, double[] col, Consumer<HouseholderReflector> qFunc) { 
+    protected double applyLeft(Mode mode, Matrix input, int at, double[] col, Consumer<Householder> qFunc) { 
         int offset = mode == Mode.UPPER ? 0 : 1;        
         this.getColumn(input, at + offset, at, col); 
-        HouseholderReflector hh = new HouseholderReflector(col, at + offset);
+        Householder hh = new Householder(col, at + offset);
         double norm = hh.normalize();        
         if(norm == 0.0){
             return at + offset < col.length ? col[at + offset] : 0.0;
@@ -95,11 +95,11 @@ public class GolubKahanBDD implements BiDiagDecomp {
      * @param vFunc  Accepts Householder reflection applied to A
      * @return  First element of reflection resultant
      */
-    protected double applyRight(Mode mode, Matrix input, int at, double[] row, Consumer<HouseholderReflector> vFunc) {
+    protected double applyRight(Mode mode, Matrix input, int at, double[] row, Consumer<Householder> vFunc) {
         int offset = mode == Mode.UPPER ? 1 : 0;
         int index = at + offset;
         System.arraycopy(input.getRow(at), index, row, index, input.getColCount() - index);
-        HouseholderReflector hh = new HouseholderReflector(row, index);
+        Householder hh = new Householder(row, index);
         double norm = hh.normalize();
         if(norm == 0.0){
             return index < row.length ? row[index] : 0.0;

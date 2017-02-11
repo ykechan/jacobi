@@ -1,7 +1,7 @@
 /* 
  * The MIT License
  *
- * Copyright 2016 Y.K. Chan
+ * Copyright 2017 Y.K. Chan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -116,7 +116,7 @@ public class QRDecompTest {
         return new QRDecomp(){
 
             @Override
-            protected void eliminate(Matrix matrix, Consumer<HouseholderReflector> listener, int j) {
+            protected void eliminate(Matrix matrix, Consumer<Householder> listener, int j) {
                 super.eliminate(matrix, listener, j);
                 for(int k = j + 1; k < matrix.getRowCount(); k++){
                     matrix.set(k, j, 0.0);

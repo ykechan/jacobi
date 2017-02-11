@@ -1,7 +1,7 @@
 /* 
  * The MIT License
  *
- * Copyright 2016 Y.K. Chan
+ * Copyright 2017 Y.K. Chan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -132,9 +132,9 @@ class PaddingPlan {
          * @return  This object.
          */
         public Builder insert(int at, Function<List<Double>, Double> func) {
-            if (at < 0 || at >= this.currentLength) {
+            if (at < 0 || at > this.currentLength) {
                 throw new IllegalArgumentException("Invalid index " + at);
-            }
+            } 
             this.currentLength++;
             this.funcs.add((buf) -> buf.insert(at, func.apply(buf)) );
             return this.update();

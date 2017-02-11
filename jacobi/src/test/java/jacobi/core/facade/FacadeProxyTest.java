@@ -1,7 +1,7 @@
 /* 
  * The MIT License
  *
- * Copyright 2016 Y.K. Chan
+ * Copyright 2017 Y.K. Chan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,22 +28,13 @@ import jacobi.api.annotations.Implementation;
 import java.io.Serializable;
 import java.util.function.Supplier;
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 /**
  *
  * @author Y.K. Chan
  */
-public class FacadeProxyTest {
-    
-    @Rule
-    public ExpectedException expected;
-
-    public FacadeProxyTest() {
-        this.expected = ExpectedException.none();
-    }
+public class FacadeProxyTest {    
     
     @Test
     public void testNormalFluent() {
@@ -51,10 +42,15 @@ public class FacadeProxyTest {
         Assert.assertEquals(new DoSthImpl().compute("I am a string", 0), facade.doSth(0).get());
     }
     
-    @Test
+    @Test(expected = RuntimeException.class)
     public void testFluentWrongSupplier() {
-        this.expected.expect(RuntimeException.class);
         TestFluentWrongSupplier facade = FacadeProxy.of(TestFluentWrongSupplier.class, "I am a string");
+    }
+    
+    @Test(expected = RuntimeException.class)
+    public void testFluentWrongReturnType() {
+        TestFluentWrongReturnType facade = FacadeProxy.of(TestFluentWrongReturnType.class, "I am a string");
+        facade.doSth("").get();
     }
     
     @Test(expected = IllegalArgumentException.class)
@@ -82,11 +78,23 @@ public class FacadeProxyTest {
         public TestFluentInterface doSth(int i);
         
     }
+    
+    @Facade(String.class)
+    public interface TestFluentWrongReturnType extends Supplier<String> {
+        
+        @Implementation(DoSthImpl.class)
+        public TestFluentWrongReturnType doSth(String str);
+        
+    }
 
     public static class DoSthImpl {
         
         public String compute(String str, int i) {
             return "String = " + str + ", i = " + i;
+        }
+        
+        public int compute(String a, String b) {
+            return a.length() + b.length();
         }
         
     }

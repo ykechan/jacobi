@@ -1,7 +1,7 @@
 /* 
  * The MIT License
  *
- * Copyright 2016 Y.K. Chan
+ * Copyright 2017 Y.K. Chan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,8 +25,6 @@ package jacobi.core.solver;
 
 import jacobi.api.Matrix;
 import jacobi.core.util.Throw;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**

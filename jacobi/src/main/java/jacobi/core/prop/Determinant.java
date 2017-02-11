@@ -1,7 +1,7 @@
 /* 
  * The MIT License
  *
- * Copyright 2016 Y.K. Chan
+ * Copyright 2017 Y.K. Chan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,8 @@ import jacobi.api.Matrix;
 import jacobi.core.decomp.gauss.AbstractElementaryOperatorDecor;
 import jacobi.core.decomp.gauss.ElementaryOperator;
 import jacobi.core.decomp.gauss.GenericGaussianElim;
+import jacobi.core.decomp.qr.step.shifts.DoubleShift;
+import jacobi.core.util.Throw;
 
 /**
  * Find the determinant of a given matrix.
@@ -53,13 +55,18 @@ public class Determinant {
      * @return  det(A)
      */
     public double compute(Matrix matrix) {
+        Throw.when()
+            .isNull(() -> matrix, () -> "No matrix to compute.")
+            .isFalse(
+                () -> matrix.getRowCount() == matrix.getColCount(), 
+                () -> "Trace not exists for non-square matrices");
         switch(matrix.getRowCount()){
             case 0 :
                 return 0.0;
             case 1 :
-                return this.compute1x1(matrix);
+                return matrix.get(0, 0);
             case 2 :
-                return this.compute2x2(matrix);
+                return DoubleShift.of(matrix, 0).getDet();
             case 3 :
                 return this.compute3x3(matrix);
             default :
@@ -70,26 +77,6 @@ public class Determinant {
             det *= matrix.get(i, i);
         }
         return det;
-    }
-    
-    /**
-     * Find the determinant of the input 1x1 matrix A.
-     * @param m  Input 1x1 matrix
-     * @return  det(A)
-     */
-    protected double compute1x1(Matrix m) {        
-        return m.get(0, 0);
-    }
-    
-    /**
-     * Find the determinant of the input 2x2 matrix A.
-     * @param m  Input 2x2 matrix
-     * @return  det(A)
-     */
-    protected double compute2x2(Matrix m) { 
-        double[] u = m.getRow(0);
-        double[] v = m.getRow(1);
-        return u[0]*v[1] - v[0]*u[1];
     }
     
     /**

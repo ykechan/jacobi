@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2016 Y.K. Chan.
+ * Copyright 2017 Y.K. Chan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,6 @@ import jacobi.core.decomp.qr.SchurDecomp;
 import jacobi.core.decomp.qr.QRStrategy;
 import jacobi.core.decomp.qr.step.QRStep;
 import jacobi.core.decomp.qr.step.QRSteps;
-import jacobi.core.decomp.qr.step.SingleStep2x2;
 import jacobi.core.decomp.qr.step.shifts.DoubleShift;
 import jacobi.core.impl.ColumnVector;
 import jacobi.core.impl.DefaultMatrix;

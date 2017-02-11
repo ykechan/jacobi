@@ -1,7 +1,7 @@
 /* 
  * The MIT License
  *
- * Copyright 2016 Y.K. Chan
+ * Copyright 2017 Y.K. Chan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,7 @@
  */
 package jacobi.core.decomp.chol;
 
+import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
@@ -59,4 +60,10 @@ public class CholeskyDecompTest {
     public void test4x4() {
         this.lower = new CholeskyDecomp().compute(this.input).get();
     }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test5x4() {
+        new CholeskyDecomp().compute(Matrices.zeros(5, 4)).get();
+    }
+    
 }

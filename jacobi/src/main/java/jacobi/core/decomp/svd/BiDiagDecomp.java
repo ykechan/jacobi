@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2017 Y.K. Chan.
+ * Copyright 2017 Y.K. Chan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,7 @@
 package jacobi.core.decomp.svd;
 
 import jacobi.api.Matrix;
-import jacobi.core.decomp.qr.HouseholderReflector;
+import jacobi.core.decomp.qr.Householder;
 import java.util.function.Consumer;
 
 /**
@@ -59,7 +59,7 @@ public interface BiDiagDecomp {
      * @param vFunc  Listener of V1, V2, ... where V^t = V1*V2*...*Vn
      * @return  Bi-diagonal elements as {a1, b1, a2, b2, ...} where diag(E) = {a1, a2, ...}, sup-diag(E) = {b1, b2, ...}
      */
-    public double[] compute(Mode mode, Matrix input, Consumer<HouseholderReflector> qFunc, Consumer<HouseholderReflector> vFunc);
+    public double[] compute(Mode mode, Matrix input, Consumer<Householder> qFunc, Consumer<Householder> vFunc);
     
     public enum Mode {
         UPPER, LOWER

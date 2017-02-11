@@ -1,7 +1,7 @@
 /* 
  * The MIT License
  *
- * Copyright 2016 Y.K. Chan
+ * Copyright 2017 Y.K. Chan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,10 +25,8 @@ package jacobi.core.op;
 
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
+import jacobi.core.util.MapReducer;
 import jacobi.core.util.Throw;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.RecursiveAction;
-import java.util.concurrent.TimeUnit;
 import java.util.function.DoubleBinaryOperator;
 import java.util.stream.IntStream;
 
@@ -88,18 +86,22 @@ public class RowBased {
                       + b.getColCount());
         
         Matrix ans = Matrices.zeros(a.getRowCount(), a.getColCount());
-        this.serial(a, b, ans);
+        this.compute(a, b, ans);
         return ans;
     }
     
     /**
-     * Compute result in serial.
+     * Compute result in with resultant matrix C created.
      * @param a  Matrix A
      * @param b  Matrix B
-     * @param ans   Result matrix C
+     * @param ans   Resultant matrix C
      */
-    protected void serial(Matrix a, Matrix b, Matrix ans) {
-        this.serial(a, b, ans, 0, a.getRowCount());
+    protected void compute(Matrix a, Matrix b, Matrix ans) {
+        if(a.getRowCount() * a.getColCount() < DEFAULT_LIMIT_FLOP){
+            this.serial(a, b, ans, 0, a.getRowCount());
+        }else{
+            this.forkJoin(a, b, ans, a.getColCount());
+        }        
     }
     
     /**
@@ -133,19 +135,12 @@ public class RowBased {
      * @param a  Matrix A
      * @param b  Matrix B
      * @param ans  Result matrix C
-     * @param limit  Minimum number of operation for each thread
+     * @param rowFlop Number of flop to process a single row
      */
-    protected void forkJoin(Matrix a, Matrix b, Matrix ans, int limit) {
-        if(limit < 3){
-            throw new IllegalArgumentException("Limit is too small: " + limit);
-        }
-        ForkJoinPool.commonPool().execute(new Action(a, b, ans, 0, a.getRowCount(), limit));
-        long timeout = a.getRowCount() * a.getColCount() * MAX_TIME_FOR_ELEM;
-        try {
-            ForkJoinPool.commonPool().awaitTermination(timeout, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException ex) {
-            throw new IllegalStateException("Unable to finish in " + timeout + "s.", ex);
-        }
+    protected void forkJoin(Matrix a, Matrix b, Matrix ans, int rowFlop) {        
+        MapReducer.of(0, a.getRowCount())
+                .flop(rowFlop)
+                .forEach((begin, end) -> this.serial(a, b, ans, begin, end));
     }
     
     private void operate(Matrix a, Matrix b, Matrix ans, int i) {
@@ -156,37 +151,5 @@ public class RowBased {
     
     private RowOperation<Void> oper;
     
-    private static final long MAX_TIME_FOR_ELEM = 100;
-    
-    private class Action extends RecursiveAction {
-
-        public Action(Matrix a, Matrix b, Matrix ans,
-                int begin, int end,
-                int limit) {
-            this.a = a;
-            this.b = b;
-            this.ans = ans;
-            this.begin = begin;
-            this.end = end;
-            this.limit = limit;
-        }
-
-        @Override
-        protected void compute() {
-            if((end - begin) * a.getColCount() < limit || end - begin < 2){
-                serial(a, b, ans, begin, end);
-                return;
-            }
-            
-            int mid = (begin + end) / 2;
-            Action right = new Action(a, b, ans, mid, end, limit);
-            this.end = mid;
-            right.fork();
-            this.compute();
-            right.join();
-        }
-        
-        private Matrix a, b, ans;
-        private int begin, end, limit;
-    }
+    private static final int DEFAULT_LIMIT_FLOP = 512 * 512;    
 }

@@ -1,7 +1,7 @@
 /* 
  * The MIT License
  *
- * Copyright 2016 Y.K. Chan
+ * Copyright 2017 Y.K. Chan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -130,12 +130,12 @@ public class DeterminantTest {
         this.det4x4 = this.single(new Determinant().compute(this.matrix4x4));
     }
     
-    @Test(expected = RuntimeException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testNullMatrix() {
         new Determinant().compute(null);
     }
     
-    @Test(expected = RuntimeException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testNonSquareMatrix() {
         new Determinant().compute(Matrices.zeros(5, 4));
     }

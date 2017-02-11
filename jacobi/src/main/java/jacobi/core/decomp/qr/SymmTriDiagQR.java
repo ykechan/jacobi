@@ -1,7 +1,7 @@
 /* 
  * The MIT License
  *
- * Copyright 2016 Y.K. Chan
+ * Copyright 2017 Y.K. Chan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,8 +26,9 @@ package jacobi.core.decomp.qr;
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.core.decomp.qr.step.QRStep;
-import jacobi.core.givens.GivensQR;
 import jacobi.core.givens.Givens;
+import jacobi.core.givens.GivensMode;
+import jacobi.core.givens.GivensRQ;
 import java.util.Arrays;
 import java.util.List;
 
@@ -115,6 +116,9 @@ public class SymmTriDiagQR implements QRStrategy {
         List<Givens> rot = this.qrDecomp(diag, subDiag, begin, end - 1);
         this.computeRQ(diag, subDiag, begin, end - 1, rot);
         this.postCompute(diag, subDiag, begin, end, shift);
+        if(partner != null){
+            new GivensRQ(rot).compute(partner, begin, end, GivensMode.FULL);
+        }
     }
     
     /**
@@ -188,7 +192,7 @@ public class SymmTriDiagQR implements QRStrategy {
             subDiag[i] = left;
             diag[i + 1] = right;
         }
-    }    
+    } 
     
     /**
      * Transform input matrix to symmetric tri-diagonal elements, if matrix is symmetric and at least 3x3.
@@ -263,9 +267,9 @@ public class SymmTriDiagQR implements QRStrategy {
             }
         }
         return end;
-    }
+    }        
 
     private QRStrategy base;
     
-    private static final double EPSILON = 1e-12;    
+    private static final double EPSILON = 1e-12;        
 }

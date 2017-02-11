@@ -1,7 +1,7 @@
 /* 
  * The MIT License
  *
- * Copyright 2016 Y.K. Chan
+ * Copyright 2017 Y.K. Chan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,7 +40,7 @@ import java.util.Optional;
 /**
  * Extension for getting a property of a matrix, e.g. determinant and trace.
  * 
- * This extension is non-perturbative, i.e. it preserves the value of the matrices
+ * This extension is immutating, i.e. it preserves the value of the matrices
  * it operates upon.
  * 
  * @author Y.K. Chan
@@ -52,14 +52,14 @@ public interface Prop {
     /**
      * Trace of a matrix, i.e. tr(A)
      * @return  Trace value
-     * @throws  UnsupportedOperationException if underlying matrix is not a square matrix
+     * @throws  IllegalArgumentException if underlying matrix is not a square matrix
      */
     @Implementation(Trace.class)
     public double tr();
     
     /**
      * Rank of a matrix.
-     * @return 
+     * @return  Matrix rank
      */
     @Implementation(Rank.class)
     public int rank();
@@ -67,14 +67,15 @@ public interface Prop {
     /**
      * Determinant of a matrix, i.e. det(A)
      * @return  Determinant value
-     * @throws  UnsupportedOperationException if underlying matrix is not a square matrix
+     * @throws  IllegalArgumentException if underlying matrix is not a square matrix
      */
     @Implementation(Determinant.class)
     public double det();
     
     /**
      * Inverse of a matrix, i.e. B = A^-1 s.t. A * B = I
-     * @return  Matrix inverse.
+     * @return  Matrix inverse, or empty if matrix is not invertible.
+     * @throws  UnsupportedOperationException if underlying matrix is not a square matrix
      */
     @Implementation(Inverse.class)
     public Optional<Matrix> inv();
