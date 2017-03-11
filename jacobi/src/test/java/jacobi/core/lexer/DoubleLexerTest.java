@@ -71,7 +71,7 @@ public class DoubleLexerTest {
         Assert.assertEquals(Action.MOVE, lexer.push('9'));
         Assert.assertEquals(Action.MOVE, lexer.push('1'));
         Assert.assertEquals(Action.ACCEPT, lexer.push(' '));
-        Assert.assertEquals(1991, lexer.get().get(), 1e-16);
+        Assert.assertEquals(-1991, lexer.get().get(), 1e-16);
     }
     
     @Test
