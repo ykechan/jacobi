@@ -39,6 +39,10 @@ import java.util.Optional;
  */
 public class IgnorableWhitespaceLexer<T> implements ItemLexer<T> {
 
+    /**
+     * Constructor.
+     * @param base  Base item lexer.
+     */
     public IgnorableWhitespaceLexer(ItemLexer<T> base) {
         this.base = base;
         this.state = State.START;
@@ -57,7 +61,13 @@ public class IgnorableWhitespaceLexer<T> implements ItemLexer<T> {
     private State state;
     private ItemLexer<T> base;
     
+    /**
+     * State this lexer could be in.
+     */
     protected enum State {
+        /**
+         * Initial state. Until first non-whitespace character is encountered.
+         */
         START {
 
             @Override
@@ -82,6 +92,9 @@ public class IgnorableWhitespaceLexer<T> implements ItemLexer<T> {
             }
             
         },
+        /**
+         * Parsing by base lexer. 
+         */
         PARSING {
 
             @Override
@@ -103,6 +116,9 @@ public class IgnorableWhitespaceLexer<T> implements ItemLexer<T> {
             }
             
         },
+        /**
+         * Waiting trailing whitespaces to end.
+         */
         WAITING {
 
             @Override
@@ -113,14 +129,28 @@ public class IgnorableWhitespaceLexer<T> implements ItemLexer<T> {
         },
         ACCEPT(Action.ACCEPT), REJECT(Action.REJECT), FAIL(Action.FAIL);
 
+        /**
+         * Constructor.
+         */
         private State() {
             this(Action.MOVE);
         }
         
+        /**
+         * Constructor.
+         * @param action  Corresponding action upon arriving this state
+         */
         private State(Action action) {
             this.action = action;
         }
         
+        /**
+         * Get the state destination for jump upon encountering an input character.
+         * @param <T>  Item type
+         * @param context  Lexer context to be updated
+         * @param ch  Input character
+         * @return  Destination state
+         */
         public <T> State jump(ItemLexer<T> context, char ch) {
             throw new IllegalStateException();
         }

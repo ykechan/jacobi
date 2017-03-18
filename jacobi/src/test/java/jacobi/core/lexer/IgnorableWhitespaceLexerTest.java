@@ -122,36 +122,6 @@ public class IgnorableWhitespaceLexerTest {
     }
     
     protected ItemLexer<Integer> digitLexer() {
-        return new ItemLexer<Integer>() {
-
-            @Override
-            public Action push(char ch) {
-                if(this.ended){
-                    throw new IllegalStateException();
-                }
-                if(this.result.isPresent()){
-                    this.ended = true;
-                    if(ch >= '0' && ch <= '9'){
-                        this.result = Optional.empty();
-                        return Action.FAIL;
-                    }
-                    return Action.ACCEPT;
-                }
-                if(ch >= '0' && ch <= '9'){ 
-                    this.result = Optional.of(ch - '0');
-                    return Action.MOVE;
-                }
-                this.ended = true;
-                return Action.REJECT;
-            }
-
-            @Override
-            public Optional<Integer> get() {
-                return this.result;
-            }
-            
-            private boolean ended = false;
-            private Optional<Integer> result = Optional.empty();
-        };
+        return new DigitLexer();
     }
 }
