@@ -71,7 +71,7 @@ public class DoubleLexer implements ItemLexer<Double> {
                     case '-' :
                         return this.append(context, '-').to(State.SIGNED);
                     case '.' :
-                        return this.append(context, '-').to(State.DOTTED);                                            
+                        return this.append(context, '0').append(context, '.').to(State.DOTTED);                                            
                     default :
                         if(ch >= '0' && ch <= '9'){
                             return this.append(context, ch).to(State.INT);

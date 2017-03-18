@@ -93,6 +93,33 @@ public class DoubleLexerTest {
         Assert.assertEquals(-2.718281828, lexer.get().get(), 1e-16);
     }
     
+    @Test
+    public void testNoIntegralPart() {
+        ItemLexer<Double> lexer = new DoubleLexer();
+        Assert.assertEquals(Action.MOVE, lexer.push('.'));
+        Assert.assertEquals(Action.MOVE, lexer.push('6'));
+        Assert.assertEquals(Action.MOVE, lexer.push('1'));
+        Assert.assertEquals(Action.MOVE, lexer.push('8'));
+        Assert.assertEquals(Action.MOVE, lexer.push('0'));
+        Assert.assertEquals(Action.MOVE, lexer.push('3'));
+        Assert.assertEquals(Action.ACCEPT, lexer.push('='));
+        Assert.assertEquals(0.61803, lexer.get().get(), 1e-16);
+    }
+    
+    @Test
+    public void testNegativeNoIntegralPart() {
+        ItemLexer<Double> lexer = new DoubleLexer();
+        Assert.assertEquals(Action.MOVE, lexer.push('-'));
+        Assert.assertEquals(Action.MOVE, lexer.push('.'));
+        Assert.assertEquals(Action.MOVE, lexer.push('6'));
+        Assert.assertEquals(Action.MOVE, lexer.push('1'));
+        Assert.assertEquals(Action.MOVE, lexer.push('8'));
+        Assert.assertEquals(Action.MOVE, lexer.push('0'));
+        Assert.assertEquals(Action.MOVE, lexer.push('3'));
+        Assert.assertEquals(Action.ACCEPT, lexer.push('='));
+        Assert.assertEquals(-0.61803, lexer.get().get(), 1e-16);
+    }
+    
     @Test(expected = IllegalStateException.class)
     public void testNotANumberAtTheStart() {
         ItemLexer<Double> lexer = new DoubleLexer();
