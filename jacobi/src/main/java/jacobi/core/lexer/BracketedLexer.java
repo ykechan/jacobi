@@ -25,7 +25,7 @@
 package jacobi.core.lexer;
 
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 /**
  * Item lexer in which item is enclosed by a bracket.
@@ -47,7 +47,7 @@ public class BracketedLexer<T> implements ItemLexer<T> {
      * @param ket  Close bracket character
      * @return  Decorating function
      */
-    public static <T> Function<ItemLexer<T>, ItemLexer<T>> of(char bra, char ket) {
+    public static <T> UnaryOperator<ItemLexer<T>> by(char bra, char ket) {
         return (lexer) -> new BracketedLexer<>(lexer, bra, ket);
     }
 

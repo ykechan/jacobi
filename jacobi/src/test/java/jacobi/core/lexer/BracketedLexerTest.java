@@ -67,8 +67,8 @@ public class BracketedLexerTest {
     @Test
     public void testStackedBracket() {
         ItemLexer<Integer> lexer = Optional.of(new DigitLexer())
-                .map(BracketedLexer.of('[', ']'))
-                .map(BracketedLexer.of('[', ']'))
+                .map(BracketedLexer.by('[', ']'))
+                .map(BracketedLexer.by('[', ']'))
                 .get();
         Assert.assertEquals(Action.MOVE, lexer.push('['));
         Assert.assertEquals(Action.MOVE, lexer.push('['));
