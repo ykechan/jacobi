@@ -49,7 +49,7 @@ public class DigitLexerTest {
         ItemLexer<Integer> lexer = new DigitLexer();
         Assert.assertEquals(Action.MOVE, lexer.push('1'));
         Assert.assertEquals(Action.ACCEPT, lexer.push('-'));
-        Assert.assertEquals(0, lexer.get().get().intValue());
+        Assert.assertEquals(1, lexer.get().get().intValue());
         lexer.push('!');
     }
     
