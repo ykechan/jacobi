@@ -58,10 +58,9 @@ public abstract class ImmutableMatrix implements Matrix { // NOPMD
      * @return  An immutable matrix
      */
     public static ImmutableMatrix of(Matrix base) {
-        if(base instanceof ImmutableMatrix){
-            return (ImmutableMatrix) base;
-        }
-        return new ImmutableMatrix() {
+        return base instanceof ImmutableMatrix
+            ? (ImmutableMatrix) base
+            : new ImmutableMatrix() {
 
             @Override
             public int getRowCount() {
