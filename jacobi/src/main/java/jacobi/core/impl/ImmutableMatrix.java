@@ -30,23 +30,23 @@ import java.util.Arrays;
 /**
  * Common parent class for a matrix implementation that is immutable.
  * 
- * Usually child class represents matrix that is of special form or value,
+ * Usually child class represents matrix that is in a special form or value,
  * such as an identity matrix. Instead of fully realize all matrix entries,
  * it may be favorable to compute the matrix elements on demand, because
  * what is interesting is not the elements but its operations. For example the 
  * product of any matrix with an identity matrix is instantly known, which
  * is itself, saving O(n^3) operations.
  * 
- * These operations can be implemented as delegates can will be chosen
+ * These operations can be implemented as delegates that can will be chosen
  * preferably by the facade engine through extension interfaces.
  * 
  * However such advantage is lost if matrix element values are changed, and it
- * is no long, say, an identity matrix. Therefore the implementation of an
+ * is no longer, say, an identity matrix. Therefore the implementation of an
  * identity matrix must be immutable.
  * 
  * An immutable matrix would not return its inner array in getRow(...), and
  * methods swapRow(...), set(...), setRow(...) would results in an
- * UnsupportedOperationException begin thrown.
+ * UnsupportedOperationException to thrown.
  * 
  * @author Y.K. Chan
  */
@@ -76,6 +76,11 @@ public abstract class ImmutableMatrix implements Matrix { // NOPMD
             @Override
             public double[] getRow(int index) {
                 return Arrays.copyOf(base.getRow(index), base.getColCount());
+            }
+
+            @Override
+            public double get(int i, int j) {
+                return base.get(i, j);
             }
 
             @Override
