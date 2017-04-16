@@ -89,15 +89,15 @@ public class MutableTableauTest {
     }
     
     @Test
-    @JacobiImport("swap 3,2")
+    @JacobiImport("swap 3,3")
     @JacobiEquals(expected = 100, actual = 100)
     @JacobiEquals(expected = 101, actual = 101)
     @JacobiEquals(expected = 102, actual = 102)
-    public void testSwap3and2() {
+    public void testSwap3and3() {
         MutableTableau tab = MutableTableau.of(c, a, b).apply((mat, i, j) -> {});
         this.result = tab.getMatrix();
         this.signs = this.toMatrix(tab.getSigns());
-        tab.swapBasis(3, 2);
+        tab.swapBasis(3, 3);
         this.vars = this.toMatrix(tab.getVars());
     }
     
