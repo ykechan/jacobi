@@ -70,7 +70,7 @@ public class MutableTableauTest {
     @JacobiEquals(expected = 101, actual = 101)
     @JacobiEquals(expected = 102, actual = 102)
     public void testConstructor() {
-        Tableau tab = MutableTableau.of(c, a, b).apply((mat, i, j, sgn) -> {});
+        Tableau tab = MutableTableau.of(c, a, b).apply((mat, i, j) -> {});
         this.result = tab.getMatrix();
         this.signs = this.toMatrix(tab.getSigns());
         this.vars = this.toMatrix(tab.getVars());
@@ -82,7 +82,7 @@ public class MutableTableauTest {
     @JacobiEquals(expected = 101, actual = 101)
     @JacobiEquals(expected = 102, actual = 102)
     public void testConstructorMixedSigns() {
-        Tableau tab = MutableTableau.of(c, a, b).apply((mat, i, j, sgn) -> {});
+        Tableau tab = MutableTableau.of(c, a, b).apply((mat, i, j) -> {});
         this.result = tab.getMatrix();
         this.signs = this.toMatrix(tab.getSigns());
         this.vars = this.toMatrix(tab.getVars());
@@ -94,7 +94,7 @@ public class MutableTableauTest {
     @JacobiEquals(expected = 101, actual = 101)
     @JacobiEquals(expected = 102, actual = 102)
     public void testSwap3and2() {
-        MutableTableau tab = MutableTableau.of(c, a, b).apply((mat, i, j, sgn) -> {});
+        MutableTableau tab = MutableTableau.of(c, a, b).apply((mat, i, j) -> {});
         this.result = tab.getMatrix();
         this.signs = this.toMatrix(tab.getSigns());
         tab.swapBasis(3, 2);
@@ -103,27 +103,27 @@ public class MutableTableauTest {
     
     @Test(expected = IllegalArgumentException.class)
     public void testNullObjective() {
-        MutableTableau.of(null, Matrices.zeros(3), Matrices.zeros(3, 1)).apply((mat, i, j, sgn) -> {});
+        MutableTableau.of(null, Matrices.zeros(3), Matrices.zeros(3, 1)).apply((mat, i, j) -> {});
     }
     
     @Test(expected = IllegalArgumentException.class)
     public void testNullConstraintMatrix() {
-        MutableTableau.of(Matrices.zeros(3), null, Matrices.zeros(3, 1)).apply((mat, i, j, sgn) -> {});
+        MutableTableau.of(Matrices.zeros(3), null, Matrices.zeros(3, 1)).apply((mat, i, j) -> {});
     }
     
     @Test(expected = IllegalArgumentException.class)
     public void testNullConstraintBoundary() {
-        MutableTableau.of(Matrices.zeros(3), Matrices.zeros(3), null).apply((mat, i, j, sgn) -> {});
+        MutableTableau.of(Matrices.zeros(3), Matrices.zeros(3), null).apply((mat, i, j) -> {});
     }
     
     @Test(expected = IllegalArgumentException.class)
     public void testVariableDimensionMismatch() {
-        MutableTableau.of(Matrices.zeros(6), Matrices.zeros(3), Matrices.zeros(3, 1)).apply((mat, i, j, sgn) -> {});
+        MutableTableau.of(Matrices.zeros(6), Matrices.zeros(3), Matrices.zeros(3, 1)).apply((mat, i, j) -> {});
     }
     
     @Test(expected = IllegalArgumentException.class)
     public void testConstraintDimensionMismatch() {
-        MutableTableau.of(Matrices.zeros(3), Matrices.zeros(3), Matrices.zeros(5, 1)).apply((mat, i, j, sgn) -> {});
+        MutableTableau.of(Matrices.zeros(3), Matrices.zeros(3), Matrices.zeros(5, 1)).apply((mat, i, j) -> {});
     }
     
     private Matrix toMatrix(IntArray array) {

@@ -106,7 +106,12 @@ public class MutableTableau implements Tableau {
      * @param col  Column index of the non-basic column basis
      */
     public void swapBasis(int row, int col) {
-        this.pivoting.run(this.matrix, row, col, this.getSigns().get(row)); 
+        int sign = this.getSigns().get(row);
+        if(sign * this.matrix.get(row, col) < 0.0){
+            throw new IllegalArgumentException();
+        }
+        this.pivoting.run(this.matrix, row, col); 
+        this.matrix.set(0, 0, 0.0);
         this.swapVars(col - 1, this.matrix.getColCount() + row - 2);
     }
     
@@ -240,10 +245,9 @@ public class MutableTableau implements Tableau {
          * @param matrix  Mutable compact tableau [0 -c^t; |b| A*].
          * @param row  Row index of leaving variable, i.e. the row s.t. the leaving column in J is non-zero.
          * @param col  Column index of enter variable
-         * @param sign  Sign of the non-zero entry in the leaving column in J
          * @throws  IllegalArgumentException if the swapping of columns cannot be done due to opposite signs.
          */
-        public void run(Matrix matrix, int row, int col, int sign);
+        public void run(Matrix matrix, int row, int col);
         
     }
     
