@@ -28,102 +28,176 @@ import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.core.impl.ColumnVector;
 import jacobi.core.impl.ImmutableMatrix;
-import jacobi.core.util.IntArray;
 import jacobi.core.util.Throw;
+import java.util.Arrays;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
 /**
- * Tableau structure that is mutable.
+ * Implementation of the Tableau structure.
  * 
- * This class is mainly responsible for constructing the tableau from the LP problem.
+ * The LP problem max c^t * x s.t. A*x &lt;= b, x &gt;= 0 can be expressed as 
+ * [ 1 -c^t  0 ][ x ]   [ z ]
+ * [           ][   ] = [   ]
+ * [ 0    A  I ][ s ]   [ b ]
  * 
- * The tableau can only be mutated by the pivoting operation implementation.
+ * If b &gt;= 0, the trivial solution [0 b] is feasible. However if some b[k] &lt; 0, [0 b] is not feasible.
+ * In this case, an auxiliary scalar variable is added s.t. [A I -1]*[x s t] = b, thus [0 s |min(b)|] is feasible. 
+ * In such cases, the auxiliary problem:
  * 
- * Pivoting operation for simplex algorithm is essentially a change of column basis on the tableau
- * [ 0 -c^t 0 ]
- * [          ], where I is an identity matrix
- * [ b   A  I ]
+ * min t -&gt; max -t s.t. [A I t]*[x s t] = b, need to be solved first.
  * 
- * But this operation is done on the compact tableau
- * [ 0 -c^t ]
- * [|b|  A* ]
- * , and the original structure is by swapping out the +-e^k introduced in [-c^t; A*] and 
- * non-standard basis introduced in J.
+ * The auxiliary problem can be expressed as 
+ *                [ 0 ]
+ * [ 0   A  I -1 ][ x ]    [ z ]
+ * [ 1 -c^t 0 -1 ][ s ] =  [ b ]
+ * [ 0   0  0 -1 ][ t ]    [ 0 ]
  * 
- * By conforming to notation in Simplex algorithm, index all refers to the compact tableau.
+ * Internally, this class keeps the tableau in following format
+ * [   A   -1 b ]
+ * [ -c^t  -1 0 ]
+ * [   0   -1 0 ]
+ * 
+ * Notice that for each pivoting operation, a non-basic column in the tableau is drives to a e^k, and a e^k in I
+ * is mutated to a non-basic column, where e^k is some standard basis. A swap of column and be done and I is maintained.
+ * The swapping of variables is kept by a mapping from column index to variable index.
+ * 
+ * When the auxiliary problem is solved, the tableau can be collapsed into the standard LP 
+ * [   A  b ]
+ * [ -c^t 0 ]
  * 
  * @author Y.K. Chan
  */
 public class MutableTableau implements Tableau {
     
-    /**
-     * Create a factory of tableau accepting an implementation of pivoting operation.
-     * @param c  Objective coefficient 
-     * @param a  Constraint matrix
-     * @param b  Constraint boundary
-     * @return  Factory of tableau
-     */
-    public static final Function<Pivoting, MutableTableau> of(Matrix c, Matrix a, Matrix b) {
-        return (f) -> new MutableTableau(c, a, b, f);
+    public static Function<Pivoting, MutableTableau> of(Matrix c, Matrix a, Matrix b) {
+        return (p) -> new MutableTableau(pack(c, a, b, false), 
+                    IntStream.range(0, a.getRowCount() + a.getColCount()).toArray(), 
+                    p,
+                    false);
     }
     
-    /**
-     * Constructor.
-     * @param c  Objective coefficient 
-     * @param a  Constraint matrix
-     * @param b  Constraint boundary
-     * @param pivoting  Implementation of pivoting operation
-     */
-    public MutableTableau(Matrix c, Matrix a, Matrix b, Pivoting pivoting) {        
-        this.matrix = this.pack(c, a, b);
-        this.vars = IntStream.range(0, a.getColCount() + a.getRowCount()).toArray();
+    public static Function<Pivoting, MutableTableau> ofAux(Matrix c, Matrix a, Matrix b) {
+        return (p) -> new MutableTableau(pack(c, a, b, true), 
+                    IntStream.range(0, a.getRowCount() + a.getColCount() + 1).toArray(), 
+                    p,
+                    true);
+    }
+
+    protected MutableTableau(Matrix matrix, int[] vars, Pivoting pivoting, boolean isAux) {
+        this.matrix = matrix;
+        this.vars = vars;
         this.pivoting = pivoting;
-        
-        this.immutableMatrix = ImmutableMatrix.of(this.matrix);
-        this.immutableSigns = new IntArray(this.getSigns(b));
-        this.immutableVars = new IntArray(this.vars);
+        this.isAux = isAux;
     }
 
     @Override
     public Matrix getMatrix() {
-        return this.immutableMatrix;
+        return new ImmutableMatrix() {
+
+            @Override
+            public int getRowCount() {
+                return rowCount;
+            }
+
+            @Override
+            public int getColCount() {
+                return matrix.getColCount();
+            }
+
+            @Override
+            public double[] getRow(int index) {
+                return Arrays.copyOf(matrix.getRow(index), matrix.getColCount());
+            }
+            
+            private int rowCount = matrix.getRowCount() - 1;
+        };
     }
 
     @Override
-    public IntArray getSigns() {
-        return this.immutableSigns;
+    public double[] getCoeff() {
+        return Arrays.copyOf(matrix.getRow(matrix.getRowCount() - 1), matrix.getColCount() - 1);
     }
 
     @Override
-    public IntArray getVars() {
-        return this.immutableVars;
+    public int[] getVars() {
+        return Arrays.copyOf(this.vars, this.vars.length);
     }
     
     /**
-     * Swap a basic and non-basic column basis. 
-     * @param row  Row index of the basic column basis in J
-     * @param col  Column index of the non-basic column basis
+     * Pivot on a select element.
+     * @param i  Row index of pivot
+     * @param j  Column index of pivot
+     * @return  This object.
      */
-    public void swapBasis(int row, int col) {
-        int sign = this.getSigns().get(row);
-        if(sign * this.matrix.get(row, col) < 0.0){
-            throw new IllegalArgumentException();
+    public MutableTableau pivot(int i, int j) {
+        this.pivoting.perform(this.matrix, i, j);
+        int enter = j;
+        int leave = this.matrix.getColCount() - (isAux ? 2 : 1) + i;
+        int temp = this.vars[enter];
+        this.vars[enter] = this.vars[leave];
+        this.vars[leave] = temp;
+        return this;
+    }
+    
+    /**
+     * Dropping the auxiliary row and column to create a new tableau.
+     * @return  A new tableau without the auxiliary row and column.
+     * @throws  UnsupportedOperationException if this tableau is not auxiliary
+     */
+    public MutableTableau collapse() {
+        if(!isAux){
+            throw new UnsupportedOperationException("Tableau is not an auxiliary tableau.");
         }
-        this.pivoting.run(this.matrix, row, col); 
-        this.matrix.set(0, 0, 0.0);
-        this.swapVars(col - 1, this.matrix.getColCount() + row - 2);
+        int auxIdx = IntStream.range(0, this.vars.length).filter((i) -> this.vars[i] == this.matrix.getColCount() - 1)
+                .reduce((a, b) -> {
+                    throw new IllegalStateException("Variable index corrupted.");
+                })
+                .orElseThrow(() -> new IllegalStateException("Auxiliary variable not found."));
+                
+        Matrix tab = Matrices.zeros(this.matrix.getRowCount() - 1, this.matrix.getColCount() - 1);
+        for(int i = 0; i < tab.getRowCount(); i++){
+            double[] row = matrix.getRow(i + (i == tab.getRowCount() - 1 ? 1 : 0));
+            tab.getAndSet(i, (r) -> {
+                System.arraycopy(row, 0, r, 0, auxIdx);
+                System.arraycopy(row, auxIdx + 1, r, auxIdx, r.length - auxIdx); 
+            });
+        }
+        int[] newVars = IntStream.range(0, this.vars.length)
+                .filter((i) -> i != auxIdx)
+                .map((i) -> this.vars[i])
+                .toArray();
+        return new MutableTableau(tab, newVars, pivoting, false);
     }
     
     /**
-     * Swap two variable indices.
-     * @param i  First variable index
-     * @param j  Second variable index
+     * Pack the linear programming problem max c^t * x s.t. A*x &lt;= b. into a matrix.
+     * @param c  Column vector c
+     * @param a  Constraint matrix A
+     * @param b  Constraint boundary b
+     * @param isAux  True for constructing auxiliary problem, false otherwise
+     * @return  Matrix which has the form [A b; c^t 0] or [A -1 b; c^t -1 0] for auxiliary problem
      */
-    protected void swapVars(int i, int j) {
-        int temp = this.vars[i];
-        this.vars[i] = this.vars[j];
-        this.vars[j] = temp;
+    private static Matrix pack(Matrix c, Matrix a, Matrix b, boolean isAux) {
+        validate(c, a, b);
+        Matrix mat = Matrices.zeros((isAux ? 2 : 1) + a.getRowCount(), (isAux ? 2 : 1) + c.getRowCount());        
+        for(int i = 0; i < a.getRowCount(); i++){
+            int j = i;
+            mat.getAndSet(i, (r) -> {
+                System.arraycopy(a.getRow(j), 0, r, 0, a.getColCount()); 
+                if(isAux){
+                    r[a.getColCount()] = -1.0; 
+                    r[a.getColCount() + 1] = b.get(j, 0); 
+                }else{
+                    r[a.getColCount()] = b.get(j, 0); 
+                }
+            });
+        }
+        mat.getAndSet(a.getRowCount(), (r) -> invertVector(c, r, isAux) );
+        if(isAux){
+            mat.getAndSet(a.getRowCount() + 1, (r) -> r[r.length - 2] = -1.0);
+        }
+        return mat;
     }
     
     /**
@@ -132,7 +206,7 @@ public class MutableTableau implements Tableau {
      * @param a  Constraint matrix A
      * @param b  Constraint boundary b
      */
-    private void validate(Matrix c, Matrix a, Matrix b) {
+    private static void validate(Matrix c, Matrix a, Matrix b) {
         Throw.when()
             .isNull(() -> c, () -> "Missing objective function.")
             .isNull(() -> a, () -> "Missing constraint matrix. (A in A*x <= b)")
@@ -148,107 +222,39 @@ public class MutableTableau implements Tableau {
     }
     
     /**
-     * Pack the linear programming problem max c^t * x s.t. A*x &lt;= b. into a matrix.
-     * @param c  Column vector c
-     * @param a  Constraint matrix A
-     * @param b  Constraint boundary b
-     * @return  Matrix which has the form [0 -c^t;b A]
-     */
-    private Matrix pack(Matrix c, Matrix a, Matrix b) {
-        this.validate(c, a, b);
-        Matrix mat = Matrices.zeros(1 + a.getRowCount(), 1 + c.getRowCount());
-        mat.getAndSet(0, (r) -> invertVector(c, r));
-        for(int i = 1; i < mat.getRowCount(); i++){
-            int j = i - 1;
-            mat.getAndSet(i, (r) -> {
-                r[0] = b.get(j, 0);
-                if(r[0] >= 0.0){
-                    System.arraycopy(a.getRow(j), 0, r, 1, a.getColCount()); 
-                }else{
-                    r[0] = Math.abs(r[0]);
-                    negate(a.getRow(j), r);                    
-                }
-            });
-        }
-        return mat;
-    }
-    
-    /**
-     * Copy the negated column vector into an array, i.e. c -&gt; [0 -c^t].
+     * Copy the negated column vector into an array, i.e. c -&gt; [c^t 0] or [c^t -1 0].
      * @param vector  Column vector c
      * @param array  Array instance
-     * @return  [0 -c^t]
+     * @param isAux  True if auxiliary column need, false otherwise
+     * @return  [c^t 0]
      */
-    private double[] invertVector(Matrix vector, double[] array) {
-        if(vector instanceof ColumnVector){            
-            return negate(((ColumnVector)vector).getVector(), array);
+    private static double[] invertVector(Matrix vector, double[] array, boolean isAux) {
+        try {
+            if(vector instanceof ColumnVector){            
+                //return negate(((ColumnVector)vector).getVector(), array);
+                System.arraycopy(((ColumnVector) vector).getVector(), 0, array, 0, vector.getRowCount());
+                return array;
+            }
+            for(int i = 0; i < vector.getRowCount(); i++){
+                array[i] = vector.get(i, 0);
+            }       
+            return array;
+        } finally {
+            if(isAux){
+                array[vector.getRowCount()] = -1.0;
+            }
         }
-        for(int i = 0; i < array.length; i++){
-            array[i] = -vector.get(i, 0);
-        }
-        return array;
     }
     
-    /**
-     * Copy the negated array into another array, i.e. v -&gt; [. -v].
-     * @param source  Source array
-     * @param dest  Destination array
-     * @return  [. -v]
-     */
-    private double[] negate(double[] source, double[] dest) {
-        for(int i = 1; i < dest.length; i++){
-            dest[i] = -source[i - 1];
-        }
-        return dest;
-    } 
-    
-    /**
-     * Get the signs of a column vector, with a 1 prepended.
-     * @param b  Column vector
-     * @return  [1 sgn(b)]
-     */
-    private int[] getSigns(Matrix b) {
-        return IntStream.range(0, b.getRowCount() + 1)
-                .map((i) -> i == 0 ? 1 : (int) Math.signum(b.get(i - 1, 0)) )
-                .map((i) -> i == 0 ? 1 : i)
-                .toArray();
-    }
     
     private Matrix matrix;
     private int[] vars;
-    
-    private Matrix immutableMatrix;
-    private IntArray immutableSigns, immutableVars;
-    
     private Pivoting pivoting;
+    private boolean isAux;
 
-    /**
-     * Interface of pivoting operation for simplex algorithm.
-     * 
-     * This is essentially a change of column basis on the tableau
-     * [ 0 -c^t 0]
-     * [         ], where diag(J) = {J[i, i] = +-1, J[i, j] = 0 for all i &lt;&gt; j}
-     * [ b   A* J]
-     * 
-     * But this operation is done on the compact tableau
-     * [ 0 -c^t ]
-     * [|b|  A* ]
-     * , and the original structure is by swapping out the +-e^k introduced in [-c^t; A*] and 
-     * non-standard basis introduced in J.
-     * 
-     * By conforming to notation in Simplex algorithm, index all refers to the compact tableau.
-     */
     public interface Pivoting {
         
-        /**
-         * Perform pivoting operation.
-         * @param matrix  Mutable compact tableau [0 -c^t; |b| A*].
-         * @param row  Row index of leaving variable, i.e. the row s.t. the leaving column in J is non-zero.
-         * @param col  Column index of enter variable
-         * @throws  IllegalArgumentException if the swapping of columns cannot be done due to opposite signs.
-         */
-        public void run(Matrix matrix, int row, int col);
+        public void perform(Matrix matrix, int row, int col);
         
     }
-    
 }

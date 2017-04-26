@@ -31,48 +31,41 @@ import jacobi.core.linprog.MutableTableau.Pivoting;
  * Implementation for pivoting operation by elementary row operations.
  * 
  * Pivoting operation for simplex algorithm is essentially a change of column basis on the tableau
- * [ 0 -c^t 0]
- * [         ], where diag(J) = {J[i, i] = +-1, J[i, j] = 0 for all i &lt;&gt; j}
- * [ b   A* J]
+ * [ 1 -c^t  0 ][ x ]   [ z ]
+ * [           ][   ] = [   ]
+ * [ 0    A  I ][ s ]   [ b ]
  * 
- * But this operation is done on the compact tableau
- * [ 0 -c^t ]
- * [|b|  A* ]
- * , and the original structure is by swapping out the +-e^k introduced in [-c^t; A*] and 
- * non-standard basis introduced in J.
+ * This can be done by performing elementary row operations on the tableau.
  * 
- * By conforming to notation in Simplex algorithm, index all refers to the compact tableau.
+ * Note that the row and column index refers to the index of the given matrix. This class is 
+ * oblivious to the actual format of the tableau. It should work whether it is given a full tableau
+ * [ 1 -c^t 0 | z]                      [   A   b ]
+ * [ 0   A  I | b], or compact tableau  [ -c^t  0 ], or with auxiliary variable.
  * 
  * @author Y.K. Chan
  */
 public class ElementaryPivoting implements Pivoting {    
     
     @Override
-    public void run(Matrix matrix, int row, int col) {
+    public void perform(Matrix matrix, int row, int col) {
         double[] pivot = matrix.getRow(row);
-        int sign = (int) Math.signum(pivot[col]);
-        System.out.println("sign = " + sign);
-        if(sign == 0){
-            throw new IllegalArgumentException("Unable to use zero as pivot (" + row + "," + col + ").");
-        }
         for(int k = 0; k < matrix.getRowCount(); k++){
             if(k == row){
                 continue;
             }
-            matrix.getAndSet(k, (r) -> this.eliminate(r, pivot, col, sign));
+            matrix.getAndSet(k, (r) -> this.eliminate(r, pivot, col));
         }
-        this.normalize(pivot, col, sign);        
+        this.normalize(pivot, col);        
     }    
     
     /**
      * Normalize the pivot row s.t. the enter column is 1, and swap with the leaving column.
      * @param pivot  Pivot row
      * @param enter  Enter column
-     * @param sign  Sign of the leaving row
      */
-    protected void normalize(double[] pivot, int enter, int sign) {
+    protected void normalize(double[] pivot, int enter) {
         double denom = Math.abs(pivot[enter]); 
-        pivot[enter] = sign / denom;
+        pivot[enter] = 1.0 / denom;
         for(int i = enter + 1; i < pivot.length; i++){
             pivot[i] /= denom;
         }
@@ -86,11 +79,10 @@ public class ElementaryPivoting implements Pivoting {
      * @param row  Row to be eliminated
      * @param pivot  Pivot row
      * @param enter  Enter column
-     * @param sign  Sign of the leaving row
      */
-    protected void eliminate(double[] row, double[] pivot, int enter, int sign) {
+    protected void eliminate(double[] row, double[] pivot, int enter) {
         double factor = -row[enter] / pivot[enter]; 
-        row[enter] = sign * factor;
+        row[enter] = factor;
         for(int i = enter + 1; i < row.length; i++){
             row[i] += factor * pivot[i];
         }
