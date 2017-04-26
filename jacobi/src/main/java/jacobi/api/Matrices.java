@@ -63,10 +63,11 @@ public final class Matrices {
                     );
                 })
                 .orElse(0);
-        if(n == 0){
-            return Empty.getInstance();
-        }
-        return new DefaultMatrix(rows);
+        return n == 0 
+                ? Empty.getInstance()
+                : n == 1
+                    ? new ColumnVector( Arrays.stream(rows).mapToDouble((arr) -> arr[0]).toArray() )
+                    : Matrices.unsafe(rows).copy();
     }
     
     /**
@@ -76,7 +77,9 @@ public final class Matrices {
      * @return  Matrix instance
      */
     public static Matrix unsafe(double[][] rows) {
-        return new DefaultMatrix(rows);
+        return rows == null || rows.length == 0 || rows[0].length == 0
+                ? Empty.getInstance() 
+                : new DefaultMatrix(rows);
     }
     
     /**
@@ -108,9 +111,9 @@ public final class Matrices {
             throw new IllegalArgumentException("Invalid number of rows / columns : " 
                     + m + "x" + n);
         }
-        return (m == 0 || n == 0)
+        return m == 0 || n == 0
                 ? Empty.getInstance() 
-                : (n == 1)
+                : n == 1
                     ? new ColumnVector(m)
                     : new DefaultMatrix(m, n);
     }
@@ -198,7 +201,7 @@ public final class Matrices {
      * @return  An array of evenly distributed values
      * @throws IllegalArgumentException if number of points is negative or min &lt; max
      */
-    protected static double[] linspace(double min, double max, int num) {
+    private static double[] linspace(double min, double max, int num) {
         if(num < 0 || max < min){
             throw new IllegalArgumentException();
         }

@@ -30,6 +30,7 @@ import jacobi.core.impl.ImmutableMatrix;
 import jacobi.test.util.Jacobi;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -48,7 +49,7 @@ public class MatricesTest {
     
     @Test
     public void testCreateEmptyMatrix() {
-        Assert.assertTrue(Matrices.of(null) == Empty.getInstance());
+        Assert.assertTrue(Matrices.of((double[][]) null) == Empty.getInstance());
         Assert.assertTrue(Matrices.of(new double[0][]) == Empty.getInstance());
         Assert.assertTrue(Matrices.of(new double[10][0]) == Empty.getInstance());
         Assert.assertTrue(Empty.getInstance().copy() == Empty.getInstance());  
@@ -138,6 +139,28 @@ public class MatricesTest {
     @Test(expected = IllegalArgumentException.class)
     public void testLinspaceNegativeMeasure() {
         Matrices.lincol(1.0, -1.0, 10);        
+    }
+    
+    @Test
+    public void testOfMatrixAndCorruptOriginalArray() {
+        double[][] data = new double[][]{
+            {1.0, 2.0, 3.0},
+            {4.0, 3.0, 2.0},
+        };
+        Matrix matrix = Matrices.of(data);
+        Arrays.fill(data[0], 0.0);
+        Assert.assertArrayEquals(new double[]{1.0, 2.0, 3.0}, matrix.getRow(0), 1e-12);
+    }
+    
+    @Test
+    public void testUnsafeMatrixAndCorruptOriginalArray() {
+        double[][] data = new double[][]{
+            {1.0, 2.0, 3.0},
+            {4.0, 3.0, 2.0},
+        };
+        Matrix matrix = Matrices.unsafe(data);
+        Arrays.fill(data[0], 0.0);
+        Assert.assertArrayEquals(new double[]{0.0, 0.0, 0.0}, matrix.getRow(0), 1e-12);
     }
     
 }
