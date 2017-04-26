@@ -24,39 +24,30 @@
 
 package jacobi.core.linprog;
 
-import jacobi.core.util.Real;
+import java.util.function.BiFunction;
 
 /**
- * Implementation of Dantzig's pivoting rule. 
+ * Common interface for pivoting rules of the Simplex algorithm.
  * 
- * This is proposed by Dantzig in his original simplex algorithm: uses the index i where c[i] is largest positive.
+ * The Linear Programming problem is as follows:
+ * Maximize c^t * x s.t. A*x &lt;= b, x &gt;= 0, for some matrix A, and column vector b and c.
  * 
- * The benefit of this approach is its speed: it requires checking the column vector c only. To maintain this
- * advantage, this class provides only 1 entering variable only, unless no choice fits.
+ * For any k where c[k] &gt; 0, it can be chosen as the entering variable. However the choice
+ * makes significant difference in the finishing rate. A number of different criteria exist. This
+ * is the interface for finding a set of pivots from an immutable tableau.
+ * 
+ * Implementations of this interface should choose a set of distinct entering variables under a
+ * given limit of quantity. Implementations can return lesser number of choice, but not more.
+ * 
+ * Returning a empty array in case no such enter variable exists.
  * 
  * @author Y.K. Chan
  */
-public class DantzigsRule implements PivotingRule {
-
-    @Override
-    public int[] apply(Tableau tab, Integer limit) {
-        double[] coeff = tab.getCoeff();
-        int[] vars = tab.getVars();
-        double min = 0.0;
-        int index = -1;
-        for(int i = 0; i < coeff.length; i++){
-            if(coeff[i] > 0.0){
-                continue;
-            }
-            if(index < 0 || (Real.isNegl(coeff[i] - min) && vars[i] < vars[index])){
-                min = coeff[i];
-                index = i;
-            }else if(coeff[i] < min){
-                min = coeff[i];
-                index = i;
-            }            
-        }
-        return index < 0 ? PivotingRule.NONE : new int[]{index};
-    }
+public interface PivotingRule extends BiFunction<Tableau, Integer, int[]> {
+    
+    /**
+     * Empty array for no enter variable can be chosen.
+     */
+    public static final int[] NONE = new int[0];
 
 }
