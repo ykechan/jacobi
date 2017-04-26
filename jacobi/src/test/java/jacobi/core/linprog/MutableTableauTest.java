@@ -88,15 +88,11 @@ public class MutableTableauTest {
     @JacobiEquals(expected = 100, actual = 100)
     @JacobiEquals(expected = 101, actual = 101)
     public void testConstructAux4x6() {
-        MutableTableau tableau = MutableTableau.of(c, a, b).apply(this.mock());
-        Matrix mat = tableau.getMatrix();
-        Jacobi.assertEquals(a, this.exclude(mat, 0, 1));
-        Jacobi.assertEquals(b, this.column(mat, mat.getRowCount() - 1, mat.getColCount() - 1));
-        Jacobi.assertEquals(c, new ColumnVector(tableau.getCoeff()));
+        MutableTableau tableau = MutableTableau.ofAux(c, a, b).apply(this.mock());
         this.vars = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
         tableau.pivot(0, 1);
     }
-    
+    /*
     @Test
     @JacobiImport("swap 2,3")
     @JacobiEquals(expected = 100, actual = 100)
@@ -110,21 +106,23 @@ public class MutableTableauTest {
         tableau.pivot(2, 3);
         this.vars = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });        
     }
-    
+    */
+    /*
     @Test
-    @JacobiImport("swap aux 5,0")
+    @JacobiImport("swap aux 0,5")
     @JacobiEquals(expected = 100, actual = 100)
     @JacobiEquals(expected = 101, actual = 101)
-    public void testSwapAux5And0() {
+    public void testSwapAux0And5() {
         MutableTableau tableau = MutableTableau.ofAux(c, a, b).apply(this.mock());
-        Matrix mat = tableau.getMatrix();
-        Jacobi.assertEquals(a, this.exclude(mat, 1, 2));
-        Jacobi.assertEquals(b, this.column(mat, mat.getRowCount() - 1, mat.getColCount() - 1));
-        Jacobi.assertEquals(c, new ColumnVector(tableau.getCoeff()));
-        tableau.pivot(2, 3);
+        //Matrix mat = tableau.getMatrix();
+        //Jacobi.assertEquals(a, this.exclude(mat, 1, 2));
+        //Jacobi.assertEquals(b, this.column(mat, mat.getRowCount() - 1, mat.getColCount() - 1));
+        
+        //Jacobi.assertEquals(c, new ColumnVector(tableau.getCoeff()));
+        tableau.pivot(0, 5);
         this.vars = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });        
     }
-    
+    */
     @Test
     @JacobiImport("swap aux 3,9 1,3")
     @JacobiEquals(expected = 100, actual = 100)

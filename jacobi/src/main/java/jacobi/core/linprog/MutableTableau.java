@@ -133,7 +133,7 @@ public class MutableTableau implements Tableau {
     public MutableTableau pivot(int i, int j) {
         this.pivoting.perform(this.matrix, i, j);
         int enter = j;
-        int leave = this.matrix.getColCount() - (isAux ? 2 : 1) + i;
+        int leave = this.matrix.getColCount() - (isAux ? i == this.matrix.getRowCount()- 1 ? 2 : 1 : 0) + i;
         int temp = this.vars[enter];
         this.vars[enter] = this.vars[leave];
         this.vars[leave] = temp;
