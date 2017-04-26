@@ -21,20 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package jacobi.core.linprog;
 
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.core.impl.ColumnVector;
-import jacobi.core.util.IntArray;
+import jacobi.core.impl.ImmutableMatrix;
+import jacobi.core.linprog.MutableTableau.Pivoting;
 import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.annotations.JacobiResult;
+import jacobi.test.util.Jacobi;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
 import java.util.Arrays;
 import java.util.stream.IntStream;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -53,84 +55,116 @@ public class MutableTableauTest {
     public Matrix a;
     
     @JacobiInject(2)
-    public Matrix b;        
+    public Matrix b;
     
     @JacobiResult(100)
-    public Matrix result;
+    public Matrix tab;
     
     @JacobiResult(101)
-    public Matrix signs;
-
-    @JacobiResult(102)
     public Matrix vars;
     
-    @Test
-    @JacobiImport("constructor")
-    @JacobiEquals(expected = 100, actual = 100)
-    @JacobiEquals(expected = 101, actual = 101)
-    @JacobiEquals(expected = 102, actual = 102)
-    public void testConstructor() {
-        Tableau tab = MutableTableau.of(c, a, b).apply((mat, i, j) -> {});
-        this.result = tab.getMatrix();
-        this.signs = this.toMatrix(tab.getSigns());
-        this.vars = this.toMatrix(tab.getVars());
-    }
+    @JacobiResult(102)
+    public Matrix vars2;
+    
+    @JacobiResult(103)
+    public Matrix vars3;
     
     @Test
-    @JacobiImport("constructor mixed signs")
+    @JacobiImport("construct 3x5")
     @JacobiEquals(expected = 100, actual = 100)
     @JacobiEquals(expected = 101, actual = 101)
-    @JacobiEquals(expected = 102, actual = 102)
-    public void testConstructorMixedSigns() {
-        Tableau tab = MutableTableau.of(c, a, b).apply((mat, i, j) -> {});
-        this.result = tab.getMatrix();
-        this.signs = this.toMatrix(tab.getSigns());
-        this.vars = this.toMatrix(tab.getVars());
+    public void testConstruct3x5() {
+        MutableTableau tableau = MutableTableau.of(c, a, b).apply(this.mock());
+        Matrix mat = tableau.getMatrix();
+        Jacobi.assertEquals(a, this.exclude(mat, 0, 1));
+        Jacobi.assertEquals(b, this.column(mat, mat.getRowCount(), mat.getColCount() - 1));
+        Jacobi.assertEquals(c, new ColumnVector(tableau.getCoeff()));
+        this.vars = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
+        tableau.pivot(0, 1);
     }
     
     @Test
-    @JacobiImport("swap 3,3")
+    @JacobiImport("construct aux 4x6")
     @JacobiEquals(expected = 100, actual = 100)
     @JacobiEquals(expected = 101, actual = 101)
-    @JacobiEquals(expected = 102, actual = 102)
-    public void testSwap3and3() {
-        MutableTableau tab = MutableTableau.of(c, a, b).apply((mat, i, j) -> {});
-        this.result = tab.getMatrix();
-        this.signs = this.toMatrix(tab.getSigns());
-        tab.swapBasis(3, 3);
-        this.vars = this.toMatrix(tab.getVars());
+    public void testConstructAux4x6() {
+        MutableTableau tableau = MutableTableau.of(c, a, b).apply(this.mock());
+        Matrix mat = tableau.getMatrix();
+        Jacobi.assertEquals(a, this.exclude(mat, 0, 1));
+        Jacobi.assertEquals(b, this.column(mat, mat.getRowCount() - 1, mat.getColCount() - 1));
+        Jacobi.assertEquals(c, new ColumnVector(tableau.getCoeff()));
+        this.vars = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
+        tableau.pivot(0, 1);
     }
     
-    @Test(expected = IllegalArgumentException.class)
-    public void testNullObjective() {
-        MutableTableau.of(null, Matrices.zeros(3), Matrices.zeros(3, 1)).apply((mat, i, j) -> {});
+    @Test
+    @JacobiImport("swap 2,3")
+    @JacobiEquals(expected = 100, actual = 100)
+    @JacobiEquals(expected = 101, actual = 101)
+    public void testSwap2And3() {
+        MutableTableau tableau = MutableTableau.of(c, a, b).apply(this.mock());
+        Matrix mat = tableau.getMatrix();
+        Jacobi.assertEquals(a, this.exclude(mat, 0, 1));
+        Jacobi.assertEquals(b, this.column(mat, mat.getRowCount(), mat.getColCount() - 1));
+        Jacobi.assertEquals(c, new ColumnVector(tableau.getCoeff()));
+        tableau.pivot(2, 3);
+        this.vars = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });        
     }
     
-    @Test(expected = IllegalArgumentException.class)
-    public void testNullConstraintMatrix() {
-        MutableTableau.of(Matrices.zeros(3), null, Matrices.zeros(3, 1)).apply((mat, i, j) -> {});
+    @Test
+    @JacobiImport("swap aux 5,0")
+    @JacobiEquals(expected = 100, actual = 100)
+    @JacobiEquals(expected = 101, actual = 101)
+    public void testSwapAux5And0() {
+        MutableTableau tableau = MutableTableau.ofAux(c, a, b).apply(this.mock());
+        Matrix mat = tableau.getMatrix();
+        Jacobi.assertEquals(a, this.exclude(mat, 1, 2));
+        Jacobi.assertEquals(b, this.column(mat, mat.getRowCount() - 1, mat.getColCount() - 1));
+        Jacobi.assertEquals(c, new ColumnVector(tableau.getCoeff()));
+        tableau.pivot(2, 3);
+        this.vars = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });        
     }
     
-    @Test(expected = IllegalArgumentException.class)
-    public void testNullConstraintBoundary() {
-        MutableTableau.of(Matrices.zeros(3), Matrices.zeros(3), null).apply((mat, i, j) -> {});
+    @Test
+    @JacobiImport("swap aux 3,9 1,3")
+    @JacobiEquals(expected = 100, actual = 100)
+    @JacobiEquals(expected = 101, actual = 101)
+    public void testSwapAux3And9Then1And3() {
+        MutableTableau tableau = MutableTableau.ofAux(c, a, b).apply(this.mock());
+        this.vars = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
+        tableau.pivot(3, 9);
+        this.vars2 = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
+        tableau.pivot(1, 3);
+        this.vars3 = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
     }
+
+    protected Matrix exclude(Matrix matrix, int numRow, int numCol) {
+        return new ImmutableMatrix() {
+
+            @Override
+            public int getRowCount() {
+                return matrix.getRowCount() - numRow;
+            }
+
+            @Override
+            public int getColCount() {
+                return matrix.getColCount() - numCol;
+            }
+
+            @Override
+            public double[] getRow(int index) {
+                return Arrays.copyOf(matrix.getRow(index), this.getColCount());
+            }
+        };
+    } 
     
-    @Test(expected = IllegalArgumentException.class)
-    public void testVariableDimensionMismatch() {
-        MutableTableau.of(Matrices.zeros(6), Matrices.zeros(3), Matrices.zeros(3, 1)).apply((mat, i, j) -> {});
+    protected Matrix column(Matrix matrix, int toRow, int col) {
+        return new ColumnVector( IntStream.range(0, toRow)
+                .mapToDouble((i) -> matrix.get(i, col))
+                .toArray() );
     }
-    
-    @Test(expected = IllegalArgumentException.class)
-    public void testConstraintDimensionMismatch() {
-        MutableTableau.of(Matrices.zeros(3), Matrices.zeros(3), Matrices.zeros(5, 1)).apply((mat, i, j) -> {});
-    }
-    
-    private Matrix toMatrix(IntArray array) {
-        return new ColumnVector(IntStream.range(0, array.length())
-                .map((i) -> array.get(i))
-                .mapToDouble((i) -> i)
-                .toArray()
-        );
+
+    protected Pivoting mock() {
+        return (mat, i, j) -> this.tab = mat.copy();
     }
 }

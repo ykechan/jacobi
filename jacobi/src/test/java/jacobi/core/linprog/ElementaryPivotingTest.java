@@ -41,28 +41,21 @@ import org.junit.runner.RunWith;
 public class ElementaryPivotingTest {
     
     @JacobiInject(0)
-    @JacobiResult(100)
-    public Matrix matrix;
+    @JacobiResult(1)
+    public Matrix result;
     
     @Test
-    @JacobiImport("swap 2,3")
-    @JacobiEquals(expected = 100, actual = 100)
-    public void testSwap2And3() {
-        new ElementaryPivoting().run(this.matrix, 2, 3);
+    @JacobiImport("test 5x6 on 2,4")
+    @JacobiEquals(expected = 1, actual = 1)
+    public void test5x6On2And4() {
+        new ElementaryPivoting().perform(result, 2, 4);
     }
     
     @Test
-    @JacobiImport("swap 1,5")
-    @JacobiEquals(expected = 100, actual = 100)
-    public void testSwap1And5() {
-        new ElementaryPivoting().run(this.matrix, 1, 5);
-    }
-    
-    @Test
-    @JacobiImport("swap 4,2")
-    @JacobiEquals(expected = 100, actual = 100)
-    public void testSwap4And2() {
-        new ElementaryPivoting().run(this.matrix, 4, 2);
+    @JacobiImport("test 7x4 on 0,3")
+    @JacobiEquals(expected = 1, actual = 1)
+    public void test7x4On0And3() {
+        new ElementaryPivoting().perform(result, 0, 3);
     }
     
 }
