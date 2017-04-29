@@ -74,9 +74,7 @@ public class DantzigsRuleTest {
     @Test
     @JacobiImport("test 6 columns no entry")
     public void test6columnsNoEntry() {
-        int[] pool = new DantzigsRule().apply(this.toTableau(), 5);
-        Assert.assertEquals(1, pool.length);
-        this.result = Matrices.scalar(pool[0]);
+        Assert.assertEquals(0, new DantzigsRule().apply(this.toTableau(), 5).length);
     }
     
     @Test
