@@ -30,7 +30,6 @@ import jacobi.core.impl.ColumnVector;
 import jacobi.core.impl.ImmutableMatrix;
 import jacobi.core.util.Throw;
 import java.util.Arrays;
-import java.util.function.Function;
 import java.util.stream.IntStream;
 
 /**
@@ -70,20 +69,25 @@ import java.util.stream.IntStream;
  */
 public class MutableTableau implements Tableau {
     
-    public static Function<Pivoting, MutableTableau> of(Matrix c, Matrix a, Matrix b) {
-        return (p) -> new MutableTableau(pack(c, a, b, false), 
-                    IntStream.range(0, a.getRowCount() + a.getColCount()).toArray(), 
-                    p,
-                    false);
-    }
-    
-    public static Function<Pivoting, MutableTableau> ofAux(Matrix c, Matrix a, Matrix b) {
-        return (p) -> new MutableTableau(pack(c, a, b, true), 
-                    IntStream.range(0, a.getRowCount() + a.getColCount() + 1).toArray(), 
-                    p,
-                    true);
+    /**
+     * Start constructing a tableau with builder.
+     * @param aux  True if auxiliary row/column needed, false otherwise.
+     * @return  Helper builder for constructing tableau.
+     */
+    public static Using build(boolean aux) { 
+        return (p) -> (c, a, b) -> {
+            int[] vars = IntStream.range(0, a.getRowCount() + a.getColCount() + (aux ? 1 : 0)).toArray();
+            return new MutableTableau(pack(c, a, b, aux), vars, p, aux);
+        };
     }
 
+    /**
+     * Constructor.
+     * @param matrix  Internal matrix
+     * @param vars  Hash array of column index to variable index
+     * @param pivoting  Implementation of pivoting operation
+     * @param isAux  True if auxiliary row/column needed, false otherwise
+     */
     protected MutableTableau(Matrix matrix, int[] vars, Pivoting pivoting, boolean isAux) {
         this.matrix = matrix;
         this.vars = vars;
@@ -132,8 +136,14 @@ public class MutableTableau implements Tableau {
      */
     public MutableTableau pivot(int i, int j) {
         this.pivoting.perform(this.matrix, i, j);
-        int enter = j;
-        int leave = this.matrix.getColCount() - (isAux ? i == this.matrix.getRowCount()- 1 ? 2 : 1 : 0) + i;
+        int padded = isAux ? 2 : 1;
+        int enter = j == this.matrix.getColCount() - padded ? this.vars.length - 1 : j;
+        
+        if(i >= this.matrix.getRowCount() - padded){
+            throw new IllegalArgumentException("No corresponding exit variable for " + i);
+        }
+        int leave = this.matrix.getColCount() + i - padded;       
+        System.out.println("enter = " + enter + ", leave = " + leave);
         int temp = this.vars[enter];
         this.vars[enter] = this.vars[leave];
         this.vars[leave] = temp;
@@ -230,8 +240,7 @@ public class MutableTableau implements Tableau {
      */
     private static double[] invertVector(Matrix vector, double[] array, boolean isAux) {
         try {
-            if(vector instanceof ColumnVector){            
-                //return negate(((ColumnVector)vector).getVector(), array);
+            if(vector instanceof ColumnVector){ 
                 System.arraycopy(((ColumnVector) vector).getVector(), 0, array, 0, vector.getRowCount());
                 return array;
             }
@@ -252,9 +261,61 @@ public class MutableTableau implements Tableau {
     private Pivoting pivoting;
     private boolean isAux;
 
+    /**
+     * Common interface for Pivoting operation.
+     * 
+     * Pivoting operation for simplex algorithm is essentially a change of column basis on the tableau
+     * [ 1 -c^t  0 ][ x ]   [ z ]
+     * [           ][   ] = [   ]
+     * [ 0    A  I ][ s ]   [ b ]
+     * 
+     * This can be done by performing elementary row operations on the tableau.
+     * 
+     * Note that the row and column index refers to the index of the given matrix. This class is 
+     * oblivious to the actual format of the tableau. It should work whether it is given a full tableau
+     * [ 1 -c^t 0 | z]                      [   A   b ]
+     * [ 0   A  I | b], or compact tableau  [ -c^t  0 ], or with auxiliary variable.
+     */
     public interface Pivoting {
         
+        /**
+         * Perform pivoting operation on given pivot.
+         * @param matrix  Internal matrix of the tableau
+         * @param row  Row index of the pivot
+         * @param col  Column index of the pivot
+         */
         public void perform(Matrix matrix, int row, int col);
         
     }
+    
+    /**
+     * Builder helper interface that accepts the Pivoting operation implementation.
+     */
+    public interface Using { 
+        
+        /**
+         * Accept pivoting operation in constructing the Tableau.
+         * @param pivoting  Implementation of pivoting operation.
+         * @return  Builder of tableau
+         */
+        public Builder use(Pivoting pivoting);
+        
+    }
+    
+    /**
+     * Builder interface that accepts the linear programming problem maximize c^t * x s.t. A*x &lt; b.
+     */
+    public interface Builder {
+        
+        /**
+         * Construct the Tableau.
+         * @param c  Coefficient of objective function
+         * @param a  Constraint matrix A
+         * @param b  Constraint boundary b
+         * @return  Resultant tableau
+         */
+        public MutableTableau of(Matrix c, Matrix a, Matrix b);
+        
+    }
+    
 }

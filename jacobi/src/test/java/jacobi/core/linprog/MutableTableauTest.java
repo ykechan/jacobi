@@ -27,6 +27,7 @@ package jacobi.core.linprog;
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.core.impl.ColumnVector;
+import jacobi.core.impl.DefaultMatrix;
 import jacobi.core.impl.ImmutableMatrix;
 import jacobi.core.linprog.MutableTableau.Pivoting;
 import jacobi.test.annotations.JacobiEquals;
@@ -37,6 +38,7 @@ import jacobi.test.util.Jacobi;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
 import java.util.Arrays;
 import java.util.stream.IntStream;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -74,7 +76,23 @@ public class MutableTableauTest {
     @JacobiEquals(expected = 100, actual = 100)
     @JacobiEquals(expected = 101, actual = 101)
     public void testConstruct3x5() {
-        MutableTableau tableau = MutableTableau.of(c, a, b).apply(this.mock());
+        MutableTableau tableau = MutableTableau.build(false).use(this.mock()).of(c, a, b);
+        Matrix mat = tableau.getMatrix();
+        Jacobi.assertEquals(a, this.exclude(mat, 0, 1));
+        Jacobi.assertEquals(b, this.column(mat, mat.getRowCount(), mat.getColCount() - 1));
+        Jacobi.assertEquals(c, new ColumnVector(tableau.getCoeff()));
+        this.vars = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
+        tableau.pivot(0, 1);
+    }
+    
+    @Test
+    @JacobiImport("construct 3x5")
+    @JacobiEquals(expected = 100, actual = 100)
+    @JacobiEquals(expected = 101, actual = 101)
+    public void testConstruct3x5UsingDefaultMatrixAsColumnMatrix() {
+        MutableTableau tableau = MutableTableau
+                .build(false)
+                .use(this.mock()).of(new DefaultMatrix(c), a, new DefaultMatrix(b));
         Matrix mat = tableau.getMatrix();
         Jacobi.assertEquals(a, this.exclude(mat, 0, 1));
         Jacobi.assertEquals(b, this.column(mat, mat.getRowCount(), mat.getColCount() - 1));
@@ -88,17 +106,17 @@ public class MutableTableauTest {
     @JacobiEquals(expected = 100, actual = 100)
     @JacobiEquals(expected = 101, actual = 101)
     public void testConstructAux4x6() {
-        MutableTableau tableau = MutableTableau.ofAux(c, a, b).apply(this.mock());
+        MutableTableau tableau = MutableTableau.build(true).use(this.mock()).of(c, a, b);
         this.vars = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
         tableau.pivot(0, 1);
     }
-    /*
+    
     @Test
     @JacobiImport("swap 2,3")
     @JacobiEquals(expected = 100, actual = 100)
     @JacobiEquals(expected = 101, actual = 101)
     public void testSwap2And3() {
-        MutableTableau tableau = MutableTableau.of(c, a, b).apply(this.mock());
+        MutableTableau tableau = MutableTableau.build(false).use(this.mock()).of(c, a, b);
         Matrix mat = tableau.getMatrix();
         Jacobi.assertEquals(a, this.exclude(mat, 0, 1));
         Jacobi.assertEquals(b, this.column(mat, mat.getRowCount(), mat.getColCount() - 1));
@@ -106,35 +124,58 @@ public class MutableTableauTest {
         tableau.pivot(2, 3);
         this.vars = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });        
     }
-    */
-    /*
+    
+    
     @Test
-    @JacobiImport("swap aux 0,5")
+    @JacobiImport("swap aux 3,8")
     @JacobiEquals(expected = 100, actual = 100)
     @JacobiEquals(expected = 101, actual = 101)
-    public void testSwapAux0And5() {
-        MutableTableau tableau = MutableTableau.ofAux(c, a, b).apply(this.mock());
-        //Matrix mat = tableau.getMatrix();
-        //Jacobi.assertEquals(a, this.exclude(mat, 1, 2));
-        //Jacobi.assertEquals(b, this.column(mat, mat.getRowCount() - 1, mat.getColCount() - 1));
+    public void testSwapAux3And8() {
+        MutableTableau tableau = MutableTableau.build(true).use(this.mock()).of(c, a, b);
+        Matrix mat = tableau.getMatrix();
+        Jacobi.assertEquals(a, this.exclude(mat, 1, 2));
+        Jacobi.assertEquals(b, this.column(mat, mat.getRowCount() - 1, mat.getColCount() - 1));
         
         //Jacobi.assertEquals(c, new ColumnVector(tableau.getCoeff()));
-        tableau.pivot(0, 5);
+        tableau.pivot(3, 8);
         this.vars = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });        
     }
-    */
+    
     @Test
     @JacobiImport("swap aux 3,9 1,3")
     @JacobiEquals(expected = 100, actual = 100)
     @JacobiEquals(expected = 101, actual = 101)
     public void testSwapAux3And9Then1And3() {
-        MutableTableau tableau = MutableTableau.ofAux(c, a, b).apply(this.mock());
+        MutableTableau tableau = MutableTableau.build(true).use(this.mock()).of(c, a, b);
         this.vars = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
         tableau.pivot(3, 9);
         this.vars2 = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
         tableau.pivot(1, 3);
         this.vars3 = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
     }
+    
+    @Test(expected = UnsupportedOperationException.class)
+    public void testMatrixGetterIsImmutable() {
+        MutableTableau tableau = MutableTableau.build(false)
+                .use(this.mock())
+                .of(Matrices.zeros(5, 1), Matrices.zeros(4, 5), Matrices.zeros(4, 1));
+        tableau.getMatrix().getAndSet(0, (r) -> Arrays.fill(r, 1.0));
+    }
+    
+    @Test
+    public void testCoeffVarsGetterIsImmutable() {
+        MutableTableau tableau = MutableTableau.build(false)
+                .use(this.mock())
+                .of(Matrices.zeros(5, 1), Matrices.zeros(4, 5), Matrices.zeros(4, 1));
+        int[] vars = tableau.getVars();
+        double[] coeff = tableau.getCoeff();
+        double[] origCoeff = Arrays.copyOf(coeff, coeff.length);
+        int[] origVars = Arrays.copyOf(vars, vars.length);
+        Arrays.fill(coeff, 1.0);
+        Arrays.fill(vars, 1);
+        Assert.assertArrayEquals(origCoeff, tableau.getCoeff(), 1e-16);
+        Assert.assertArrayEquals(origVars, tableau.getVars());
+    }    
 
     protected Matrix exclude(Matrix matrix, int numRow, int numCol) {
         return new ImmutableMatrix() {

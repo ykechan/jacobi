@@ -42,17 +42,17 @@ public class DantzigsRule implements PivotingRule {
     public int[] apply(Tableau tab, Integer limit) {
         double[] coeff = tab.getCoeff();
         int[] vars = tab.getVars();
-        double min = 0.0;
+        double max = 0.0;
         int index = -1;
         for(int i = 0; i < coeff.length; i++){
-            if(coeff[i] > 0.0){
+            if(coeff[i] < 0.0){
                 continue;
             }
-            if(index < 0 || (Real.isNegl(coeff[i] - min) && vars[i] < vars[index])){
-                min = coeff[i];
+            if(index < 0 || (Real.isNegl(coeff[i] - max) && vars[i] < vars[index])){
+                max = coeff[i];
                 index = i;
-            }else if(coeff[i] < min){
-                min = coeff[i];
+            }else if(coeff[i] > max){
+                max = coeff[i];
                 index = i;
             }            
         }
