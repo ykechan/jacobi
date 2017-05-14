@@ -67,9 +67,6 @@ public class StandardSimplexTest {
     public void testDanzigsRule5x6() {
         this.x = new StandardSimplex(0.0, 0.0, 256L, this.assertBefore(new DantzigsRule(), 10)).compute(c, a, b)
                 .orElseThrow(() -> new IllegalStateException("Answer un-obtained"));
-        for(double[] r : x.toArray()){
-            System.out.println(r[0]);
-        }
     }
     
     @Test
@@ -78,9 +75,6 @@ public class StandardSimplexTest {
     public void testAuxProblem4x5() {
         this.x = new StandardSimplex(0.0, 0.0, 256L, this.assertBefore(new DantzigsRule(), 10)).compute(c, a, b)
                 .orElseThrow(() -> new IllegalStateException("Answer un-obtained"));
-        for(double[] r : x.toArray()){
-            System.out.println(r[0]);
-        }
     }
     
     @Test
