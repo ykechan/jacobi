@@ -72,8 +72,7 @@ public class JacobiJUnit4ClassRunner extends BlockJUnit4ClassRunner {
         } 
         this.injects = new ArrayList<>();
         this.results = new TreeMap<>();
-        this.detectInjection(clazz);        
-        System.out.println("injected " + this.injects);
+        this.detectInjection(clazz);
     }
 
     @Override
