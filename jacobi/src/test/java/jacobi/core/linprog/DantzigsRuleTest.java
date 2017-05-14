@@ -32,6 +32,7 @@ import jacobi.test.annotations.JacobiResult;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
 import java.util.Arrays;
 import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -82,6 +83,15 @@ public class DantzigsRuleTest {
     @JacobiEquals(expected = 100, actual = 100)
     public void test9columnsWithDuplicates() {
         this.result = Matrices.scalar( new DantzigsRule().apply(this.toTableau(), 1)[0] );
+    }
+    
+    @Test    
+    public void testAllZeroesNoEntry() {
+        double[] row = new double[10];
+        Arrays.fill(row, 0.0);        
+        this.coeff = Matrices.of(new double[][]{ row });
+        this.vars = Matrices.of(new double[][]{ IntStream.range(0, row.length).mapToDouble((v) -> v).toArray() });
+        Assert.assertEquals(0, new DantzigsRule().apply(this.toTableau(), 1).length);
     }
     
     private Tableau toTableau() {

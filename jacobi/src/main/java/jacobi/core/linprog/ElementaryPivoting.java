@@ -64,7 +64,7 @@ public class ElementaryPivoting implements Pivoting {
      * @param enter  Enter column
      */
     protected void normalize(double[] pivot, int enter) {
-        double denom = Math.abs(pivot[enter]); 
+        double denom = pivot[enter]; 
         pivot[enter] = 1.0 / denom;
         for(int i = enter + 1; i < pivot.length; i++){
             pivot[i] /= denom;
@@ -80,7 +80,7 @@ public class ElementaryPivoting implements Pivoting {
      * @param pivot  Pivot row
      * @param enter  Enter column
      */
-    protected void eliminate(double[] row, double[] pivot, int enter) {
+    protected void eliminate(double[] row, double[] pivot, int enter) {         
         double factor = -row[enter] / pivot[enter]; 
         row[enter] = factor;
         for(int i = enter + 1; i < row.length; i++){

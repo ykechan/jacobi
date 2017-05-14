@@ -30,15 +30,16 @@ import jacobi.core.impl.ColumnVector;
 import jacobi.core.impl.ImmutableMatrix;
 import jacobi.core.util.Throw;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 /**
  * Implementation of the Tableau structure.
  * 
  * The LP problem max c^t * x s.t. A*x &lt;= b, x &gt;= 0 can be expressed as 
- * [ 1 -c^t  0 ][ x ]   [ z ]
- * [           ][   ] = [   ]
- * [ 0    A  I ][ s ]   [ b ]
+ * [ c^t  0 ][ x ]   [ z ]
+ * [        ][   ] = [   ]
+ * [  A   I ][ s ]   [ b ]
  * 
  * If b &gt;= 0, the trivial solution [0 b] is feasible. However if some b[k] &lt; 0, [0 b] is not feasible.
  * In this case, an auxiliary scalar variable is added s.t. [A I -1]*[x s t] = b, thus [0 s |min(b)|] is feasible. 
@@ -47,23 +48,23 @@ import java.util.stream.IntStream;
  * min t -&gt; max -t s.t. [A I t]*[x s t] = b, need to be solved first.
  * 
  * The auxiliary problem can be expressed as 
- *                [ 0 ]
- * [ 0   A  I -1 ][ x ]    [ z ]
- * [ 1 -c^t 0 -1 ][ s ] =  [ b ]
- * [ 0   0  0 -1 ][ t ]    [ 0 ]
+ * 
+ * [  A  I -1 ][ x ]    [ z ]
+ * [ c^t 0 -1 ][ s ] =  [ b ]
+ * [  0  0 -1 ][ t ]    [ 0 ]
  * 
  * Internally, this class keeps the tableau in following format
- * [   A   -1 b ]
- * [ -c^t  -1 0 ]
- * [   0   -1 0 ]
+ * [  A   -1 b ]
+ * [ c^t  -1 0 ]
+ * [  0   -1 0 ]
  * 
  * Notice that for each pivoting operation, a non-basic column in the tableau is drives to a e^k, and a e^k in I
  * is mutated to a non-basic column, where e^k is some standard basis. A swap of column and be done and I is maintained.
  * The swapping of variables is kept by a mapping from column index to variable index.
  * 
  * When the auxiliary problem is solved, the tableau can be collapsed into the standard LP 
- * [   A  b ]
- * [ -c^t 0 ]
+ * [  A  b ]
+ * [ c^t 0 ]
  * 
  * @author Y.K. Chan
  */
@@ -76,7 +77,7 @@ public class MutableTableau implements Tableau {
      */
     public static Using build(boolean aux) { 
         return (p) -> (c, a, b) -> {
-            int[] vars = IntStream.range(0, a.getRowCount() + a.getColCount() + (aux ? 1 : 0)).toArray();
+            int[] vars = IntStream.range(0, a.getRowCount() + a.getColCount() + (aux ? 1 : 0)).toArray();            
             return new MutableTableau(pack(c, a, b, aux), vars, p, aux);
         };
     }
@@ -114,7 +115,7 @@ public class MutableTableau implements Tableau {
                 return Arrays.copyOf(matrix.getRow(index), matrix.getColCount());
             }
             
-            private int rowCount = matrix.getRowCount() - 1;
+            private int rowCount = matrix.getRowCount() - (isAux ? 2 : 1) ;
         };
     }
 
@@ -126,6 +127,15 @@ public class MutableTableau implements Tableau {
     @Override
     public int[] getVars() {
         return Arrays.copyOf(this.vars, this.vars.length);
+    }
+    
+    /**
+     * Get entry of the coefficient of the objective function c^t * x.
+     * @param i  Index of the coefficient
+     * @return  Value of the coefficient
+     */
+    public double getCoeff(int i) {
+        return matrix.get(matrix.getRowCount() - 1, i);
     }
     
     /**
@@ -142,8 +152,7 @@ public class MutableTableau implements Tableau {
         if(i >= this.matrix.getRowCount() - padded){
             throw new IllegalArgumentException("No corresponding exit variable for " + i);
         }
-        int leave = this.matrix.getColCount() + i - padded;       
-        System.out.println("enter = " + enter + ", leave = " + leave);
+        int leave = this.matrix.getColCount() + i - padded; 
         int temp = this.vars[enter];
         this.vars[enter] = this.vars[leave];
         this.vars[leave] = temp;
@@ -152,33 +161,35 @@ public class MutableTableau implements Tableau {
     
     /**
      * Dropping the auxiliary row and column to create a new tableau.
-     * @return  A new tableau without the auxiliary row and column.
+     * @return  A new tableau without the auxiliary row and column, or empty if auxiliary variable is basic.
      * @throws  UnsupportedOperationException if this tableau is not auxiliary
      */
-    public MutableTableau collapse() {
+    public Optional<MutableTableau> collapse() {
         if(!isAux){
             throw new UnsupportedOperationException("Tableau is not an auxiliary tableau.");
         }
-        int auxIdx = IntStream.range(0, this.vars.length).filter((i) -> this.vars[i] == this.matrix.getColCount() - 1)
+        int auxVar = this.matrix.getRowCount() - 2 + this.matrix.getColCount() - 1 - 1;
+        int auxIdx = IntStream.range(0, this.vars.length).filter((i) -> this.vars[i] == auxVar)
                 .reduce((a, b) -> {
                     throw new IllegalStateException("Variable index corrupted.");
                 })
                 .orElseThrow(() -> new IllegalStateException("Auxiliary variable not found."));
-                
+        if(auxIdx >= this.matrix.getColCount() - 2){
+            return Optional.empty();
+        }
         Matrix tab = Matrices.zeros(this.matrix.getRowCount() - 1, this.matrix.getColCount() - 1);
         for(int i = 0; i < tab.getRowCount(); i++){
-            double[] row = matrix.getRow(i + (i == tab.getRowCount() - 1 ? 1 : 0));
+            double[] row = matrix.getRow(i);
             tab.getAndSet(i, (r) -> {
-                System.arraycopy(row, 0, r, 0, auxIdx);
-                System.arraycopy(row, auxIdx + 1, r, auxIdx, r.length - auxIdx); 
+                System.arraycopy(row, 0, r, 0, r.length); 
+                r[auxIdx] = row[row.length - 2];
+                r[r.length - 1] = row[row.length - 1];
             });
         }
-        int[] newVars = IntStream.range(0, this.vars.length)
-                .filter((i) -> i != auxIdx)
-                .map((i) -> this.vars[i])
-                .toArray();
-        return new MutableTableau(tab, newVars, pivoting, false);
-    }
+        int[] newVars = Arrays.copyOf(this.vars, this.vars.length - 1);
+        newVars[auxIdx] = this.vars[this.vars.length - 1];
+        return Optional.of(new MutableTableau(tab, newVars, pivoting, false));
+    }    
     
     /**
      * Pack the linear programming problem max c^t * x s.t. A*x &lt;= b. into a matrix.
@@ -186,7 +197,7 @@ public class MutableTableau implements Tableau {
      * @param a  Constraint matrix A
      * @param b  Constraint boundary b
      * @param isAux  True for constructing auxiliary problem, false otherwise
-     * @return  Matrix which has the form [A b; c^t 0] or [A -1 b; c^t -1 0] for auxiliary problem
+     * @return  Matrix which has the form [A b; -c^t 0] or [A -1 b; -c^t -1 0] for auxiliary problem
      */
     private static Matrix pack(Matrix c, Matrix a, Matrix b, boolean isAux) {
         validate(c, a, b);
@@ -203,7 +214,7 @@ public class MutableTableau implements Tableau {
                 }
             });
         }
-        mat.getAndSet(a.getRowCount(), (r) -> invertVector(c, r, isAux) );
+        mat.getAndSet(a.getRowCount(), (r) -> invertVector(c, r) );
         if(isAux){
             mat.getAndSet(a.getRowCount() + 1, (r) -> r[r.length - 2] = -1.0);
         }
@@ -232,27 +243,21 @@ public class MutableTableau implements Tableau {
     }
     
     /**
-     * Copy the negated column vector into an array, i.e. c -&gt; [c^t 0] or [c^t -1 0].
+     * Copy the negated column vector into an array, i.e. c -&gt; [c^t 0] or [c^t 0 0].
      * @param vector  Column vector c
      * @param array  Array instance
      * @param isAux  True if auxiliary column need, false otherwise
      * @return  [c^t 0]
      */
-    private static double[] invertVector(Matrix vector, double[] array, boolean isAux) {
-        try {
-            if(vector instanceof ColumnVector){ 
-                System.arraycopy(((ColumnVector) vector).getVector(), 0, array, 0, vector.getRowCount());
-                return array;
-            }
-            for(int i = 0; i < vector.getRowCount(); i++){
-                array[i] = vector.get(i, 0);
-            }       
+    private static double[] invertVector(Matrix vector, double[] array) {
+        if(vector instanceof ColumnVector){ 
+            System.arraycopy(((ColumnVector) vector).getVector(), 0, array, 0, vector.getRowCount());
             return array;
-        } finally {
-            if(isAux){
-                array[vector.getRowCount()] = -1.0;
-            }
         }
+        for(int i = 0; i < vector.getRowCount(); i++){
+            array[i] = vector.get(i, 0);
+        }       
+        return array;        
     }
     
     

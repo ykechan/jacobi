@@ -71,6 +71,18 @@ public class MutableTableauTest {
     @JacobiResult(103)
     public Matrix vars3;
     
+    @JacobiResult(10)
+    public Matrix before;
+    
+    @JacobiResult(11)
+    public Matrix swapped1;
+    
+    @JacobiResult(12)
+    public Matrix swapped2;
+    
+    @JacobiResult(13)
+    public Matrix collapsed;
+    
     @Test
     @JacobiImport("construct 3x5")
     @JacobiEquals(expected = 100, actual = 100)
@@ -133,10 +145,9 @@ public class MutableTableauTest {
     public void testSwapAux3And8() {
         MutableTableau tableau = MutableTableau.build(true).use(this.mock()).of(c, a, b);
         Matrix mat = tableau.getMatrix();
-        Jacobi.assertEquals(a, this.exclude(mat, 1, 2));
-        Jacobi.assertEquals(b, this.column(mat, mat.getRowCount() - 1, mat.getColCount() - 1));
+        Jacobi.assertEquals(a, this.exclude(mat, 0, 2));
+        Jacobi.assertEquals(b, this.column(mat, mat.getRowCount(), mat.getColCount() - 1));
         
-        //Jacobi.assertEquals(c, new ColumnVector(tableau.getCoeff()));
         tableau.pivot(3, 8);
         this.vars = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });        
     }
@@ -151,6 +162,29 @@ public class MutableTableauTest {
         tableau.pivot(3, 9);
         this.vars2 = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
         tableau.pivot(1, 3);
+        this.vars3 = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
+    }
+    
+    @Test
+    @JacobiImport("swap aux 2,5 2,2 and collapse")
+    @JacobiEquals(expected = 10, actual = 10)    
+    @JacobiEquals(expected = 11, actual = 11)
+    @JacobiEquals(expected = 101, actual = 101)
+    @JacobiEquals(expected = 12, actual = 12)
+    @JacobiEquals(expected = 102, actual = 102)
+    @JacobiEquals(expected = 13, actual = 13)
+    @JacobiEquals(expected = 103, actual = 103)
+    public void testSwapAux2x5Then2x2ThenCollapse() {
+        MutableTableau tableau = MutableTableau.build(true).use(this.mockReset(1)).of(c, a, b);
+        this.before = this.asMatrix(tableau);
+        tableau.pivot(2, 5);
+        this.swapped1 = this.asMatrix(tableau);
+        this.vars = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
+        tableau.pivot(2, 2);
+        this.swapped2 = this.asMatrix(tableau);
+        this.vars2 = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
+        tableau = tableau.collapse().get();
+        this.collapsed = this.asMatrix(tableau);
         this.vars3 = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
     }
     
@@ -197,6 +231,30 @@ public class MutableTableauTest {
         };
     } 
     
+    protected Matrix asMatrix(Tableau tab) {
+        Matrix constraint = tab.getMatrix().copy();
+        double[] coeff = Arrays.copyOf(tab.getCoeff(), constraint.getColCount());
+        return new ImmutableMatrix() {
+
+            @Override
+            public int getRowCount() {
+                return constraint.getRowCount() + 1;
+            }
+
+            @Override
+            public int getColCount() {
+                return constraint.getColCount();
+            }
+
+            @Override
+            public double[] getRow(int index) {
+                return index == constraint.getRowCount()
+                        ? coeff
+                        : constraint.getRow(index);
+            }
+        };
+    }
+    
     protected Matrix column(Matrix matrix, int toRow, int col) {
         return new ColumnVector( IntStream.range(0, toRow)
                 .mapToDouble((i) -> matrix.get(i, col))
@@ -205,5 +263,14 @@ public class MutableTableauTest {
 
     protected Pivoting mock() {
         return (mat, i, j) -> this.tab = mat.copy();
+    }
+    
+    protected Pivoting mockReset(int value) {        
+        return (mat, i, j) -> {
+            for(int k = 0; k < mat.getRowCount(); k++){
+                mat.set(k, j, value);
+            }
+            this.tab = mat.copy();
+        };
     }
 }

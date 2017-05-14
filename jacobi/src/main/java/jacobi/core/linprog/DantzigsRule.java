@@ -45,7 +45,7 @@ public class DantzigsRule implements PivotingRule {
         double max = 0.0;
         int index = -1;
         for(int i = 0; i < coeff.length; i++){
-            if(coeff[i] < 0.0){
+            if(coeff[i] <= 0.0){
                 continue;
             }
             if(index < 0 || (Real.isNegl(coeff[i] - max) && vars[i] < vars[index])){
