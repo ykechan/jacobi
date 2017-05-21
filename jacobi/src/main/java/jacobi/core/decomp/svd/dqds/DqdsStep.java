@@ -23,7 +23,7 @@
  */
 package jacobi.core.decomp.svd.dqds;
 
-import java.util.OptionalDouble;
+import jacobi.core.util.Real;
 
 /**
  * Iteration step of differential quotient different with shifts (dqds).
@@ -63,17 +63,34 @@ public interface DqdsStep {
      * Compute an iteration of dqds.
      * @param zElem Elements {a1^2, b1^2, p1^2, q1^2, a2^2, b2^2, p2^2, q2^2, ...}
      * @param begin  Begin index of elements of interest
-     * @param end  End index of elements of interest
-     * @param shift  Shift value
+     * @param end  End index of elements of interest     
      * @param forward  True if compute {a^2[i], b^2[i]} to {p^2[i], q^2[i]}, false the other way around
+     * @param prev  Result of previous iteration
      * @return  A splitting index and shifted value, or the shifted value and next shift
      */
-    public Result compute(double[] zElem, int begin, int end, double shift, boolean forward);
+    public State compute(double[] zElem, int begin, int end, boolean forward, State prev);
     
     /**
      * Data object for Dqds computation result
      */
-    public static class Result {
+    public static final class State { 
+        
+        /**
+         * Get state instance for no useful information available.
+         * @return  State instance
+         */
+        public static State empty() {
+            return EMPTY;
+        }
+        
+        /**
+         * Create a state instance for a failed iteration.
+         * @param guess  Next shift value suggestion
+         * @return  State instance
+         */
+        public static State failed(double guess) {
+            return new State(-1, Double.NaN, guess, 1.0, 1.0, 1.0);
+        }
         
         /**
          * Index for splitting
@@ -81,9 +98,9 @@ public interface DqdsStep {
         public final int split;
         
         /**
-         * Shift value used, or empty if failed
+         * Shift value used, or NaN if failed
          */
-        public final OptionalDouble shifted;
+        public final double shifted;
         
         /**
          * Next shift value suggested
@@ -91,45 +108,37 @@ public interface DqdsStep {
         public final double guess;
         
         /**
-         * Construct result with splitting point.
-         * @param split  Index for splitting
-         * @param shifted  Shift value used
+         * Maximum diagonal element and minimum sup-diagonal element found
          */
-        public Result(int split, double shifted) {
-            this(split, shifted, 0.0);
-        }
-        
-        /**
-         * Construct result with shift value used and next shift suggestion.
-         * @param shift  Shift value used
-         * @param guess  Next shift suggestion
-         */
-        public Result(double shift, double guess) {
-            this(-1, shift, guess);
-        }
-        
-        /**
-         * Construct result with failed iteration but with next shift suggestion.
-         * @param guess  Next shift suggestion
-         */
-        public Result(double guess) {
-            this.split = -1;
-            this.shifted = OptionalDouble.empty();
-            this.guess = guess;
-        }
+        public final double maxElem, minElem, minErr;
 
         /**
          * Constructor.
          * @param split  Index for splitting
-         * @param shifted  Shift value used
-         * @param guess  Next shift suggestion
+         * @param shifted  Shift value used, or empty if failed
+         * @param guess  Next shift value suggested
+         * @param maxElem  Maximum diagonal element
+         * @param minElem  Minimum diagonal element
+         * @param minErr  Minimum sup-diagonal element found
          */
-        protected Result(int split, double shifted, double guess) {
+        protected State(int split, double shifted, double guess, double maxElem, double minElem, double minErr) {
             this.split = split;
-            this.shifted = OptionalDouble.of(shifted);
+            this.shifted = shifted;
             this.guess = guess;
+            this.maxElem = maxElem;
+            this.minElem = minElem;
+            this.minErr = minErr;
         }
         
+        /**
+         * Check if the previous iteration has failed.
+         * @return  True if failed, false otherwise
+         */
+        public boolean isFailed() {
+            return Double.isNaN(this.shifted);
+        }
+        
+        private static final State EMPTY = new State(-1, 0.0, 0.0, 1.0, 0.0, Real.EPSILON);
     }
     
 }
