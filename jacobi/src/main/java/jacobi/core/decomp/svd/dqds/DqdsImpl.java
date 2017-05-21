@@ -37,17 +37,24 @@ package jacobi.core.decomp.svd.dqds;
 public class DqdsImpl implements DqdsStep {
 
     @Override
-    public Result compute(double[] zElem, int begin, int end, double shift, boolean forward) {
+    public State compute(double[] zElem, int begin, int end, boolean forward, State result) { 
+        return this.unsafe(zElem, begin, end, forward, result.guess);
+    } 
+    
+    protected State unsafe(double[] zElem, int begin, int end, boolean forward, double shift) {
         int curr = forward ? 0 : 2;
         int next = Math.abs(curr - 2);
         double delta = zElem[curr + 4*begin] - shift;
-        for(int i = begin; i < end; i++){
-            zElem[next + 4*i] = delta + zElem[curr + 4*i + 1];
-            double temp = zElem[curr + 4*(i + 1)] / zElem[next + 4*i];
-            zElem[next + 4*i + 1] = zElem[curr + 4*i + 1] / temp;
-            delta = delta * temp - shift;
-        }
-        return new Result(0.0);
+        double maxElem = Double.MIN_VALUE;
+        double minElem = Double.MAX_VALUE;
+        double minErr = Double.MAX_VALUE; 
+        double minDelta = delta;
+        
+        return State.empty();
+    }
+    
+    protected State safe() {
+        return State.empty();
     }
 
     private static final double SAFEMIN = 1e-20;
