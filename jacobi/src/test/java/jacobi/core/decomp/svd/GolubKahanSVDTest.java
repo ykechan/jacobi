@@ -35,7 +35,6 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.runner.RunWith;
 
 /**
@@ -48,6 +47,12 @@ public class GolubKahanSVDTest {
     
     @JacobiInject(0)
     public Matrix input;
+    
+    @JacobiResult(10)
+    public Matrix uMat;
+    
+    @JacobiResult(11)
+    public Matrix vMat;
     
     @JacobiInject(-1)
     public Map<Integer, Matrix> steps;
@@ -108,6 +113,17 @@ public class GolubKahanSVDTest {
     }
     
     @Test
+    @JacobiImport("Full 5x5")
+    @JacobiEquals(expected = 10, actual = 10)
+    @JacobiEquals(expected = 11, actual = 11)
+    public void testFull5x5() {
+        this.uMat = Matrices.identity(5);
+        this.vMat = Matrices.identity(5);
+        this.mock().compute(this.input.getRow(0), this.input.getRow(1), 0, 5, uMat, vMat);
+        this.result = this.input;
+    }
+    
+    @Test
     @JacobiImport("3x3 In 6x6")
     public void test3x3In6x6() {
         this.mock().compute(this.input.getRow(0), this.input.getRow(1), 1, 4, null, null);
@@ -118,6 +134,17 @@ public class GolubKahanSVDTest {
     @JacobiImport("3x3 In 6x6 (2)")
     public void test3x3In6x6Two() {
         this.mock().compute(this.input.getRow(0), this.input.getRow(1), 1, 4, null, null);
+        this.result = this.input;
+    }
+    
+    @Test
+    @JacobiImport("Full 4x4 In 6x6")
+    @JacobiEquals(expected = 10, actual = 10)
+    @JacobiEquals(expected = 11, actual = 11)
+    public void testFull4x4In6x6() {
+        this.uMat = Matrices.identity(6);
+        this.vMat = Matrices.identity(6);
+        this.mock().compute(this.input.getRow(0), this.input.getRow(1), 1, 5, uMat, vMat);
         this.result = this.input;
     }
     

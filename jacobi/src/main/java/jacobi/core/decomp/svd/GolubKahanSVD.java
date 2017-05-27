@@ -26,6 +26,8 @@ package jacobi.core.decomp.svd;
 
 import jacobi.api.Matrix;
 import jacobi.core.givens.Givens;
+import jacobi.core.givens.GivensMode;
+import jacobi.core.givens.GivensRQ;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,31 +55,40 @@ public class GolubKahanSVD implements SvdStep {
             return begin;
         }
         double shift = this.wilkinson(diag, supDiag, begin, end);
-        Step step = this.createBulge(diag, supDiag, begin, shift); 
-        List<Step> left = new ArrayList<>();
-        List<Step> right = new ArrayList<>();
+        Step step = this.createBulge(diag, supDiag, begin, shift);         
+        List<Givens> left = new ArrayList<>(end - begin);
+        List<Givens> right = new ArrayList<>(end - begin);
+        right.add(step.givens);
         int last = end - 2;
         int deflated = -1;
         for(int i = begin; i < last; i++){
             Step leftStep = this.pushRight(diag, supDiag, i, step.bulge);
             Step rightStep = this.pushDown(diag, supDiag, i, leftStep.bulge);
-            left.add(leftStep);
-            right.add(rightStep);
+            left.add(leftStep.givens);
+            right.add(rightStep.givens);
             step = rightStep;
             if(rightStep.givens.getMag() < SvdStep.EPSILON){
                 deflated = i;
             }
         }
-        left.add(this.pushRight(diag, supDiag, last, step.bulge));
+        left.add(this.pushRight(diag, supDiag, last, step.bulge).givens);
         if(uMat != null){
-            // ...
+            new GivensRQ(left).compute(uMat, begin, end, GivensMode.FULL);
         }
         if(vMat != null){
-            // ...
+            new GivensRQ(right).compute(vMat, begin, end, GivensMode.FULL);
         }
         return Math.abs(supDiag[last + 1]) < SvdStep.EPSILON ? end - 1 : deflated; 
     }
     
+    /**
+     * Create a bulge with given shift.
+     * @param diag  Diagonal elements
+     * @param supDiag  Sup-diagonal elements
+     * @param at  Index of the bulge to be created
+     * @param shift  Shift value
+     * @return  Givens rotation used with bulge value
+     */
     protected Step createBulge(double[] diag, double[] supDiag, int at, double shift) {
         Givens giv = Givens.of(diag[at] * diag[at] - shift, diag[at] * supDiag[at]);
         double x = giv.rotateX(diag[at], supDiag[at]);
@@ -88,6 +99,14 @@ public class GolubKahanSVD implements SvdStep {
         return new Step(giv, bulge);
     }
     
+    /**
+     * Push the bulge value to the right.
+     * @param diag  Diagonal elements
+     * @param supDiag  Sup-diagonal elements
+     * @param at  Index of the bulge to be created
+     * @param bulge  Bulge value
+     * @return  Givens rotation used with bulge value
+     */
     protected Step pushRight(double[] diag, double[] supDiag, int at, double bulge) {
         Givens giv = Givens.of(diag[at], bulge);
         diag[at] = giv.getMag();
@@ -99,6 +118,14 @@ public class GolubKahanSVD implements SvdStep {
         return new Step(giv, next);
     }
     
+    /**
+     * Push the bulge value down one row.
+     * @param diag  Diagonal elements
+     * @param supDiag  Sup-diagonal elements
+     * @param at  Index of the bulge to be created
+     * @param bulge  Bulge value
+     * @return  Givens rotation used with bulge value
+     */
     protected Step pushDown(double[] diag, double[] supDiag, int at, double bulge) {
         Givens giv = Givens.of(supDiag[at], bulge);
         supDiag[at] = giv.getMag();
@@ -110,6 +137,14 @@ public class GolubKahanSVD implements SvdStep {
         return new Step(giv, next);
     }
     
+    /**
+     * Find the wilkinson shift value.
+     * @param diag  Diagonal elements
+     * @param supDiag  Sup-diagonal elements
+     * @param begin  Index of beginning of elements of interest
+     * @param end  Index of ending of elements of interest
+     * @return  Shift value
+     */
     protected double wilkinson(double[] diag, double[] supDiag, int begin, int end) {
         double c = diag[end - 1] * diag[end - 1] + supDiag[end - 2] * supDiag[end - 2];
         double b = diag[end - 2] * supDiag[end - 2];
@@ -120,12 +155,26 @@ public class GolubKahanSVD implements SvdStep {
         return (tr + (tr > 2*c ? -1 : 1) * Math.sqrt(delta) )/2.0;
     }
 
+    /**
+     * Data class for operations used in pushing the bulge.
+     */
     protected static final class Step {
         
+        /**
+         * Givens rotation to push the bulge.
+         */
         public final Givens givens;
         
+        /**
+         * Bulge value overflowed after bulge pushed.
+         */
         public final double bulge;
 
+        /**
+         * Constructor.
+         * @param givens  Givens rotation to push the bulge.
+         * @param bulge  Bulge value overflowed after bulge pushed.
+         */
         public Step(Givens givens, double bulge) {
             this.givens = givens;
             this.bulge = bulge;
