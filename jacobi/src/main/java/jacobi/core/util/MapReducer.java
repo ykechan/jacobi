@@ -56,7 +56,7 @@ public class MapReducer<T> implements Supplier<T> {
     /**
      * Default maximum number of flop for a single thread.
      */
-    public static final int DEFAULT_THREAD_FLOP = 2048;
+    public static final int DEFAULT_NUM_FLOP = 2048;
    
     /**
      * Specify a range of indices to begin building a MapReducer.
@@ -157,7 +157,7 @@ public class MapReducer<T> implements Supplier<T> {
          * @return  Builder helper class
          */
         public default Limited flop(int count) {
-            return this.limit(Math.max(DEFAULT_THREAD_FLOP / count, 2));
+            return this.limit(Math.max(DEFAULT_NUM_FLOP / count, 2));
         }
         
     }
