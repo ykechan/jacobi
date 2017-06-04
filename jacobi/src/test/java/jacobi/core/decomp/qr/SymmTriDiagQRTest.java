@@ -33,6 +33,7 @@ import jacobi.test.util.Jacobi;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,46 +64,46 @@ public class SymmTriDiagQRTest {
     @Test
     @JacobiImport("ToTriDiag 6x6")
     public void testToTriDiag6x6() {
-        double[][] triDiag = new SymmTriDiagQR((m, p, up) -> m).toTriDiag(this.input);
-        Jacobi.assertEquals(this.output, Matrices.of(triDiag));
+        double[] diags = new SymmTriDiagQR((m, p, up) -> m).toTriDiag(this.input).get();
+        Jacobi.assertEquals(this.output, this.diagsToRows(diags));
     }
     
     @Test
     @JacobiImport("ToTriDiag Non-Symm 5x5")
-    public void testToTriDiagNonSymm5x5() {
-        double[][] triDiag = new SymmTriDiagQR((m, p, up) -> m).toTriDiag(this.input);        
-        Assert.assertNull(triDiag);
+    public void testToTriDiagNonSymm5x5() {     
+        Assert.assertFalse(new SymmTriDiagQR((m, p, up) -> m).toTriDiag(this.input).isPresent());
     }
     
     @Test
     @JacobiImport("ToTriDiag Non-Symm 4x4")
     public void testToTriDiagNonSymm4x4() {
-        double[][] triDiag = new SymmTriDiagQR((m, p, up) -> m).toTriDiag(this.input);        
-        Assert.assertNull(triDiag);
+        Assert.assertFalse(new SymmTriDiagQR((m, p, up) -> m).toTriDiag(this.input).isPresent());
     }
     
     @Test
     @JacobiImport("Step 6x6")
     public void testStep6x6() {
-        double[] diag = this.input.getRow(0);
-        double[] subDiag = this.input.getRow(1);
-        this.mockForStepTest(shifted, intermit, output).step(diag, subDiag, null, 0, diag.length);
+        double[] diags = this.toZNotation(this.input.getRow(0), this.input.getRow(1));
+        this.mockForStepTest(shifted, intermit, output).step(diags, null, 0, diags.length / 2);
     }
     
     @Test
     @JacobiImport("Step 5x5")
     public void testStep5x5One() {
-        double[] diag = this.input.getRow(0);
-        double[] subDiag = this.input.getRow(1);
-        this.mockForStepTest(shifted, intermit, output).step(diag, subDiag, null, 0, diag.length);
+        //double[] diag = this.input.getRow(0);
+        //double[] subDiag = this.input.getRow(1);
+        //this.mockForStepTest(shifted, intermit, output).step(diag, subDiag, null, 0, diag.length);
+        double[] diags = this.toZNotation(this.input.getRow(0), this.input.getRow(1));
+        this.mockForStepTest(shifted, intermit, output).step(diags, null, 0, diags.length / 2);
     }
     
     @Test
     @JacobiImport("Step 5x5 (2)")
     public void testStep5x5Two() {
-        double[] diag = this.input.getRow(0);
-        double[] subDiag = this.input.getRow(1);
-        this.mockForStepTest(shifted, intermit, output).step(diag, subDiag, null, 0, diag.length);
+        //double[] diag = this.input.getRow(0);
+        //double[] subDiag = this.input.getRow(1);
+        double[] diags = this.toZNotation(this.input.getRow(0), this.input.getRow(1));
+        this.mockForStepTest(shifted, intermit, output).step(diags, null, 0, diags.length / 2);
     }
     
     @Test
@@ -110,15 +111,17 @@ public class SymmTriDiagQRTest {
     public void testStep5x5Three() {
         double[] diag = this.input.getRow(0);
         double[] subDiag = this.input.getRow(1);
-        this.mockForStepTest(shifted, intermit, output).step(diag, subDiag, null, 0, diag.length);
+        double[] diags = this.toZNotation(this.input.getRow(0), this.input.getRow(1));
+        this.mockForStepTest(shifted, intermit, output).step(diags, null, 0, diags.length / 2);
     }
     
     @Test
     @JacobiImport("Step 5x5 (4)")
     public void testStep5x5Four() {
-        double[] diag = this.input.getRow(0);
-        double[] subDiag = this.input.getRow(1);
-        this.mockForStepTest(shifted, intermit, output).step(diag, subDiag, null, 0, diag.length);
+        //double[] diag = this.input.getRow(0);
+        //double[] subDiag = this.input.getRow(1);
+        double[] diags = this.toZNotation(this.input.getRow(0), this.input.getRow(1));
+        this.mockForStepTest(shifted, intermit, output).step(diags, null, 0, diags.length / 2);
     }
     
     @Test
@@ -138,33 +141,42 @@ public class SymmTriDiagQRTest {
         Jacobi.assertEquals(exp, eigs, 1e-12);
     }
     
+    private Matrix diagsToRows(double[] diags) {
+        double[] diag = new double[diags.length / 2];
+        double[] supDiag = new double[diag.length];
+        for(int i = 0; i < diag.length; i++){
+            diag[i] = diags[2*i];
+            supDiag[i] = diags[2*i + 1];
+        }
+        return Matrices.unsafe(new double[][]{diag, supDiag});
+    }
+    
+    private double[] toZNotation(double[] diags, double[] supDiags) {
+        return IntStream.range(0, 2 * diags.length)
+                .mapToDouble((i) -> i % 2 == 0 ? diags[i/2] : supDiags[i/2])
+                .toArray();
+    }
+    
     private SymmTriDiagQR mock() {
         return new SymmTriDiagQR(new BasicQR(new DefaultQRStep()));
     }
     
     private SymmTriDiagQR mockForStepTest(Matrix afterShift, Matrix afterQR, Matrix result) {
-        return new SymmTriDiagQR((m, p, up) -> m){
+        return new SymmTriDiagQR((m, p, up) -> m){           
 
             @Override
-            protected double preCompute(double[] diag, double[] subDiag, int begin, int end) {
-                double shift = super.preCompute(diag, subDiag, begin, end);
-                Jacobi.assertEquals(afterShift, Matrices.of(new double[][]{diag, subDiag}));
-                return shift;
+            protected List<Givens> qrDecomp(double[] diags, int begin, int end, double shift) {
+                List<Givens> giv = super.qrDecomp(diags, begin, end, shift);
+                Jacobi.assertEquals(afterQR, diagsToRows(diags));
+                return giv;    
             }
 
             @Override
-            protected List<Givens> qrDecomp(double[] diag, double[] subDiag, int begin, int end) {
-                List<Givens> rotList = super.qrDecomp(diag, subDiag, begin, end);
-                Jacobi.assertEquals(afterQR, Matrices.of(new double[][]{diag, subDiag}));
-                return rotList;
+            protected int step(double[] diags, Matrix partner, int begin, int end) {
+                int split = super.step(diags, partner, begin, end);
+                Jacobi.assertEquals(result, diagsToRows(diags));
+                return split;
             }
-
-            @Override
-            protected void postCompute(double[] diag, double[] subDiag, int begin, int end, double shift) {
-                super.postCompute(diag, subDiag, begin, end, shift);
-                Jacobi.assertEquals(result, Matrices.of(new double[][]{diag, subDiag}));
-            }            
-            
         };
     }    
 }

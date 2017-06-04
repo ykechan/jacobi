@@ -25,12 +25,16 @@ package jacobi.core.decomp.qr;
 
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
-import jacobi.core.decomp.qr.step.QRStep;
 import jacobi.core.givens.Givens;
 import jacobi.core.givens.GivensMode;
 import jacobi.core.givens.GivensRQ;
+import jacobi.core.util.Divider;
+import jacobi.core.util.MapReducer;
+import jacobi.core.util.Real;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.IntStream;
 
 /**
  * QR algorithm for symmetric Hessenberg matrices.
@@ -39,7 +43,10 @@ import java.util.List;
  * since it can be represents by only its diagonal elements and sub-diagonal elements, and double-shift is un-necessary
  * since all eigenvalues and  Rayleigh quotient shifts are real.
  * 
- * This class is only for 3x3 or larger symmetric Hessenberg matrices, or else the computation fall-through to 
+ * Internally this class keeps the symmetric tri-diagonal elements in B-notation, i.e. 
+ * {a1, b1, a2, b2, ...} where {a1, a2, ...} = diag(H) and {b1, b2, ...} = supDiag(H)
+ * 
+ * This class is only for 3x3 or larger symmetric Hessenberg matrices, or else the computation falls-through to 
  * base implementation.
  * 
  * @author Y.K. Chan
@@ -58,218 +65,132 @@ public class SymmTriDiagQR implements QRStrategy {
     public Matrix compute(Matrix matrix, Matrix partner, boolean fullUpper) {
         if(matrix.getRowCount() < 3){
             return this.base.compute(matrix, partner, fullUpper);
-        }
-        double[][] diags = this.toTriDiag(matrix);
-        if(diags == null){
-            return this.base.compute(matrix, partner, fullUpper);
-        }
-        this.compute(diags[0], diags[1], partner, 0, diags[0].length);
-        return Matrices.diag(diags[0]);
+        }        
+        double[] diag = this.toTriDiag(matrix)                
+                /*
+                .map((diags) -> {
+                    //MapReducer.divide((begin, end) -> this.step(diags, partner, begin, end), 0, diags.length / 2);
+                    Divider.repeats((begin, end) -> this.step(diags, partner, begin, end)).visit(0, diags.length / 2);
+                    return diags;
+                })
+                */
+                .map((diags) -> Divider
+                        .repeats((begin, end) -> this.step(diags, partner, begin, end))
+                        .visit(0, diags.length / 2)
+                        .echo(diags) )
+                .map((diags) -> IntStream.range(0, diags.length / 2).mapToDouble((i) -> diags[2*i]).toArray())
+                .orElse(null);
+        return diag == null ? this.base.compute(matrix, partner, fullUpper) : Matrices.diag(diag);
     }
     
     /**
-     * Compute an iteration of QR algorithm with diagonal and sub-diagonal element.
-     * @param diag  diagonal elements
-     * @param subDiag  sub-diagonal elements
+     * Compute an iteration of QR algorithm on the diagonal and sub-diagonal elements
+     * @param diags  Diagonal and sub-diagonal elements in Z-notation
      * @param partner  Partner matrix
      * @param begin  Begin index of elements of interest
      * @param end   End index of elements of interest
+     * @return  Index of deflated element or -1 if none
      */
-    protected void compute(double[] diag, double[] subDiag, Matrix partner, int begin, int end) {
+    protected int step(double[] diags, Matrix partner, int begin, int end) {
         if(end - begin < 2){
-            return;
+            return begin + 1;
         }
-        if(Math.abs(subDiag[begin]) < EPSILON){
-            this.compute(diag, subDiag, partner, begin + 1, end);
-            return;
+        if(Real.isNegl(diags[2*begin + 1])){
+            return begin + 1;
         }
-        if(Math.abs(subDiag[end - 2]) < EPSILON){
-            this.compute(diag, subDiag, partner, begin, end - 1);
-            return;
-        }
-        int max = (end - begin) * 16;
-        while(--max > 0){
-            this.step(diag, subDiag, partner, begin, end);
-            int deflated = this.findDeflated(subDiag, begin, end);
-            if(deflated < end){
-                this.compute(diag, subDiag, partner, begin, deflated + 1);
-                this.compute(diag, subDiag, partner, deflated + 1, end);
-                return;
-            }
-        }
-        throw new UnsupportedOperationException("Unable to deflate.");
-    }
-    
-    /**
-     * Compute an iteration of QR algorithm with diagonal and sub-diagonal element.
-     * @param diag  diagonal elements
-     * @param subDiag  sub-diagonal elements
-     * @param partner  Partner matrix
-     * @param begin  Begin index of elements of interest
-     * @param end   End index of elements of interest
-     */
-    protected void step(double[] diag, double[] subDiag, Matrix partner, int begin, int end) {
-        if(end - begin < 2){
-            return;
-        }
-        double shift = this.preCompute(diag, subDiag, begin, end);
-        List<Givens> rot = this.qrDecomp(diag, subDiag, begin, end - 1);
-        this.computeRQ(diag, subDiag, begin, end - 1, rot);
-        this.postCompute(diag, subDiag, begin, end, shift);
+        double shift = diags[2*(end - 1)];
+        List<Givens> rot = this.qrDecomp(diags, begin, end, shift);        
+        int split = this.computeRQ(diags, begin, end, rot, shift);
         if(partner != null){
             new GivensRQ(rot).compute(partner, begin, end, GivensMode.FULL);
         }
-    }
+        return split;
+    }    
     
     /**
-     * Pre-compute operation for shifting diagonal elements.
-     * @param diag  Diagonal elements
-     * @param subDiag  Sub-diagonal elements
-     * @param begin  Begin index of elements of interest
-     * @param end   End index of elements of interest
-     * @return Shift value
-     */
-    protected double preCompute(double[] diag, double[] subDiag, int begin, int end) { 
-        double shift = end - begin == 2 ? this.eigenvalue(diag, subDiag, begin) : diag[end - 1];
-        for(int i = begin; i < end; i++){
-            diag[i] -= shift;
-        }
-        return shift;
-    }
-    
-    /**
-     * Post-compute operation for un-shifting diagonal elements.
-     * @param diag  Diagonal elements
-     * @param subDiag  Sub-diagonal elements
+     * Compute QR decomposition on the tri-diagonal matrix
+     * @param diags  Diagonal and sub-diagonal elements.
      * @param begin  Begin index of elements of interest
      * @param end   End index of elements of interest
      * @param shift  Shift value
-     */
-    protected void postCompute(double[] diag, double[] subDiag, int begin, int end, double shift) {
-        for(int i = begin; i < end; i++){
-            diag[i] += shift;
-        }
-    }
-    
-    /**
-     * Compute QR decomposition on the tri-diagonal matrix.
-     * @param diag  Diagonal elements
-     * @param subDiag  Sub-diagonal elements
-     * @param begin  Begin index of elements of interest
-     * @param end   End index of elements of interest
      * @return  List of Givens rotation applied
      */
-    protected List<Givens> qrDecomp(double[] diag, double[] subDiag, int begin, int end) {
+    protected List<Givens> qrDecomp(double[] diags, int begin, int end, double shift) {
         Givens[] rot = new Givens[end - begin];
-        double up = subDiag[begin];
-        for(int i = begin; i < end; i++){
-            Givens giv = Givens.of(diag[i], subDiag[i]);
-            diag[i] = giv.getMag();            
-            double upper = giv.rotateX(up, diag[i + 1]);
-            double lower = giv.rotateY(up, diag[i + 1]);
-            subDiag[i] = upper;
-            diag[i + 1] = lower;            
-            up = giv.rotateY(0.0, subDiag[i + 1]);
-            rot[i - begin] = giv;
-        }        
+        double up = diags[begin + 1];
+        int last = end - 1;
+        int finish = 2 * last;
+        diags[2 * begin] -= shift;
+        for(int i = 2 * begin; i < finish; i += 2){
+            Givens giv = Givens.of(diags[i], diags[i + 1]);
+            diags[i] = giv.getMag(); 
+            double upper = giv.rotateX(up, diags[i + 2] - shift);
+            double lower = giv.rotateY(up, diags[i + 2] - shift);
+            diags[i + 1] = upper;
+            diags[i + 2] = lower;
+            up = giv.rotateY(0.0, diags[i + 3]);
+            rot[i / 2 - begin] = giv;
+        }
         return Arrays.asList(rot);
     }
     
     /**
      * Compute R*Q from QR decomposition.
-     * @param diag  Diagonal elements
-     * @param subDiag  Sub-diagonal elements
+     * @param diags  Diagonal and sub-diagonal elements.
      * @param begin  Begin index of elements of interest
      * @param end   End index of elements of interest
-     * @param rot  List of Givens rotation applied
+     * @param rot  Givens rotation applied
+     * @param shift  Shift value
+     * @return  Index of deflated entry, or -1 if none
      */
-    protected void computeRQ(double[] diag, double[] subDiag, int begin, int end, List<Givens> rot) {         
-        for(int i = begin; i < end; i++){
-            Givens giv = rot.get(i - begin);
-            diag[i] = giv.rotateX(diag[i], subDiag[i]);
-            double left = giv.rotateX(0.0, diag[i + 1]);
-            double right = giv.rotateY(0.0, diag[i + 1]);
-            subDiag[i] = left;
-            diag[i + 1] = right;
+    protected int computeRQ(double[] diags, int begin, int end, List<Givens> rot, double shift) {
+        int last = end - 1;
+        int finish = 2 * last;
+        int deflated = -1;
+        for(int i = 2 * begin; i < finish; i+=2){
+            Givens giv = rot.get(i/2 - begin);
+            diags[i] = giv.rotateX(diags[i], diags[i + 1]) + shift;
+            double left = giv.rotateX(0.0, diags[i + 2]);
+            double right = giv.rotateY(0.0, diags[i + 2]);
+            if(Real.isNegl(left)){
+                deflated = i / 2;
+            }
+            diags[i + 1] = left;
+            diags[i + 2] = right;
         }
-    } 
+        diags[2 * last] += shift;
+        return deflated < 0 ? deflated : deflated + 1;
+    }
     
     /**
-     * Transform input matrix to symmetric tri-diagonal elements, if matrix is symmetric and at least 3x3.
+     * Transform input matrix to symmetric tri-diagonal elements, if matrix is symmetric
      * @param matrix  Input matrix
-     * @return  Diagonal elements and sub-diagonal elements, or null if matrix is not symmetric or too small.
+     * @return   Diagonal and sub-diagonal elements, or empty if matrix is not symmetric
      */
-    protected double[][] toTriDiag(Matrix matrix) {
+    protected Optional<double[]> toTriDiag(Matrix matrix) {
         for(int i = 0; i < matrix.getRowCount(); i++){
             double[] row = matrix.getRow(i);
             boolean nonZero = Arrays.stream(row).skip(i + 2)                    
-                    .filter((elem) -> Math.abs(elem) > QRStep.EPSILON )
+                    .filter((elem) -> !Real.isNegl(elem) )
                     .findAny()
                     .isPresent();
-            if(nonZero){
-                return null;
+            if(nonZero){                
+                return Optional.empty();
             }
         }
-        double[][] diags = new double[2][matrix.getRowCount()];
+        double[] diags = new double[2 * matrix.getRowCount()];
         double upper = 0.0;
         for(int i = 0; i < matrix.getRowCount(); i++){
             double[] row = matrix.getRow(i);
-            diags[0][i] = row[i];
-            if(i > 0 && Math.abs(row[i - 1] - upper) > QRStep.EPSILON){
-                return null;
+            diags[2*i] = row[i];
+            if(i > 0 && !Real.isNegl(row[i - 1] - upper)){
+                return Optional.empty();
             }
             upper = i + 1 < matrix.getColCount() ? row[i + 1] : 0.0; 
-            diags[1][i] = upper;
+            diags[2*i + 1] = upper;
         }
-        return diags;
+        return Optional.of(diags);
     }
-    
-    /**
-     * Compute the eigenvalue for 2x2 symmetric matrix.
-     * @param diag  Diagonal elements
-     * @param subDiag  Sub-diagonal elements
-     * @param at  Index of elements of interest
-     * @return  One real eigenvalue
-     */
-    protected double eigenvalue(double[] diag, double[] subDiag, int at) {
-        //
-        //     [a c]
-        // A = [   ]
-        //     [c b]
-        //
-        // p(A) = (a - k) * (b - k) - c^2
-        //      = k^2 - (a + b)*k + a*b - c^2
-        //  det = (a + b)^2 - 4(a*b - c^2)
-        //      = (a - b)^2 + 4c^2
-        //
-        double b = diag[at + 1];
-        double c = subDiag[at];
-        
-        if(Math.abs(c) < EPSILON){
-            return b;
-        }        
-        double a = diag[at];
-        double det = Math.sqrt((a - b) * (a - b) + 4*c*c);
-        return (b + a + (a < 0 ? det : -det)) / 2.0;
-    }
-    
-    /**
-     * Find the first deflated element in sub-diagonal
-     * @param subDiag  Sub-diagonal
-     * @param begin  Begin index of elements of interest
-     * @param end  End index of elements of interest
-     * @return  First deflated element in sub-diagonal
-     */
-    protected int findDeflated(double[] subDiag, int begin, int end) {
-        for(int i = begin; i < end; i++){
-            if(Math.abs(subDiag[i]) < EPSILON){
-                return i;
-            }
-        }
-        return end;
-    }        
 
     private QRStrategy base;
-    
-    private static final double EPSILON = 1e-12;        
 }

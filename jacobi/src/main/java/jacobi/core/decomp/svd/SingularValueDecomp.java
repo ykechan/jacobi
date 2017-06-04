@@ -25,10 +25,78 @@
 package jacobi.core.decomp.svd;
 
 import jacobi.api.Matrix;
+import jacobi.core.util.Divider;
+import jacobi.core.util.Throw;
 
 /**
- *
+ * Implementation of Singular Value Decomposition.
+ * 
+ * Given a matrix A, find orthogonal matrices U and V s.t. A = U*E*V^t where E is a diagonal matrix.
+ * 
  * @author Y.K. Chan
  */
 public class SingularValueDecomp {
+
+    /**
+     * Constructor.
+     */
+    public SingularValueDecomp() {
+        this(new GolubKahanBDD(), new GolubKahanSVD());
+    }
+    
+    /**
+     * Constructor.
+     * @param bdd  Bi-diagonal decomposition implementation
+     * @param step   Iteration implementation for SVD
+     */
+    public SingularValueDecomp(BiDiagDecomp bdd, SvdStep step) {
+        this.bdd = bdd;
+        this.step = step;
+    }
+    
+    public double[] compute(Matrix matrix) {
+        return this.compute(matrix, null, null);
+    }
+    
+    public double[] compute(Matrix matrix, Matrix left, Matrix right) {
+        Throw.when()
+                .isNull(() -> matrix, () -> "No matrix to decompose.")
+                .isFalse(() -> left == null || left.getColCount() == matrix.getRowCount(), 
+                         () -> "Dimension mismatch for left partner matrix.")
+                .isFalse(() -> right == null || right.getRowCount() == matrix.getColCount(), 
+                         () -> "Dimension mismatch for right partner matrix.");
+        if(matrix.getRowCount() == 0){
+            if(left != null || right != null){
+                throw new IllegalArgumentException("Illegal usage.");
+            }
+            return new double[0];
+        }
+        double[] biDiag = this.bdd.compute(BiDiagDecomp.Mode.UPPER, matrix);
+        if(left == null || right == null){
+            // only singular values are needed
+            // ...
+        }
+        double[][] diags = this.separate(biDiag);
+        return Divider.repeats((begin, end) -> this.step.compute(diags[0], diags[1], begin, end, left, right))
+                .visit(0, diags[0].length)
+                .echo(diags[0]);
+    }    
+    
+    /**
+     * Separate diagonal and sup-diagonal elements from B-notation.
+     * @param biDiag  Bi-diagonal elements in B-notation.
+     * @return  Diagonal and sup-diagonal elements
+     */
+    protected double[][] separate(double[] biDiag) {
+        double[] diag = new double[biDiag.length / 2];
+        double[] supDiag = new double[biDiag.length / 2];
+        for(int i = 0; i < diag.length; i++){
+            diag[i] = biDiag[2*i];
+            supDiag[i] = biDiag[2*i + 1];
+        }
+        return new double[][]{ diag, supDiag };
+    }
+    
+    private BiDiagDecomp bdd;
+    private SvdStep step;
 }

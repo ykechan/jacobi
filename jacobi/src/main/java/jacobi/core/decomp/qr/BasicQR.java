@@ -25,6 +25,9 @@ package jacobi.core.decomp.qr;
 
 import jacobi.core.decomp.qr.step.QRStep;
 import jacobi.api.Matrix;
+import jacobi.core.util.Divider;
+import jacobi.core.util.MapReducer;
+import jacobi.core.util.Real;
 import jacobi.core.util.Throw;
 
 /**
@@ -68,33 +71,10 @@ public class BasicQR implements QRStrategy {
             .isTrue(
                 () -> partner != null && matrix.getRowCount() != partner.getRowCount(), 
                 () -> "Mismatch partner matrix having " + partner.getRowCount() + " rows.");
-        this.compute(matrix, partner, 0, matrix.getRowCount(), fullUpper);
-        return matrix;
-    }
-    
-    /**
-     * Iterate using QR step within the limited range until it converges or exhausted.
-     * @param matrix  Input matrix A
-     * @param partner  Partner matrix
-     * @param beginRow  Begin index of row of interest
-     * @param endRow  End index of row of interest
-     * @param fullUpper   True is full upper triangular matrix required, false otherwise
-     */
-    protected void compute(Matrix matrix, Matrix partner, int beginRow, int endRow, boolean fullUpper) {        
-        int limit = LIMIT * (endRow - beginRow);
-        int end = this.deflate(matrix, beginRow, endRow);
-        if(end - beginRow < 2){
-            return;
-        }
-        for(int k = 0; k < limit; k++){ 
-            int conv = this.step.compute(matrix, partner, beginRow, end, fullUpper);
-            if (conv > beginRow) {
-                this.compute(matrix, partner, beginRow, conv, fullUpper);
-                this.compute(matrix, partner, conv, endRow, fullUpper);
-                return;
-            }
-        }
-        throw new UnsupportedOperationException("Exhaused to converge any entry in " + limit + " iterations.");
+        //MapReducer.divide((begin, end) -> this.step.compute(matrix, partner, begin, end, fullUpper), 0, matrix.getRowCount());
+        return Divider.repeats((begin, end) -> this.step.compute(matrix, partner, begin, end, fullUpper))
+                .visit(0, matrix.getRowCount())
+                .echo(matrix);
     }    
     
     /**
@@ -107,7 +87,7 @@ public class BasicQR implements QRStrategy {
     protected int deflate(Matrix matrix, int begin, int end) {
         int k = end - 1;
         while(k > begin){
-            if(Math.abs(matrix.get(k, k - 1)) > EPSILON){
+            if(Real.isNegl(matrix.get(k, k - 1))){
                 break;
             }
             k--;
@@ -115,8 +95,5 @@ public class BasicQR implements QRStrategy {
         return k + 1;
     }    
 
-    private QRStep step;        
-    
-    private static final double EPSILON = 1e-12;
-    private static final int LIMIT = 8;
+    private QRStep step;  
 }
