@@ -34,8 +34,8 @@ import java.util.List;
 /**
  * Implementation of Golub-Kahan SVD step.
  * 
- * Given a bi-diagonal matrix B, for SVD i.e. B = U*E*V where U and V are orthogonal and E diagonal,
- * consider B^t*B = (V^t*E*U^t)*(U*E*V) = V^t*E^2*V which is essentially the eigenvalue decomposition
+ * Given a bi-diagonal matrix B, for SVD i.e. B = U*E*V^t where U and V are orthogonal and E diagonal,
+ * consider B^t*B = (V*E*U^t)*(U*E*V^t) = V*E^2*V^t which is essentially the eigenvalue decomposition
  * of B^t*B. Similar argument can be made with B*B^t and U. Therefore QR algorithm on B^t*B can be used.
  * 
  * Since B^t*B is symmetric, an analogy of QR algorithm for symmetric tri-diagonal matrix can be employed.
