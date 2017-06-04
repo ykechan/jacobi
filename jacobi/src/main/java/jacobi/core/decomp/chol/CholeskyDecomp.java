@@ -28,9 +28,7 @@ import jacobi.api.Matrix;
 import jacobi.api.annotations.Immutate;
 import jacobi.core.impl.CopyOnWriteMatrix;
 import jacobi.core.util.Pair;
-import jacobi.core.util.Real;
 import jacobi.core.util.Throw;
-import jacobi.core.util.Triplet;
 import java.util.Optional;
 
 /**
@@ -67,19 +65,20 @@ public class CholeskyDecomp {
     }
     
     /**
-     * Compute the Cholesky decomposition for a symmetric bi-diagonal matrix A. 
-     * @param diag  Diagonal elements of A
-     * @param supDiag  Sup/sub-diagonal elements of A
+     * Compute the Cholesky decomposition on a symmetric tri-diagonal matrix A, and return the squared elements.
+     * @param diags  Diagonal and sup-diagonal elements of A in B-notation
      * @return  L in B-notation, or empty if A is not positive definite
      */
-    public Optional<double[]> computeSquared(double[] diag, double[] supDiag) {
-        double[] elem = new double[4*diag.length];
-        for(int i = 0; i < diag.length; i++){
-            if(diag[i] < Real.EPSILON){
+    public Optional<double[]> computeSquared(double[] diags) {
+        double[] elem = new double[2*diags.length];
+        double prev = 0.0;
+        for(int i = 0, j = 0; i < diags.length; i += 2, j += 4){
+            if(diags[i] < prev){
                 return Optional.empty();
             }
-            elem[4*i] = diag[i];
-            elem[4*i + 1] = supDiag[i] * (supDiag[i] / diag[i]);
+            elem[j] = diags[i] - prev;
+            elem[j + 1] = diags[i + 1] * (diags[i + 1] / elem[2*i]); 
+            prev = elem[j + 1];
         }
         return Optional.of(elem);
     }

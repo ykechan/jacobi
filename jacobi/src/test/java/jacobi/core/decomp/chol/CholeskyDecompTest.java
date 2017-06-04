@@ -30,6 +30,8 @@ import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.annotations.JacobiResult;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
+import java.util.Arrays;
+import java.util.stream.IntStream;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -61,9 +63,23 @@ public class CholeskyDecompTest {
         this.lower = new CholeskyDecomp().compute(this.input).get();
     }
     
+    @Test
+    @JacobiImport("Symmetric 5x5")
+    @JacobiEquals(expected = 1, actual = 1)
+    public void testSymmetric5x5() {
+        double[] ans = new CholeskyDecomp().computeSquared(this.input.getRow(0)).get();
+        this.lower = this.front(ans);
+    }
+    
     @Test(expected = IllegalArgumentException.class)
     public void test5x4() {
         new CholeskyDecomp().compute(Matrices.zeros(5, 4)).get();
+    }
+    
+    protected Matrix front(double[] zElem) {
+        return Matrices.unsafe(new double[][]{
+            IntStream.range(0, zElem.length / 2).mapToDouble((i) -> zElem[4*(i/2) + (i % 2)] ).toArray()
+        });
     }
     
 }
