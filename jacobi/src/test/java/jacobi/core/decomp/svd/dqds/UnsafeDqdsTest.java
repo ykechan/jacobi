@@ -58,7 +58,7 @@ public class UnsafeDqdsTest {
     @JacobiEquals(expected = 10, actual = 10)
     public void test5x5() {
         State state = new State(-1, 0.0, shift.get(0, 0), 0.0, 0.0, 0.0);
-        double[] elem = this.toArray(this.input);
+        double[] elem = this.toArray(this.input, true);
         new UnsafeDqds().compute(elem, 0, 5, true, state);
         this.output = this.toMatrix(elem, 0, 5, false);
     }
@@ -67,60 +67,66 @@ public class UnsafeDqdsTest {
     @JacobiImport("5x5 shift 1")
     @JacobiEquals(expected = 10, actual = 10)
     public void testShifted5x5Iteration1() {
+        boolean forward = true;
         State state = new State(-1, 0.0, shift.get(0, 0), 0.0, 0.0, 0.0);
-        double[] elem = this.toArray(this.input);
-        new UnsafeDqds().compute(elem, 0, 5, true, state);
-        this.output = this.toMatrix(elem, 0, 5, false);
+        double[] elem = this.toArray(this.input, forward);
+        new UnsafeDqds().compute(elem, 0, 5, forward, state);
+        this.output = this.toMatrix(elem, 0, 5, !forward);
     }
     
     @Test
     @JacobiImport("5x5 shift 2")
     @JacobiEquals(expected = 10, actual = 10)
     public void testShifted5x5Iteration2() {
+        boolean forward = false;
         State state = new State(-1, 0.0, shift.get(0, 0), 0.0, 0.0, 0.0);
-        double[] elem = this.toArray(this.input);
-        new UnsafeDqds().compute(elem, 0, 5, true, state);
-        this.output = this.toMatrix(elem, 0, 5, false);
+        double[] elem = this.toArray(this.input, forward);
+        new UnsafeDqds().compute(elem, 0, 5, forward, state);
+        this.output = this.toMatrix(elem, 0, 5, !forward);
     }
     
     @Test
     @JacobiImport("5x5 shift 3")
     @JacobiEquals(expected = 10, actual = 10)
     public void testShifted5x5Iteration3() {
+        boolean forward = true;
         State state = new State(-1, 0.0, shift.get(0, 0), 0.0, 0.0, 0.0);
-        double[] elem = this.toArray(this.input);
-        new UnsafeDqds().compute(elem, 0, 5, true, state);
-        this.output = this.toMatrix(elem, 0, 5, false);
+        double[] elem = this.toArray(this.input, forward);
+        new UnsafeDqds().compute(elem, 0, 5, forward, state);
+        this.output = this.toMatrix(elem, 0, 5, !forward);
     }
     
     @Test
     @JacobiImport("5x5 shift 4")
     @JacobiEquals(expected = 10, actual = 10)
     public void testShifted5x5Iteration4() {
+        boolean forward = false;
         State state = new State(-1, 0.0, shift.get(0, 0), 0.0, 0.0, 0.0);
-        double[] elem = this.toArray(this.input);
-        new UnsafeDqds().compute(elem, 0, 5, true, state);
-        this.output = this.toMatrix(elem, 0, 5, false);
+        double[] elem = this.toArray(this.input, forward);
+        new UnsafeDqds().compute(elem, 0, 5, forward, state);
+        this.output = this.toMatrix(elem, 0, 5, !forward);
     }
     
     @Test
     @JacobiImport("5x5 shift 5")
     @JacobiEquals(expected = 10, actual = 10)
     public void testShifted5x5Iteration5() {
+        boolean forward = true;
         State state = new State(-1, 0.0, shift.get(0, 0), 0.0, 0.0, 0.0);
-        double[] elem = this.toArray(this.input);
-        new UnsafeDqds().compute(elem, 0, 5, true, state);
-        this.output = this.toMatrix(elem, 0, 5, false);
+        double[] elem = this.toArray(this.input, forward);
+        new UnsafeDqds().compute(elem, 0, 5, forward, state);
+        this.output = this.toMatrix(elem, 0, 5, !forward);
     }
     
     @Test
     @JacobiImport("5x5 shift 6")
     @JacobiEquals(expected = 10, actual = 10)
     public void testShifted5x5Iteration6() {
+        boolean forward = false;
         State state = new State(-1, 0.0, shift.get(0, 0), 0.0, 0.0, 0.0);
-        double[] elem = this.toArray(this.input);
-        new UnsafeDqds().compute(elem, 0, 5, true, state);
-        this.output = this.toMatrix(elem, 0, 5, false);
+        double[] elem = this.toArray(this.input, forward);
+        new UnsafeDqds().compute(elem, 0, 5, forward, state);
+        this.output = this.toMatrix(elem, 0, 5, !forward);
     }
     
     @Test
@@ -128,7 +134,7 @@ public class UnsafeDqdsTest {
     @JacobiEquals(expected = 10, actual = 10)
     public void test6x6() {
         State state = new State(-1, 0.0, shift.get(0, 0), 0.0, 0.0, 0.0);
-        double[] elem = this.toArray(this.input);
+        double[] elem = this.toArray(this.input, true);
         new UnsafeDqds().compute(elem, 0, 6, true, state);
         this.output = this.toMatrix(elem, 0, 6, false);
     }
@@ -138,26 +144,22 @@ public class UnsafeDqdsTest {
     @JacobiEquals(expected = 10, actual = 10)
     public void test6x6WithShift() {
         State state = new State(-1, 0.0, shift.get(0, 0), 0.0, 0.0, 0.0);
-        double[] elem = this.toArray(this.input);
+        double[] elem = this.toArray(this.input, true);
         new UnsafeDqds().compute(elem, 0, 6, true, state);
         this.output = this.toMatrix(elem, 0, 6, false);
     }
     
-    private double[] toArray(Matrix matrix) {
+    private double[] toArray(Matrix matrix, boolean head) {
         Assert.assertTrue(matrix.getRowCount() == matrix.getColCount());
         double[] elem = new double[4*matrix.getRowCount()];
         for(int i = 0; i < matrix.getRowCount(); i++){
             double[] row = matrix.getRow(i);
-            elem[4*i] = row[i];
+            elem[4*i + (head ? 0 : 2)] = row[i];
             if(i + 1 < matrix.getColCount()){
-                elem[4*i + 1] = row[i + 1];
+                elem[4*i + (head ? 0 : 2) + 1] = row[i + 1];
             }
         }
         return elem;
-    }
-    
-    private Pair toMatrices(double[] zElem, int begin, int end) {
-        return Pair.of(this.toMatrix(zElem, begin, end, true), this.toMatrix(zElem, begin, end, false));
     }
     
     private Matrix toMatrix(double[] zElem, int begin, int end, boolean head) {
