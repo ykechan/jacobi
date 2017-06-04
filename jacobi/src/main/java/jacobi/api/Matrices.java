@@ -137,7 +137,7 @@ public final class Matrices {
      * @return  Matrix instance.
      */
     public static Matrix diag(double[] values) {        
-        return Matrices.diag((values == null)? 0 : values.length, values);
+        return Matrices.diag(values == null ? 0 : values.length, values);
     }
     
     /**
@@ -147,7 +147,7 @@ public final class Matrices {
      * @return   Matrix instance.
      */
     public static Matrix diag(int m, double[] values) {
-        return (values == null || values.length == 0)
+        return values == null || values.length == 0
                 ? Empty.getInstance()
                 : CopyOnWriteMatrix.of(new DiagonalMatrix(values));
     }        
