@@ -75,12 +75,11 @@ public class GivensRQ {
      * @return  The index of row that has a negligible off-diagonal entry, or negative if none are zero.
      */
     public int compute(Matrix matrix, int begin, int end, GivensMode mode) {
-        int opCount = (end - begin) * this.rotList.size();        
-        if(opCount > DEFAULT_LIMIT){
-            return this.rotateInParallel(matrix, begin, end, mode);
-        }
-        return this.rotateInSerial(matrix, begin, end, mode);
-    }        
+        int opCount = (end - begin) * this.rotList.size(); 
+        return opCount > DEFAULT_LIMIT 
+                ? this.rotateInParallel(matrix, begin, end, mode) 
+                : this.rotateInSerial(matrix, begin, end, mode);
+    }
     
     /**
      * Compute the product R * Q in serial.
@@ -92,7 +91,7 @@ public class GivensRQ {
      */
     protected int rotateInSerial(Matrix matrix, int begin, int end, GivensMode mode) {
         int deflated = -1;
-        int beginRow = mode != GivensMode.DEFLATE ? 0 : begin;
+        int beginRow = mode == GivensMode.DEFLATE ? begin : 0;
         int endRow = mode == GivensMode.FULL ? matrix.getRowCount() : end;
         for(int i = beginRow; i < endRow; i++){
             deflated = Math.max(deflated, this.rotateByRow(matrix, i, begin, mode));
@@ -109,7 +108,7 @@ public class GivensRQ {
      * @return  The index of row that has a negligible off-diagonal entry, or negative if none are zero.
      */
     protected int rotateInParallel(Matrix matrix, int begin, int end, GivensMode mode) {
-        int beginRow = mode != GivensMode.DEFLATE ? 0 : begin;
+        int beginRow = mode == GivensMode.DEFLATE ? begin : 0;
         int endRow = mode == GivensMode.FULL ? matrix.getRowCount() : end;
         AtomicInteger index = new AtomicInteger(beginRow);
         return ParallelSupplier.of(() -> {
