@@ -77,7 +77,7 @@ public class RowBasedTest {
         this.hstream = Matrices.zeros(this.a.getRowCount(), this.a.getColCount());
         new Operators.Hadamard().stream(a, b, this.hstream);
         this.hfork = Matrices.zeros(this.a.getRowCount(), this.a.getColCount());
-        new Operators.Hadamard().forkJoin(a, b, this.hfork, MapReducer.DEFAULT_THREAD_FLOP / 4);
+        new Operators.Hadamard().forkJoin(a, b, this.hfork, MapReducer.DEFAULT_NUM_FLOP / 4);
     }
     
     @Test
@@ -94,7 +94,7 @@ public class RowBasedTest {
         this.hstream = Matrices.zeros(this.a.getRowCount(), this.a.getColCount());
         new Operators.Hadamard().stream(a, b, this.hstream);
         this.hfork = Matrices.zeros(this.a.getRowCount(), this.a.getColCount());
-        new Operators.Hadamard().forkJoin(a, b, this.hfork, MapReducer.DEFAULT_THREAD_FLOP / 4);
+        new Operators.Hadamard().forkJoin(a, b, this.hfork, MapReducer.DEFAULT_NUM_FLOP / 4);
     }
     
     @Test
@@ -111,7 +111,7 @@ public class RowBasedTest {
         this.hstream = Matrices.zeros(this.a.getRowCount(), this.a.getColCount());
         new Operators.Hadamard().stream(a, b, this.hstream);
         this.hfork = Matrices.zeros(this.a.getRowCount(), this.a.getColCount());
-        new Operators.Hadamard().forkJoin(a, b, this.hfork, MapReducer.DEFAULT_THREAD_FLOP / 4);
+        new Operators.Hadamard().forkJoin(a, b, this.hfork, MapReducer.DEFAULT_NUM_FLOP / 4);
     }
     
     @Test
@@ -128,7 +128,7 @@ public class RowBasedTest {
         this.hstream = Matrices.zeros(this.a.getRowCount(), this.a.getColCount());
         new Operators.Hadamard().stream(a, b, this.hstream);
         this.hfork = Matrices.zeros(this.a.getRowCount(), this.a.getColCount());
-        new Operators.Hadamard().forkJoin(a, b, this.hfork, MapReducer.DEFAULT_THREAD_FLOP / 4);
+        new Operators.Hadamard().forkJoin(a, b, this.hfork, MapReducer.DEFAULT_NUM_FLOP / 4);
     }
     
     @Test
@@ -145,7 +145,7 @@ public class RowBasedTest {
         this.hstream = Matrices.zeros(this.a.getRowCount(), this.a.getColCount());
         new Operators.Hadamard().stream(a, b, this.hstream);
         this.hfork = Matrices.zeros(this.a.getRowCount(), this.a.getColCount());
-        new Operators.Hadamard().forkJoin(a, b, this.hfork, MapReducer.DEFAULT_THREAD_FLOP / 4);
+        new Operators.Hadamard().forkJoin(a, b, this.hfork, MapReducer.DEFAULT_NUM_FLOP / 4);
     }
     
     @Test
@@ -162,7 +162,7 @@ public class RowBasedTest {
         this.hstream = Matrices.zeros(this.a.getRowCount(), this.a.getColCount());
         new Operators.Hadamard().stream(a, b, this.hstream);
         this.hfork = Matrices.zeros(this.a.getRowCount(), this.a.getColCount());
-        new Operators.Hadamard().forkJoin(a, b, this.hfork, MapReducer.DEFAULT_THREAD_FLOP / 4);
+        new Operators.Hadamard().forkJoin(a, b, this.hfork, MapReducer.DEFAULT_NUM_FLOP / 4);
     }
     
     @Test
@@ -179,7 +179,7 @@ public class RowBasedTest {
         this.hstream = Matrices.zeros(this.a.getRowCount(), this.a.getColCount());
         new Operators.Hadamard().stream(a, b, this.hstream);
         this.hfork = Matrices.zeros(this.a.getRowCount(), this.a.getColCount());
-        new Operators.Hadamard().forkJoin(a, b, this.hfork, MapReducer.DEFAULT_THREAD_FLOP / 4);
+        new Operators.Hadamard().forkJoin(a, b, this.hfork, MapReducer.DEFAULT_NUM_FLOP / 4);
     }    
     
     @Test(expected = IllegalStateException.class)

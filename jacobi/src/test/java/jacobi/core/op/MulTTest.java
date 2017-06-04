@@ -25,7 +25,6 @@ package jacobi.core.op;
 
 import jacobi.api.Matrix;
 import jacobi.core.util.MapReducer;
-import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.annotations.JacobiResult;
@@ -76,7 +75,7 @@ public class MulTTest {
 
             @Override
             protected Matrix compute(Matrix a, Matrix b, Matrix ans) {
-                return this.parallel(a, b, ans, MapReducer.DEFAULT_THREAD_FLOP / 4);
+                return this.parallel(a, b, ans, MapReducer.DEFAULT_NUM_FLOP / 4);
             }
             
         };
