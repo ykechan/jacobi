@@ -64,6 +64,20 @@ public class MulTest {
     public void test7x7Mul7x7() {
         this.ans = new Mul().compute(this.matrixA, this.matrixB);
     }
+    
+    @Test
+    @JacobiImport("7x7 mul 7x7")
+    @JacobiEquals(expected = 2, actual = 2)
+    public void test7x7Mul7x7WithLesserStride() {
+        this.ans = new Mul(3).compute(this.matrixA, this.matrixB);
+    }
+    
+    @Test
+    @JacobiImport("7x7 mul 7x7")
+    @JacobiEquals(expected = 2, actual = 2)
+    public void test7x7Mul7x7WithEqualStride() {
+        this.ans = new Mul(7).compute(this.matrixA, this.matrixB);
+    }
 
     @Test
     @JacobiImport("7x3 mul 3x5")
@@ -77,6 +91,13 @@ public class MulTest {
     @JacobiEquals(expected = 2, actual = 2)
     public void test2x9Mul9x1() {
         this.ans = new Mul().compute(this.matrixA, this.matrixB);
+    }
+    
+    @Test
+    @JacobiImport("8x4 mul 4x8")
+    @JacobiEquals(expected = 2, actual = 2)
+    public void test8x4Mul4x8WithDivisibleStride() {
+        this.ans = new Mul(2).compute(this.matrixA, this.matrixB);
     }
     
     @Test
@@ -96,22 +117,22 @@ public class MulTest {
     @Test
     @JacobiImport("7x7 mul 7x7")
     @JacobiEquals(expected = 2, actual = 2)
-    public void test7x7Mul7x7ByStream() {
-        this.ans = this.mockToUseStream().compute(this.matrixA, this.matrixB);
+    public void test7x7Mul7x7InParallel() {
+        this.ans = this.parallelMock().compute(this.matrixA, this.matrixB);
     }
 
     @Test
     @JacobiImport("7x3 mul 3x5")
     @JacobiEquals(expected = 2, actual = 2)
-    public void test7x3Mul3x5ByStream() {
-        this.ans = this.mockToUseStream().compute(this.matrixA, this.matrixB);
+    public void test7x3Mul3x5InParallel() {
+        this.ans = this.parallelMock().compute(this.matrixA, this.matrixB);
     }
     
     @Test
     @JacobiImport("2x9 mul 9x1")
     @JacobiEquals(expected = 2, actual = 2)
-    public void test2x9Mul9x1ByStream() {
-        this.ans = this.mockToUseStream().compute(this.matrixA, this.matrixB);
+    public void test2x9Mul9x1InParallel() {
+        this.ans = this.parallelMock().compute(this.matrixA, this.matrixB);
     }
     
     @Test
@@ -128,12 +149,12 @@ public class MulTest {
         this.ans = this.matrixA.ext(Op.class).mul(this.matrixB.get(0, 0)).get();
     }
     
-    protected Mul mockToUseStream() {
+    protected Mul parallelMock() {
         return new Mul(){
 
             @Override
-            protected void serial(double[] u, Matrix b, double[] v) {
-                System.arraycopy(this.stream(u, b), 0, v, 0, v.length);
+            protected void compute(Matrix a, Matrix b, Matrix ans) {
+                this.parallel(a, b, ans);
             }
             
         };

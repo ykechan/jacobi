@@ -74,7 +74,7 @@ public class MulTTest {
         return new MulT(){
 
             @Override
-            protected Matrix compute(Matrix a, Matrix b, Matrix ans) {
+            public Matrix compute(Matrix a, Matrix b, Matrix ans) {
                 return this.parallel(a, b, ans, MapReducer.DEFAULT_NUM_FLOP / 4);
             }
             
