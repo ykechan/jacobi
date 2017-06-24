@@ -25,6 +25,9 @@
 package jacobi.core.util;
 
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.IntConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -50,6 +53,11 @@ public class ParallelSupplier<T> implements Supplier<List<T>> {
     public static final int DEFAULT_NUM_THREADS = 4 * Runtime.getRuntime().availableProcessors();
     
     /**
+     * Suggested maximum number of flop for a single thread.
+     */
+    public static final int DEFAULT_FLOP_THRESHOLD = MapReducer.DEFAULT_NUM_FLOP * DEFAULT_NUM_THREADS;
+    
+    /**
      * Run a task multiple times in multiple threads, with default number of threads.
      * @param task 
      */
@@ -64,6 +72,35 @@ public class ParallelSupplier<T> implements Supplier<List<T>> {
      */
     public static void run(Runnable task, int numThreads) {
         ParallelSupplier.of(() -> { task.run(); return null; }, numThreads).get();
+    }
+    
+    /**
+     * Run a task multiple times in multiple threads with indices.
+     * @param task  Task to be performed, accepting task index.
+     * @param begin  Beginning of task index
+     * @param end  End of task index
+    */
+    public static void cyclic(IntConsumer task, int begin, int end) {
+        ParallelSupplier.cyclic(task, begin, end, DEFAULT_NUM_THREADS);
+    }
+    
+    /**
+     * Run a task multiple times in multiple threads with indices.
+     * @param task  Task to be performed, accepting task index.
+     * @param begin  Beginning of task index
+     * @param end  End of task index
+     * @param numThreads   Number of worker threads
+    */
+    public static void cyclic(IntConsumer task, int begin, int end, int numThreads) {
+        AtomicInteger work = new AtomicInteger(begin);        
+        ParallelSupplier.of(() -> { 
+            int next = work.getAndIncrement();
+            while(next < end){
+                task.accept(next);
+                next = work.getAndIncrement();
+            }
+            return null;
+        }, numThreads).get();
     }
     
     /**
@@ -131,7 +168,7 @@ public class ParallelSupplier<T> implements Supplier<List<T>> {
         }); 
         return this.suppliers.stream()
                 .map((t) -> t.get())
-                .collect(Collectors.toList());
+                .collect(Collectors.toList());        
     }    
 
     private List<Task<T>> suppliers;
@@ -142,7 +179,7 @@ public class ParallelSupplier<T> implements Supplier<List<T>> {
      * Supplier and Runnable with cached return result.
      * @param <T>  Individual return result
      */
-    protected class Task<T> implements Supplier<T>, Runnable {
+    protected class Task<T> implements Supplier<T>, Runnable, Callable<T> {
 
         /**
          * Constructor.
@@ -162,7 +199,13 @@ public class ParallelSupplier<T> implements Supplier<List<T>> {
             this.result = this.supplier.get();
         }
         
+        @Override
+        public T call() throws Exception {
+            this.run();
+            return this.get();
+        }
+        
         private T result;
-        private Supplier<T> supplier;
+        private Supplier<T> supplier;        
     }
 }
