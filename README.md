@@ -6,9 +6,7 @@
 ## Synopsis
 Jacobi is a comprehensive library for computations involving matrices for
 Java programmers. The goal of this project is to provide easy to use matrix 
-library that complex computational logic at the fingertip of the developer.
-
-This library is still under development.
+library with complex computational logic at the fingertip of Java developers.
 
 ## Code Example
 ```java
@@ -33,7 +31,7 @@ This library is still under development.
 - [x] Inverse
 - [x] Tranpose
 - [x] Eigenvalues
-- [ ] Singular Values
+- [x] Singular Values
 
 ### Decomposition
 - [x] Cholesky
@@ -46,7 +44,7 @@ This library is still under development.
 ### System of linear equations
 - [x] Exact solution
 - [x] Linear Regression
-- [ ] Linear Programming
+- [x] Linear Programming
 
 ### Statistics
 - [x] Min
