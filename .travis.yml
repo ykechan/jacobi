@@ -7,6 +7,5 @@ before_script:
   - cd jacobi
 deploy:
   provider: releases
-  api_key: 
-    secure: "$GITHUB_API_KEY"
+  api_key: $GITHUB_API_TOKEN
   skip_cleanup: true
