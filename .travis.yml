@@ -14,13 +14,7 @@ jdk:
 before_script: 
   - cd jacobi
 script:
-  mvn clean install
+  mvn test
 cache:
   directories:
     - ~/.m2/repository
-deploy:
-  provider: releases
-  api_key: $GITHUB_API_TOKEN
-  skip_cleanup: true
-  on:
-    tag: true
