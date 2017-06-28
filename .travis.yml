@@ -3,6 +3,7 @@ jdk:
   - oraclejdk8
 before_script: 
   - cd jacobi
+  - if [ ! -z "$GPG_SECRET_KEYS" ]; then echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import; fi
 script:
   mvn test
 cache:
