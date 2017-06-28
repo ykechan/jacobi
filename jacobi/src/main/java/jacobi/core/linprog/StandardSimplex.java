@@ -51,7 +51,7 @@ import java.util.stream.IntStream;
  * of the problem is the trivial solution in this stage + the increase in x[k]. Consider the aforementioned step
  * a swap of non-zero-valued variable and zero-valued variable in the trivial solution. 
  * 
- * This would be the case if A^k -&gt; e^i and I^k -gt; A^k in [A I] -&gt; [A* J], where A^k and I^k is the k-th column 
+ * This would be the case if A^k -&gt; e^i and I^k -&gt; A*^k in [A I] -&gt; [A* J], where A^k and I^k is the k-th column 
  * of A and I respectively, and e^i is the i-th standard basis. [A* J] can be obtained by applying linear transformation
  * T*[A I] so that the problem is invariant under this transformation.
  * 
@@ -60,9 +60,9 @@ import java.util.stream.IntStream;
  * unlike normal trivial solution, there is a non-zero-valued variable t with non-standard basis {-1, -1...} 
  * in the constraint. Again, this can be fixed by swapping t with some s[k] s.t. b[k] = min(b).
  * 
- * Sometimes, finding an entering variable k may be expensive. In cases there are many variables, it would be beneficial
- * to find a number of entering variables in the order of effectiveness, and expire this set when many of them are not
- * valid anymore.
+ * Sometimes, finding an entering variable k may be expensive. In cases when there are many variables, it would be 
+ * beneficial to find a number of entering variables in the order of effectiveness, and expire this set when many of 
+ * them are not valid anymore.
  * 
  * @author Y.K. Chan
  */
@@ -104,7 +104,7 @@ public class StandardSimplex {
     }
     
     /**
-     * Find the optimal solution for LP max c^t * x s.t. A * x &ly;= b, x &gt;= 0.
+     * Find the optimal solution for LP max c^t * x s.t. A * x &lt;= b, x &gt;= 0.
      * @param c  Objective coefficient
      * @param a  Constraint matrix
      * @param b  Constraint boundary
@@ -131,13 +131,13 @@ public class StandardSimplex {
      * @param poolMax  Maximum number of enter variable pool.
      * @return  Tableau is its stopped state, or empty if problem is unbounded/infeasible
      */
-    protected Optional<MutableTableau> simplex(MutableTableau tab, boolean isAux, long limit, int poolMax) {
-        int fail = 0;
+    protected Optional<MutableTableau> simplex(MutableTableau tab, boolean isAux, long limit, int poolMax) {        
         if(isAux){
             // pivot on the auxiliary variable first
             tab = tab.pivot(this.auxLeavingRule(tab), tab.getMatrix().getColCount() - 2);
         }
         for(long k = 0; k < limit; k++){
+            int fail = 0;
             int[] pivots = this.pivotingRule.apply(tab, poolMax);
             if(pivots.length == 0){
                 return Optional.of(tab);
@@ -193,8 +193,8 @@ public class StandardSimplex {
     
     /**
      * Leaving rule for auxiliary problem, which is bounded by the constraint boundary.
-     * @param tab
-     * @return 
+     * @param tab  Tableau representation of the LP 
+     * @return  Leaving column
      */
     protected int auxLeavingRule(Tableau tab) {
         int leave = -1;

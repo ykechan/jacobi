@@ -104,7 +104,7 @@ public class LLSquaresSolver {
     }
     
     /**
-     * For a m-by-n matrix which m > n, trim the matrix to a k-by-k matrix
+     * For a m-by-n matrix which m &gt; n, trim the matrix to a k-by-k matrix
      * by discarding other rows.
      * @param matrix  Input m-by-n matrix
      * @param k  Number of rows to keep

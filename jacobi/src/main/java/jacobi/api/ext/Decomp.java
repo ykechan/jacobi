@@ -80,7 +80,7 @@ public interface Decomp extends Supplier<Matrix> {
     /**
      * Compute QR decomposition, i.e. A = Q * R where Q is orthogonal 
      * and R is upper triangular.
-     * @return 
+     * @return A pair of matrices &lt;Q, R&gt;
      */
     @Immutate
     @Implementation(QRDecomp.class)

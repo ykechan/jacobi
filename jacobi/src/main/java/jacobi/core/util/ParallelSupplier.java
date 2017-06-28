@@ -59,7 +59,7 @@ public class ParallelSupplier<T> implements Supplier<List<T>> {
     
     /**
      * Run a task multiple times in multiple threads, with default number of threads.
-     * @param task 
+     * @param task   Task to be run
      */
     public static void run(Runnable task) {
         ParallelSupplier.of(() -> { task.run(); return null; }).get();

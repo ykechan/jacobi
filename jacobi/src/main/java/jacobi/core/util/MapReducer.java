@@ -170,7 +170,7 @@ public class MapReducer<T> implements Supplier<T> {
         /**
          * Specify the mapping function from a range of index to a result.
          * @param <T>  Return type
-         * @param mapper  Mapping function [a, b] -> T where a and b are begin and end indices
+         * @param mapper  Mapping function [a, b] -&gt; T where a and b are begin and end indices
          * @return  Builder helper class
          */
         public <T> Mapped<T> map(BiFunction<Integer, Integer, T> mapper);
@@ -208,8 +208,8 @@ public class MapReducer<T> implements Supplier<T> {
         
         /**
          * Specify the reducer function to combine result from different ranges.
-         * @param reducer
-         * @return 
+         * @param reducer  Reducer function
+         * @return  Resultant MapReducer object
          */
         public MapReducer<T> reduce(BinaryOperator<T> reducer);
         

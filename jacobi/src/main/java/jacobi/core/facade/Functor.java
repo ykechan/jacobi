@@ -46,10 +46,10 @@ import java.util.Arrays;
  * 
  * For example, for the following facade
  * 
- * @Facade(String.class)
+ * {@literal @}Facade(String.class)
  * public interface Foo {
  * 
- *     @Implementation(Bar.class)
+ *     {@literal @}Implementation(Bar.class)
  *     public double bar(int i);
  * 
  * }

@@ -34,7 +34,7 @@ import java.lang.annotation.Target;
  * <p>A delegate method is a special implementation 
  * for certain facade method, that is usually more efficient than general
  * implementation specified by the Implementation annotation, but applicable
- * only for this child-class of parameter.<p>
+ * only for this child-class of parameter.</p>
  * 
  * <p>The facade engine should match by annotated facade interface and method
  * name, and find the method with the same signature in case of overloading.</p>

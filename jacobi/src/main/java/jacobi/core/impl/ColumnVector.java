@@ -60,6 +60,7 @@ public class ColumnVector implements Matrix {
     /**
      * Construct a column vector with given values.
      * @param vector   Vector elements
+     * @param n New length
      */
     public ColumnVector(double[] vector, int n) {
         Throw.when().isNull(() -> vector, () -> "Unable to use null array as vector.");

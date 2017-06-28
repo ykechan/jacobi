@@ -36,7 +36,7 @@ import java.util.List;
  * Pure QR algorithm refers to the following: 
  * Consider the QR decomposition of a matrix A = Q * R, compute ~A = R * Q
  * If ~A is diagonal some upper triangular matrix U, therefore
- * R * Q = U -&gt; Q * U * Q^t = Q * R * Q * Q^t -&gt Q * U * Q^t = Q * R
+ * R * Q = U -&gt; Q * U * Q^t = Q * R * Q * Q^t -&gt; Q * U * Q^t = Q * R
  * Therefore A = Q * U * Q^t, which is the Schur decomposition of A.
  * 
  * The proof of convergence is omitted here.
