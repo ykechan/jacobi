@@ -1,23 +1,21 @@
 
-  Jacobi Java Matrix Library  vers 1.0.0.SNAPSHOT 
+# Jacobi Java Matrix Library  vers 1.0.0.SNAPSHOT 
   
 ![Travis Latest Build](https://travis-ci.org/ykechan/jacobi.svg?branch=master)
 
-# Synopsis
+## Synopsis
 Jacobi is a comprehensive library for computations involving matrices for
 Java programmers. The goal of this project is to provide easy to use matrix 
-library that complex computational logic at the fingertip of the developer.
+library with complex computational logic at the fingertip of Java developers.
 
-This library is still under development.
-
-# Code Example
+## Code Example
 ```java
   Matrix matrix = Matrices.of(new double[][]{ {3.0, 2.0, -1.0}, {2.0, -2.0, 4.0}, {-1.0, 0.5, -1.0} });
   Matrix y = Matrices.of(new double[][]{ {1.0}, {-2.0}, {-2.0} });
   Matrix x = matrix.ext(Solver.class).exact(y); // load Solver extension and solve for x
 ```
 
-# Functionalities
+## Functionalities
 
 ### Algebra
 - [x] Addition
@@ -33,7 +31,7 @@ This library is still under development.
 - [x] Inverse
 - [x] Tranpose
 - [x] Eigenvalues
-- [ ] Singular Values
+- [x] Singular Values
 
 ### Decomposition
 - [x] Cholesky
@@ -46,6 +44,7 @@ This library is still under development.
 ### System of linear equations
 - [x] Exact solution
 - [x] Linear Regression
+- [x] Linear Programming
 
 ### Statistics
 - [x] Min
@@ -60,7 +59,7 @@ This library is still under development.
 - [x] Insert computed values
 - [x] Projection (Select)
 
-# License
+## License
 Jacobi will be licensed under MIT and shall keep on to be a free software in the 
 foreseeable future. 
 
