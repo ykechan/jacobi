@@ -6,7 +6,7 @@ before_script:
 script:
   mvn test
 install:
-  - mvn --settings ./travis/settings.xml install -DskipTests=true -Dgpg.skip -Dmaven.javadoc.skip=true -B -V
+  - mvn --settings ../travis/settings.xml install -DskipTests=true -Dgpg.skip -Dmaven.javadoc.skip=true -B -V
 before_install:
   - cd jacobi
   - if [ ! -z "$GPG_SECRET_KEYS" ]; then echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import; fi
@@ -14,13 +14,13 @@ before_install:
 deploy:
   -
     provider: script
-    script: ./travis/deploy.sh
+    script: ../travis/deploy.sh
     skip_cleanup: true
     on:
       branch: master
   -
     provider: script
-    script: .travis/deploy.sh
+    script: ../travis/deploy.sh
     skip_cleanup: true
     on:
       tags: true
