@@ -28,16 +28,16 @@ import jacobi.api.Matrix;
 /**
  * Compute variance of each column of a matrix.
  * 
- * It is common to represent a dataset as a matrix, with a column as a random
+ * <p>It is common to represent a dataset as a matrix, with a column as a random
  * variable and each row as a data point. In this case this class computes
- * the variance for each random variable.
+ * the variance for each random variable.</p>
  * 
- * The variance here is the biased variance, given by the formula
+ * <p>The variance here is the biased variance, given by the formula</p>
  * 
- * var(X) = Sum{(x[i] - u)^2} / n, where u is the mean and n is number of data.
+ * <p>var(X) = Sum{(x[i] - u)^2} / n, where u is the mean and n is number of data.</p>
  * 
- * A biased variance is chosen since it's easier to understand and simplier
- * to convert to un-biased variance if necessary.
+ * <p>A biased variance is chosen since it's easier to understand and simplier
+ * to convert to un-biased variance if necessary.</p>
  * 
  * @author Y.K. Chan
  */

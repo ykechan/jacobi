@@ -34,13 +34,15 @@ import jacobi.core.util.Pair;
 /**
  * Representation of double-shift. 
  * 
- * A double-shift is a pair of shifts that are both real or conjugate to each other.
+ * <p>A double-shift is a pair of shifts that are both real or conjugate to each other.</p>
  * 
- * Often double-shifts based on the eigenvalues of a 2x2 matrix, which instead of explicitly
- * compute the eigenvalues, the characteristic polynomial is suffice.
+ * <p>Often double-shifts based on the eigenvalues of a 2x2 matrix, which instead of explicitly
+ * compute the eigenvalues, the characteristic polynomial is suffice.</p>
  * 
- * The characteristic polynomial of a 2x2 matrix A is given by
+ * <p>
+ * The characteristic polynomial of a 2x2 matrix A is given by<br/>
  * x^2 - tr(A)*x + det(A) = 0
+ * </p>
  * 
  * @author Y.K. Chan
  */
@@ -97,7 +99,7 @@ public class DoubleShift {
     
     /**
      * Compute the pair of eigenvalues.
-     * @return A pair of column vectors &lt;A, B&gt; s.t. a[k] + b[k]i is an eigenvalue for k = 0, 1.
+     * @return A pair of column vectors &lt;A, B&gt; s.t.&nbsp;a[k] + b[k]i is an eigenvalue for k = 0, 1.
      */
     public Pair eig() {
         double del = Math.sqrt(Math.abs(this.delta));

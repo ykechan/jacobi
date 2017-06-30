@@ -30,9 +30,9 @@ import java.util.stream.IntStream;
 /**
  * Implementation of Backward and Forward Substitution.
  * 
- * For practical and performance reasons, this class would check if the input
+ * <p>For practical and performance reasons, this class would NOT check if the input
  * matrix is truly upper or lower triangular. It is up to the caller to ensure
- * the data integrity of the input.
+ * the data integrity of the input.</p>
  * 
  * @author Y.K. Chan
  */
@@ -52,7 +52,7 @@ public class Substitution {
     }
     
     /**
-     * Compute substitution. This method is perturbative, i.e. it transforms 
+     * Compute substitution. This method is perturbative, i.e.&nbsp;it transforms 
      * the input into the output.
      * @param rhs  Right-hand side of the equation
      * @return  Object rhs after substitution, or null if unable to substitute
@@ -76,7 +76,7 @@ public class Substitution {
     }
     
     /**
-     * Forward substitution. This method is perturbative, i.e. it transforms 
+     * Forward substitution. This method is perturbative, i.e.&nbsp;it transforms 
      * the input into the output.
      * @param rhs  Right-hand side of the equation
      * @return  Object rhs after substitution, or null if unable to substitute
@@ -95,7 +95,7 @@ public class Substitution {
     }
     
     /**
-     * Backward substitution. This method is perturbative, i.e. it transforms 
+     * Backward substitution. This method is perturbative, i.e.&nbsp;it transforms 
      * the input into the output.
      * @param rhs  Right-hand side of the equation
      * @return  Object rhs after substitution, or null if unable to substitute
@@ -203,6 +203,13 @@ public class Substitution {
     private static final int DEFAULT_THRESHOLD  = 8 * 1024;
     
     public enum Mode {
-        FORWARD, BACKWARD
+        /**
+         * Forward substitution
+         */
+        FORWARD, 
+        /**
+         * Backward substitution
+         */
+        BACKWARD
     }
 }

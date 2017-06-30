@@ -23,16 +23,22 @@
  */
 package jacobi.core.op;
 
-import jacobi.api.Matrix;
 import jacobi.core.impl.ImmutableMatrix;
 import java.util.Arrays;
 
 /**
- *
+ * A special matrix that all elements are of the same value.
+ * 
  * @author Y.K. Chan
  */
 class Scalar extends ImmutableMatrix {
     
+    /**
+     * Constructor.
+     * @param m  Number of rows
+     * @param n  Number of columns
+     * @param value  Element value
+     */
     public Scalar(int m, int n, double value) {
         this.m = m;
         this.n = n;

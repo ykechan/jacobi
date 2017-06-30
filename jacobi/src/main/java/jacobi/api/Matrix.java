@@ -23,6 +23,7 @@
  */
 package jacobi.api;
 
+import java.util.Iterator;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -111,7 +112,7 @@ public interface Matrix {
      * Returned matrix may not be the same type as the original matrix, but
      * must have the same dimension and value in each elements and mutable.
      * 
-     * Returned matrix is independent from the original matrix, i.e. when
+     * Returned matrix is independent from the original matrix, i.e.&nbsp;when
      * the value of the original matrix changes, the returned matrix will
      * not be affected.
      * @return  A mutable copy of original matrix
@@ -129,6 +130,7 @@ public interface Matrix {
         }
         return elem;
     }
+
     
     /**
      * Get a row, apply a function on it, and set the row values back.

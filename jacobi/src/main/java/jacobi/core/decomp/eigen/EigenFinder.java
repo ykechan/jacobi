@@ -38,6 +38,7 @@ import jacobi.core.util.Pair;
 import jacobi.core.util.Throw;
 
 /**
+ * Finding eigenvalues of a matrix.
  * 
  * @author Y.K. Chan
  */
@@ -62,7 +63,7 @@ public class EigenFinder {
     /**
      * Compute the eigenvalue of square matrix.
      * @param matrix  Input matrix A.
-     * @return  A pair of column vectors A and B s.t. each row of A + Bi is a eigenvalue of the underlying matrix
+     * @return  A pair of column vectors A and B s.t.&nbsp;each row of A + Bi is a eigenvalue of the underlying matrix
      * @throws  UnsupportedOperationException if unable to compute
      */
     public Pair compute(Matrix matrix) {
@@ -85,7 +86,7 @@ public class EigenFinder {
     /**
      * Find eigen-values of a square matrix in Schur form.
      * @param schur  Input matrix in Schur form
-     * @return  A pair of column vectors A and B s.t. each row of A + Bi is a eigenvalue of the underlying matrix
+     * @return  A pair of column vectors A and B s.t.&nbsp;each row of A + Bi is a eigenvalue of the underlying matrix
      */
     protected Pair findEig(Matrix schur) {
         int n = schur.getRowCount() - 1;

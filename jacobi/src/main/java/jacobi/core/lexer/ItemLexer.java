@@ -33,11 +33,11 @@ import java.util.function.Supplier;
  * 
  * 1. ItemLexer is stateful containing intermediate result and updates upon push(char).
  * 2. If MOVE is not returned on push(char ch), the ch is NOT included with this lexer.
- * 3. Upon encountering '\0', MOVE should NOT be returned, i.e. '\0' is universally 
+ * 3. Upon encountering '\0', MOVE should NOT be returned, i.e.&nbsp;'\0' is universally 
  *    un-accepted.
- * 4. If the lexer is in an intermediate state, i.e. the lexer is not yet parsing any result, 
+ * 4. If the lexer is in an intermediate state, i.e.&nbsp;the lexer is not yet parsing any result, 
  *    REJECT is returned upon invalid characters.
- * 5. If the lexer is not in an intermediate state, i.e. the lexer is in the middle of parsing result,
+ * 5. If the lexer is not in an intermediate state, i.e.&nbsp;the lexer is in the middle of parsing result,
  *    FAIL is returned upon invalid characters.
  * 6. Before ACCEPT/REJECT/FAIL is returned, get() returns empty.
  * 7. After ACCEPT is returned, get() returns with actual result.

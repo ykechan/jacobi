@@ -28,14 +28,14 @@ import jacobi.core.decomp.qr.Householder;
 import java.util.function.Consumer;
 
 /**
- * Bi-Diagonal decomposition is to decompose a m-by-n matrix A into Q*E*V s.t. Q and V are othogonal, and E
+ * Bi-Diagonal decomposition is to decompose a m-by-n matrix A into Q * E * V^t s.t.&nbsp;Q and V are othogonal, and E
  * is a bi-diagonal matrix. E can be chosen to be upper triangular and lower triangular.
  * 
- * This class disturb the value of the input matrix A and the resultant value is in-determined. Only the returned
- * bi-diagonal elements should be relied upon.
+ * <p>This class mutates the value of the input matrix A and the resultant value is in-determined. Only the returned
+ * bi-diagonal elements should be relied upon.<p>
  * 
- * The bi-diagonal elements are returned as {a1, b1, a2, b2, ...} 
- * where diag(E) = {a1, a2, ...}, sup-diag(E) = {b1, b2, ...}
+ * <p>The bi-diagonal elements are returned as {a1, b1, a2, b2, ...} 
+ * where diag(E) = {a1, a2, ...}, sup-diag(E) = {b1, b2, ...}</p>
  * 
  * @author Y.K. Chan
  */
@@ -61,8 +61,18 @@ public interface BiDiagDecomp {
      */
     public double[] compute(Mode mode, Matrix input, Consumer<Householder> qFunc, Consumer<Householder> vFunc);
     
+    /**
+     * Mode of decomposition.
+     */
     public enum Mode {
-        UPPER, LOWER
+        /**
+         * Decompose to upper triangular matrix
+         */
+        UPPER, 
+        /**
+         * Decompose to lower triangular matrix
+         */
+        LOWER
     }
     
 }

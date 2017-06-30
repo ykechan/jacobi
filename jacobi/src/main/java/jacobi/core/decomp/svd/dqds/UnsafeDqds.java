@@ -27,7 +27,7 @@ package jacobi.core.decomp.svd.dqds;
 /**
  * An implementation of dqds step that is prone to overflow or underflow in extreme situation.
  * 
- * Refer to the paper B.N. Parlett &amp; O.A. Marques, "An implementation of dqds algorithm (a positive case)".
+ * <p>Refer to the paper B.N. Parlett &amp; O.A. Marques, "An implementation of dqds algorithm (a positive case)".</p>
  * 
  * @author Y.K. Chan
  */

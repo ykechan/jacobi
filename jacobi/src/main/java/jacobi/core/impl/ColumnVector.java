@@ -33,7 +33,7 @@ import java.util.Arrays;
 
 /**
  * 
- * A column vector, i.e. a matrix with a single column.
+ * A column vector, i.e.&nbsp;a matrix with a single column.
  * 
  * This class uses an 1-D array internally.
  * 
@@ -42,7 +42,7 @@ import java.util.Arrays;
 public class ColumnVector implements Matrix {
     
     /**
-     * Construct a column vector in n-dimension, i.e. a n-by-1 matrix
+     * Construct a column vector in n-dimension, i.e.&nbsp;a n-by-1 matrix
      * @param n   Number of dimension/rows
      */
     public ColumnVector(int n) {
@@ -111,7 +111,7 @@ public class ColumnVector implements Matrix {
     }
     
     /**
-     * Construct the transpose of the column vector, i.e. a row vector.
+     * Construct the transpose of the column vector, i.e.&nbsp;a row vector.
      * @return  Row vector
      */
     @Immutate

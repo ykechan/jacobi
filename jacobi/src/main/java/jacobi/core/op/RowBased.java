@@ -33,12 +33,12 @@ import java.util.stream.IntStream;
 /**
  * Perform operations in a row-by-row manner.
  * 
- * This class computes a matrix function C = f(A, B) where A, B, C are matrices
- * in the same dimension. 
+ * <p>This class computes a matrix function C = f(A, B) where A, B, C are matrices
+ * in the same dimension. </p>
  * 
- * Also the function f has the property that there exists a vector field g s.t.
+ * <p>Also the function f has the property that there exists a vector field g s.t.
  * C[i,:] = g(A[i,:], B[i,:])
- * where A[i,:], B[i,:], C[i,:] are i-th row of A, B, C respectively.
+ * where A[i,:], B[i,:], C[i,:] are i-th row of A, B, C respectively.</p>
  * 
  * @author Y.K. Chan
  */
@@ -97,7 +97,7 @@ public class RowBased {
      * @param ans   Resultant matrix C
      */
     protected void compute(Matrix a, Matrix b, Matrix ans) {
-        if(a.getRowCount() * a.getColCount() < DEFAULT_LIMIT_FLOP){
+        if(a.getRowCount() * a.getColCount() < DEFAULT_NUM_FLOP){
             this.serial(a, b, ans, 0, a.getRowCount());
         }else{
             this.forkJoin(a, b, ans, a.getColCount());
@@ -151,5 +151,5 @@ public class RowBased {
     
     private RowOperation<Void> oper;
     
-    private static final int DEFAULT_LIMIT_FLOP = 512 * 512;    
+    private static final int DEFAULT_NUM_FLOP = 512 * 512;    
 }

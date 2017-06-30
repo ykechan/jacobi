@@ -29,10 +29,10 @@ import jacobi.core.util.Real;
 /**
  * Implementation of Dantzig's pivoting rule. 
  * 
- * This is proposed by Dantzig in his original simplex algorithm: uses the index i where c[i] is largest positive.
+ * <p>This is proposed by Dantzig in his original simplex algorithm: uses the index i where c[i] is largest positive.</p>
  * 
- * The benefit of this approach is its speed: it requires checking the column vector c only. To maintain this
- * advantage, this class provides only 1 entering variable only, unless no choice fits.
+ * <p>The benefit of this approach is its speed: it requires checking the column vector c only. To maintain this
+ * advantage, this class provides only 1 entering variable only, unless no choice fits.</p>
  * 
  * @author Y.K. Chan
  */

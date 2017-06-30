@@ -33,10 +33,10 @@ import java.util.function.Consumer;
 /**
  * Implementation class for QR Decomposition.
  * 
- * QR decomposition refers to consider A = Q*R where Q is orthogonal and R is 
- * upper triangular.
+ * <p>QR decomposition refers to consider A = Q*R where Q is orthogonal and R is 
+ * upper triangular.</p>
  * 
- * This class is perturbative, that is it transform the input parameters.
+ * <p>This class is mutating, i.e.&nbsp;it transform the input parameters.</p>
  * 
  * @author Y.K. Chan
  */
@@ -63,7 +63,7 @@ public class QRDecomp {
     }
     
     /**
-     * Compute QR decomposition with a partner matrix, i.e. given matrix A and
+     * Compute QR decomposition with a partner matrix, i.e.&nbsp;given matrix A and
      * partner matrix B, transform A to R and B to Q^t * R, where A = Q * R, 
      * Q is orthogonal and R is lower trianguar.
      * @param matrix  Matrix A

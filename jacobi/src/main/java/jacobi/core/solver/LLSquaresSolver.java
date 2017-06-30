@@ -34,36 +34,42 @@ import java.util.Optional;
  * Solve a over-determined system of linear equations in a linear-least
  * square sense.
  * 
- * A system of linear equations y = A * x is over-determined if A has more 
+ * <p>A system of linear equations y = A * x is over-determined if A has more 
  * rows then columns, and rows are not mostly degenerated. A linear-least
- * square estimator of x is that such estimator x' minimizes || y - A * x' ||.
+ * square estimator of x is that such estimator x' minimizes || y - A * x' ||.</p>
  * 
- * Derivation omitted, x' can be obtained by solving the system
- *   (A^t * A)x' = A^t * y
+ * <p>Derivation omitted, x' can be obtained by solving the system
+ *   (A^t * A)x' = A^t * y</p>
  * 
- * A^t * A is positive definite and square and the system can be solved by
+ * <p>A^t * A is positive definite and square and the system can be solved by
  * Gaussian Eliminated or Cholesky decomposition. However to compute this matrix
  * involves slow large matrix multiplication, and poor numerical stability since
  * the condition number squared with the multiplication. Instead, it can also
  * be solved by decomposition A = Q * R where Q is orthogonal and R upper triangular,
- * and solve R * x = Q^t * y, since
+ * and solve R * x = Q^t * y, since<br/>
+ * <br/>
+ * A^t * A = R^t * Q^t * Q * R = R^t * R<br/>
+ * A^t * y = R^t * Q^t * y<br/>
+ * </p>
  * 
- * A^t * A = R^t * Q^t * Q * R = R^t * R
- * A^t * y = R^t * Q^t * y
+ * <p>
+ * Therefore R^t * R * x' = R^t * Q^t * y <br/>
+ * Since R * x' = Q^t * y -&gt; (A^t * A)x' = A^t * y, result follows.<br/>
+ * </p>
  * 
- * Therefore R^t * R * x' = R^t * Q^t * y 
- * Since R * x' = Q^t * y -&gt; (A^t * A)x' = A^t * y, result follows.
+ * <p>SVD can be be used to solve this, but SVD is an iterative algorithm and
+ * much more complicated to implement than what is necessary here.</p>
  * 
- * SVD can be be used to solve this, but SVD is an iterative algorithm and
- * much more complicated to implement than what is necessary here.
- * 
- * This class is perturbative, i.e. it destroys the value of the first parameter,
- * matrix A. Value of matrix y however, is not disturbed.
+ * <p>This class is mutating, i.e.&nbsp;it destroys the value of the first parameter,
+ * matrix A. Value of matrix y however, is not disturbed.</p>
  * 
  * @author Y.K. Chan
  */
 public class LLSquaresSolver {
 
+    /**
+     * Constructor.
+     */
     public LLSquaresSolver() {
         this.qrDecomp = new QRDecomp();
     }

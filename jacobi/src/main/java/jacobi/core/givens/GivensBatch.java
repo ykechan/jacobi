@@ -30,10 +30,10 @@ import java.util.List;
 /**
  * Data object for a batch of Givens rotation done by bulge-chasing.
  * 
- * In bulge-chasing, a series of pair of Givens rotation is done along in chasing a 4x4 bulge down to the bottom,
- * and a final single Givens rotation to reduce the matrix into Hessenberg form.
+ * <p>In bulge-chasing, a series of pair of Givens rotation is done along in chasing a 4x4 bulge down to the bottom,
+ * and a final single Givens rotation to reduce the matrix into Hessenberg form.</p>
  * 
- * This class is immutable and contains only immutable objects, thus getter deemed un-necessary.
+ * <p>This class is immutable and contains only immutable objects, thus getter deemed un-necessary.</p>
  * 
  * @author Y.K. Chan
  */

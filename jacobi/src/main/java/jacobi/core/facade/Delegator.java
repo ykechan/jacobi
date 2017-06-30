@@ -27,19 +27,32 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
- *
+ * A delegator is an method wrapped as an Invocator.
+ * 
  * @author Y.K. Chan
  */
 public class Delegator implements Invocator {
 
+    /**
+     * Constructor.
+     * @param method  Method to be invoked
+     */
     public Delegator(Method method) {
         this.method = method;
     }
 
+    /**
+     * Get the method to be invoked.
+     * @return  Method object
+     */
     public Method getMethod() {
         return method;
     }
     
+    /**
+     * Get the return type of the method.
+     * @return  Class of return type
+     */
     public Class<?> getReturnType() {
         return method.getReturnType();
     }

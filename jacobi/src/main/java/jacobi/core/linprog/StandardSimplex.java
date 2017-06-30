@@ -33,36 +33,36 @@ import java.util.stream.IntStream;
 /**
  * Implementation of Standard Simplex algorithm.
  * 
- * The Linear Programming problem is as follows:
- * Maximize c^t * x s.t. A*x &lt;= b, x &gt;= 0, for some matrix A, and column vector b and c.
+ * <p>The Linear Programming problem is as follows:<br/>
+ * Maximize c^t * x s.t.&nbsp;A*x &lt;= b, x &gt;= 0, for some matrix A, and column vector b and c.</p>
  * 
- * The simplex algorithm works as follows:
+ * <p>The simplex algorithm works as follows:</p>
  * 
- * Add a set of slack variable s s.t. A*x + I*s = b, s &gt;= 0. If b &gt;= 0, the trivial solution
- * [x s] = [0 b] is feasible. Find a k s.t. c[k] &gt; 0, therefore x[k] can be increased. 
+ * <p>Add a set of slack variable s s.t.&nbsp;A*x + I*s = b, s &gt;= 0. If b &gt;= 0, the trivial solution
+ * [x s] = [0 b] is feasible. Find a k s.t.&nbsp;c[k] &gt; 0, therefore x[k] can be increased.</p>
  * 
- * To maintain the equality, s[i] needed to be decreased. Since s = b, and s &gt;= 0, i must be chosen s.t. 
+ * <p>To maintain the equality, s[i] needed to be decreased. Since s = b, and s &gt;= 0, i must be chosen s.t.&nbsp;
  * b[i] / A[i, k] is minimum for all b[i] &gt; 0. If b[i] &lt; 0, s[i] would be increased and poses no constraint.
- * If b[i] &lt; 0 for all i, the problem is unbounded since the value can increase to infinity.
+ * If b[i] &lt; 0 for all i, the problem is unbounded since the value can increase to infinity.</p>
  * 
- * If c[k] &lt;= 0 for all k, the trivial solution [0 b] is already optimal.
+ * <p>If c[k] &lt;= 0 for all k, the trivial solution [0 b] is already optimal.</p>
  * 
- * The simplex algorithm evolves the problem by linear transformation s.t. the trivial solution in the next stage
+ * <p>The simplex algorithm evolves the problem by linear transformation s.t.&nbsp;the trivial solution in the next stage
  * of the problem is the trivial solution in this stage + the increase in x[k]. Consider the aforementioned step
- * a swap of non-zero-valued variable and zero-valued variable in the trivial solution. 
+ * a swap of non-zero-valued variable and zero-valued variable in the trivial solution.</p>
  * 
- * This would be the case if A^k -&gt; e^i and I^k -&gt; A*^k in [A I] -&gt; [A* J], where A^k and I^k is the k-th column 
+ * <p>This would be the case if A^k -&gt; e^i and I^k -&gt; A*^k in [A I] -&gt; [A* J], where A^k and I^k is the k-th column 
  * of A and I respectively, and e^i is the i-th standard basis. [A* J] can be obtained by applying linear transformation
- * T*[A I] so that the problem is invariant under this transformation.
+ * T*[A I] so that the problem is invariant under this transformation.</p>
  * 
- * If b[j] &lt; 0 for some j, [0 b] is not feasible. In such cases a auxiliary scalar variable t &gt;= 0 is added, i.e.
+ * <p>If b[j] &lt; 0 for some j, [0 b] is not feasible. In such cases a auxiliary scalar variable t &gt;= 0 is added, i.e.
  * A*x + I*s - t*1' = b, where 1' = {1, 1, ...}. There is a solution [x s t] = [0 b - |min(b)| |min(b)|], however this
  * unlike normal trivial solution, there is a non-zero-valued variable t with non-standard basis {-1, -1...} 
- * in the constraint. Again, this can be fixed by swapping t with some s[k] s.t. b[k] = min(b).
+ * in the constraint. Again, this can be fixed by swapping t with some s[k] s.t.&nbsp;b[k] = min(b).</p>
  * 
- * Sometimes, finding an entering variable k may be expensive. In cases when there are many variables, it would be 
+ * <p>Sometimes, finding an entering variable k may be expensive. In cases when there are many variables, it would be 
  * beneficial to find a number of entering variables in the order of effectiveness, and expire this set when many of 
- * them are not valid anymore.
+ * them are not valid anymore.</p>
  * 
  * @author Y.K. Chan
  */
@@ -104,7 +104,7 @@ public class StandardSimplex {
     }
     
     /**
-     * Find the optimal solution for LP max c^t * x s.t. A * x &lt;= b, x &gt;= 0.
+     * Find the optimal solution for LP max c^t * x s.t.&nbsp;A * x &lt;= b, x &gt;= 0.
      * @param c  Objective coefficient
      * @param a  Constraint matrix
      * @param b  Constraint boundary

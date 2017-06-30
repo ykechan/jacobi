@@ -44,6 +44,8 @@ public interface SvdStep {
      */
     public int compute(double[] diag, double[] supDiag, int begin, int end, Matrix uMat, Matrix vMat);
     
+    /**
+     * Epsilon value for SVD.
+     */
     public static final double EPSILON = 1e-16;
-    
 }

@@ -34,8 +34,10 @@ import java.util.function.Supplier;
  * Determines the maximum number of element and number of element to pre-allocate
  * for a series of appending, prepending, insertion and extraction.
  * 
+ * <p>
  * This class is specifically designed to perform vector transformation with
  * the said operations in linear time. Outside usage is not advised.
+ * </p>
  * 
  * @author Y.K. Chan
  */

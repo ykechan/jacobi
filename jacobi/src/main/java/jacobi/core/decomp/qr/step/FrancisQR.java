@@ -31,22 +31,23 @@ import jacobi.core.givens.GivensBatchRQ;
 import jacobi.core.givens.GivensMode;
 import jacobi.core.givens.GivensPair;
 import jacobi.core.util.Real;
-import java.util.Arrays;
 import java.util.List;
 
 /**
  * Implementation of Francis double-shifted QR algorithm.
  * 
- * Wilkinson shifts ensures convergence albeit having slightly lower convergence
+ * <p>Wilkinson shifts ensures convergence albeit having slightly lower convergence
  * rate. The biggest problem is that eigenvalues may not be real, which involve
- * entire layer of complexity. 
+ * entire layer of complexity.</p>
  * 
- * However if a complex value z is an eigenvalue of A, z', its complex conjugate
+ * <p>However if a complex value z is an eigenvalue of A, z', its complex conjugate
  * must also be an eigenvalue of A since eigenvalues are roots of characteristic
- * polynomials.
+ * polynomials.</p>
  * 
+ * <p>
  * Consider
- *  H0 - zI = Q0 * R0
+ * <pre>
+ * H0 - zI = Q0 * R0
  *       H1 = R0 * Q0 + zI
  * H1 - z'I = Q1 * R1
  *       H2 = R1 * Q1 + z'I
@@ -57,15 +58,19 @@ import java.util.List;
  * H0^2 - 2*z*H0 + z^2 + (z - z')*H0 - z(z - z')I = Q0*Q1*R1*R0
  * H0^2 - (z + z')*H0 + z*z'I = Q0*Q1*R1*R0
  * H0^2 - 2*Re(z)*H0 + |z|*I = Q0*Q1*R1*R0
+ * </pre>
+ * </p>
  * 
+ * <p>
  * Therefore computing H2 = Q0^t*Q1^t*H*Q1*Q0 is equivalent to compute
  * QR decomposition on (H0 - zI)*(H1 - z'I). By implicit-Q theorem, Hessenberg
  * form is unique save for signs. Avoid computing the whole matrix, only Q
  * for reducing the first column of (H0 - zI)*(H1 - z'I) is computed and applied
  * to H, and reducing Q*H*Q (Q = Q^t for Householder) to Hessenberg form
  * will yields H2.
+ * </p>
  * 
- * Francis QR step fails when matrix is 2x2 or below.
+ * <p>Francis QR step fails when matrix is 2x2 or below.</p>
  * 
  * @author Y.K. Chan
  */

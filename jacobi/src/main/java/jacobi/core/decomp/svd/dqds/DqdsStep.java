@@ -28,32 +28,40 @@ import jacobi.core.util.Real;
 /**
  * Iteration step of differential quotient different with shifts (dqds).
  * 
- * Given a upper bi-diagonal matrix B where diag(B) = {a1, a2, ...}, supDiag(B) = {b1, b2, ...}.
- * Consider the LU iteration, i.e. Find U^t*U = B*B^t where U is also upper bi-diagonal.
+ * <p>Given a upper bi-diagonal matrix B where diag(B) = {a1, a2, ...}, supDiag(B) = {b1, b2, ...}.
+ * Consider the LU iteration, i.e.&nbsp;Find U^t*U = B*B^t where U is also upper bi-diagonal.</p>
  * 
- * Let diag(U) = {p1, p2, ...}, supDiag(U) = {q1, q2, ...}
+ * <p>Let diag(U) = {p1, p2, ...}, supDiag(U) = {q1, q2, ...}</p>
  * 
- * diag(U^t*U) = {p1^2, p2^2 + q1^2, ...}
+ * <p>
+ * diag(U^t*U) = {p1^2, p2^2 + q1^2, ...}<br/>
  * supDiag(U^t*U) = {p1*q1, p2*q2, ...}
+ * </p>
  * 
- * diag(B*B^t) = {a1^2 + b1^2, a2^2 + b2^2, ..., aN^2}
+ * <p>
+ * diag(B*B^t) = {a1^2 + b1^2, a2^2 + b2^2, ..., aN^2}<br/>
  * supDiag(B*B^t) = {a2*b1, a3*b2, ...}
+ * </p>
  * 
- * By comparing elements, let q[0] = 0
+ * <p>Comparing elements, let q[0] = 0</p>
  * 
- * p[i]^2 = a[i]^2 + b[i]^2 - q[i-1]^2
- * q[i] = a[i + 1]*b[i] / p[i]
+ * <p>p[i]^2 = a[i]^2 + b[i]^2 - q[i-1]^2
+ * q[i] = a[i + 1]*b[i] / p[i]</p>
  * 
+ * <p>
+ * <pre>
  * Consider d[i] = a[i]^2 - q[i-1]^2
  *               = a[i]^2 - a[i]^2*b[i-1]^2/p[i-1]^2
  *               = a[i]^2 * { p[i-1]^2 - b[i-1]^2 }/p[i-1]^2
  *               = a[i]^2 * { a[i-1]^2 + b[i-1]^2 }/p[i-1]^2
  *               = d[i-1] * { a[i]^2 / p[i-1]^2 }
+ * </pre>
+ * </p>
  * 
- * Therefore p[i]^2 = d[i] + b[i]^2, q[i] = (a[i + 1]/p[i]) * b[i]
+ * <p>Therefore p[i]^2 = d[i] + b[i]^2, q[i] = (a[i + 1]/p[i]) * b[i]</p>
  * 
- * Since most operations are involved with squares, this interface accepts {a1^2, a2^2, ...} and {b1^2, b2^2, ...}
- * instead of B.
+ * <p>Since most operations are involved with squares, this interface accepts {a1^2, a2^2, ...} and {b1^2, b2^2, ...}
+ * instead of B.</p>
  * 
  * @author Y.K. Chan
  */

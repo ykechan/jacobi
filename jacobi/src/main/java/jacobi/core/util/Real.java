@@ -48,7 +48,7 @@ public abstract class Real {
     public static final double TOLERANCE = 1e-8;
     
     /**
-     * Check if a value is negligible, i.e. with absolute value smaller than EPSILON.
+     * Check if a value is negligible, i.e.&nbsp;with absolute value smaller than EPSILON.
      * @param value  Value to be checked
      * @return   True if negligible, false otherwise
      */

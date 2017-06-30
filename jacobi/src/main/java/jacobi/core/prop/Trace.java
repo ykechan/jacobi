@@ -29,7 +29,7 @@ import jacobi.core.util.Throw;
 /**
  * Find the trace of an input matrix A.
  * 
- * The trace of a matrix A tr(A) is the sum of its diagonal elements.
+ * <p>The trace of a matrix A tr(A) is the sum of its diagonal elements.</p>
  * 
  * @author Y.K. Chan
  */

@@ -33,10 +33,9 @@ import jacobi.core.util.Throw;
 /**
  * Find the determinant of a given matrix.
  * 
- * This class has no side-effect, i.e. it copies the data for necessary
- * operation.
+ * <p>This class is not mutating, i.e.&nbsp;it does not change the value of the original matrix.</p>
  * 
- * The current implementation is using Gaussian Elimination.
+ * <p>The current implementation is using Gaussian Elimination.</p>
  * 
  * @author Y.K. Chan
  */

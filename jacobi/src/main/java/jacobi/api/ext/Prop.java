@@ -40,7 +40,7 @@ import java.util.Optional;
 /**
  * Extension for getting a property of a matrix, e.g. determinant and trace.
  * 
- * This extension is immutating, i.e. it preserves the value of the matrices
+ * This extension is immutating, i.e.&nbsp;it preserves the value of the matrices
  * it operates upon.
  * 
  * @author Y.K. Chan
@@ -50,7 +50,7 @@ import java.util.Optional;
 public interface Prop {
     
     /**
-     * Trace of a matrix, i.e. tr(A)
+     * Trace of a matrix, i.e.&nbsp;tr(A)
      * @return  Trace value
      * @throws  IllegalArgumentException if underlying matrix is not a square matrix
      */
@@ -65,7 +65,7 @@ public interface Prop {
     public int rank();
     
     /**
-     * Determinant of a matrix, i.e. det(A)
+     * Determinant of a matrix, i.e.&nbsp;det(A)
      * @return  Determinant value
      * @throws  IllegalArgumentException if underlying matrix is not a square matrix
      */
@@ -73,7 +73,7 @@ public interface Prop {
     public double det();
     
     /**
-     * Inverse of a matrix, i.e. B = A^-1 s.t. A * B = I
+     * Inverse of a matrix, i.e.&nbsp;B = A^-1 s.t.&nbsp;A * B = I
      * @return  Matrix inverse, or empty if matrix is not invertible.
      * @throws  UnsupportedOperationException if underlying matrix is not a square matrix
      */
@@ -81,7 +81,7 @@ public interface Prop {
     public Optional<Matrix> inv();
     
     /**
-     * Transpose of a matrix, i.e. exchanging rows and columns.
+     * Transpose of a matrix, i.e.&nbsp;exchanging rows and columns.
      * @return   Matrix transpose
      */
     @Implementation(Transpose.class)
@@ -96,7 +96,7 @@ public interface Prop {
     
     /**
      * Eigenvalues of this matrix.
-     * @return  A pair of column vectors A and B s.t. each row of A + Bi is a eigenvalue of the underlying matrix
+     * @return  A pair of column vectors A and B s.t.&nbsp;each row of A + Bi is a eigenvalue of the underlying matrix
      * @throws  IllegalArgumentException if underlying matrix is not a square matrix
      */
     @Implementation(EigenFinder.class)

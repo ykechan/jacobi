@@ -32,7 +32,7 @@ import jacobi.core.util.Throw;
 /**
  * Create the transpose of the input matrix.
  * 
- * The transpose matrix A^t of matrix A can be obtained by reflect A over its diagonal.
+ * <p>The transpose matrix A^t of matrix A can be obtained by reflect A over its diagonal.</p>
  * 
  * @author Y.K. Chan
  */
@@ -52,7 +52,7 @@ public class Transpose {
         Matrix trans = Matrices.zeros(matrix.getColCount(), matrix.getRowCount());
         double[][] temp = new double[FETCH_SIZE][];
         for(int i = 0; i < matrix.getRowCount(); i += temp.length){
-            int n = this.fetch(matrix, temp, i);
+            int n = this.fetch(matrix, i, temp);
             
             for(int j = 0; j < trans.getRowCount(); j++){
                 double[] row = trans.getRow(j);
@@ -68,11 +68,11 @@ public class Transpose {
     /**
      * Fetch rows from input matrix into temp buffer.
      * @param matrix  Input matrix A
-     * @param temp  Temp buffer
      * @param from  Index to start fetching rows
+     * @param temp  Temp buffer
      * @return  Number of rows fetched
      */
-    protected int fetch(Matrix matrix, double[][] temp, int from) {
+    protected int fetch(Matrix matrix, int from, double[][] temp) {
         int n = Math.min(matrix.getRowCount() - from, temp.length);
         for(int i = 0; i < n; i++){
             temp[i] = matrix.getRow(from + i);

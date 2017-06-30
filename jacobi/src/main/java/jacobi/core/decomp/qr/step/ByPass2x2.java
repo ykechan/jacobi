@@ -29,10 +29,11 @@ import jacobi.api.Matrix;
 /**
  * A QR-Step that instantly deflate 2-by-2 (or 1-by-1) case without computing.
  * 
- * For certain scenario, such as computing eigenvalues only, a non-reducible Schur form is not necessarily, and
- * the blocked Schur form would suffice even though the 2-by-2 block maybe further reduced to upper triangular.
+ * <p>For certain scenario, such as computing eigenvalues only, a non-reducible Schur form is not necessarily, and
+ * the blocked Schur form would suffice even though the 2-by-2 block maybe further reduced to upper triangular.</p>
  * 
- * This class saves efforts in computing those cases. In most such cases the 2x2 block will be processed after the fact.
+ * <p>This class saves efforts in computing those cases. 
+ * In most such cases the 2x2 block will be processed after the fact.</p>
  * 
  * @author Y.K. Chan
  */

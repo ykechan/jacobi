@@ -26,12 +26,16 @@ package jacobi.core.givens;
 
 /**
  * Data object for Givens rotation for reducing [a, b] &gt; [r, 0].
+ * <p>
  * The Givens rotation is of the form
+ * <pre>
  * [ c  -s ][ a ]   [ r ]
  * [       ][   ] = [   ]
  * [ s   c ][ b ]   [ 0 ]
+ * </pre>
+ * </p>
  * 
- * This class is immutable.
+ * <p>This class is immutable.</p>
  * 
  * @author Y.K. Chan
  */
@@ -107,7 +111,7 @@ public final class Givens {
      * Compute G^t * [a b]^t or [a b] * G and return the upper/left element.
      * @param a  Upper/Left vector element
      * @param b  Lower/Right vector element
-     * @return  Upper element of G^t * [a b]^t
+     * @return  Upper/left element of G^t * [a b]^t
      */
     public double reverseRotX(double a, double b) {
         return this.getCos() * a + this.getSin() * b;
@@ -117,14 +121,14 @@ public final class Givens {
      * Compute G^t * [a b]^t or [a b] * G and return the lower/right element.
      * @param a  Upper/Left vector element
      * @param b  Lower/Right vector element
-     * @return  Lower element of G^t * [a b]^t
+     * @return  Lower/right element of G^t * [a b]^t
      */
     public double reverseRotY(double a, double b) {
         return this.getCos() * b - this.getSin() * a;
     }
     
     /**
-     * Apply Givens rotation to a pair of vector, i.e. G*[u v]^t
+     * Apply Givens rotation to a pair of vector, i.e.&nbsp;G*[u v]^t
      * @param upper  Upper vector u
      * @param lower  Lower vector v
      * @param begin  Begin of columns of interest

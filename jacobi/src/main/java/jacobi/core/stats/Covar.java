@@ -29,8 +29,8 @@ import jacobi.api.Matrix;
 /**
  * Computation of covariance matrix.
  * 
- * A covariance matrix of a m-by-n matrix A, is a n-by-n matrix V, that an
- * entry v[i, j] in V is the covariance of column i and column j in A. 
+ * <p>A covariance matrix of a m-by-n matrix A, is a n-by-n matrix V, that an
+ * entry v[i, j] in V is the covariance of column i and column j in A. </p>
  * 
  * @author Y.K. Chan
  */

@@ -30,13 +30,13 @@ import jacobi.core.facade.FacadeProxy;
  * A matrix decorator that copies the value of the underlying matrix
  * whenever written upon.
  * 
- * Computational result can take some special form, for example a diagonal 
+ * <p>Computational result can take some special form, for example a diagonal 
  * matrix. It maybe advantageous to return an special immutable implementation 
- * that does not fully realize all matrix elements. 
+ * that does not fully realize all matrix elements.</p>
  * 
- * However user may further change the value of the return results. This class
+ * <p>However user may further change the value of the return results. This class
  * is for such cases, it would then materializes all elements to a vanilla
- * DefaultMatrix. All operations would be transparent with respect to the user.
+ * DefaultMatrix. All operations would be transparent with respect to the user.</p>
  * 
  * @author Y.K. Chan
  */

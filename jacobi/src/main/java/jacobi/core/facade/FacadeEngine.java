@@ -37,9 +37,9 @@ import java.util.Map;
 /**
  * Detect and invoke the implementation class given a facade method.
  * 
- * This class will cache the implementation class with correct invocator
+ * <p>This class will cache the implementation class with correct invocator
  * so duplicate searching of implementation method for multiple invocation
- * of the same facade method is avoided.
+ * of the same facade method is avoided.</p>
  * 
  * @author Y.K. Chan
  */
@@ -116,8 +116,7 @@ public class FacadeEngine {
             ? (target, args) -> 
                 func.invoke(target, args)
             : (target, args) -> 
-                func.invoke( Matrices.copy((Matrix) target), args)
-            ;
+                func.invoke( Matrices.copy((Matrix) target), args);
     }
     
     private Map<Method, Invocator> invocators;

@@ -31,7 +31,7 @@ import jacobi.core.util.Throw;
 /**
  * Implementation of Singular Value Decomposition.
  * 
- * Given a matrix A, find orthogonal matrices U and V s.t. A = U*E*V^t where E is a diagonal matrix.
+ * <p>Given a matrix A, find orthogonal matrices U and V s.t.&nbsp;A = U*E*V^t where E is a diagonal matrix.</p>
  * 
  * @author Y.K. Chan
  */

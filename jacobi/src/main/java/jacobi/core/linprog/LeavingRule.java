@@ -30,20 +30,29 @@ import java.util.function.ToIntBiFunction;
 /**
  * Implementation of the rule of choosing the leaving variable.
  * 
+ * <p>
  * Given the following tableau
- * 
+ * <pre>
  * [  A   I ][ x ]   [ b ]
  * [        ][   ] = [   ]
  * [ c^t  0 ][ s ]   [ z ]
+ * </pre>
+ * </p>
  * 
- * And the trivial solution [x s] = [0 b] is feasible.
+ * <p>And the trivial solution [x s] = [0 b] is feasible.</p>
  * 
- * Given k where x[k] is an enter variable, i.e. x[k] &lt; d for some value d.
+ * <p>
+ * Given k where x[k] is an enter variable, i.e.&nbsp;x[k] &lt; d for some value d.
  * To maintain the system of equations, s[i] &lt; s[i] - A[i, k] * d for all row index i.
+ * </p>
  * 
+ * <p>
  * Since s &gt;= 0, b[i] - A[i, k] * d &gt;= 0, therefore d &lt; b[i] / A[i, k].
+ * </p>
  * 
+ * <p>
  * This class finds the row index that gives the lower bound of d.
+ * </p>
  * 
  * @author Y.K. Chan
  */

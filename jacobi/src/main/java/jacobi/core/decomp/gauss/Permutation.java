@@ -36,11 +36,20 @@ import jacobi.core.util.Throw;
 import java.util.Arrays;
 
 /**
- *
+ * A permutation matrix i.e.&nbsp; matrix obtained from only swapping rows of an identity matrix.
+ * 
+ * <p>
+ * To remain being a permutation matrix this class is immutable.
+ * </p>
+ * 
  * @author Y.K. Chan
  */
 public class Permutation extends ImmutableMatrix {
 
+    /**
+     * Constructor.
+     * @param length  Number of rows/columns
+     */
     public Permutation(int length) {
         this.indices = new int[length];
         for(int i = 0; i < this.indices.length; i++){
@@ -48,17 +57,30 @@ public class Permutation extends ImmutableMatrix {
         }
     }
 
+    /**
+     * Constructor.
+     * @param indices  Permutation of row indices
+     * @param order  Order of permutation
+     */
     protected Permutation(int[] indices, int order) { // NOPMD - private usage
         this.indices = indices; 
         this.order = order;
     }
     
+    /**
+     * Determinant of the permutation matrix, which is the order of permutation.
+     * @return  Determinant of permutation matrix
+     */
     @Immutate
     @Delegate(facade = Prop.class, method = "det")
     public double det() {
         return this.order;
     }
     
+    /**
+     * Inverse of the permutation matrix, which is itself a permutation matrix.
+     * @return  Inverse of the permutation matrix
+     */
     @Immutate
     @Delegate(facade = Prop.class, method = "inv")
     public Matrix inv() {
@@ -69,6 +91,11 @@ public class Permutation extends ImmutableMatrix {
         return new Permutation(inverse, this.order);
     }
     
+    /**
+     * Multiply with another matrix, which requires only swapping rows of the other matrix.
+     * @param b  Matrix operand
+     * @return  Resultant matrix
+     */
     @Immutate
     @Delegate(facade = Op.class, method = "mul")
     public Matrix mul(Matrix b) {

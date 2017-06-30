@@ -34,20 +34,20 @@ import java.util.Optional;
  * are written in lower case for familiarity, they are not necessarily vectors
  * and can be matrices. 
  * 
- * This class is for solving the exact solution of a full-rank square matrix A.
+ * <p>This class is for solving the exact solution of a full-rank square matrix A.</p>
  * 
- * If A is not square, or not full ranked, UnsupportedOperationException will
- * be thrown.
+ * <p>This class uses Gaussian Eliminated to obtain the solution.</p>
  * 
- * This class uses Gaussian Eliminated to obtain the solution.
- * 
- * This class is perturbative, i.e. it destroys the value of the first parameter,
- * matrix A. Value of matrix y however, is not disturbed.
+ * <p>This class is mutating, i.e.&nbsp;it destroys the value of the first parameter,
+ * matrix A. Value of matrix y however, is not disturbed.</p>
  * 
  * @author Y.K. Chan
  */
 public class ExactSolver {
 
+    /**
+     * Constructor.
+     */
     public ExactSolver() {
         this.gaussDecomp = new GaussianDecomp();
     }

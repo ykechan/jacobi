@@ -34,19 +34,19 @@ import java.util.function.Supplier;
 /**
  * Map-Reduce implementation using Fork-Join Framework.
  * 
- * This implementation is equivalent to 
+ * <p>This implementation is equivalent to 
  * 
- *     IntStream.range(begin, end).parallel().map(mapper).reduce(reduer);
+ *     IntStream.range(begin, end).parallel().map(mapper).reduce(reduer);</p>
  * 
- * While it is convenient to use IntStream, it lacks an important feature that potentially
+ * <p>While it is convenient to use IntStream, it lacks an important feature that potentially
  * damage the efficiency: it lacks control on the number of works each thread should do. For example when
  * dealing with matrices that has many more rows than columns, it would be more efficient for a
- * thread to handle more rows than spawning more threads.
+ * thread to handle more rows than spawning more threads.</p>
  * 
- * This class allows user to specify which to split the task when the range is above a certain
- * limit, to make sure each thread has adequate amount of work to do.
+ * <p>This class allows user to specify which to split the task when the range is above a certain
+ * limit, to make sure each thread has adequate amount of work to do.</p>
  * 
- * It also skips using parallelism if the amount of work falls under the limit.
+ * <p>It also skips using parallelism if the amount of work falls under the limit.</p>
  * 
  * @author Y.K. Chan
  * @param <T>  Result type

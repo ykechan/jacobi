@@ -27,16 +27,17 @@ package jacobi.core.decomp.svd.dqds;
 /**
  * Implementation of a flipping step in Dqds algorithm.
  * 
- * Dqds, being a variant of QR algorithm, has a tendency to converge first at the bottom. In cases
- * that it is close to convergence at the top, it takes a few iterations to push the converging value down.
+ * <p>Dqds, being a variant of QR algorithm, has a tendency to converge first at the bottom. In cases
+ * that it is close to convergence at the top, it takes a few iterations to push the converging value down.</p>
  * 
- * To save these few iterations, it would be better to reverse the elements, i.e.
+ * <p>To save these few iterations, it would be better to reverse the elements, i.e.</p>
  * 
- * {a1, b1, a2, b2, ..., aN} -&gt; {aN, bN-1, aN-1, bN-2, ..., b1, a1}
+ * <p>{a1, b1, a2, b2, ..., aN} -&gt; {aN, bN-1, aN-1, bN-2, ..., b1, a1}</p>
  * 
- * Such operations can be carried out by orthogonal transformation on the underlying tri-diagonal matrix, and
- * thus singular values are invariant. For example
+ * <p>Such operations can be carried out by orthogonal transformation on the underlying tri-diagonal matrix, and
+ * thus singular values are invariant. For example</p>
  * 
+ * <pre>
  * [a1 b1  0  0  0]       [ 0  0  0 b4 a5]       [a5  0  0 b4  0]
  * [b1 a2 b2  0  0]       [b1 a2 b2  0  0]       [ 0 a2 b2  0 b1]
  * [ 0 b2 a3 b3  0] =&lt; [ 0 b2 a3 b3  0] =&lt; [ 0 b2 a3 b3  0]
@@ -48,6 +49,7 @@ package jacobi.core.decomp.svd.dqds;
  *                  =&lt; [ 0 b2 a3 b3  0] =&lt; [ 0 b3 a3 b2  0]
  *                        [ 0 a2 b2  0 b1]       [ 0  0 b2 a2 b1]
  *                        [ 0 b1  0  0 a1]       [ 0  0  0 b1 a1]
+ * </pre>
  * 
  * @author Y.K. Chan
  */
@@ -57,7 +59,7 @@ public class FlippingDqds implements DqdsStep {
      * Constructor.
      * @param base  Base implementation
      * @param factor  Factor of the first element that last element must exceed for flipping, 
-     *                i.e. last &gt;= factor * fist to flip.
+     *                i.e.&nbsp;last &gt;= factor * fist to flip.
      */
     public FlippingDqds(DqdsStep base, double factor) {
         this.base = base;

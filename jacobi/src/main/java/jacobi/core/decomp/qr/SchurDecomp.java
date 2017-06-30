@@ -37,10 +37,10 @@ import java.util.Optional;
 /**
  * Compute the Schur Decomposition.
  * 
- * This implementation reduces the input matrix to Hessenberg form, and collects all QR strategies to further reduce
- * the Hessenberg matrix into Schur form.
+ * <p>This implementation reduces the input matrix to Hessenberg form, and collects all QR strategies to further reduce
+ * the Hessenberg matrix into Schur form.</p>
  * 
- * Current implementation uses the QR algorithm.
+ * <p>Current implementation uses the QR algorithm.</p>
  * 
  * @author Y.K. Chan
  */

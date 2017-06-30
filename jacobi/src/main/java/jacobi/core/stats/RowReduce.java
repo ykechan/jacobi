@@ -29,8 +29,7 @@ import java.util.Arrays;
 import java.util.function.BiConsumer;
 
 /**
- * For computing vector that is from reducing of all rows in a matrix, e.g.
- * max, min, mean. 
+ * For computing vector that is from reducing of all rows in a matrix, e.g.&nbsp;max, min, mean. 
  * 
  * @author Y.K. Chan
  */

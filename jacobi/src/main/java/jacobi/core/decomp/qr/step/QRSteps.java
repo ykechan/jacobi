@@ -29,8 +29,8 @@ import java.util.Optional;
 /**
  * Factory of common composite QR steps.
  * 
- * Givens the wide range of QR steps, and possibly more for further expansion and optimization, and some steps may
- * require ordering in composing (though mostly does not), this class provide functions for building QR steps.
+ * <p>Givens the wide range of QR steps, and possibly more for further expansion and optimization, and some steps may
+ * require ordering in composing (though mostly does not), this class provide functions for building QR steps.</p>
  * 
  * @author Y.K. Chan
  */

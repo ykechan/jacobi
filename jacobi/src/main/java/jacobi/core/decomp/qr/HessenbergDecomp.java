@@ -40,10 +40,10 @@ import java.util.function.Consumer;
  * almost upper triangular, in that all elements below the sub-diagonal are zero. 
  * Sub-diagonal is not necessarily zeroes though.
  * 
- * Hessenberg decomposition may not attract much interest invested in itself, but
- * it is the first step of optimization of QR algorithm.
+ * <p>Hessenberg decomposition may not attract much interest invested in itself, but
+ * it is the first step of optimization of QR algorithm.</p>
  * 
- * Hessenberg decomposition can be easily computed using Householder reflections.
+ * <p>Hessenberg decomposition can be easily computed using Householder reflections.</p>
  * 
  * @author Y.K. Chan
  */

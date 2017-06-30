@@ -138,6 +138,7 @@ THE SOFTWARE.
                     </execution>
                 </executions>
             </plugin>
+            <!--
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
@@ -152,6 +153,7 @@ THE SOFTWARE.
                     </execution>
                 </executions>
             </plugin>
+            -->
         </plugins>
         <resources>
             <resource>

@@ -34,7 +34,6 @@ import jacobi.core.util.Triplet;
  * series of elementary matrix, and U is upper triangular, and P is permutation
  * matrix.
  * 
- * 
  * @author Y.K. Chan
  */
 public class GaussianDecomp {
@@ -55,8 +54,8 @@ public class GaussianDecomp {
     }
     
     /**
-     * Performs Gaussian Elimination with a partner matrix, i.e. transform A to 
-     * R and partner matrix B to P^-1 * B, where A = P * L * R s.t. P is a permutation
+     * Performs Gaussian Elimination with a partner matrix, i.e.&nbsp;transform A to 
+     * R and partner matrix B to P^-1 * B, where A = P * L * R s.t.&nbsp;P is a permutation
      * matrix, L is lower triangular and R upper triangular.
      * @param matrix  Matrix A
      * @param partner  Partner matrix B
@@ -68,8 +67,8 @@ public class GaussianDecomp {
     }
     
     /**
-     * Performs Gaussian Elimination i.e. transform A to 
-     * R and returns &lt;P, L, U&gt;, where A = P * L * R s.t. P is a permutation
+     * Performs Gaussian Elimination i.e.&nbsp;transform A to 
+     * R and returns &lt;P, L, U&gt;, where A = P * L * R s.t.&nbsp;P is a permutation
      * matrix, L is lower triangular and R upper triangular.
      * @param matrix  Matrix A
      * @return  Instance of A, transformed into R

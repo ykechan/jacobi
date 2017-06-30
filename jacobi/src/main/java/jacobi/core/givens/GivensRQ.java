@@ -34,15 +34,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Process a list of Givens rotation on the right as a batch.
  * 
- * Let {G[1], G[2], ... G[n]} be a set of Givens rotation s.t. G[n]*G[n-1]*...*G[1]*A = R,
+ * <p>Let {G[1], G[2], ... G[n]} be a set of Givens rotation s.t.&nbsp;G[n]*G[n-1]*...*G[1]*A = R,
  * where A is a Hessenberg matrix and R is upper triangular, this class computes 
- * B*G[1]^t*G[2]^t*...*G[n]^t for some input matrix B.
+ * B*G[1]^t*G[2]^t*...*G[n]^t for some input matrix B.</p>
  * 
- * The set of Givens rotation is assumed to be irreducible, i.e. no superfluous operation
+ * <p>The set of Givens rotation is assumed to be irreducible, i.e.&nbsp;no superfluous operation
  * in between, done in the given order, and G[i] is for reducing the off-diagonal element
- * of row[i] by row[i - 1].
+ * of row[i] by row[i - 1].</p>
  * 
- * Such operations are embarrassingly parallel when dividing the task by row.
+ * <p>Such operations are embarrassingly parallel when dividing the task by row.</p>
  * 
  * @author Y.K. Chan
  */

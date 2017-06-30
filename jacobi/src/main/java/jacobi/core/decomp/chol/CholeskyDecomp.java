@@ -36,7 +36,7 @@ import java.util.Optional;
  * Implementation of Cholesky decomposition.
  * 
  * Cholesky decomposition is given a square matrix A, find lower triangular L 
- * s.t. A = L * L^t.
+ * s.t.&nbsp;A = L * L^t.
  * 
  * @author Y.K. Chan
  */
@@ -84,7 +84,7 @@ public class CholeskyDecomp {
     }
     
     /**
-     * Find lower triangular L of a matrix A s.t. A = L * L^t.
+     * Find lower triangular L of a matrix A s.t.&nbsp;A = L * L^t.
      * @param matrix  Matrix A
      * @return  Matrix L or empty if A is not positive definite
      * @throws  IllegalArgumentException if A is null or A is not square

@@ -31,9 +31,11 @@ import java.util.Arrays;
  * or appending an element takes constant time, and inserting or extracting
  * elements takes linear time.
  * 
+ * <p>
  * This class is package private since it is un-safe, in the sense that
  * it requires correct pre-determination of number of prepending or maximum
  * number of elements.
+ * </p>
  * 
  * @author Y.K. Chan
  */

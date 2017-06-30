@@ -39,12 +39,14 @@ import java.util.stream.DoubleStream;
  * only, which saves many un-necessary zero elements. To maintain being
  * diagonal, this class is immutable.
  * 
- * 
- * 
  * @author Y.K. Chan
  */
 public class DiagonalMatrix extends ImmutableMatrix {
 
+    /**
+     * Constructor.
+     * @param vector  Diagonal elements
+     */
     public DiagonalMatrix(double[] vector) {
         this.vector = Arrays.copyOf(vector, vector.length);
     }

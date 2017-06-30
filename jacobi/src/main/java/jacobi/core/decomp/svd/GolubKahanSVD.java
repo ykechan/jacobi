@@ -34,16 +34,16 @@ import java.util.List;
 /**
  * Implementation of Golub-Kahan SVD step.
  * 
- * Given a bi-diagonal matrix B, for SVD i.e. B = U*E*V^t where U and V are orthogonal and E diagonal,
+ * <p>Given a bi-diagonal matrix B, for SVD i.e.&nbsp;B = U*E*V^t where U and V are orthogonal and E diagonal,
  * consider B^t*B = (V*E*U^t)*(U*E*V^t) = V*E^2*V^t which is essentially the eigenvalue decomposition
- * of B^t*B. Similar argument can be made with B*B^t and U. Therefore QR algorithm on B^t*B can be used.
+ * of B^t*B. Similar argument can be made with B*B^t and U. Therefore QR algorithm on B^t*B can be used.</p>
  * 
- * Since B^t*B is symmetric, an analogy of QR algorithm for symmetric tri-diagonal matrix can be employed.
+ * <p>Since B^t*B is symmetric, an analogy of QR algorithm for symmetric tri-diagonal matrix can be employed.</p>
  * 
- * Moreover, it is not necessary to compute B^t*B. Like in the Francis QR double-shift step, by Implicit-Q
+ * <p>Moreover, it is not necessary to compute B^t*B. Like in the Francis QR double-shift step, by Implicit-Q
  * theorem, bi-diagonal form is unique up to signs. A first Givens rotation G to QR decompose B^t*B is computed,
- * and B*G^t is computed. A bulge is created which breaks the bi-diagonal form, and then subsequently by applying
- * Givens rotation left and right the bulge is pushed and eliminated.
+ * and B*G^t is computed. A bulge is created breaking the bi-diagonal form, and then subsequently by applying
+ * Givens rotation left and right the bulge is pushed and eliminated.</p>
  * 
  * @author Y.K. Chan
  */

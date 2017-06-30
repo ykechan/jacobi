@@ -32,20 +32,23 @@ import java.util.Arrays;
 /**
  * A functor is a wrapper of an implementation class for invoking facade method.
  * 
- * In this context, an implementation class is a functor, if this class
- *  - has a no-arg constructor
- *  - has at least one public method
- *  - a public method that has the signature of facade argument followed by 
- *    facade method argument
- *  - no other public method has that same signature
- *  - the return type should be the same as the facade method, or same as the 
+ * <p>In this context, an implementation class is a functor, if this class
+ * <ul>
+ *  <li>has a no-arg constructor</li>
+ *  <li>has at least one public method</li>
+ *  <li>a public method that has the signature of facade argument followed by 
+ *    facade method argument</li>
+ *  <li>no other public method has that same signature</li>
+ *  <li>the return type should be the same as the facade method, or same as the 
  *    facade argument for chaining. (In case of chaining, the facade method 
- *    must have the same facade interface as return type.)
+ *    must have the same facade interface as return type.)</li>
+ * </p>
  * 
- * The name of the method is not important.
+ * <p>The name of the method is not important.</p>
  * 
- * For example, for the following facade
+ * <p>For example, for the following facade</p>
  * 
+ * <pre>
  * {@literal @}Facade(String.class)
  * public interface Foo {
  * 
@@ -53,9 +56,11 @@ import java.util.Arrays;
  *     public double bar(int i);
  * 
  * }
+ * </pre>
  * 
- * The implementation class Bar, being a functor, may looks like
+ * <p>The implementation class Bar, being a functor, may looks like</p>
  * 
+ * <pre>
  * public Bar {
  * 
  *     public double compute(String str, int i) {
@@ -63,11 +68,13 @@ import java.util.Arrays;
  *     }
  * 
  * }
+ * </pre>
  * 
- * Additional private, protected or public method is allowed. 
+ * <p>Additional private, protected or public method is allowed. </p>
  * 
- * However, the following is not allowed
+ * <p>However, the following is not allowed</p>
  * 
+ * <pre>
  * public Bar {
  * 
  *     public double doFoo(String str, int i) {
@@ -79,12 +86,13 @@ import java.util.Arrays;
  *     }
  * 
  * }
+ * </pre>
  * 
- * Both methods have the same signature, thus which is the real implementation
- * is ambiguous.
+ * <p>Both methods have the same signature, thus which is the real implementation
+ * is ambiguous.</p>
  * 
- * Implementation classes are encouraged to be stateless and immutable since
- * the instance maybe used in a multi-threaded environment.
+ * <p>Implementation classes are encouraged to be stateless and immutable since
+ * the instance maybe used in a multi-threaded environment.</p>
  * 
  * @author Y.K. Chan
  */

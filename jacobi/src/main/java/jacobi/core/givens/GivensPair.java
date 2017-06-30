@@ -27,14 +27,15 @@ package jacobi.core.givens;
 /**
  * Representation of a pair of Givens rotation.
  * 
- * For 3 elements [a b c]^t, the upper Givens rotation refers to G s.t.
+ * <p>For 3 elements [a b c]^t, the upper Givens rotation refers to G s.t.
  * G*[a b c]^t = [x 0 c], and the lower Givens rotation refers to H s.t.
  * H*[x 0 c]^t = [y 0 0].
+ * </p>
 */
 public final class GivensPair {        
     
     /**
-     * Create a pair of Givens rotation &lt;G, H&gt; s.t. H*G*[a b c]^t = [r 0 0].
+     * Create a pair of Givens rotation &lt;G, H&gt; s.t.&nbsp;H*G*[a b c]^t = [r 0 0].
      * @param a  Value of a in the above formula
      * @param b  Value of b in the above formula
      * @param c  Value of c in the above formula
@@ -81,7 +82,7 @@ public final class GivensPair {
     }
     
     /**
-     * Apply a pair of Givens rotation to 3 vectors, i.e. H*G*[u v w]^t
+     * Apply a pair of Givens rotation to 3 vectors, i.e.&nbsp;H*G*[u v w]^t
      * @param upper  Upper vector u
      * @param mid  Middle vector v
      * @param lower  Lower vector w

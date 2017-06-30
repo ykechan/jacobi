@@ -33,13 +33,15 @@ import java.util.List;
 /**
  * An iteration of Pure QR algorithm.
  * 
+ * <p>
  * Pure QR algorithm refers to the following: 
  * Consider the QR decomposition of a matrix A = Q * R, compute ~A = R * Q
  * If ~A is diagonal some upper triangular matrix U, therefore
  * R * Q = U -&gt; Q * U * Q^t = Q * R * Q * Q^t -&gt; Q * U * Q^t = Q * R
  * Therefore A = Q * U * Q^t, which is the Schur decomposition of A.
+ * </p>
  * 
- * The proof of convergence is omitted here.
+ * <p>The proof of convergence is omitted here.</p>
  * 
  * @author Y.K. Chan
  */

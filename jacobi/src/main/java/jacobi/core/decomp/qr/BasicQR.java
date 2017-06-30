@@ -26,26 +26,26 @@ package jacobi.core.decomp.qr;
 import jacobi.core.decomp.qr.step.QRStep;
 import jacobi.api.Matrix;
 import jacobi.core.util.Divider;
-import jacobi.core.util.MapReducer;
 import jacobi.core.util.Real;
 import jacobi.core.util.Throw;
 
 /**
  * Basic QR algorithm implementation with given iteration implementation.
  * 
- * Basic QR algorithm goes as the following: 
+ * <p>Basic QR algorithm goes as the following: </p>
  * 
- * Given a Hessenberg matrix A, find f(A) with some shifting strategy
- * Find Q*R = f(A), s.t. Q is orthogonal and R upper triangular 
- * Compute A' = R*Q, and ~A = f^-1(A')
+ * <p>Given a Hessenberg matrix A, find f(A) with some shifting strategy
+ * Find Q*R = f(A), s.t.&nbsp;Q is orthogonal and R upper triangular.<br/>
+ * Compute A' = R*Q, and ~A = f^-1(A').<br/>
  * Repeat until ~A is upper triangular.
+ * </p>
  * 
- * When a sub-diagonal entry of A is close to zero, A can be deflated into
+ * <p>When a sub-diagonal entry of A is close to zero, A can be deflated into
  * two separate matrices, and perform the iteration isolated. Depending on
  * whether whole Schur form is required or only eigenvalues, computes are
- * not necessary for columns beyond the upper left corner.
+ * not necessary for columns beyond the upper left corner.</p>
  * 
- * This class is to perform the iteration given the step of each iteration.
+ * <p>This class is to perform the iteration given the step of each iteration.</p>
  * 
  * @author Y.K. Chan
  */

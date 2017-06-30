@@ -32,36 +32,44 @@ import java.util.List;
 /**
  * Functionality class for performing bulge-chasing in Francis QR double step.
  * 
- * This class accepts the intermediate produce during Francis QR double step,
+ * <p>This class accepts the intermediate produce during Francis QR double step,
  * the a bulge is created in an otherwise Hessenberg matrix. This matrix is
- * almost Hessenberg except first 4 rows, e.g.
+ * almost Hessenberg except first 4 rows, e.g.<p>
  * 
+ * <pre>
  *      x x x x x x
  *      x x x x x x
  * A =  x x x x x x
  *      x x x x x x
  *      0 0 0 x x x
  *      0 0 0 0 x x
+ * </pre>
  * 
+ * <p>
  * Two givens rotation matrix G1 and G2 and be found to reduce the first
  * column of A' = G2*G1*A to Hessenberg, however B = A'*G1^t*G2^t has the bulge pushed,
  * i.e.
+ * </p>
  * 
+ * <p>
+ * <pre>
  *      x x x x x x
  *      x x x x x x
  * B =  0 x x x x x
  *      0 x x x x x
  *      0 x 0 x x x
  *      0 0 0 0 x x
+ * </pre>
+ * </p>
  * 
- * Repeating the procedure would reduce the final product to Hessenberg form.
+ * <p>Repeating the procedure would reduce the final product to Hessenberg form.</p>
  * 
- * Instead of chasing the bulge all the way, this class move the bulge from 
- * one column to another, and returns the Givens rotation applied.
+ * <p>Instead of chasing the bulge all the way, this class move the bulge from 
+ * one column to another, and returns the Givens rotation applied.</p>
  * 
- * This class is "lazy" in the sense that Givens rotation are applied to the
+ * <p>This class is "lazy" in the sense that Givens rotation are applied to the
  * right only along the diagonal region for computing the next Givens rotation
- * to further move the bulge. Computation of other columns are omitted.
+ * to further move the bulge. Computation of other columns are omitted.</p>
  * 
  * @author Y.K. Chan
  */

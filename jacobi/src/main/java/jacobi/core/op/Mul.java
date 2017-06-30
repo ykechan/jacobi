@@ -33,7 +33,7 @@ import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 
 /**
- * Matrix Multiplication operator, i.e. computes C = A * B.
+ * Matrix Multiplication operator, i.e.&nbsp;computes C = A * B.
  * 
  * @author Y.K. Chan
  */
@@ -193,7 +193,7 @@ public class Mul {
     }
     
     /**
-     * Shallow copy of a matrix, i.e. only row references are copied.
+     * Shallow copy of a matrix, i.e.&nbsp;only row references are copied.
      * The copy of the matrix should not be mutated.
      * @param mat  Matrix to be copied
      * @return  Shallow copy of a matrix

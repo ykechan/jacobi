@@ -32,13 +32,12 @@ import java.util.function.Consumer;
 /**
  * Implementation of Golub-Kahan bi-diagonal decomposition.
  * 
- * This is similar to Hessenberg decomposition only the orthogonal matrix for left and right are allowed
- * to be different such that a bi-diagonal matrix can be resulted.
+ * <p>This is similar to Hessenberg decomposition only the orthogonal matrix for left and right are allowed
+ * to be different such that a bi-diagonal matrix can be resulted.</p>
  * 
  * @author Y.K. Chan
  */
 public class GolubKahanBDD implements BiDiagDecomp {
-
     
     @Override
     public double[] compute(Mode mode, Matrix input, Consumer<Householder> qFunc, Consumer<Householder> vFunc) {

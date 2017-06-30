@@ -31,14 +31,14 @@ import java.util.function.IntBinaryOperator;
 /**
  * Implementation of divide-and-conquer algorithm.
  * 
- * The divide-and-conquer algorithm is generalized as follows:
- * Given a range [a, b), find a &lt; p &lt; b s.t. [a, p) and [p, b) can be handled independently, until
- * there is only a single element within the range.
+ * <p>The divide-and-conquer algorithm is generalized as follows:
+ * Given a range [a, b), find a &lt; p &lt; b s.t.&nbsp;[a, p) and [p, b) can be handled independently, until
+ * there is only a single element within the range.</p>
  * 
- * In numerical methods, it is often that the splitting point p can only be found after several iteration.
+ * <p>In numerical methods, it is often that the splitting point p can only be found after several iteration.
  * This class also supports when such splitting function returns out-of-range splitting point as no splitting point
  * found. To vaoid indefinite computation, this class poses a limit of iterations on finding a single p w.r.t. the 
- * length of the range.
+ * length of the range.</p>
  * 
  * @author Y.K. Chan
  */

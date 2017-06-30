@@ -41,24 +41,24 @@ import java.util.stream.IntStream;
  * 
  * This class represents a Householder Reflection matrix.
  * 
- * Householder reflection matrix of a vector v is H = I - 2*v*v^t. It is 
- * commonly used in QR decomposition, or related decompositions.
+ * <p>Householder reflection matrix of a vector v is H = I - 2*v*v^t. It is 
+ * commonly used in QR decomposition, or related decompositions.</p>
  * 
- * Instead of a standard full-multiplication which takes O(n^3) time, computing
- * H*A only takes O(n^2) time by taking advantage of the properties of H.
+ * <p>Instead of a standard full-multiplication which takes O(n^3) time, computing
+ * H*A only takes O(n^2) time by taking advantage of the properties of H.</p>
  * 
- * H * A = (I - 2*v*v^t) * A = A - 2*v*(v^t * A)
+ * <p>H * A = (I - 2*v*v^t) * A = A - 2*v*(v^t * A)</p>
  * 
- * v^t is a row vector, therefore v^t * A is also a row vector. All operations
- * takes O(n^2) time and as a whole also takes O(n^2) time.
+ * <p>v^t is a row vector, therefore v^t * A is also a row vector. All operations
+ * take O(n^2) time and as a whole also takes O(n^2) time.</p>
  * 
- * Computing row vector w = v^t * A is equivalent to multiply v^t with
+ * <p>Computing row vector w = v^t * A is equivalent to multiply v^t with
  * each column in A. However column access to most matrix implementations take
  * a lot of memory miss, since elements usually are stored in a row-by-row manner.
  * Instead, compute k * u first, where k is an element in v^t, and u is a row
  * in A, for each k and u, and summing all the results will yield the row
  * vector w. In this case, the only memory misses would be access of k, which is far
- * less than O(n^2) miss previously. 
+ * less than O(n^2) misses previously.</p>
  * 
  * @author Y.K. Chan
  */
@@ -266,7 +266,7 @@ public class Householder extends ImmutableMatrix {
     }
     
     /**
-     * Apply Householder reflector partially, i.e. compute v^t*A
+     * Apply Householder reflector partially, i.e.&nbsp;compute v^t*A
      * @param matrix  Input matrix A
      * @param startCol  Begin index of column of interest
      * @return   v^t*A
@@ -289,7 +289,7 @@ public class Householder extends ImmutableMatrix {
     }
     
     /**
-     * Apply Householder reflector partially by stream, i.e. compute v^t*A
+     * Apply Householder reflector partially by stream, i.e.&nbsp;compute v^t*A
      * @param matrix  Input matrix A
      * @param startCol  Begin index of column of interest
      * @return   v^t*A

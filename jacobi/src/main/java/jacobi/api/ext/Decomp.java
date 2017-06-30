@@ -59,7 +59,7 @@ import java.util.function.Supplier;
 public interface Decomp extends Supplier<Matrix> { 
     
     /**
-     * Compute lower triangular L from Cholesky decomposition, i.e. A = L * L^t
+     * Compute lower triangular L from Cholesky decomposition, i.e.&nbsp;A = L * L^t
      * where L is lower triangular.
      * @return  Lower triangular matrix L
      * @throws  UnsupportedOperationException  if matrix is not positive-definite.
@@ -69,7 +69,7 @@ public interface Decomp extends Supplier<Matrix> {
     public Optional<Decomp> chol();
     
     /**
-     * Compute Cholesky decomposition, i.e. A = L * L^t where L is lower triangular
+     * Compute Cholesky decomposition, i.e.&nbsp;A = L * L^t where L is lower triangular
      * @return  A pair of matrices &lt;L, L^t&gt;
      * @throws  UnsupportedOperationException  if matrix is not positive-definite.
      */
@@ -78,7 +78,7 @@ public interface Decomp extends Supplier<Matrix> {
     public Optional<Pair> chol2();
     
     /**
-     * Compute QR decomposition, i.e. A = Q * R where Q is orthogonal 
+     * Compute QR decomposition, i.e.&nbsp;A = Q * R where Q is orthogonal 
      * and R is upper triangular.
      * @return A pair of matrices &lt;Q, R&gt;
      */
@@ -146,7 +146,7 @@ public interface Decomp extends Supplier<Matrix> {
     public Triplet hessQHQt();
     
     /**
-     * Compute the Schur form S of the underlying matrix A, s.t. S = Q * A * Q^t for some orthogonal
+     * Compute the Schur form S of the underlying matrix A, s.t.&nbsp;S = Q * A * Q^t for some orthogonal
      * matrix Q and almost upper triangular matrix S. Almost upper triangular here refers to a matrix
      * that contains all zeros below the sub-diagonal.
      * @return  Schur form S of the underlying matrix A, or empty if computation failed.
@@ -156,22 +156,22 @@ public interface Decomp extends Supplier<Matrix> {
     public Matrix schur();
     
     /**
-     * Compute the Schur form S of the underlying matrix A, s.t. S = Q * A * Q^t for some orthogonal
+     * Compute the Schur form S of the underlying matrix A, s.t.&nbsp;S = Q * A * Q^t for some orthogonal
      * matrix Q and almost upper triangular matrix S. Almost upper triangular here refers to a matrix
      * that contains all zeros below the sub-diagonal.
-     * @return  Pair of matrices &lt;Q, S&gt; s.t. S is schur form of A and A = Q * S * Q^t
+     * @return  Pair of matrices &lt;Q, S&gt; s.t.&nbsp;S is schur form of A and A = Q * S * Q^t
      */
     @Immutate
     @Implementation(SchurDecomp.class)
     public Pair schurQS();
     
     /**
-     * Compute the Schur form S of the underlying matrix A, s.t. S = Q * A * Q^t for some orthogonal
+     * Compute the Schur form S of the underlying matrix A, s.t.&nbsp;S = Q * A * Q^t for some orthogonal
      * matrix Q and almost upper triangular matrix S. Almost upper triangular here refers to a matrix
      * that contains all zeros below the sub-diagonal.
      * This method may incur extra memory consumption for Q^t that may not be necessary. You may want to use
      * schurQS instead.
-     * @return  Triplet of matrices &lt;Q, S, Q^t&gt; s.t. S is schur form of A and A = Q * S * Q^t
+     * @return  Triplet of matrices &lt;Q, S, Q^t&gt; s.t.&nbsp;S is schur form of A and A = Q * S * Q^t
      */
     @Immutate
     @Implementation(SchurDecomp.class)

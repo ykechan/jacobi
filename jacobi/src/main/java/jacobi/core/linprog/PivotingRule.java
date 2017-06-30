@@ -29,17 +29,17 @@ import java.util.function.BiFunction;
 /**
  * Common interface for pivoting rules of the Simplex algorithm.
  * 
- * The Linear Programming problem is as follows:
- * Maximize c^t * x s.t. A*x &lt;= b, x &gt;= 0, for some matrix A, and column vector b and c.
+ * <p>The Linear Programming problem is as follows:
+ * Maximize c^t * x s.t.&nbsp;A*x &lt;= b, x &gt;= 0, for some matrix A, and column vector b and c.</p>
  * 
- * For any k where c[k] &gt; 0, it can be chosen as the entering variable. However the choice
+ * <p>For any k where c[k] &gt; 0, it can be chosen as the entering variable. However the choice
  * makes significant difference in the finishing rate. A number of different criteria exist. This
- * is the interface for finding a set of pivots from an immutable tableau.
+ * is the interface for finding a set of pivots from an immutable tableau.</p>
  * 
- * Implementations of this interface should choose a set of distinct entering variables under a
- * given limit of quantity. Implementations can return lesser number of choice, but not more.
+ * <p>Implementations of this interface should choose a set of distinct entering variables under a
+ * given limit of quantity. Implementations can return lesser number of choice, but not more.</p>
  * 
- * Returning a empty array in case no such enter variable exists.
+ * <p>Returning a empty array in case no such enter variable exists.</p>
  * 
  * @author Y.K. Chan
  */

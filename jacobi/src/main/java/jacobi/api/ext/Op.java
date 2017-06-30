@@ -36,11 +36,11 @@ import java.util.function.Supplier;
  * Extension for matrix arithmetics operations, including addition, multiplication,
  * and subtraction. 
  * 
- * This extension is a chaining interface, i.e. that is it supports doing multiple
+ * This extension is a chaining interface, i.e.&nbsp;that is it supports doing multiple
  * operations and gets back the answer as an Supplier, without the need to
  * create extension every time.
  * 
- * This extension is non-perturbative, i.e. it preserves the value of the matrices
+ * This extension is non-perturbative, i.e.&nbsp;it preserves the value of the matrices
  * it operates upon.
  * 
  * @author Y.K. Chan
@@ -50,7 +50,7 @@ import java.util.function.Supplier;
 public interface Op extends Supplier<Matrix> {
     
     /**
-     * Matrix addition, i.e. C = A + B
+     * Matrix addition, i.e.&nbsp;C = A + B
      * @param b  2nd Operand. The first operand is the extension parameter.
      * @return  Op instance with Resultant matrix
      */
@@ -58,7 +58,7 @@ public interface Op extends Supplier<Matrix> {
     public Op add(Matrix b);
     
     /**
-     * Matrix subtraction, i.e. C = A - B
+     * Matrix subtraction, i.e.&nbsp;C = A - B
      * @param b  2nd Operand. The first operand is the extension parameter.
      * @return  Op instance with Resultant matrix
      */
@@ -66,7 +66,7 @@ public interface Op extends Supplier<Matrix> {
     public Op sub(Matrix b);
     
     /**
-     * Matrix multiplication, i.e. C = A * B
+     * Matrix multiplication, i.e.&nbsp;C = A * B
      * @param b  2nd Operand. The first operand is the extension parameter.
      * @return  Op instance with Resultant matrix
      */
@@ -74,7 +74,7 @@ public interface Op extends Supplier<Matrix> {
     public Op mul(Matrix b);
     
     /**
-     * Matrix multiplication with transpose of the 2nd operand, i.e. C = A * B^t
+     * Matrix multiplication with transpose of the 2nd operand, i.e.&nbsp;C = A * B^t
      * @param b  2nd Operand. The first operand is the extension parameter.
      * @return  Op instance with Resultant matrix
      */
@@ -82,7 +82,7 @@ public interface Op extends Supplier<Matrix> {
     public Op mulT(Matrix b);
     
     /**
-     * Hadamand multiplication, i.e. element-by-element multiplication.
+     * Hadamand multiplication, i.e.&nbsp;element-by-element multiplication.
      * @param b  2nd Operand. The first operand is the extension parameter.
      * @return  Op instance with Resultant matrix
      */

@@ -36,16 +36,29 @@ import java.util.Arrays;
  */
 public class DefaultMatrix implements Matrix {
     
+    /**
+     * Constructor.
+     * @param m  Number of rows
+     * @param n  Number of columns
+     */
     public DefaultMatrix(int m, int n) {
         this.rows = new double[m][n];
         this.numCols = n;
     }
 
+    /**
+     * Constructor using a given backing array of rows.
+     * @param rows  Array of rows
+     */
     public DefaultMatrix(double[][] rows) { // NOPMD - intended
         this.rows = rows;
-        this.numCols = (rows == null || rows.length == 0)? 0 : rows[0].length;
+        this.numCols = rows == null || rows.length == 0 ? 0 : rows[0].length;
     }
     
+    /**
+     * Constructor using a given matrix. 
+     * @param matrix  Matrix to be copied
+     */
     public DefaultMatrix(Matrix matrix) {
         this.numCols = matrix.getColCount();
         this.rows = new double[matrix.getRowCount()][];

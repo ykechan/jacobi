@@ -24,19 +24,21 @@
 package jacobi.core.impl;
 
 import jacobi.api.Matrix;
+import java.util.Collections;
+import java.util.Iterator;
 
 /**
  *
- * An empty matrix, i.e. a matrix with no element.
+ * An empty matrix, i.e.&nbsp;a matrix with no element.
  * 
- * This serves as a NULL object for matrix.
+ * <p>This serves as a NULL object for matrix.</p>
  * 
- * Instead of simple null value of which Java screams annoyingly every time 
+ * <p>Instead of simple null value of which Java screams annoyingly every time 
  * developers ever touches it no matter how slightly, an Empty matrix serves 
  * to cause as little error as possible. All operations are encouraged to 
- * define a default behaviour whenever an Empty matrix is encountered.
+ * define a default behaviour whenever an Empty matrix is encountered.</p>
  * 
- * Nonetheless, computation result with Empty should not be relied upon.
+ * <p>Nonetheless, computation result with Empty should not be relied upon.</p>
  * 
  * @author Y.K. Chan
  */

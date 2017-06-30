@@ -30,14 +30,14 @@ import java.util.List;
 /**
  * Perform QR Decomposition on a upper Hessenberg matrix.
  * 
- * Given the special structure of a upper Hessenberg matrix, it is much easier
+ * <p>Given the special structure of a upper Hessenberg matrix, it is much easier
  * to perform QR decomposition by Givens rotation instead of Householder Reflection
- * which is used in the general case.
+ * which is used in the general case.</p>
  * 
- * This class is designed to perform QR algorithm. 
+ * <p>This class is designed to perform QR algorithm. </p>
  * 
- * This class doesn't work with general matrix, and for performance it doesn't 
- * check if the matrix is actually Hessenberg.
+ * <p>This class doesn't work with general matrix, and for performance it doesn't 
+ * check if the matrix is actually Hessenberg.</p>
  * 
  * @author Y.K. Chan
  */
@@ -83,7 +83,7 @@ public class GivensQR {
     /**
      * Given a lower triangular matrix R, multiply it with Q.
      * @param matrix  Input matrix R
-     * @param givens  List of Givens rotation s.t. Q^t = G[n] * G[n - 1] * ...
+     * @param givens  List of Givens rotation s.t.&nbsp;Q^t = G[n] * G[n - 1] * ...
      */    
     public void computeRQ(Matrix matrix, List<Givens> givens) {
         this.computeRQ(matrix, givens, 0, matrix.getRowCount(), 0, true);
@@ -93,7 +93,7 @@ public class GivensQR {
      * Given a lower triangular matrix R, multiply it with Q, within given 
      * limited region.
      * @param matrix  Input matrix R
-     * @param givens  List of Givens rotation s.t. Q^t = G[n] * G[n - 1] * ...
+     * @param givens  List of Givens rotation s.t.&nbsp;Q^t = G[n] * G[n - 1] * ...
      * @param beginRow  Begin index of rows of interest
      * @param endRow  End index of rows of interest
      * @param beginCol  Begin index of columns of interest

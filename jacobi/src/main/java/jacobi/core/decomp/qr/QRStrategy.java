@@ -28,16 +28,16 @@ import jacobi.api.Matrix;
 /**
  * Common strategy interface for QR algorithm.
  * 
- * The basic idea of QR algorithm is referred to as follows: 
+ * <p>The basic idea of QR algorithm is referred to as follows: </p>
  * 
- * Given a Hessenberg matrix H, find H = Q * R, 
- * where Q is orthogonal, and R is upper triangular.
+ * <p>Given a Hessenberg matrix H, find H = Q * R, 
+ * where Q is orthogonal, and R is upper triangular.</p>
  * 
- * Compute H2 = R * Q, and until H2 is upper triangular, repeat the process.
+ * <p>Compute H2 = R * Q, and until H2 is upper triangular, repeat the process.</p>
  * 
- * The vanilla QR algorithm, stated above, though works, takes large number 
+ * <p>The vanilla QR algorithm, stated above, though works, takes a large number 
  * of iterations to converge. Many enhancements are available, and the
- * efficiency increases with the complexity. 
+ * efficiency increases with the complexity.</p>
  * 
  * @author Y.K. Chan
  */

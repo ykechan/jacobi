@@ -33,6 +33,10 @@ import jacobi.core.util.Throw;
  */
 public abstract class AbstractElementaryOperatorDecor implements ElementaryOperator {
 
+    /**
+     * Constructor.
+     * @param op  Base operator to be decorated
+     */
     public AbstractElementaryOperatorDecor(ElementaryOperator op) {
         Throw.when().isNull(() -> op, () -> "No base operator.");
         this.op = op;
@@ -53,6 +57,12 @@ public abstract class AbstractElementaryOperatorDecor implements ElementaryOpera
         return this.op.getMatrix();
     }
     
+    /**
+     * Validate if an integer is valid row index.
+     * @param i  Row index
+     * @return This 
+     * @throws IllegalArgumentException if i is not valid
+     */
     protected AbstractElementaryOperatorDecor isValidRow(int i) {
         Throw.when()
                 .isTrue(

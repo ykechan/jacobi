@@ -32,7 +32,7 @@ import jacobi.core.stats.RowReduce;
 import jacobi.core.stats.Variance;
 
 /**
- * Extension for statistical properties, i.e. mean, variance, standard deviation
+ * Extension for statistical properties, i.e.&nbsp;mean, variance, standard deviation
  * etc.
  * 
  * @author Y.K. Chan

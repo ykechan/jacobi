@@ -35,11 +35,11 @@ import java.util.stream.IntStream;
 /**
  * Composite suppliers that will be run in parallel, each with its own thread.
  * 
- * In some scenarios, especially works are closely dependent of each other and synchronizing is frequent, fork-join 
+ * <p>In some scenarios, especially works are closely dependent of each other and synchronizing is frequent, fork-join 
  * model is not suitable since it requires spawning threads each time of synchronizing. Synchronization in ExecutorService
- * is hard since newFixedThreadPool guarantees maximum thread limit, but lesser threads may be spawned instead.
+ * is hard since newFixedThreadPool guarantees maximum thread limit, but lesser threads may be spawned instead.</p>
  * 
- * This class uses one thread per supplier so the number of threads is predictable.
+ * <p>This class uses one thread per supplier so the number of threads is predictable.</p>
  * 
  * @author Y.K. Chan
  * @param <T>  Individual return result

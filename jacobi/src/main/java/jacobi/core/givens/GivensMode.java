@@ -26,16 +26,23 @@ package jacobi.core.givens;
 /**
  * Mode indicating which rows should be interested in computing RQ.
  * 
- * Due to different purposes for computing different assumption can be made on the matrix R.
- * 
- * Full - R is an ordinarily matrix, thus all rows needed to be included in computation.
- * Upper - R is a proper upper triangular matrix, thus all rows involving non-zero elements needed to be included.
- * Deflate - R is an upper triangular matrix and only rows within scope are included.
+ * <p>Due to different purposes for computing different assumption can be made on the matrix R.</p>
  * 
  * @author Y.K. Chan
  */
 public enum GivensMode {
     
-    FULL, UPPER, DEFLATE
+    /**
+     * R is an ordinarily matrix, thus all rows needed to be included in computation.
+     */
+    FULL, 
+    /**
+     * R is a proper upper triangular matrix, thus all rows involving non-zero elements needed to be included.
+     */
+    UPPER, 
+    /**
+     * R is an upper triangular matrix and only rows within scope are included.
+     */
+    DEFLATE
     
 }

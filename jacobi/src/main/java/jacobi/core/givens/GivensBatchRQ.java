@@ -30,21 +30,31 @@ import java.util.List;
 /**
  * Implementation to perform delayed Givens rotation as a batch.
  * 
- * In bulge chasing algorithms, it is more efficient to leave out the Givens rotation on the right, i.e.
+ * <p>In bulge chasing algorithms, it is more efficient to leave out the Givens rotation on the right, i.e.
  * computing A*G for each chasing step, and compute those as a batch after the bulge was chased. The reason of 
  * doing Givens rotations by batch being more efficient is it turns a column-based access to a row-based access
- * and cache locality can be taken too the fullest, plus each operations for each rows are embarrassingly parallel.
+ * and cache locality can be taken too the fullest, plus each operations for each rows are embarrassingly parallel.</p>
  * 
  * @author Y.K. Chan
  */
 public class GivensBatchRQ {        
 
+    /**
+     * Constructor.
+     * @param implicitG  Givens pair used to induce the bulge
+     * @param rotList  Givens rotations done to chase the bulge
+     * @param last  Last Givens rotation to eliminate the bulge
+     */
     public GivensBatchRQ(GivensPair implicitG, List<GivensPair> rotList, Givens last) {
         this.implicitG = implicitG;
         this.rotList = rotList;
         this.last = last;
     }
 
+    /**
+     * Constructor.
+     * @param batch  A batch of Givens rotation
+     */
     public GivensBatchRQ(GivensBatch batch) {
         this(batch.implicitG, batch.rotList, batch.last);
     }

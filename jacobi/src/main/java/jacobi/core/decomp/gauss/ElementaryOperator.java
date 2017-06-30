@@ -31,22 +31,22 @@ import jacobi.api.Matrix;
  * Gaussian elimination can be carried out, with partial-pivoting, by 
  * only 2 types of elementary row operation:
  * 
- * - Swapping two rows, i.e. r[i] &lt;-&gt; r[j]
- * - Add another row multiplied with a scalar, i.e. r[i] &lt;- r[i] + k * r[j]
+ * - Swapping two rows, i.e.&nbsp;r[i] &lt;-&gt; r[j]
+ * - Add another row multiplied with a scalar, i.e.&nbsp;r[i] &lt;- r[i] + k * r[j]
  * 
  * @author Y.K. Chan
  */
 public interface ElementaryOperator {
    
     /**
-     * Swapping two rows, i.e. r[i] &lt;-&gt; r[j]
+     * Swapping two rows, i.e.&nbsp;r[i] &lt;-&gt; r[j]
      * @param i  row index
      * @param j  row index
      */
     public void swapRows(int i, int j);
     
     /**
-     * Add another row multiplied with a scalar, i.e. r[i] &lt;- r[i] + a * r[j]
+     * Add another row multiplied with a scalar, i.e.&nbsp;r[i] &lt;- r[i] + a * r[j]
      * @param i  row index i
      * @param a  scalar value a
      * @param j  row index j

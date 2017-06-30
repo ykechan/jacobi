@@ -34,7 +34,7 @@ import java.util.Optional;
 /**
  * Implementation for finding inverse.
  * 
- * Currently it uses Gaussian Elimination against an identity matrix.
+ * <p>Currently it uses Gaussian Elimination against an identity matrix.</p>
  * 
  * @author Y.K. Chan
  */

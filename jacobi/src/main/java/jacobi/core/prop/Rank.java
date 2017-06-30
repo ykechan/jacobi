@@ -28,15 +28,24 @@ import jacobi.core.decomp.gauss.GenericGaussianElim;
 import jacobi.core.util.Throw;
 
 /**
+ * Find the rank of a given matrix.
  * 
  * @author Y.K. Chan
  */
 public class Rank {
 
+    /**
+     * Constructor.
+     */
     public Rank() {
         this.gaussElim = new GenericGaussianElim();
     }
     
+    /**
+     * Compute the rank of a given matrix A.
+     * @param a  Matrix A
+     * @return  Rank(A)
+     */
     public int compute(Matrix a) {
         Throw.when()
             .isNull(() -> a, () -> "No matrix to rank.");
@@ -54,6 +63,11 @@ public class Rank {
         return rank;
     }
     
+    /**
+     * Compute rank for a 1x1 matrix, a.k.a.&nbsp; a scalar.
+     * @param a  Scalar matrix
+     * @return   Rank(A)
+     */
     protected int compute1x1(Matrix a) {
         return Math.abs(a.get(0, 0)) < EPSILON ? 0 : 1;
     }

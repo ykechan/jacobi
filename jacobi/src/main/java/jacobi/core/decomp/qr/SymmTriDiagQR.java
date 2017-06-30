@@ -29,7 +29,6 @@ import jacobi.core.givens.Givens;
 import jacobi.core.givens.GivensMode;
 import jacobi.core.givens.GivensRQ;
 import jacobi.core.util.Divider;
-import jacobi.core.util.MapReducer;
 import jacobi.core.util.Real;
 import java.util.Arrays;
 import java.util.List;
@@ -39,15 +38,15 @@ import java.util.stream.IntStream;
 /**
  * QR algorithm for symmetric Hessenberg matrices.
  * 
- * A symmetric Hessenberg matrix is a tri-diagonal matrix, which has only real eigenvalues. Computation is much simpler
- * since it can be represents by only its diagonal elements and sub-diagonal elements, and double-shift is un-necessary
- * since all eigenvalues and  Rayleigh quotient shifts are real.
+ * <p>A symmetric Hessenberg matrix is a tri-diagonal matrix, which has only real eigenvalues. Computation is much 
+ * simpler since it can be represents by only its diagonal elements and sub-diagonal elements, and double-shift is 
+ * un-necessary since all eigenvalues and  Rayleigh quotient shifts are real.</p>
  * 
- * Internally this class keeps the symmetric tri-diagonal elements in B-notation, i.e. 
- * {a1, b1, a2, b2, ...} where {a1, a2, ...} = diag(H) and {b1, b2, ...} = supDiag(H)
+ * <p>Internally this class keeps the symmetric tri-diagonal elements in B-notation, i.e.&nbsp;
+ * {a1, b1, a2, b2, ...} where {a1, a2, ...} = diag(H) and {b1, b2, ...} = supDiag(H)</p>
  * 
- * This class is only for 3x3 or larger symmetric Hessenberg matrices, or else the computation falls-through to 
- * base implementation.
+ * <p>This class is only for 3x3 or larger symmetric Hessenberg matrices, or else the computation falls-through to 
+ * base implementation.</p>
  * 
  * @author Y.K. Chan
  */

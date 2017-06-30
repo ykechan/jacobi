@@ -30,52 +30,63 @@ import jacobi.core.util.Pair;
 /**
  * Compute Schur decomposition of a 2x2 sub-matrix in a single step.
  * 
- * For a 2x2 matrix, A = [a  b;c  d], the eigenvalues can be found by solving
- * the characteristic polynomial det(A - kI) = 0.
+ * <p>For a 2x2 matrix, A = [a  b;c  d], the eigenvalues can be found by solving
+ * the characteristic polynomial det(A - kI) = 0.</p>
  * 
+ * <p>
  * Therefore
+ * <pre>
  * (a - k) * (d - k) - b * c = 0
  * k^2 - (a + d) * k + (a*d - b*c) = 0
  * k^2 - tr(A)*k + det(A) = 0
+ * </pre>
+ * </p>
  * 
+ * <p>
  * The roots can be easily solved by the quadratic formula
+ * <pre>
  * delta = tr(A)*tr(A) - 4*det(A)
  * k = [tr(A) +- sqrt(delta)]/2
+ * </pre>
+ * </p>
  * 
- * If delta &lt; 0, further decomposition into real upper triangular form 
- * is not possible.
+ * <p>If delta &lt; 0, further decomposition into real upper triangular form is not possible.</p>
  * 
- * If full decomposition is need, i.e. Q is needed, the eigenvector can be found.
+ * <p>If full decomposition is need, i.e.&nbsp;Q is needed, the eigenvector can be found.</p>
  * 
- * WLOG, assume k be the larger eigenvalue.
- * Find eigenvector by solving Av = k*v
- * a*x + b*y = k*x, where v = [x ; y]
- * y = [(k - a)/b] * x
+ * <p>WLOG, assume k be the larger eigenvalue.<br/>
+ * Find eigenvector by solving Av = k*v<br/>
+ * a*x + b*y = k*x, where v = [x ; y]<br/>
+ * y = [(k - a)/b] * x<br/>
+ * </p>
  * 
- * Imposing v to be a unit vector,
+ * <p>Imposing v to be a unit vector,
+ * <pre>
  * x^2 + y^2 = 1
  * x^2 + (k - a)^2/b^2 * x^2 = 1
  * x^2 ( k^2 - 2*a*k + a^2 + b^2 )/b^2 = 1
  * x = +- b / sqrt( k^2 - 2*a*k + a^2 + b^2 )
+ * </pre>
+ * </p>
  * 
- * In general the two eigenvectors are not orthogonal, thus to introduce an 
- * orthogonal basis, find a vector w that is orthongal to v.
+ * <p>In general the two eigenvectors are not orthogonal, thus to introduce an 
+ * orthogonal basis, find a vector w that is orthongal to v.</p>
  * 
- * A trivial choice would be w = [+-y ; -+x]. And the schur decomposition can be 
+ * <p>A trivial choice would be w = [+-y ; -+x]. And the schur decomposition can be 
  * obtained by A = [ v w ] U [ v w ]^t. As the signs are freely chosen, a clever
- * choice of w would be [y ; -x] s.t. Q = [ x y ; y -x ] is orthogonal and
+ * choice of w would be [y ; -x] s.t.&nbsp;Q = [ x y ; y -x ] is orthogonal and
  * symmetric, thus no need to worry multiplying Q or Q^t, and therefore less
- * error-prone.
+ * error-prone.</pr>
  * 
- * This class is a decorator on a more general class for computing Schur
- * decomposition on a general matrix, and handles the 2-by-2 case.
+ * <p>This class is a decorator on a more general class for computing Schur
+ * decomposition on a general matrix, and handles the 2-by-2 case.</p>
  * 
  * @author Y.K. Chan
  */
 public class SingleStep2x2 implements QRStep {
 
     /**
-     * Constructor
+     * Constructor with no fall through.
      */
     public SingleStep2x2() {
         this(new DefaultQRStep());
@@ -105,7 +116,7 @@ public class SingleStep2x2 implements QRStep {
      * Compute the eigenvalues of a 2x2 sub-matrix of input matrix A.
      * @param matrix  Input matrix A
      * @param at  Row index of the 2x2 sub-matrix.
-     * @return  &lt;X, Y&gt; s.t. x[k] + iy[k] is an eigenvalue of A
+     * @return  &lt;X, Y&gt; s.t.&nbsp;x[k] + iy[k] is an eigenvalue of A
      */
     public Pair computeEig(Matrix matrix, int at) {
         return DoubleShift.of(matrix, at).eig();
@@ -153,6 +164,14 @@ public class SingleStep2x2 implements QRStep {
         return new Vector2(x, y);
     }    
     
+    /**
+     * Multiply the eigenvector v to partner matrix Q, i.e.&nbsp; v^t * Q.
+     * @param eigVec  Eigenvector
+     * @param matrix  Partner matrix Q
+     * @param i  Row index
+     * @param beginCol  Begin index of columns of interest
+     * @return  This object
+     */
     protected SingleStep2x2 leftMultQ(Vector2 eigVec, Matrix matrix, int i, int beginCol) {
         double[] upper = matrix.getRow(i);
         double[] lower = matrix.getRow(i + 1);
@@ -161,6 +180,13 @@ public class SingleStep2x2 implements QRStep {
         return this;
     }
     
+    /**
+     *  Multiply the eigenvector matrix v to 2 rows of partner matrix Q, i.e.&nbsp; v^t * Q[i:i+1].
+     * @param eigVec  2x2 Eigenvector matrix V
+     * @param upper  Upper row
+     * @param lower  Lower row
+     * @param begin  Begin index of columns of interest
+     */
     protected void leftMultQ(Vector2 eigVec, double[] upper, double[] lower, int begin) {
         for(int i = begin; i < upper.length; i++){
             double p = eigVec.x * upper[i] + eigVec.y * lower[i];
@@ -170,6 +196,15 @@ public class SingleStep2x2 implements QRStep {
         }
     }
     
+    /**
+     * Multiply partner matrix Q to the eigenvector v, i.e.&nbsp; Q * v.
+     * @param eigVec  Eigenvector
+     * @param matrix  Partner matrix Q
+     * @param beginRow  Begin index of rows of interest
+     * @param endRow  End index of rows of interest
+     * @param j  Column index
+     * @return  This object
+     */
     protected SingleStep2x2 rightMultQ(Vector2 eigVec, Matrix matrix, int beginRow, int endRow, int j) {
         for(int i = beginRow; i < endRow; i++){
             double[] row = matrix.getRow(i);
@@ -184,10 +219,21 @@ public class SingleStep2x2 implements QRStep {
     
     private QRStep base;
     
+    /**
+     * Data class for a 2-vector [x, y].
+     */
     protected static final class Vector2 {
         
+        /**
+         * Vector elements
+         */
         public final double x, y;
 
+        /**
+         * Constructor.
+         * @param x  Element x
+         * @param y  Element y
+         */
         public Vector2(double x, double y) {
             this.x = x;
             this.y = y;

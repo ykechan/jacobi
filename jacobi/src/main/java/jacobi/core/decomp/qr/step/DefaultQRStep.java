@@ -28,6 +28,9 @@ import jacobi.api.Matrix;
 /**
  * Default base for QRStep decorators. 
  * 
+ * <p>This class servers as base decorator that doesn't falls through, and throws exception upon computation.
+ * Invoking this class indicates cases not handled by other decorators.</p>
+ * 
  * @author Y.K. Chan
  */
 public class DefaultQRStep implements QRStep {

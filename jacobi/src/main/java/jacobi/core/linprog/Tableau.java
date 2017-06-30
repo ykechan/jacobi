@@ -29,30 +29,39 @@ import jacobi.api.Matrix;
 /**
  * Tableau structure for linear programming problem used in Simplex Algorithm.
  * 
- * The Linear Programming problem is as follows:
- * Maximize c^t * x s.t. A*x &lt;= b.
+ * <p>The Linear Programming problem is as follows:<br/>
+ * Maximize c^t * x s.t.&nbsp;A*x &lt;= b.</p>
  * 
- * The feasibility inequality constraint A*x &lt;= b can be expressed as a system of linear equation
- * [A I]*[x s] = b where s &gt;= 0.
+ * <p>The feasibility inequality constraint A*x &lt;= b can be expressed as a system of linear equation
+ * [A I]*[x s] = b where s &gt;= 0.</p>
  * 
+ * <p>
  * Thus the problem can be expressed as 
+ * <pre>
  * [ c^t  0 ][ x ]   [ z ]
  * [        ][   ] = [   ]
  * [  A   I ][ s ]   [ b ]
+ * </pre>
+ * </p>
  * 
- * If b &gt;= 0, the trivial solution [0 b] is feasible. However if some b[k] &lt; 0, [0 b] is not feasible.
- * In this case, an auxiliary scalar variable is added s.t. [A I -1]*[x s t] = b, thus [0 s |min(b)|] is feasible. 
- * In such cases, the auxiliary problem:
+ * <p>If b &gt;= 0, the trivial solution [0 b] is feasible. However if some b[k] &lt; 0, [0 b] is not feasible.
+ * In this case, an auxiliary scalar variable is added s.t.&nbsp;[A I -1]*[x s t] = b, thus [0 s |min(b)|] is feasible. 
+ * In such cases, the auxiliary problem becomes: <br/>
+ * <br/>
+ * min t -&gt; max -t s.t.&nbsp;[A I t]*[x s t] = b.
+ * </p>
  * 
- * min t -&gt; max -t s.t. [A I t]*[x s t] = b.
- * 
+ * <p>
  * The full problem can be expressed as 
+ * <pre>
  *             [ 0 ]
  * [  A  I -1 ][ x ]    [ z ]
  * [ c^t 0 -1 ][ s ] =  [ b ]
  * [  0  0 -1 ][ t ]    [ 0 ]
+ * </pre>
+ * </p>
  * 
- * If t can not be optimized to 0, the problem is infeasible.
+ * <p>If t can not be optimized to 0, the problem is infeasible.</p>
  * 
  * @author Y.K. Chan
  */

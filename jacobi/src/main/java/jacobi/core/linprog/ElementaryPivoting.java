@@ -30,17 +30,31 @@ import jacobi.core.linprog.MutableTableau.Pivoting;
 /**
  * Implementation for pivoting operation by elementary row operations.
  * 
+ * <p>
  * Pivoting operation for simplex algorithm is essentially a change of column basis on the tableau
+ * <pre>
  * [ 1 -c^t  0 ][ x ]   [ z ]
  * [           ][   ] = [   ]
  * [ 0    A  I ][ s ]   [ b ]
+ * </pre>
+ * </p>
  * 
- * This can be done by performing elementary row operations on the tableau.
+ * <p>This can be done by performing elementary row operations on the tableau.</p>
  * 
+ * <p>
  * Note that the row and column index refers to the index of the given matrix. This class is 
  * oblivious to the actual format of the tableau. It should work whether it is given a full tableau
- * [ 1 -c^t 0 | z]                      [   A   b ]
- * [ 0   A  I | b], or compact tableau  [ -c^t  0 ], or with auxiliary variable.
+ * <pre>
+ * [ 1 -c^t 0 | z]                      
+ * [ 0   A  I | b]
+ * </pre>
+ * , or compact tableau  
+ * <pre>
+ * [   A   b ]
+ * [ -c^t  0 ]
+ * </pre>
+ * , or with auxiliary variable.
+ * </p>
  * 
  * @author Y.K. Chan
  */
@@ -59,7 +73,7 @@ public class ElementaryPivoting implements Pivoting {
     }    
     
     /**
-     * Normalize the pivot row s.t. the enter column is 1, and swap with the leaving column.
+     * Normalize the pivot row s.t.&nbsp;the enter column is 1, and swap with the leaving column.
      * @param pivot  Pivot row
      * @param enter  Enter column
      */
