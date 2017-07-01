@@ -38,6 +38,16 @@ import java.util.Optional;
  * @param <T>  Item type
  */
 public class IgnorableWhitespaceLexer<T> implements ItemLexer<T> {
+    
+    /**
+     * Create an IgnorableWhitespaceLexer on another lexer.
+     * @param <T>  Return type
+     * @param lexer  Base lexer
+     * @return  An ItemLexer that ignores whitespaces around an item
+     */
+    public static <T> ItemLexer<T> upon(ItemLexer<T> lexer) {        
+        return new IgnorableWhitespaceLexer<>(lexer);
+    }
 
     /**
      * Constructor.
@@ -127,7 +137,18 @@ public class IgnorableWhitespaceLexer<T> implements ItemLexer<T> {
             }                        
             
         },
-        ACCEPT(Action.ACCEPT), REJECT(Action.REJECT), FAIL(Action.FAIL);
+        /**
+         * Result accepted.
+         */
+        ACCEPT(Action.ACCEPT), 
+        /**
+         * Input rejected.
+         */
+        REJECT(Action.REJECT), 
+        /**
+         * Lexer failed.
+         */
+        FAIL(Action.FAIL);
 
         /**
          * Constructor.
@@ -155,6 +176,9 @@ public class IgnorableWhitespaceLexer<T> implements ItemLexer<T> {
             throw new IllegalStateException();
         }
         
+        /**
+         * Action to be returned in this state.
+         */
         public Action action;
     }
 }

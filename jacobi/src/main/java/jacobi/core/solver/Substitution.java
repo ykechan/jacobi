@@ -202,6 +202,9 @@ public class Substitution {
     private static final double EPSILON         = 1e-10;
     private static final int DEFAULT_THRESHOLD  = 8 * 1024;
     
+    /**
+     * Mode of substitution.
+     */
     public enum Mode {
         /**
          * Forward substitution

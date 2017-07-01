@@ -78,12 +78,34 @@ public class DigitLexer implements ItemLexer<Integer> {
      * State this lexer could be in
      */
     protected enum State {
-        START(Action.MOVE), READ(Action.MOVE), ACCEPT(Action.ACCEPT), REJECT(Action.REJECT), FAIL(Action.FAIL);
+        /**
+         * Start state.
+         */
+        START(Action.MOVE), 
+        /**
+         * Waiting for a digit.
+         */
+        READ(Action.MOVE), 
+        /**
+         * Result accepted.
+         */
+        ACCEPT(Action.ACCEPT), 
+        /**
+         * Input rejected.
+         */
+        REJECT(Action.REJECT), 
+        /**
+         * Lexer failed.
+         */
+        FAIL(Action.FAIL);
 
         private State(Action action) {
             this.action = action;
         }
         
+        /**
+         * Action to be returned in this state.
+         */
         public final Action action;
     }
 }

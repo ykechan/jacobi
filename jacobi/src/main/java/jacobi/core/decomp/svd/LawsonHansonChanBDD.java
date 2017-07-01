@@ -27,16 +27,21 @@ package jacobi.core.decomp.svd;
 import jacobi.api.Matrix;
 import jacobi.core.decomp.qr.Householder;
 import jacobi.core.decomp.qr.QRDecomp;
-import jacobi.core.facade.FacadeProxy;
-import jacobi.core.impl.DefaultMatrix;
 import java.util.function.Consumer;
 
 /**
- *
+ * Lawson-Hanson-Chan Bi-Diagonal Decomposition.
+ * 
+ * <p>For large matrices that there are much more rows than columns, it would be more efficient to first perform QR 
+ * decomposition and use regular bi-diagonal decomposition on the much smaller non-zero rows.</p>
+ * 
  * @author Y.K. Chan
  */
 public class LawsonHansonChanBDD implements BiDiagDecomp {
 
+    /**
+     * Constructor.
+     */
     public LawsonHansonChanBDD() {
         this.qrDecomp = new QRDecomp();
         this.baseBdd = new GolubKahanBDD();
@@ -48,6 +53,12 @@ public class LawsonHansonChanBDD implements BiDiagDecomp {
         return this.baseBdd.compute(mode, this.trimmed(mode, input), qFunc, vFunc);
     }
     
+    /**
+     * Trim matrix into a square matrix.
+     * @param mode  Mode of decomposition
+     * @param input  Input matrix
+     * @return  Trimmed matrix
+     */
     protected Matrix trimmed(Mode mode, Matrix input) {
         return null;
     }

@@ -140,8 +140,17 @@ public class DoubleLexer implements ItemLexer<Double> {
             }                        
             
         },
+        /**
+         * Result accepted.
+         */
         ACCEPT(Action.ACCEPT), 
-        REJECT(Action.REJECT),
+        /**
+         * Input rejected.
+         */
+        REJECT(Action.REJECT), 
+        /**
+         * Lexer failed.
+         */
         FAIL(Action.FAIL)
         ;
 
@@ -153,19 +162,39 @@ public class DoubleLexer implements ItemLexer<Double> {
             this.action = action;
         }
         
+        /**
+         * Jump to another state upon receiving a character.
+         * @param context  String of characters accepted.
+         * @param ch  Character received.
+         * @return  Next state
+         */
         public State jump(StringBuilder context, char ch) {
             throw new IllegalStateException(this.name());
         }
         
+        /**
+         * Append a character and return this object for chaining.
+         * @param context  String of characters accepted.
+         * @param ch  Character received.
+         * @return  This
+         */
         protected final State append(StringBuilder context, char ch) {
             context.append(ch);
             return this;
         }
         
+        /**
+         * Return the input state for chaining.
+         * @param state  Input state
+         * @return  Input state
+         */
         protected final State to(State state) {
             return state;
         }
         
+        /**
+         * Action to be returned in this state.
+         */
         public final Action action;
     }
 }

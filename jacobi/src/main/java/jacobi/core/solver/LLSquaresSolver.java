@@ -46,15 +46,15 @@ import java.util.Optional;
  * involves slow large matrix multiplication, and poor numerical stability since
  * the condition number squared with the multiplication. Instead, it can also
  * be solved by decomposition A = Q * R where Q is orthogonal and R upper triangular,
- * and solve R * x = Q^t * y, since<br/>
- * <br/>
- * A^t * A = R^t * Q^t * Q * R = R^t * R<br/>
- * A^t * y = R^t * Q^t * y<br/>
+ * and solve R * x = Q^t * y, since<br>
+ * <br>
+ * A^t * A = R^t * Q^t * Q * R = R^t * R<br>
+ * A^t * y = R^t * Q^t * y<br>
  * </p>
  * 
  * <p>
- * Therefore R^t * R * x' = R^t * Q^t * y <br/>
- * Since R * x' = Q^t * y -&gt; (A^t * A)x' = A^t * y, result follows.<br/>
+ * Therefore R^t * R * x' = R^t * Q^t * y <br>
+ * Since R * x' = Q^t * y -&gt; (A^t * A)x' = A^t * y, result follows.<br>
  * </p>
  * 
  * <p>SVD can be be used to solve this, but SVD is an iterative algorithm and

@@ -34,7 +34,7 @@ import java.util.List;
  * 
  * <p>This class accepts the intermediate produce during Francis QR double step,
  * the a bulge is created in an otherwise Hessenberg matrix. This matrix is
- * almost Hessenberg except first 4 rows, e.g.<p>
+ * almost Hessenberg except first 4 rows, e.g.</p>
  * 
  * <pre>
  *      x x x x x x
@@ -51,7 +51,6 @@ import java.util.List;
  * i.e.
  * </p>
  * 
- * <p>
  * <pre>
  *      x x x x x x
  *      x x x x x x
@@ -60,7 +59,6 @@ import java.util.List;
  *      0 x 0 x x x
  *      0 0 0 0 x x
  * </pre>
- * </p>
  * 
  * <p>Repeating the procedure would reduce the final product to Hessenberg form.</p>
  * 

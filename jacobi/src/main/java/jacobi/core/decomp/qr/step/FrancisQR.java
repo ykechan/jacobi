@@ -45,7 +45,7 @@ import java.util.List;
  * polynomials.</p>
  * 
  * <p>
- * Consider
+ * Consider</p>
  * <pre>
  * H0 - zI = Q0 * R0
  *       H1 = R0 * Q0 + zI
@@ -59,7 +59,6 @@ import java.util.List;
  * H0^2 - (z + z')*H0 + z*z'I = Q0*Q1*R1*R0
  * H0^2 - 2*Re(z)*H0 + |z|*I = Q0*Q1*R1*R0
  * </pre>
- * </p>
  * 
  * <p>
  * Therefore computing H2 = Q0^t*Q1^t*H*Q1*Q0 is equivalent to compute

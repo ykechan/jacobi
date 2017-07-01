@@ -45,10 +45,17 @@ import java.util.stream.Collectors;
  */
 public class DelegateEngine extends FacadeEngine {
 
+    /**
+     * Get singleton instance.
+     * @return  Instance of Delegate engine
+     */
     public static DelegateEngine getInstance() {
         return INSTANCE;
     }
 
+    /**
+     * Constructor.
+     */
     public DelegateEngine() {
         this.delegates = Collections.synchronizedMap(new HashMap<>());
     }

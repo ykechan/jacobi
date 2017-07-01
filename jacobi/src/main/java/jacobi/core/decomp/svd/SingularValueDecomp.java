@@ -54,10 +54,22 @@ public class SingularValueDecomp {
         this.step = step;
     }
     
+    /**
+     * Find singular values of a matrix.
+     * @param matrix  Input matrix
+     * @return  Singular values
+     */
     public double[] compute(Matrix matrix) {
         return this.compute(matrix, null, null);
     }
     
+    /**
+     * Compute SVD with partner matrices.
+     * @param matrix  Input matrix A
+     * @param left  Partner matrix B to be transformed into U^t * B.
+     * @param right  Partner matrix C to be transformed into C * V
+     * @return  Singular values
+     */
     public double[] compute(Matrix matrix, Matrix left, Matrix right) {
         Throw.when()
                 .isNull(() -> matrix, () -> "No matrix to decompose.")

@@ -33,7 +33,7 @@ import java.util.stream.IntStream;
 /**
  * Implementation of Standard Simplex algorithm.
  * 
- * <p>The Linear Programming problem is as follows:<br/>
+ * <p>The Linear Programming problem is as follows:<br>
  * Maximize c^t * x s.t.&nbsp;A*x &lt;= b, x &gt;= 0, for some matrix A, and column vector b and c.</p>
  * 
  * <p>The simplex algorithm works as follows:</p>

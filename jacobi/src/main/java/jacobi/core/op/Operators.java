@@ -40,6 +40,9 @@ public class Operators {
     @Immutate
     public static class Add extends RowBased {
 
+        /**
+         * Constructor.
+         */
         public Add() {
             super((a, b) -> a + b);
         }
@@ -52,6 +55,9 @@ public class Operators {
     @Immutate
     public static class Sub extends RowBased {
 
+        /**
+         * Constructor.
+         */
         public Sub() {
             super((a, b) -> a - b);
         }
@@ -64,10 +70,19 @@ public class Operators {
     @Immutate
     public static class Hadamard extends RowBased {
 
+        /**
+         * Constructor.
+         */
         public Hadamard() {
             super((a, b) -> a * b);
         }
      
+        /**
+         * Compute the Hadamand product.
+         * @param a  Input matrix A
+         * @param k  Scalar value k
+         * @return The Hadamand product
+         */
         public Matrix compute(Matrix a, double k) {
             Throw.when().isNull(() -> a, () -> "1st operand is null.");
             return super.compute(a, new Scalar(a.getRowCount(), a.getColCount(), k));

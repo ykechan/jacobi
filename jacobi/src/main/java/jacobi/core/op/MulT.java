@@ -105,7 +105,13 @@ public class MulT {
         return ans;
     }        
     
-    
+    /**
+     * Compute u^t * B * w, where B is matrix and u and w are column vectors.
+     * @param u  Column vector u
+     * @param b  Matrix B
+     * @param w  Column vector w
+     * @return  u^t * B * w
+     */
     protected double[] compute(double[] u, Matrix b, double[] w) {
         for(int k = 0; k < w.length; k++){
             double elem = 0.0;

@@ -78,12 +78,20 @@ public class DiagonalMatrix extends ImmutableMatrix {
         return CopyOnWriteMatrix.of(new DiagonalMatrix(this.vector));
     }
     
+    /**
+     * Determinant of the diagonal matrix.
+     * @return  det(A), which A is this matrix
+     */
     @Immutate
     @Delegate(facade = Prop.class, method = "det")
     public double det() {
         return DoubleStream.of(this.vector).reduce(1.0, (a, b) -> a * b);
     }
     
+    /**
+     * Inverse of the diagonal matrix.
+     * @return  A^-1
+     */
     @Immutate
     @Delegate(facade = Prop.class, method = "inv")
     public Optional<Matrix> inv() {
@@ -97,6 +105,11 @@ public class DiagonalMatrix extends ImmutableMatrix {
         return Optional.of(CopyOnWriteMatrix.of(new DiagonalMatrix(diag)));
     }
     
+    /**
+     * Compute D * B where D is this diagonal matrix.
+     * @param b  Input matrix B
+     * @return  D * B
+     */
     @Immutate
     @Delegate(facade = Op.class, method = "mul")
     public Matrix mul(Matrix b) {

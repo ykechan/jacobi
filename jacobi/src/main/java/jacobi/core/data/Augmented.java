@@ -34,52 +34,99 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- *
+ * Implementation for builder of augmented structure on matrix.
+ * 
  * @author Y.K. Chan
  */
 public class Augmented extends ImmutableMatrix implements Data {        
     
+    /**
+     * Append a column to the end of each rows.
+     */
     @Immutate
     public static class Append {
         
+        /**
+         * Get another builder with new column at the end of each rows.
+         * @param matrix  Input augmented matrix
+         * @param func  Function to compute the value of the new column
+         * @return   Augmented with new column at the end of each rows
+         */
         public Data compute(Matrix matrix, Function<List<Double>, Double> func) {
             return new Augmented(matrix).append(func);
         }
         
     }
     
+    /**
+     * Prepend a column to the start of each rows.
+     */
     @Immutate
     public static class Prepend {
         
+        /**
+         * Get another builder with new column at the start of each rows.
+         * @param matrix  Input augmented matrix
+         * @param func  Function to compute the value of the new column
+         * @return   Augmented with new column at the start of each rows
+         */
         public Data compute(Matrix matrix, Function<List<Double>, Double> func) {
             return new Augmented(matrix).prepend(func);
         }
         
     }
     
+    /**
+     * Insert a column to each rows.
+     */
     @Immutate
     public static class Insert {
         
+        /**
+         * Get another builder with new column inserted to each rows.
+         * @param matrix  Input augmented matrix
+         * @param at  Column index to be inserted
+         * @param func  Function to compute the value of the new column
+         * @return   Augmented with new column inserted to each rows
+         */
         public Data compute(Matrix matrix, int at, Function<List<Double>, Double> func) {
             return new Augmented(matrix).insert(at, func);
         }
         
     }
     
+    /**
+     * Retain only selected column to each rows.
+     */
     @Immutate
     public static class Select {
         
+        /**
+         * Get another builder with columns selected from each rows.
+         * @param matrix  Input augmented matrix
+         * @param cols  Column indices to be selected
+         * @return  Augmented with columns selected from each rows
+         */
         public Data compute(Matrix matrix, int... cols) {
             return new Augmented(matrix).select(cols);
         }
         
     }
 
+    /**
+     * Constructor.
+     * @param base  Base matrix
+     */
     public Augmented(Matrix base) {
         this.base = base;
         this.builder = PaddingPlan.builder(base.getColCount());
     }
 
+    /**
+     * Constructor upon another augmented matrix.
+     * @param aug  Augmented matrix
+     * @param builder  Builder for padding plan.
+     */
     public Augmented(Augmented aug, PaddingPlan.Builder builder) {
         this.base = aug.base;
         this.builder = builder;
@@ -100,6 +147,11 @@ public class Augmented extends ImmutableMatrix implements Data {
         throw new UnsupportedOperationException("Invalid usage.");
     }
 
+    /**
+     * Append a column to the end of each rows.
+     * @param func  Function to compute the value of the new column
+     * @return   Augmented with new column at the end of each rows
+     */
     @Override
     @Immutate
     @Delegate(facade = Data.class, method = "append")
@@ -107,6 +159,11 @@ public class Augmented extends ImmutableMatrix implements Data {
         return new Augmented(this, this.builder.copy().append(func));
     }
 
+    /**
+     * Prepend a column to the start of each rows.
+     * @param func  Function to compute the value of the new column
+     * @return  Augmented with new column at the start of each rows
+     */
     @Override
     @Immutate
     @Delegate(facade = Data.class, method = "prepend")
@@ -114,6 +171,12 @@ public class Augmented extends ImmutableMatrix implements Data {
         return new Augmented(this, this.builder.copy().prepend(func));
     }
     
+    /**
+     * Insert a column to each rows.
+     * @param at  Column index to be inserted
+     * @param func  Function to compute the value of the new column
+     * @return  Augmented with new column inserted to each rows
+     */
     @Override
     @Immutate
     @Delegate(facade = Data.class, method = "insert")
@@ -121,6 +184,11 @@ public class Augmented extends ImmutableMatrix implements Data {
         return new Augmented(this, this.builder.copy().insert(at, func));
     }
 
+    /**
+     * Retain only selected column to each rows.
+     * @param cols  Column indices
+     * @return  Augmented with columns selected from each rows
+     */
     @Override
     @Immutate
     @Delegate(facade = Data.class, method = "select")
@@ -128,6 +196,10 @@ public class Augmented extends ImmutableMatrix implements Data {
         return new Augmented(this, this.builder.copy().select(cols));
     }
 
+    /**
+     * Build the augmented matrix.
+     * @return  The augmented matrix.
+     */
     @Immutate
     @Delegate(facade = Data.class, method = "get")
     public Matrix build() {

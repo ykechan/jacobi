@@ -44,7 +44,7 @@ public class MappedLexer<T, V> implements ItemLexer<V> {
      * @return  A mapped lexer
      */
     public static <T, V> Function<ItemLexer<T>, ItemLexer<V>> to(Function<T, V> mapper) {
-        return (lexer) -> new MappedLexer<T, V>(lexer, mapper);
+        return (lexer) -> new MappedLexer<>(lexer, mapper);
     }
     
     /**

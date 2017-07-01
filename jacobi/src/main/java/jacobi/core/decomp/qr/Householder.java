@@ -218,6 +218,11 @@ public class Householder extends ImmutableMatrix {
         this.applyRight(matrix, 0);
     }
     
+    /**
+     * Transform sub-matrix A[i:*] to A[i:*] * H. This method changes the value of A.
+     * @param matrix  Matrix A
+     * @param fromRow  Begin of row of interest
+     */
     public void applyRight(Matrix matrix, int fromRow) {
         int len = this.vector.length - this.from;
         if(matrix.getRowCount() * len >= DEFAULT_THRESHOLD){

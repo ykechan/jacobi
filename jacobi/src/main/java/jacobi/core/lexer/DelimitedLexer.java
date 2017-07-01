@@ -132,7 +132,18 @@ public class DelimitedLexer<T> implements ItemLexer<T> {
             }
             
         },
-        ACCEPT(Action.ACCEPT), REJECT(Action.REJECT), FAIL(Action.FAIL);
+        /**
+         * Result accepted.
+         */
+        ACCEPT(Action.ACCEPT), 
+        /**
+         * Input rejected.
+         */
+        REJECT(Action.REJECT), 
+        /**
+         * Lexer failed.
+         */
+        FAIL(Action.FAIL);
         
         private State() {
             this(Action.MOVE);
@@ -142,10 +153,20 @@ public class DelimitedLexer<T> implements ItemLexer<T> {
             this.action = action;
         }
         
+        /**
+         * Jump to another state upon receiving a character.
+         * @param <T>  Result type
+         * @param lexer  Lexer 
+         * @param ch  Character received.
+         * @return  Next state
+         */
         public <T> State jump(DelimitedLexer<T> lexer, char ch) {
             throw new IllegalStateException();
         }
         
+        /**
+         * Action to be returned in this state.
+         */
         public final Action action;
     }
 }

@@ -34,10 +34,9 @@ import jacobi.api.Matrix;
  * always contains a real root that can be computed algebraically. Moreover,
  * using an exact eigenvalue as shift will enable the QR algorithm to deflate
  * at least one sub-diagonal element, thus leaving a 2x2 matrix that can be solved
- * directly. Therefore a 3x3 matrix can be decomposed in exactly two iterations.<p>
+ * directly. Therefore a 3x3 matrix can be decomposed in exactly two iterations.</p>
  * 
- * <p>
- * Given a 3x3 matrix 
+ * <p>Given a 3x3 matrix</p>
  * <pre>
  *     [a b c]
  * H = [d e f]  in Hessenberg form
@@ -52,39 +51,38 @@ import jacobi.api.Matrix;
  *        - [ae + k*(a + e) - db]*x 
  *        + (-aek + cdj - jfa - bdk)
  * </pre>
- * For p(H) = 0
+ * <p>For p(H) = 0</p>
  * <pre>
  * x^3 - (a + e + k)*x^2 + [ae + k*(a + e) - bd]*x + (k(bd - ae) + j(fa - cd)) = 0
  * </pre>
- * </p>
  * 
  * <p>
- * With proper substitution, <br/>
- * x^3 + c0 * x^2 + c1 * x + c2 = 0<br/>
- * Let x = z + h, where h = -c0/3, therefore<br/>
+ * With proper substitution, <br>
+ * x^3 + c0 * x^2 + c1 * x + c2 = 0<br>
+ * Let x = z + h, where h = -c0/3, therefore<br>
  * z^3 + (3h^2 + 2c0*h + c1)z + (c0*h^2 + c1*h + c2) = 0
- * <p>
+ * </p>
  * 
  * <p>
  * With proper substitution, z^3 + 3*pz - 2*q = 0
  * </p>
  * 
- * <p>
- * Consider z^3 - v^3 = (z - v)*(z^2 - vz + v^2)
+ * <p>Consider z^3 - v^3 = (z - v)*(z^2 - vz + v^2)</p>
  * <pre>
  * Let z^3 + 3*pz + 2*q = z^3 - v^3 + w*(z - v)
  *                      = (z - v)*(z^2 - vz + v^2) + w*(z - v)
  *                      = (z - v)*(z^2 - (v - w)*z + v^2 + w*v)</pre>
- * Since z^3 - v^3 + w(z - v) = z^3 + w*z - (v^3 + w*v)<br/>
- * Comparing coefficient<br/>
- * w = 3p<br/>
- * v^3 + w*v = 2q<br/>
+ * Since z^3 - v^3 + w(z - v) = z^3 + w*z - (v^3 + w*v)
+ * <p>
+ * Comparing coefficient<br>
+ * w = 3p<br>
+ * v^3 + w*v = 2q<br>
  * </p>
  * 
  * <p>Therefore v^3 + 3p*v = 2q</p>
  * 
  * <p>
- * A miracle solution for v would be<br/>
+ * A miracle solution for v would be<br>
  * v = [q + (p^3 + q^2)^(1/2)]^(1/3) + [q - (p^3 + q^2)^(1/2)]^(1/3)
  * </p>
  * 

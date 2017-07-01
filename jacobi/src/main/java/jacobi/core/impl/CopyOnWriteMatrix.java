@@ -53,6 +53,10 @@ public final class CopyOnWriteMatrix implements Matrix {
                 : new CopyOnWriteMatrix( ImmutableMatrix.of(matrix) );
     }
 
+    /**
+     * Constructor.
+     * @param matrix  Matrix to be protected.
+     */
     protected CopyOnWriteMatrix(Matrix matrix) {
         this.materialized = false;
         this.matrix = matrix;

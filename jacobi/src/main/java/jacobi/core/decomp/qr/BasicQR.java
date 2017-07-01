@@ -35,8 +35,8 @@ import jacobi.core.util.Throw;
  * <p>Basic QR algorithm goes as the following: </p>
  * 
  * <p>Given a Hessenberg matrix A, find f(A) with some shifting strategy
- * Find Q*R = f(A), s.t.&nbsp;Q is orthogonal and R upper triangular.<br/>
- * Compute A' = R*Q, and ~A = f^-1(A').<br/>
+ * Find Q*R = f(A), s.t.&nbsp;Q is orthogonal and R upper triangular.<br>
+ * Compute A' = R*Q, and ~A = f^-1(A').<br>
  * Repeat until ~A is upper triangular.
  * </p>
  * 

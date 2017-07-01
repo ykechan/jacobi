@@ -33,41 +33,36 @@ import jacobi.core.util.Pair;
  * <p>For a 2x2 matrix, A = [a  b;c  d], the eigenvalues can be found by solving
  * the characteristic polynomial det(A - kI) = 0.</p>
  * 
- * <p>
- * Therefore
+ * <p>Therefore</p>
  * <pre>
  * (a - k) * (d - k) - b * c = 0
  * k^2 - (a + d) * k + (a*d - b*c) = 0
  * k^2 - tr(A)*k + det(A) = 0
  * </pre>
- * </p>
  * 
- * <p>
- * The roots can be easily solved by the quadratic formula
+ * <p>The roots can be easily solved by the quadratic formula</p>
  * <pre>
  * delta = tr(A)*tr(A) - 4*det(A)
  * k = [tr(A) +- sqrt(delta)]/2
  * </pre>
- * </p>
  * 
  * <p>If delta &lt; 0, further decomposition into real upper triangular form is not possible.</p>
  * 
  * <p>If full decomposition is need, i.e.&nbsp;Q is needed, the eigenvector can be found.</p>
  * 
- * <p>WLOG, assume k be the larger eigenvalue.<br/>
- * Find eigenvector by solving Av = k*v<br/>
- * a*x + b*y = k*x, where v = [x ; y]<br/>
- * y = [(k - a)/b] * x<br/>
+ * <p>WLOG, assume k be the larger eigenvalue.<br>
+ * Find eigenvector by solving Av = k*v<br>
+ * a*x + b*y = k*x, where v = [x ; y]<br>
+ * y = [(k - a)/b] * x<br>
  * </p>
  * 
- * <p>Imposing v to be a unit vector,
+ * <p>Imposing v to be a unit vector,<p>
  * <pre>
  * x^2 + y^2 = 1
  * x^2 + (k - a)^2/b^2 * x^2 = 1
  * x^2 ( k^2 - 2*a*k + a^2 + b^2 )/b^2 = 1
  * x = +- b / sqrt( k^2 - 2*a*k + a^2 + b^2 )
  * </pre>
- * </p>
  * 
  * <p>In general the two eigenvectors are not orthogonal, thus to introduce an 
  * orthogonal basis, find a vector w that is orthongal to v.</p>
@@ -76,7 +71,7 @@ import jacobi.core.util.Pair;
  * obtained by A = [ v w ] U [ v w ]^t. As the signs are freely chosen, a clever
  * choice of w would be [y ; -x] s.t.&nbsp;Q = [ x y ; y -x ] is orthogonal and
  * symmetric, thus no need to worry multiplying Q or Q^t, and therefore less
- * error-prone.</pr>
+ * error-prone.</p>
  * 
  * <p>This class is a decorator on a more general class for computing Schur
  * decomposition on a general matrix, and handles the 2-by-2 case.</p>

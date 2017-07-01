@@ -40,7 +40,7 @@ import jacobi.core.util.Pair;
  * compute the eigenvalues, the characteristic polynomial is suffice.</p>
  * 
  * <p>
- * The characteristic polynomial of a 2x2 matrix A is given by<br/>
+ * The characteristic polynomial of a 2x2 matrix A is given by<br>
  * x^2 - tr(A)*x + det(A) = 0
  * </p>
  * 
@@ -156,5 +156,8 @@ public class DoubleShift {
     }
     
     private double tr, det;
+    /**
+     * Discriminant.
+     */
     protected final double delta;
 }

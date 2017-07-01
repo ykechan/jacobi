@@ -32,8 +32,8 @@ import jacobi.api.Matrix;
  * illustration of how shifting works.</p>
  * 
  * <p>
- * A "pure" QR algorithm computes A = Q * R, and compute A' = R * Q.<br/>
- * A "shifted" QR algorithm computes A - kI = Q * R, and computes A' = R * Q + kI<br/>
+ * A "pure" QR algorithm computes A = Q * R, and compute A' = R * Q.<br>
+ * A "shifted" QR algorithm computes A - kI = Q * R, and computes A' = R * Q + kI<br>
  * </p>
  * 
  * <p>

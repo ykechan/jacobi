@@ -40,6 +40,9 @@ public class RowReduce {
      */
     public static class Max extends RowReduce {
 
+        /**
+         * Constructor.
+         */
         public Max() {
             super(RowReduce::max);
         }
@@ -51,6 +54,9 @@ public class RowReduce {
      */
     public static class Min extends RowReduce {
 
+        /**
+         * Constructor.
+         */
         public Min() {
             super(RowReduce::min);
         }
@@ -62,6 +68,9 @@ public class RowReduce {
      */
     public static class Mean extends RowReduce {
 
+        /**
+         * Constructor.
+         */
         public Mean() {
             super(RowReduce::sum);
         }

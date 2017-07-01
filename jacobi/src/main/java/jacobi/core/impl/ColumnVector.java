@@ -77,6 +77,10 @@ public class ColumnVector implements Matrix {
         return 1;
     }
 
+    /**
+     * Get underlying backing array for the vector value.
+     * @return  Array of vector value.
+     */
     public double[] getVector() {
         return vector; // NOPMD - intented to be mutable
     }

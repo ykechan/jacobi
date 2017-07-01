@@ -36,35 +36,44 @@ import java.util.stream.IntStream;
 /**
  * Implementation of the Tableau structure.
  * 
- * The LP problem max c^t * x s.t. A*x &lt;= b, x &gt;= 0 can be expressed as 
+ * <p>
+ * The LP problem max c^t * x s.t.&nbsp;A*x &lt;= b, x &gt;= 0 can be expressed as 
+ * <pre>
  * [ c^t  0 ][ x ]   [ z ]
  * [        ][   ] = [   ]
  * [  A   I ][ s ]   [ b ]
+ * </pre>
+ * </p>
  * 
- * If b &gt;= 0, the trivial solution [0 b] is feasible. However if some b[k] &lt; 0, [0 b] is not feasible.
- * In this case, an auxiliary scalar variable is added s.t. [A I -1]*[x s t] = b, thus [0 s |min(b)|] is feasible. 
- * In such cases, the auxiliary problem:
+ * <p>If b &gt;= 0, the trivial solution [0 b] is feasible. However if some b[k] &lt; 0, [0 b] is not feasible.
+ * In this case, an auxiliary scalar variable is added s.t.&nbsp;[A I -1]*[x s t] = b, thus [0 s |min(b)|] is feasible. 
+ * In such cases, the auxiliary problem:</p>
  * 
- * min t -&gt; max -t s.t. [A I t]*[x s t] = b, need to be solved first.
+ * <p>min t -&gt; max -t s.t.&nbsp;[A I t]*[x s t] = b, need to be solved first.</p>
  * 
- * The auxiliary problem can be expressed as 
- * 
+ * <p>The auxiliary problem can be expressed as </p>
+ * <pre>
  * [  A  I -1 ][ x ]    [ z ]
  * [ c^t 0 -1 ][ s ] =  [ b ]
  * [  0  0 -1 ][ t ]    [ 0 ]
+ * </pre>
  * 
- * Internally, this class keeps the tableau in following format
+ * <p>Internally, this class keeps the tableau in following format</p>
+ * <pre>
  * [  A   -1 b ]
  * [ c^t  -1 0 ]
  * [  0   -1 0 ]
+ * </pre>
  * 
- * Notice that for each pivoting operation, a non-basic column in the tableau is drives to a e^k, and a e^k in I
+ * <p>Notice that for each pivoting operation, a non-basic column in the tableau is drives to a e^k, and a e^k in I
  * is mutated to a non-basic column, where e^k is some standard basis. A swap of column and be done and I is maintained.
- * The swapping of variables is kept by a mapping from column index to variable index.
+ * The swapping of variables is kept by a mapping from column index to variable index.</p>
  * 
- * When the auxiliary problem is solved, the tableau can be collapsed into the standard LP 
+ * <p>When the auxiliary problem is solved, the tableau can be collapsed into the standard LP </p>
+ * <pre>
  * [  A  b ]
  * [ c^t 0 ]
+ * </pre>
  * 
  * @author Y.K. Chan
  */
@@ -192,7 +201,7 @@ public class MutableTableau implements Tableau {
     }    
     
     /**
-     * Pack the linear programming problem max c^t * x s.t. A*x &lt;= b. into a matrix.
+     * Pack the linear programming problem max c^t * x s.t.&nbsp;A*x &lt;= b. into a matrix.
      * @param c  Column vector c
      * @param a  Constraint matrix A
      * @param b  Constraint boundary b
@@ -243,7 +252,7 @@ public class MutableTableau implements Tableau {
     }
     
     /**
-     * Copy the negated column vector into an array, i.e. c -&gt; [c^t 0] or [c^t 0 0].
+     * Copy the negated column vector into an array, i.e.&nbsp;c -&gt; [c^t 0] or [c^t 0 0].
      * @param vector  Column vector c
      * @param array  Array instance
      * @param isAux  True if auxiliary column need, false otherwise
@@ -270,16 +279,16 @@ public class MutableTableau implements Tableau {
      * Common interface for Pivoting operation.
      * 
      * Pivoting operation for simplex algorithm is essentially a change of column basis on the tableau
-     * [ 1 -c^t  0 ][ x ]   [ z ]
-     * [           ][   ] = [   ]
-     * [ 0    A  I ][ s ]   [ b ]
+     * [ c^t  0 ][ x ]   [ z ]
+     * [        ][   ] = [   ]
+     * [  A   I ][ s ]   [ b ]
      * 
      * This can be done by performing elementary row operations on the tableau.
      * 
      * Note that the row and column index refers to the index of the given matrix. This class is 
      * oblivious to the actual format of the tableau. It should work whether it is given a full tableau
-     * [ 1 -c^t 0 | z]                      [   A   b ]
-     * [ 0   A  I | b], or compact tableau  [ -c^t  0 ], or with auxiliary variable.
+     * [ 1 -c^t 0 | z]                      [  A   b ]
+     * [ 0   A  I | b], or compact tableau  [ c^t  0 ], or with auxiliary variable.
      */
     public interface Pivoting {
         
@@ -308,7 +317,7 @@ public class MutableTableau implements Tableau {
     }
     
     /**
-     * Builder interface that accepts the linear programming problem maximize c^t * x s.t. A*x &lt; b.
+     * Builder interface that accepts the linear programming problem maximize c^t * x s.t.&nbsp;A*x &lt; b.
      */
     public interface Builder {
         

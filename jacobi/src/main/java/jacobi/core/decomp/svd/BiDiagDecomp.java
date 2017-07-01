@@ -32,7 +32,7 @@ import java.util.function.Consumer;
  * is a bi-diagonal matrix. E can be chosen to be upper triangular and lower triangular.
  * 
  * <p>This class mutates the value of the input matrix A and the resultant value is in-determined. Only the returned
- * bi-diagonal elements should be relied upon.<p>
+ * bi-diagonal elements should be relied upon.</p>
  * 
  * <p>The bi-diagonal elements are returned as {a1, b1, a2, b2, ...} 
  * where diag(E) = {a1, a2, ...}, sup-diag(E) = {b1, b2, ...}</p>

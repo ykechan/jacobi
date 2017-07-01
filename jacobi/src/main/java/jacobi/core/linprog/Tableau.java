@@ -29,7 +29,7 @@ import jacobi.api.Matrix;
 /**
  * Tableau structure for linear programming problem used in Simplex Algorithm.
  * 
- * <p>The Linear Programming problem is as follows:<br/>
+ * <p>The Linear Programming problem is as follows:<br>
  * Maximize c^t * x s.t.&nbsp;A*x &lt;= b.</p>
  * 
  * <p>The feasibility inequality constraint A*x &lt;= b can be expressed as a system of linear equation
@@ -46,8 +46,8 @@ import jacobi.api.Matrix;
  * 
  * <p>If b &gt;= 0, the trivial solution [0 b] is feasible. However if some b[k] &lt; 0, [0 b] is not feasible.
  * In this case, an auxiliary scalar variable is added s.t.&nbsp;[A I -1]*[x s t] = b, thus [0 s |min(b)|] is feasible. 
- * In such cases, the auxiliary problem becomes: <br/>
- * <br/>
+ * In such cases, the auxiliary problem becomes: <br>
+ * <br>
  * min t -&gt; max -t s.t.&nbsp;[A I t]*[x s t] = b.
  * </p>
  * 

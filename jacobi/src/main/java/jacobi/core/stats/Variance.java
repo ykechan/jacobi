@@ -24,6 +24,7 @@
 package jacobi.core.stats;
 
 import jacobi.api.Matrix;
+import jacobi.core.util.Throw;
 
 /**
  * Compute variance of each column of a matrix.
@@ -46,20 +47,45 @@ public class Variance {
     /**
      * Compute the standard deviation, which is square root of variance.
      */
-    public static class StdDev extends Variance {
+    public static class StdDev {
 
-        @Override
+        /**
+         * Constructor.
+         */
+        public StdDev() {
+            this.varImpl = new Variance();
+        }
+
+        /**
+         * Compute the variance of each columns of the matrix.
+         * @param matrix  Input matrix
+         * @return  Variance value of each columns
+         */
         public double[] compute(Matrix matrix) {
-            double[] var = super.compute(matrix);
+            Throw.when().isNull(() -> matrix, () -> "No matrix to compute.");
+            if(matrix.getRowCount() == 0){
+                return new double[0];
+            }
+            double[] var = this.varImpl.compute(matrix);
             for(int i = 0; i < var.length; i++){
                 var[i] = Math.sqrt(var[i]);
             }
             return var;
         }
         
+        private Variance varImpl;
     }
     
+    /**
+     * Compute the variance of each columns of the matrix.
+     * @param matrix  Input matrix
+     * @return  Variance value of each columns
+     */
     public double[] compute(Matrix matrix) {
+        Throw.when().isNull(() -> matrix, () -> "No matrix to compute.");
+        if(matrix.getRowCount() == 0){
+            return new double[0];
+        }
         double[] mean = new RowReduce.Mean().compute(matrix);
         double[] var = this.serial(matrix, 0, matrix.getRowCount(), mean);
         for(int i = 0; i < var.length; i++){
@@ -68,6 +94,14 @@ public class Variance {
         return var;
     }    
 
+    /**
+     * Compute the variance of each columns in given row range and the mean.
+     * @param matrix  Input matrix
+     * @param begin  Begin of row of interest
+     * @param end  End of row of interest
+     * @param mean  Mean of each columns
+     * @return  Variance value of each columns
+     */
     protected double[] serial(Matrix matrix, int begin, int end, double[] mean) {
         double[] sum = new double[mean.length];
         for(int i = begin; i < end; i++){

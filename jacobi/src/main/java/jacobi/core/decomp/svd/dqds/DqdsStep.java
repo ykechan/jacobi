@@ -34,12 +34,12 @@ import jacobi.core.util.Real;
  * <p>Let diag(U) = {p1, p2, ...}, supDiag(U) = {q1, q2, ...}</p>
  * 
  * <p>
- * diag(U^t*U) = {p1^2, p2^2 + q1^2, ...}<br/>
+ * diag(U^t*U) = {p1^2, p2^2 + q1^2, ...}<br>
  * supDiag(U^t*U) = {p1*q1, p2*q2, ...}
  * </p>
  * 
  * <p>
- * diag(B*B^t) = {a1^2 + b1^2, a2^2 + b2^2, ..., aN^2}<br/>
+ * diag(B*B^t) = {a1^2 + b1^2, a2^2 + b2^2, ..., aN^2}<br>
  * supDiag(B*B^t) = {a2*b1, a3*b2, ...}
  * </p>
  * 

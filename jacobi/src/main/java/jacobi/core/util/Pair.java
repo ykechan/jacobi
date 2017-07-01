@@ -114,6 +114,9 @@ public interface Pair {
         };
     }
     
+    /**
+     * A pair of Empty matrix.
+     */
     public static final Pair EMPTY = new Pair() {
 
         @Override

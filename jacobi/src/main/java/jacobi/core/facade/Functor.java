@@ -42,6 +42,7 @@ import java.util.Arrays;
  *  <li>the return type should be the same as the facade method, or same as the 
  *    facade argument for chaining. (In case of chaining, the facade method 
  *    must have the same facade interface as return type.)</li>
+ * </ul>
  * </p>
  * 
  * <p>The name of the method is not important.</p>

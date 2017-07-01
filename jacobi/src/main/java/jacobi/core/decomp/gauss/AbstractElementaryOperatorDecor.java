@@ -76,5 +76,8 @@ public abstract class AbstractElementaryOperatorDecor implements ElementaryOpera
         return this;
     }
 
+    /**
+     * Base operator.
+     */
     protected final ElementaryOperator op;
 }
