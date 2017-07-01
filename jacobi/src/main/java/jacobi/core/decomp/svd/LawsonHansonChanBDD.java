@@ -49,6 +49,9 @@ public class LawsonHansonChanBDD implements BiDiagDecomp {
 
     @Override
     public double[] compute(Mode mode, Matrix input, Consumer<Householder> qFunc, Consumer<Householder> vFunc) {
+        if(input.getRowCount() == 0){
+            return new double[0];
+        }
         this.qrDecomp.compute(input, qFunc);
         return this.baseBdd.compute(mode, this.trimmed(mode, input), qFunc, vFunc);
     }

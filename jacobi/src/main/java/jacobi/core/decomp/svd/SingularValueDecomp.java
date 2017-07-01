@@ -25,8 +25,10 @@
 package jacobi.core.decomp.svd;
 
 import jacobi.api.Matrix;
+import jacobi.core.decomp.qr.Householder;
 import jacobi.core.util.Divider;
 import jacobi.core.util.Throw;
+import java.util.function.Consumer;
 
 /**
  * Implementation of Singular Value Decomposition.
@@ -78,13 +80,16 @@ public class SingularValueDecomp {
                 .isFalse(() -> right == null || right.getRowCount() == matrix.getColCount(), 
                          () -> "Dimension mismatch for right partner matrix.");
         if(matrix.getRowCount() == 0){
-            if(left != null || right != null){
-                throw new IllegalArgumentException("Illegal usage.");
-            }
             return new double[0];
         }
-        double[] biDiag = this.bdd.compute(BiDiagDecomp.Mode.UPPER, matrix);
-        if(left == null || right == null){
+        Consumer<Householder> uFunc = left == null ? (hh) -> {} : (hh) -> hh.applyRight(left);
+        Consumer<Householder> vFunc = left == null ? (hh) -> {} : (hh) -> hh.applyRight(right);
+        boolean trans = matrix.getRowCount() < matrix.getColCount();
+        double[] biDiag = this.bdd.compute(trans ? BiDiagDecomp.Mode.LOWER : BiDiagDecomp.Mode.UPPER, 
+                matrix, 
+                uFunc, 
+                vFunc);
+        if(left == null && right == null){
             // only singular values are needed
             // ...
         }

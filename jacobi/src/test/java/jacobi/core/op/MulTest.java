@@ -31,6 +31,8 @@ import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.annotations.JacobiResult;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
+import java.util.concurrent.atomic.AtomicBoolean;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -147,6 +149,23 @@ public class MulTest {
     @JacobiEquals(expected = 2, actual = 2)
     public void testScalarMul13x2() {
         this.ans = this.matrixA.ext(Op.class).mul(this.matrixB.get(0, 0)).get();
+    }
+    
+    @Test
+    @JacobiImport("1x7 mul 7x1")
+    @JacobiEquals(expected = 2, actual = 2)
+    public void test1x7Mul7x1() {
+        AtomicBoolean marker = new AtomicBoolean(false);
+        this.ans = new Mul(){
+
+            @Override
+            protected double dot(double[] u, double[] v) {
+                marker.set(true);
+                return super.dot(u, v);
+            }
+
+        }.compute(this.matrixA, this.matrixB);
+        Assert.assertTrue(marker.get());
     }
     
     protected Mul parallelMock() {

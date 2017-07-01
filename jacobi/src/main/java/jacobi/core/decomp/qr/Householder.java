@@ -318,7 +318,7 @@ public class Householder extends ImmutableMatrix {
                     return x;
                 })
                 .orElseThrow(() -> new IllegalStateException());
-    }
+    }        
 
     private int from;
     private double[] vector;

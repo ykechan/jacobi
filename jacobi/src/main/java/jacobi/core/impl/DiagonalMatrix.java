@@ -42,18 +42,29 @@ import java.util.stream.DoubleStream;
  * @author Y.K. Chan
  */
 public class DiagonalMatrix extends ImmutableMatrix {
-
+    
     /**
      * Constructor.
      * @param vector  Diagonal elements
      */
     public DiagonalMatrix(double[] vector) {
+        this(vector.length, vector.length, vector);
+    }    
+
+    /**
+     * Constructor.
+     * @param vector  Diagonal elements
+     * @param rowCount  Number of rows
+     * @param colCount  Number of columns
+     */
+    public DiagonalMatrix(int rowCount, int colCount, double[] vector) {
         this.vector = Arrays.copyOf(vector, vector.length);
+        this.rowCount = rowCount;
     }
 
     @Override
     public int getRowCount() {
-        return this.vector.length;
+        return this.rowCount;
     }
 
     @Override
@@ -64,7 +75,9 @@ public class DiagonalMatrix extends ImmutableMatrix {
     @Override
     public double[] getRow(int index) {
         double[] row = new double[this.getColCount()];
-        row[index] = this.vector[index];
+        if(index < this.vector.length){
+            row[index] = this.vector[index];
+        }
         return row;
     }        
 
@@ -75,7 +88,7 @@ public class DiagonalMatrix extends ImmutableMatrix {
 
     @Override
     public Matrix copy() {
-        return CopyOnWriteMatrix.of(new DiagonalMatrix(this.vector));
+        return CopyOnWriteMatrix.of(new DiagonalMatrix(this.rowCount, this.colCount, this.vector));
     }
     
     /**
@@ -159,4 +172,5 @@ public class DiagonalMatrix extends ImmutableMatrix {
     }
     
     private double[] vector;
+    private int rowCount, colCount;
 }

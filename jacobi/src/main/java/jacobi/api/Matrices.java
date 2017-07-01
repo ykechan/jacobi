@@ -137,19 +137,19 @@ public final class Matrices {
      * @return  Matrix instance.
      */
     public static Matrix diag(double[] values) {        
-        return Matrices.diag(values == null ? 0 : values.length, values);
+        return Matrices.diag(values, values == null ? 0 : values.length);
     }
     
     /**
-     * Create a diagonal matrix with given diagonal values.
-     * @param m  Number of rows
+     * Create a diagonal matrix with given diagonal values.     
      * @param values  Diagonal values
+     * @param m  Number of rows
      * @return   Matrix instance.
      */
-    public static Matrix diag(int m, double[] values) {
+    public static Matrix diag(double[] values, int m) {
         return values == null || values.length == 0
                 ? Empty.getInstance()
-                : CopyOnWriteMatrix.of(new DiagonalMatrix(values));
+                : CopyOnWriteMatrix.of(new DiagonalMatrix(m, values.length, values));
     }        
     
     /**

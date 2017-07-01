@@ -24,10 +24,15 @@
 package jacobi.core.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.IntStream;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -63,5 +68,60 @@ public class ParallelSupplierTest {
         Set<String> set = new TreeSet<>(results);
         Assert.assertEquals(works.size(), set.size());
     }    
+    
+    @Test
+    public void testCyclic() {
+        int num = 128;
+        AtomicInteger[] marker = IntStream.range(0, num).mapToObj((i) -> new AtomicInteger(0)).toArray((n) -> new AtomicInteger[n]);
+        ParallelSupplier.cyclic((i) -> Assert.assertEquals(0, marker[i].getAndIncrement()), 0, num);
+        Assert.assertFalse(Arrays.stream(marker).filter((i) -> i.get() == 0).findAny().isPresent());
+    }
+    
+    @Test(expected = RuntimeException.class)
+    public void testExceptionThrown() {
+        AtomicInteger count = new AtomicInteger(0);
+        Supplier<Void> wait = () -> {
+                try {
+                    Thread.sleep(300L);
+                } catch (InterruptedException ex) {                    
+                }
+                count.incrementAndGet();
+                return null;
+            };
+        ParallelSupplier.of(Arrays.asList( 
+            () -> {
+                try {
+                    Thread.sleep(100L);
+                } catch (InterruptedException ex) {
+                }
+                throw new RuntimeException();
+            },
+            wait,
+            wait,
+            wait
+        )).get(); 
+    }
+    
+    @Test(expected = RuntimeException.class)
+    public void testExceptionThrownInCyclic() {
+        int n = 128;
+        AtomicInteger count = new AtomicInteger(0);
+        try {
+            ParallelSupplier.cyclic((i) -> {
+                if(i == 32){
+                    throw new RuntimeException();
+                }
+                try {
+                    Thread.sleep(10L);
+                } catch (InterruptedException ex) {
+
+                }
+                count.getAndIncrement();
+            }, 0, n);
+        } catch(RuntimeException ex) {
+            Assert.assertEquals(n - 1, count.get());
+            throw ex;
+        }
+    }
     
 }

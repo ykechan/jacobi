@@ -57,22 +57,6 @@ public class ParallelSupplier<T> implements Supplier<List<T>> {
      */
     public static final int DEFAULT_FLOP_THRESHOLD = MapReducer.DEFAULT_NUM_FLOP * DEFAULT_NUM_THREADS;
     
-    /**
-     * Run a task multiple times in multiple threads, with default number of threads.
-     * @param task   Task to be run
-     */
-    public static void run(Runnable task) {
-        ParallelSupplier.of(() -> { task.run(); return null; }).get();
-    }
-    
-    /**
-     * Run a task multiple times in multiple threads.
-     * @param task  Task
-     * @param numThreads  Number of times to run this task.
-     */
-    public static void run(Runnable task, int numThreads) {
-        ParallelSupplier.of(() -> { task.run(); return null; }, numThreads).get();
-    }
     
     /**
      * Run a task multiple times in multiple threads with indices.
@@ -97,7 +81,7 @@ public class ParallelSupplier<T> implements Supplier<List<T>> {
             int next = work.getAndIncrement();
             while(next < end){
                 task.accept(next);
-                next = work.getAndIncrement();
+                next = work.getAndIncrement();                
             }
             return null;
         }, numThreads).get();
@@ -153,12 +137,7 @@ public class ParallelSupplier<T> implements Supplier<List<T>> {
                 .collect(Collectors.toList());
         Task<T> first = this.suppliers.iterator().next();
         threads.forEach((t) -> t.start());
-        try {
-            first.run();
-        } catch(RuntimeException ex) {
-            threads.forEach((t) -> t.interrupt());
-            throw ex;
-        }
+        first.run();
         threads.forEach((t) -> {
             try { 
                 t.join(DEFAULT_TIMEOUT); 
@@ -188,15 +167,26 @@ public class ParallelSupplier<T> implements Supplier<List<T>> {
         public Task(Supplier<T> supplier) {
             this.supplier = supplier;            
         }        
+        
+        public boolean failed() {
+            return this.exception != null;
+        }
 
         @Override
         public T get() {
+            if(this.exception != null){
+                throw this.exception;
+            }
             return this.result;
         }                
 
         @Override
         public void run() {
-            this.result = this.supplier.get();
+            try {
+                this.result = this.supplier.get();
+            }catch(RuntimeException ex){
+                this.exception = ex;
+            }
         }
         
         @Override
@@ -206,6 +196,7 @@ public class ParallelSupplier<T> implements Supplier<List<T>> {
         }
         
         private T result;
-        private Supplier<T> supplier;        
+        private Supplier<T> supplier;
+        private RuntimeException exception;
     }
 }

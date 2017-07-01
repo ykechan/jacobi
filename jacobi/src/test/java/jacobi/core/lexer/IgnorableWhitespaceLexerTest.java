@@ -52,6 +52,21 @@ public class IgnorableWhitespaceLexerTest {
     }
     
     @Test
+    public void testWithDoubleLexer() {
+        ItemLexer<Double> lexer = IgnorableWhitespaceLexer.upon(new DoubleLexer());
+        Assert.assertEquals(Action.MOVE, lexer.push(' '));
+        Assert.assertEquals(Action.MOVE, lexer.push('\r'));
+        Assert.assertEquals(Action.MOVE, lexer.push('\n'));
+        Assert.assertEquals(Action.MOVE, lexer.push('3'));
+        Assert.assertEquals(Action.MOVE, lexer.push('.'));
+        Assert.assertEquals(Action.MOVE, lexer.push('1'));
+        Assert.assertEquals(Action.MOVE, lexer.push('4'));
+        Assert.assertEquals(Action.MOVE, lexer.push(' '));
+        Assert.assertEquals(Action.ACCEPT, lexer.push('?'));
+        Assert.assertEquals(3.14, lexer.get().orElse(-1.0), 1e-16);
+    }
+    
+    @Test
     public void testLeadingWhitespace() {
         ItemLexer<Integer> lexer = new IgnorableWhitespaceLexer<>(this.digitLexer());
         Assert.assertEquals(Action.MOVE, lexer.push(' '));
@@ -119,6 +134,104 @@ public class IgnorableWhitespaceLexerTest {
         Assert.assertEquals(Action.MOVE, lexer.push('1'));
         Assert.assertEquals(Action.FAIL, lexer.push('7'));
         Assert.assertFalse(lexer.get().isPresent());
+    }
+    
+    @Test(expected = IllegalStateException.class)
+    public void testFailOnStart() {
+        ItemLexer<Integer> lexer = new IgnorableWhitespaceLexer<>(new ItemLexer<Integer>(){
+
+            @Override
+            public Action push(char ch) {
+                return Action.FAIL;
+            }
+
+            @Override
+            public Optional<Integer> get() {
+                throw new UnsupportedOperationException();
+            }
+            
+        });
+        lexer.push('?');
+    }
+    
+    @Test(expected = IllegalStateException.class)
+    public void testAcceptOn1stChar() {
+        ItemLexer<Integer> lexer = new IgnorableWhitespaceLexer<>(new ItemLexer<Integer>(){
+
+            @Override
+            public Action push(char ch) {
+                return Action.ACCEPT;
+            }
+
+            @Override
+            public Optional<Integer> get() {
+                throw new UnsupportedOperationException();
+            }
+            
+        });
+        Assert.assertEquals(Action.MOVE, lexer.push('\t'));
+        Assert.assertEquals(Action.MOVE, lexer.push('\n'));
+        lexer.push('?');
+    }
+    
+    @Test(expected = IllegalStateException.class)
+    public void testFailOn1stChar() {
+        ItemLexer<Integer> lexer = new IgnorableWhitespaceLexer<>(new ItemLexer<Integer>(){
+
+            @Override
+            public Action push(char ch) {
+                return Action.FAIL;
+            }
+
+            @Override
+            public Optional<Integer> get() {
+                throw new UnsupportedOperationException();
+            }
+            
+        });
+        Assert.assertEquals(Action.MOVE, lexer.push('\t'));
+        Assert.assertEquals(Action.MOVE, lexer.push('\n'));
+        lexer.push('?');
+    }
+    
+    @Test(expected = IllegalStateException.class)
+    public void testRejectNotOn1stChar() {
+        ItemLexer<Integer> lexer = new IgnorableWhitespaceLexer<>(new ItemLexer<Integer>(){
+
+            @Override
+            public Action push(char ch) {
+                return numChar++ == 0 ? Action.MOVE : Action.REJECT;
+            }
+
+            @Override
+            public Optional<Integer> get() {
+                throw new UnsupportedOperationException();
+            }
+            
+            private int numChar = 0;
+        });
+        Assert.assertEquals(Action.MOVE, lexer.push('\t'));
+        Assert.assertEquals(Action.MOVE, lexer.push('\n'));
+        Assert.assertEquals(Action.MOVE, lexer.push('?'));
+        lexer.push('!');
+    }
+    
+    @Test(expected = IllegalStateException.class)
+    public void testLexerEnded() {
+        ItemLexer<Integer> lexer = new IgnorableWhitespaceLexer<>(this.digitLexer());
+        Assert.assertEquals(Action.MOVE, lexer.push(' '));
+        Assert.assertEquals(Action.MOVE, lexer.push('\r'));
+        Assert.assertEquals(Action.MOVE, lexer.push('\n'));
+        Assert.assertEquals(Action.MOVE, lexer.push('3'));
+        Assert.assertEquals(Action.ACCEPT, lexer.push('?'));
+        Assert.assertEquals(3, lexer.get().orElse(-1).intValue());
+        lexer.push('!');
+    }
+    
+    @Test
+    public void testRejectOnStart() {
+        ItemLexer<Integer> lexer = new IgnorableWhitespaceLexer<>(this.digitLexer());
+        Assert.assertEquals(Action.REJECT, lexer.push('?'));
     }
     
     protected ItemLexer<Integer> digitLexer() {

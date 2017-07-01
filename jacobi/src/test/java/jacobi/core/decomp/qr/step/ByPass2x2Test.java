@@ -21,8 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jacobi.core.util;
+package jacobi.core.decomp.qr.step;
 
+import jacobi.api.Matrix;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -30,13 +32,21 @@ import org.junit.Test;
  *
  * @author Y.K. Chan
  */
-public class RealTest {
+public class ByPass2x2Test {
 
     @Test
-    public void test() {
-        double rt2 = Math.sqrt(2.0);
-        Assert.assertTrue(Real.isNegl(rt2 * rt2 - 2.0));
-        Assert.assertTrue(Real.isNegl(2.0 - rt2 * rt2));
+    public void testInstantDeflate() {
+        Assert.assertEquals(2, new ByPass2x2( null ).compute(null, null, 1, 3, true));
+    }
+    
+    @Test
+    public void testFallThrough() {
+        AtomicBoolean marker = new AtomicBoolean(false);
+        Assert.assertEquals(-1, new ByPass2x2( (mat, part, begin, end, full) -> {
+            marker.set(true);
+            return -1;
+        }).compute(null, null, 1, 4, true));
+        Assert.assertTrue(marker.get());
     }
     
 }

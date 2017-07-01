@@ -78,7 +78,7 @@ public class GolubKahanSVD implements SvdStep {
         if(vMat != null){
             new GivensRQ(right).compute(vMat, begin, end, GivensMode.FULL);
         }
-        return Math.abs(supDiag[last + 1]) < SvdStep.EPSILON ? end - 1 : deflated; 
+        return Math.abs(supDiag[last]) < SvdStep.EPSILON ? end - 1 : deflated; 
     }
     
     /**

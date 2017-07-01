@@ -34,10 +34,9 @@ import java.util.Optional;
  * 
  * @author Y.K. Chan
  */
-public abstract class QRSteps {
+public enum QRSteps {
 
-    private QRSteps() {
-    }
+    ;
 
     /**
      * Get the Standard QR step, suitable up to around 100x100 matrix.

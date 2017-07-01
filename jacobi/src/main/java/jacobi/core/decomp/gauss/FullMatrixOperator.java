@@ -57,14 +57,6 @@ public class FullMatrixOperator extends AbstractElementaryOperatorDecor {
         this.partner = partner;
     }
 
-    /**
-     * Get partner matrix.
-     * @return  Partner matrix
-     */
-    public Matrix getPartner() {
-        return partner;
-    }
-
     @Override
     public void swapRows(int i, int j) {
         super.swapRows(i, j);

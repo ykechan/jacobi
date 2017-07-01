@@ -30,6 +30,7 @@ import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.annotations.JacobiResult;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -106,6 +107,8 @@ public class ShiftedQR3x3Test {
         
         this.solveDepressedCubicTest(6, 0);
         this.solveDepressedCubicTest(0, 9);
+        
+        this.solveDepressedCubicTest(-1, 9);
     }
     
     @Test
@@ -129,6 +132,17 @@ public class ShiftedQR3x3Test {
         
         this.solveCubicAllRealRootTest(1.0, 3.0, 7.0);
         this.solveCubicAllRealRootTest(-2.0, -4.0, 6.0);
+    }
+    
+    @Test
+    @SuppressWarnings("InfiniteRecursion") // false positive
+    public void testFallThrough() {
+        AtomicBoolean marker = new AtomicBoolean(false);
+        new ShiftedQR3x3((mat, part, begin, end, full) -> {
+            marker.set(true);
+            return -1;
+        }).compute(null, null, 1, 5, true);
+        Assert.assertTrue(marker.get());
     }
     
     public void solveCubicSingleRealRootTest(double realRoot, double linearCoeff, double constTerm) {

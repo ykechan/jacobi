@@ -104,27 +104,7 @@ public final class Givens {
      */
     public double rotateY(double a, double b) {
         return this.getSin() * a + this.getCos() * b;
-    }
-    
-    /**
-     * Compute G^t * [a b]^t or [a b] * G and return the upper/left element.
-     * @param a  Upper/Left vector element
-     * @param b  Lower/Right vector element
-     * @return  Upper/left element of G^t * [a b]^t
-     */
-    public double reverseRotX(double a, double b) {
-        return this.getCos() * a + this.getSin() * b;
-    }
-    
-    /**
-     * Compute G^t * [a b]^t or [a b] * G and return the lower/right element.
-     * @param a  Upper/Left vector element
-     * @param b  Lower/Right vector element
-     * @return  Lower/right element of G^t * [a b]^t
-     */
-    public double reverseRotY(double a, double b) {
-        return this.getCos() * b - this.getSin() * a;
-    }
+    }    
     
     /**
      * Apply Givens rotation to a pair of vector, i.e.&nbsp;G*[u v]^t

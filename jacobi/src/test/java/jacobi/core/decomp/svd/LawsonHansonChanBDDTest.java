@@ -21,8 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jacobi.core.util;
+package jacobi.core.decomp.svd;
 
+import jacobi.api.Matrices;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -30,13 +31,16 @@ import org.junit.Test;
  *
  * @author Y.K. Chan
  */
-public class RealTest {
-
+public class LawsonHansonChanBDDTest {
+    
     @Test
     public void test() {
-        double rt2 = Math.sqrt(2.0);
-        Assert.assertTrue(Real.isNegl(rt2 * rt2 - 2.0));
-        Assert.assertTrue(Real.isNegl(2.0 - rt2 * rt2));
+        Assert.assertNotNull(new LawsonHansonChanBDD());
+    }
+    
+    @Test
+    public void testEmpty() {
+        new LawsonHansonChanBDD().compute(BiDiagDecomp.Mode.UPPER, Matrices.zeros(0));
     }
     
 }

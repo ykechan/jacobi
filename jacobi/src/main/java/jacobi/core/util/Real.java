@@ -29,13 +29,8 @@ package jacobi.core.util;
  * 
  * @author Y.K. Chan
  */
-public abstract class Real {
-
-    /**
-     * Not to be instantiated.
-     */
-    private Real() {
-    }
+public enum Real {
+    ;
     
     /**
      * Machine epsilon value. Magnitude smaller than this will be treated as zero.

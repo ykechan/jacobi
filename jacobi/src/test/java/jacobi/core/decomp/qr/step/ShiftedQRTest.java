@@ -29,6 +29,7 @@ import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.util.Jacobi;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Assert;
 import org.junit.Test;
@@ -94,4 +95,26 @@ public class ShiftedQRTest {
         Assert.assertEquals(1, call1x1.get());
         Assert.assertEquals(1, call2x2.get());
     }
+    
+    @Test
+    @JacobiImport("Bad shift in 5x5")
+    @SuppressWarnings("InfiniteRecursion") // false positive
+    public void testBadShiftIn5x5() {
+        AtomicBoolean marker = new AtomicBoolean(false);
+        new ShiftedQR((m, p, i, j, up) -> {
+            marker.set(true);
+            return -1;
+        }, 10000.0){
+
+            @Override
+            protected double getShift(Matrix matrix, int begin, int end) {
+                double shift = super.getShift(matrix, begin, end);
+                Assert.assertEquals(0.0, shift, 1e-16);
+                return shift;
+            }
+            
+        }.compute(input, null, 0, 5, false);
+        Assert.assertTrue(marker.get());
+    }
+    
 }

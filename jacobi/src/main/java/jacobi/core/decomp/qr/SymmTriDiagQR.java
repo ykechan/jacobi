@@ -65,14 +65,7 @@ public class SymmTriDiagQR implements QRStrategy {
         if(matrix.getRowCount() < 3){
             return this.base.compute(matrix, partner, fullUpper);
         }        
-        double[] diag = this.toTriDiag(matrix)                
-                /*
-                .map((diags) -> {
-                    //MapReducer.divide((begin, end) -> this.step(diags, partner, begin, end), 0, diags.length / 2);
-                    Divider.repeats((begin, end) -> this.step(diags, partner, begin, end)).visit(0, diags.length / 2);
-                    return diags;
-                })
-                */
+        double[] diag = this.toTriDiag(matrix) 
                 .map((diags) -> Divider
                         .repeats((begin, end) -> this.step(diags, partner, begin, end))
                         .visit(0, diags.length / 2)

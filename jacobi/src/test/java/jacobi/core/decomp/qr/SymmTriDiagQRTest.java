@@ -33,6 +33,7 @@ import jacobi.test.util.Jacobi;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.IntStream;
 import org.junit.Assert;
 import org.junit.Test;
@@ -139,6 +140,17 @@ public class SymmTriDiagQRTest {
             exp.add(ans.get(i, 0));
         }
         Jacobi.assertEquals(exp, eigs, 1e-12);
+    }
+    
+    @Test
+    @SuppressWarnings("InfiniteRecursion") // false positive
+    public void testFallThroughUnder3x3() {
+        AtomicBoolean marker = new AtomicBoolean(false);
+        new SymmTriDiagQR((mat, par, full) -> {
+            marker.set(true);
+            return mat;
+        }).compute(Matrices.zeros(2, 2), null, true);
+        Assert.assertTrue(marker.get());
     }
     
     private Matrix diagsToRows(double[] diags) {

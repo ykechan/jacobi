@@ -90,7 +90,7 @@ public class IgnorableWhitespaceLexer<T> implements ItemLexer<T> {
                     case MOVE:
                         return State.PARSING;
                     case ACCEPT:
-                        return State.WAITING.jump(context, ch);
+                        throw new IllegalStateException("Lexer " + context.toString() + " accepted on 1st character.");
                     case REJECT:
                         return State.REJECT;
                     case FAIL:

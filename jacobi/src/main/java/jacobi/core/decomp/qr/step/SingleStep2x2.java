@@ -56,7 +56,7 @@ import jacobi.core.util.Pair;
  * y = [(k - a)/b] * x<br>
  * </p>
  * 
- * <p>Imposing v to be a unit vector,<p>
+ * <p>Imposing v to be a unit vector,</p>
  * <pre>
  * x^2 + y^2 = 1
  * x^2 + (k - a)^2/b^2 * x^2 = 1

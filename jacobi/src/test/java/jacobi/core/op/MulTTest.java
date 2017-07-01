@@ -23,8 +23,10 @@
  */
 package jacobi.core.op;
 
+import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.core.util.MapReducer;
+import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.annotations.JacobiResult;
@@ -53,21 +55,29 @@ public class MulTTest {
     }
 
     @Test
-    //@JacobiEquals(expected = 2, actual = 2)
+    @JacobiImport("(3x7)x(7x4)^t")
+    @JacobiEquals(expected = 2, actual = 2)
     public void test3x7x7x4t() {
-        //this.ans = new MulT().compute(a, b);
+        this.ans = new MulT().compute(a, b);
     }
     
     @Test
-    //@JacobiEquals(expected = 2, actual = 2)
-    public void test6x2x2x5t() {
-        //this.ans = new MulT().compute(a, b);
+    @JacobiImport("(6x2)x(5x2)^t")
+    @JacobiEquals(expected = 2, actual = 2)
+    public void test6x2x5x2t() {
+        this.ans = new MulT().compute(a, b);
     }
     
     @Test
     @JacobiImport("(10x4)x(4x13)^t")
+    @JacobiEquals(expected = 2, actual = 2)
     public void testForkJoinOn10x4x4x13() {
         this.ans = this.mockForkJoin().compute(a, b);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testDimensionMismatch() {
+        new MulT().compute(Matrices.zeros(5, 2), Matrices.zeros(3, 5));
     }
     
     private MulT mockForkJoin() {

@@ -94,6 +94,25 @@ public class StandardSimplexTest {
                     .get();
     }
     
+    @Test(expected = IllegalStateException.class)
+    @JacobiImport("Dantzigs Rule 5x6")
+    public void testExhaused() {
+        this.x = new StandardSimplex(1L, this.wrongRule()).compute(c, a, b)
+                .orElseThrow(() -> new IllegalStateException("Answer un-obtained"));
+    }
+    
+    protected PivotingRule wrongRule() {
+        return (t, u) -> {
+            double[] coeff = t.getCoeff();
+            for(int i = 0; i < coeff.length; i++){
+                if(coeff[i] <= 0.0){
+                    return new int[]{i};
+                }
+            }
+            throw new UnsupportedOperationException("Not able to be wrong");
+        };
+    }
+    
     protected PivotingRule assertBefore(PivotingRule rule, int from) {
         AtomicInteger step = new AtomicInteger(from);
         Map<Integer, Matrix> expected = steps;

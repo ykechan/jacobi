@@ -71,8 +71,9 @@ public class BasicQR implements QRStrategy {
             .isTrue(
                 () -> partner != null && matrix.getRowCount() != partner.getRowCount(), 
                 () -> "Mismatch partner matrix having " + partner.getRowCount() + " rows.");
-        //MapReducer.divide((begin, end) -> this.step.compute(matrix, partner, begin, end, fullUpper), 0, matrix.getRowCount());
-        return Divider.repeats((begin, end) -> this.step.compute(matrix, partner, begin, end, fullUpper))
+        return Divider.repeats((begin, end) -> 
+                    this.step.compute(matrix, partner, begin, this.deflate(matrix, begin, end), fullUpper)
+                )
                 .visit(0, matrix.getRowCount())
                 .echo(matrix);
     }    
