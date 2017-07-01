@@ -48,7 +48,6 @@ import jacobi.core.util.Real;
  * <p>p[i]^2 = a[i]^2 + b[i]^2 - q[i-1]^2
  * q[i] = a[i + 1]*b[i] / p[i]</p>
  * 
- * <p>
  * <pre>
  * Consider d[i] = a[i]^2 - q[i-1]^2
  *               = a[i]^2 - a[i]^2*b[i-1]^2/p[i-1]^2
@@ -56,7 +55,6 @@ import jacobi.core.util.Real;
  *               = a[i]^2 * { a[i-1]^2 + b[i-1]^2 }/p[i-1]^2
  *               = d[i-1] * { a[i]^2 / p[i-1]^2 }
  * </pre>
- * </p>
  * 
  * <p>Therefore p[i]^2 = d[i] + b[i]^2, q[i] = (a[i + 1]/p[i]) * b[i]</p>
  * 

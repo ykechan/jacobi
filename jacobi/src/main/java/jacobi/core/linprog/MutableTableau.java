@@ -36,14 +36,12 @@ import java.util.stream.IntStream;
 /**
  * Implementation of the Tableau structure.
  * 
- * <p>
- * The LP problem max c^t * x s.t.&nbsp;A*x &lt;= b, x &gt;= 0 can be expressed as 
+ * <p>The LP problem max c^t * x s.t.&nbsp;A*x &lt;= b, x &gt;= 0 can be expressed as</p>
  * <pre>
  * [ c^t  0 ][ x ]   [ z ]
  * [        ][   ] = [   ]
  * [  A   I ][ s ]   [ b ]
  * </pre>
- * </p>
  * 
  * <p>If b &gt;= 0, the trivial solution [0 b] is feasible. However if some b[k] &lt; 0, [0 b] is not feasible.
  * In this case, an auxiliary scalar variable is added s.t.&nbsp;[A I -1]*[x s t] = b, thus [0 s |min(b)|] is feasible. 

@@ -30,14 +30,12 @@ import java.util.function.ToIntBiFunction;
 /**
  * Implementation of the rule of choosing the leaving variable.
  * 
- * <p>
- * Given the following tableau
+ * <p>Given the following tableau</p>
  * <pre>
  * [  A   I ][ x ]   [ b ]
  * [        ][   ] = [   ]
  * [ c^t  0 ][ s ]   [ z ]
  * </pre>
- * </p>
  * 
  * <p>And the trivial solution [x s] = [0 b] is feasible.</p>
  * 

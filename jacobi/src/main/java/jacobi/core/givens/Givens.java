@@ -26,14 +26,13 @@ package jacobi.core.givens;
 
 /**
  * Data object for Givens rotation for reducing [a, b] &gt; [r, 0].
- * <p>
- * The Givens rotation is of the form
+ * 
+ * <p>The Givens rotation is of the form</p>
  * <pre>
  * [ c  -s ][ a ]   [ r ]
  * [       ][   ] = [   ]
  * [ s   c ][ b ]   [ 0 ]
  * </pre>
- * </p>
  * 
  * <p>This class is immutable.</p>
  * 

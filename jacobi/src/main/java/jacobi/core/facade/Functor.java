@@ -32,7 +32,8 @@ import java.util.Arrays;
 /**
  * A functor is a wrapper of an implementation class for invoking facade method.
  * 
- * <p>In this context, an implementation class is a functor, if this class
+ * <p>In this context, an implementation class is a functor, if this class</p>
+ * 
  * <ul>
  *  <li>has a no-arg constructor</li>
  *  <li>has at least one public method</li>
@@ -43,7 +44,6 @@ import java.util.Arrays;
  *    facade argument for chaining. (In case of chaining, the facade method 
  *    must have the same facade interface as return type.)</li>
  * </ul>
- * </p>
  * 
  * <p>The name of the method is not important.</p>
  * 

@@ -35,14 +35,12 @@ import jacobi.api.Matrix;
  * <p>The feasibility inequality constraint A*x &lt;= b can be expressed as a system of linear equation
  * [A I]*[x s] = b where s &gt;= 0.</p>
  * 
- * <p>
- * Thus the problem can be expressed as 
+ * <p> * Thus the problem can be expressed as</p>
  * <pre>
  * [ c^t  0 ][ x ]   [ z ]
  * [        ][   ] = [   ]
  * [  A   I ][ s ]   [ b ]
  * </pre>
- * </p>
  * 
  * <p>If b &gt;= 0, the trivial solution [0 b] is feasible. However if some b[k] &lt; 0, [0 b] is not feasible.
  * In this case, an auxiliary scalar variable is added s.t.&nbsp;[A I -1]*[x s t] = b, thus [0 s |min(b)|] is feasible. 
@@ -51,15 +49,13 @@ import jacobi.api.Matrix;
  * min t -&gt; max -t s.t.&nbsp;[A I t]*[x s t] = b.
  * </p>
  * 
- * <p>
- * The full problem can be expressed as 
+ * <p>The full problem can be expressed as </p>
  * <pre>
  *             [ 0 ]
  * [  A  I -1 ][ x ]    [ z ]
  * [ c^t 0 -1 ][ s ] =  [ b ]
  * [  0  0 -1 ][ t ]    [ 0 ]
  * </pre>
- * </p>
  * 
  * <p>If t can not be optimized to 0, the problem is infeasible.</p>
  * 
