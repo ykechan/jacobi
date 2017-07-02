@@ -2,6 +2,7 @@
 # Jacobi Java Matrix Library  vers 1.0.0.SNAPSHOT 
   
 ![Travis Latest Build](https://travis-ci.org/ykechan/jacobi.svg?branch=master)
+[![codecov](https://codecov.io/gh/ykechan/jacobi/branch/master/graph/badge.svg)](https://codecov.io/gh/ykechan/jacobi)
 
 ## Synopsis
 Jacobi is a comprehensive library for computations involving matrices for

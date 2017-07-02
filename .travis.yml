@@ -26,4 +26,4 @@ cache:
   directories:
     - ~/.m2/repository
 after_success:
-  - bash <(curl -s https://codecov.io/bash) -t c58707bb-1c87-488f-9c0d-606169bbe563
+  - bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
