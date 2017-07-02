@@ -166,11 +166,7 @@ public class ParallelSupplier<T> implements Supplier<List<T>> {
          */
         public Task(Supplier<T> supplier) {
             this.supplier = supplier;            
-        }        
-        
-        public boolean failed() {
-            return this.exception != null;
-        }
+        }                
 
         @Override
         public T get() {

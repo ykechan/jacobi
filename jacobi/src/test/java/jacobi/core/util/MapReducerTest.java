@@ -24,10 +24,8 @@
 
 package jacobi.core.util;
 
-import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.DoubleStream;
-import java.util.stream.IntStream;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -59,5 +57,10 @@ public class MapReducerTest {
                 .get();
         Assert.assertEquals(DoubleStream.of(elem).max().orElse(-1.0), max, 1e-24);
     }        
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testLimitTooSmall() {
+        new MapReducer((a, b) -> a, (a, b) -> a, 0, 16, 1).get();
+    }
 
 }

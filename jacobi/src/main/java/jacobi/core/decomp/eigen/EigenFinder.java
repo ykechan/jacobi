@@ -79,7 +79,7 @@ public class EigenFinder {
                 return DoubleShift.of(matrix, 0).eig();
             default :
                 break;
-        }
+        }        
         return this.findEig(this.qrImpl.compute(new DefaultMatrix(matrix), null, false));
     }
     

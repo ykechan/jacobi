@@ -32,6 +32,7 @@ import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -49,13 +50,25 @@ public class BasicQRTest {
     @JacobiInject(2)
     public Matrix input7x7;
     
+    @JacobiInject(3)
+    public Matrix upper6x6;
+    
     @Test
     @JacobiImport("Data")
     public void test5x5() {
-        QRStrategy impl = new BasicQR(this.mockStep(
-           1, 2, 3, 4
-        ));
+        AtomicInteger count = new AtomicInteger(0);
+        QRStrategy impl = new BasicQR(this.mockStep(count, 1, 2, 3, 4));        
         impl.compute(input5x5, null, true);
+        Assert.assertEquals(4, count.get());
+    }
+    
+    @Test
+    @JacobiImport("Data")
+    public void testUpper6x6() {
+        AtomicInteger count = new AtomicInteger(0);
+        QRStrategy impl = new BasicQR(this.mockStep(count, 5, 4, 3, 2, 1));        
+        impl.compute(upper6x6, null, true);
+        Assert.assertEquals(5, count.get());
     }
    
     @Test
@@ -78,8 +91,7 @@ public class BasicQRTest {
         new BasicQR(new DefaultQRStep()).compute(Matrices.zeros(3, 3), Matrices.zeros(4, 4), true);
     }
 
-    private QRStep mockStep(int... order) {
-        AtomicInteger i = new AtomicInteger(0);
+    private QRStep mockStep(AtomicInteger i, int... order) {
         return (m, p, begin, end, full) -> order[i.getAndIncrement()];
     }
 }

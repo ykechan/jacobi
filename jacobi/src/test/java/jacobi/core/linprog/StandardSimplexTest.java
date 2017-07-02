@@ -101,6 +101,12 @@ public class StandardSimplexTest {
                 .orElseThrow(() -> new IllegalStateException("Answer un-obtained"));
     }
     
+    @Test
+    @JacobiImport("Unbounded Problem 4x5")    
+    public void testUnboundedProblem4x5() {
+        Assert.assertFalse(new StandardSimplex(0.0, 0.0, 256L, new DantzigsRule()).compute(c, a, b).isPresent());
+    }
+    
     protected PivotingRule wrongRule() {
         return (t, u) -> {
             double[] coeff = t.getCoeff();

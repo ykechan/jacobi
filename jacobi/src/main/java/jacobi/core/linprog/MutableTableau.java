@@ -240,9 +240,9 @@ public class MutableTableau implements Tableau {
             .isNull(() -> a, () -> "Missing constraint matrix. (A in A*x <= b)")
             .isNull(() -> b, () -> "Missing constraint criteria. (b in A*x <= b)")
             .isFalse(() -> c.getColCount() == 1, 
-                     () -> "Expected objective function (c) as a column/row vector.")
+                     () -> "Expected objective function (c) as a column vector.")
             .isFalse(() -> b.getColCount() == 1,
-                     () -> "Expected constraint criteria (b) as a column/row vector.")
+                     () -> "Expected constraint criteria (b) as a column vector.")
             .isFalse(() -> a.getRowCount() == b.getRowCount(), 
                      () -> "Dimension mismatch on constraint matrix and constraint criteria.")
             .isFalse(() -> c.getRowCount() == a.getColCount(),

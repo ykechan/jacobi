@@ -182,7 +182,7 @@ public class ShiftedQR3x3 implements QRStep {
             double x = 2.0 * Math.sqrt(-p) * Math.cos(Math.atan(tan) / 3.0);
             if(p > 0.0){
                 return b > 0.0 ? x : -x;
-            }            
+            }
             return Math.signum(-b)*Math.signum(x*x - p)*(x);
         }
         double delta = Math.sqrt(p3q2);

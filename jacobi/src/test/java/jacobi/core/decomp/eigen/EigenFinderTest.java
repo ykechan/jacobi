@@ -25,13 +25,18 @@ package jacobi.core.decomp.eigen;
 
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
+import jacobi.core.decomp.qr.HessenbergDecomp;
 import jacobi.core.decomp.qr.SchurDecomp;
+import jacobi.core.decomp.qr.step.QRSteps;
+import jacobi.core.impl.ColumnVector;
+import jacobi.core.impl.DefaultMatrix;
 import jacobi.core.util.Pair;
 import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.annotations.JacobiResult;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
+import java.util.Arrays;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -80,8 +85,12 @@ public class EigenFinderTest {
     
     @Test
     @JacobiImport("7x7")
+    @JacobiEquals(expected = 1, actual = 1)
+    @JacobiEquals(expected = 2, actual = 2)
     public void test7x7() {
         Pair pair = new EigenFinder().compute(this.input);
+        this.real = pair.getLeft();
+        this.img = pair.getRight();
     }
     
     @Test

@@ -210,6 +210,34 @@ public class MutableTableauTest {
         Assert.assertArrayEquals(origCoeff, tableau.getCoeff(), 1e-16);
         Assert.assertArrayEquals(origVars, tableau.getVars());
     }    
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testCoeffIsNotColumnVector() {
+        MutableTableau.build(false)
+            .use(this.mock())
+            .of(Matrices.zeros(5, 2), Matrices.zeros(4, 5), Matrices.zeros(4, 1));
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testBoundaryIsNotColumnVector() {
+        MutableTableau.build(false)
+            .use(this.mock())
+            .of(Matrices.zeros(5, 1), Matrices.zeros(4, 5), Matrices.zeros(4, 2));
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testDimensionMismatchOnConstraintAndObjective() {
+        MutableTableau.build(false)
+            .use(this.mock())
+            .of(Matrices.zeros(6, 1), Matrices.zeros(4, 5), Matrices.zeros(4, 1));
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testDimensionMismatchOnConstraint() {
+        MutableTableau.build(false)
+            .use(this.mock())
+            .of(Matrices.zeros(5, 1), Matrices.zeros(5, 5), Matrices.zeros(4, 1));
+    }
 
     protected Matrix exclude(Matrix matrix, int numRow, int numCol) {
         return new ImmutableMatrix() {

@@ -26,7 +26,6 @@ package jacobi.core.decomp.qr;
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.core.prop.Transpose;
-import jacobi.core.util.Pair;
 import jacobi.core.util.Triplet;
 import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
@@ -108,6 +107,13 @@ public class HessenbergDecompTest {
                 .computeQHQt(this.input);
         this.q = triplet.getLeft();
         Jacobi.assertEquals(triplet.getRight(), new Transpose().compute(this.q));
+    }
+    
+    @Test
+    @JacobiImport("Upper 6x6")
+    public void testUpper6x6() {
+        Matrix output = new HessenbergDecomp().compute(this.input.copy());
+        Jacobi.assertEquals(this.input, output);
     }
     
     @Test

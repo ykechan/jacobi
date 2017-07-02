@@ -88,7 +88,7 @@ public class BasicQR implements QRStrategy {
     protected int deflate(Matrix matrix, int begin, int end) {
         int k = end - 1;
         while(k > begin){
-            if(Real.isNegl(matrix.get(k, k - 1))){
+            if(!Real.isNegl(matrix.get(k, k - 1))){
                 break;
             }
             k--;
