@@ -170,7 +170,6 @@ public class ShiftedQR3x3Test {
         double constTerm = -(r0 * r1 * r2);
         
         double root = new ShiftedQR3x3(new DefaultQRStep()).solveCubic(quadCoeff, linearCoeff, constTerm);
-        System.out.println("root = " + root);
         Assert.assertTrue(
                 Math.abs(root - r0) < 1e-12
              || Math.abs(root - r1) < 1e-12

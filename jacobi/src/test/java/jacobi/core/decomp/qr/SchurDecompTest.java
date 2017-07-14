@@ -112,14 +112,4 @@ public class SchurDecompTest {
         }
     }
  
-    /*
-    private void print(Matrix matrix){
-        for(double[] row : matrix.toArray()){
-            for(double elem : row){
-                System.out.print(elem + "\t");
-            }
-            System.out.println();
-        }
-    }
-    */
 }

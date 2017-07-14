@@ -50,7 +50,7 @@ public class SchurDecomp implements QRStrategy {
      * Constructor.
      */
     public SchurDecomp() {
-        this(QRSteps.getStandard());
+        this(QRSteps.STD);
     }
     
     /**

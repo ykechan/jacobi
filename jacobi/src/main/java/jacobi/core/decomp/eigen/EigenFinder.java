@@ -49,7 +49,7 @@ public class EigenFinder {
      * Constructor.
      */
     public EigenFinder() {
-        this(new SchurDecomp(QRSteps.forEigOnly()));
+        this(new SchurDecomp(QRSteps.EIG));
     }
 
     /**

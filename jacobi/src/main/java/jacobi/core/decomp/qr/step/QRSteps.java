@@ -26,46 +26,50 @@ package jacobi.core.decomp.qr.step;
 
 import java.util.Optional;
 
+import jacobi.api.Matrix;
+
 /**
- * Factory of common composite QR steps.
+ * Common composition of QR steps.
  * 
  * <p>Givens the wide range of QR steps, and possibly more for further expansion and optimization, and some steps may
  * require ordering in composing (though mostly does not), this class provide functions for building QR steps.</p>
  * 
  * @author Y.K. Chan
  */
-public enum QRSteps {
+public enum QRSteps implements QRStep {
 
-    ;
-
-    /**
-     * Get the Standard QR step, suitable up to around 100x100 matrix.
-     * @return  Instance of QR step
-     */
-    public static QRStep getStandard() {
-        return STD;
-    }
-    
-    /**
-     * Get QR step when only eigenvalues are desired.
-     * @return  Instance of QR step.
-     */
-    public static QRStep forEigOnly() {
-        return EIGONLY;
-    }
-    
-    private static final QRStep STD = Optional.of(new DefaultQRStep())
+	/**
+	 * Standard QR step for general purposes
+	 */
+    STD(Optional.of(new DefaultQRStep())
             .map((s) -> new FrancisQR(s))
             .map((s) -> new ShiftedQR(s))
             .map((s) -> new ShiftedQR3x3(s))
             .map((s) -> new SingleStep2x2(s))
-            .get();
+            .get()), 
     
-    private static final QRStep EIGONLY = Optional.of(new DefaultQRStep())
+    /**
+     * QR step when only eigenvalues are needed
+     */
+    EIG(Optional.of(new DefaultQRStep())
             .map((s) -> new FrancisQR(s))
             .map((s) -> new ShiftedQR(s))
             .map((s) -> new ShiftedQR3x3(s))
             .map((s) -> new ByPass2x2(s))
-            .get();
+            .get());
 
+    /**
+     * Constructor.
+     * @param step  QR Step implementation
+     */
+    private QRSteps(QRStep step) {
+		this.step = step;
+	}
+
+	@Override
+	public int compute(Matrix matrix, Matrix partner, int beginRow, int endRow, boolean fullUpper) {
+		return this.step.compute(matrix, partner, beginRow, endRow, fullUpper);
+	}	
+
+	private QRStep step;
 }
