@@ -115,7 +115,7 @@ public class LinearProgTest {
     
     @Test(expected = IllegalArgumentException.class)
     public void testDimensionMismatchConstraintAndBoundary() {
-    	new LinearProg().compute(Matrices.zeros(1, 8), Matrices.zeros(3, 8), Matrices.zeros(4, 1));
+    	new LinearProg().compute(Matrices.zeros(8, 1), Matrices.zeros(3, 8), Matrices.zeros(4, 1));
     }
     
     @Test(expected = IllegalArgumentException.class)
