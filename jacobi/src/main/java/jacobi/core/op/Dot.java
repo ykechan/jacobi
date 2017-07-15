@@ -67,32 +67,50 @@ public class Dot {
                     + a.getRowCount()+ "x" + a.getColCount()
                     + " matrix with a "
                     + b.getRowCount()+ "x" + b.getColCount()
-                    + " matrix."); 
-        return a instanceof ColumnVector 
-            ? mul.compute(Matrices.wrap(new double[][]{ ((ColumnVector) a).getVector() }), b)
-            : Matrices.wrap(new double[][]{             
-                a.getRowCount() < DEFAULT_THRESHOLD ? this.dot(a, b) : this.parallel(a, b)
-              });
+                    + " matrix.");
+        if(a.getRowCount() == 0){
+            return Matrices.zeros(0);
+        }
+        if(a instanceof ColumnVector){
+            return mul.compute(Matrices.wrap(new double[][]{ ((ColumnVector) a).getVector() }), b);
+        }
+        return Matrices.wrap(new double[][]{             
+            a.getRowCount() < DEFAULT_THRESHOLD ? this.serial(a, b) : this.parallel(a, b)
+        });
     }
     
     /**
-     * 
-     * @param a
-     * @param b
-     * @return 
+     * Compute the dot product of matrix A and B in parallel.
+     * @param a  Matrix A
+     * @param b  Matrix B
+     * @return  Values of dot product of each columns in A and B
      */
     protected double[] parallel(Matrix a, Matrix b) {
         return MapReducer.of(0, a.getRowCount())
-                .flop(a.getColCount())
+                .flop(this.numFlops(a))
                 .map((begin, end) -> this.dot(a, b, begin, end))
                 .reduce((u, v) -> this.sum(u, v))
                 .get();
     }
     
-    protected double[] dot(Matrix a, Matrix b) {
+    /**
+     * Compute the dot product of matrix A and B in serial.
+     * @param a  Matrix A
+     * @param b  Matrix B
+     * @return  Values of dot product of each columns in A and B
+     */
+    protected double[] serial(Matrix a, Matrix b) {
         return this.dot(a, b, 0, a.getRowCount());
     }
     
+    /**
+     * Compute the sum of product of columns for limited rows.
+     * @param a  Matrix A
+     * @param b  Matrix B
+     * @param begin  Begin index of rows of interest
+     * @param end  End index of rows of interest
+     * @return  Sum of product of the columns for limited rows
+     */
     protected double[] dot(Matrix a, Matrix b, int begin, int end) {
         double[] w = new double[a.getColCount()];
         for(int i = begin; i < end; i++){
@@ -101,6 +119,12 @@ public class Dot {
         return w;
     }
     
+    /**
+     * Merge two arrays by summing the elements.
+     * @param u  Vector u
+     * @param v  Vector v
+     * @return  Instance of v which contains the value u + v
+     */
     protected double[] sum(double[] u, double[] v) {
         for(int i = 0; i < v.length; i++){
             v[i] += u[i];
@@ -108,11 +132,27 @@ public class Dot {
         return v;
     }
 
+    /**
+     * Compute the dot product of two vectors and sum the result to the resultant vector.
+     * @param u  Input vector u
+     * @param v  Input vector v
+     * @param w  Resultant vector w
+     * @return  Instance of w
+     */
     protected double[] dot(double[] u, double[] v, double[] w) {
         for(int i = 0; i < w.length; i++){
             w[i] += u[i] * v[i];
         }
         return w;
+    }
+    
+    /**
+     * Find the number of flops of computing a row.
+     * @param mat  Input matrix
+     * @return  Number of flops of computing a row
+     */
+    protected int numFlops(Matrix mat) {
+        return mat.getColCount();
     }
     
     private Mul mul;
