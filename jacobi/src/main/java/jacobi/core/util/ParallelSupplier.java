@@ -158,7 +158,7 @@ public class ParallelSupplier<T> implements Supplier<List<T>> {
      * Supplier and Runnable with cached return result.
      * @param <T>  Individual return result
      */
-    protected class Task<T> implements Supplier<T>, Runnable, Callable<T> {
+    protected class Task<T> implements Supplier<T>, Runnable {
 
         /**
          * Constructor.
@@ -183,13 +183,7 @@ public class ParallelSupplier<T> implements Supplier<List<T>> {
             }catch(RuntimeException ex){
                 this.exception = ex;
             }
-        }
-        
-        @Override
-        public T call() throws Exception {
-            this.run();
-            return this.get();
-        }
+        }        
         
         private T result;
         private Supplier<T> supplier;
