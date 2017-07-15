@@ -67,7 +67,7 @@ public final class Matrices {
                 ? Empty.getInstance()
                 : n == 1
                     ? new ColumnVector( Arrays.stream(rows).mapToDouble((arr) -> arr[0]).toArray() )
-                    : Matrices.unsafe(rows).copy();
+                    : Matrices.wrap(rows).copy();
     }
     
     /**
@@ -76,7 +76,7 @@ public final class Matrices {
      * @param rows  Matrix elements
      * @return  Matrix instance
      */
-    public static Matrix unsafe(double[][] rows) {
+    public static Matrix wrap(double[][] rows) {
         return rows == null || rows.length == 0 || rows[0].length == 0
                 ? Empty.getInstance() 
                 : new DefaultMatrix(rows);

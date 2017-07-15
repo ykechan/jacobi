@@ -160,7 +160,7 @@ public class SymmTriDiagQRTest {
             diag[i] = diags[2*i];
             supDiag[i] = diags[2*i + 1];
         }
-        return Matrices.unsafe(new double[][]{diag, supDiag});
+        return Matrices.wrap(new double[][]{diag, supDiag});
     }
     
     private double[] toZNotation(double[] diags, double[] supDiags) {

@@ -175,7 +175,7 @@ public class Mul {
      * @return  A * b
      */
     protected Matrix mulVector(Matrix a, ColumnVector b) {
-        return this.mulT.compute(a, Matrices.unsafe(new double[][]{ b.getVector() }));
+        return this.mulT.compute(a, Matrices.wrap(new double[][]{ b.getVector() }));
     }
     
     /**
@@ -199,7 +199,7 @@ public class Mul {
      * @return  Shallow copy of a matrix
      */
     protected Matrix copy(Matrix mat) {
-        return Matrices.unsafe(IntStream.range(0, mat.getRowCount())
+        return Matrices.wrap(IntStream.range(0, mat.getRowCount())
                 .mapToObj((i) -> mat.getRow(i))
                 .toArray((n) -> new double[n][]));
     }

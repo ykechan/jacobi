@@ -108,7 +108,7 @@ public class CholeskyDecompTest {
     }
     
     protected Matrix front(double[] zElem) {
-        return Matrices.unsafe(new double[][]{
+        return Matrices.wrap(new double[][]{
             IntStream.range(0, zElem.length / 2).mapToDouble((i) -> zElem[4*(i/2) + (i % 2)] ).toArray()
         });
     }

@@ -52,7 +52,8 @@ public class ByPass2x2 implements QRStep {
         if(endRow - beginRow < 3){
             return beginRow + 1;
         }
-        return this.base.compute(matrix, partner, beginRow, endRow, fullUpper);
+        int split = this.base.compute(matrix, partner, beginRow, endRow, fullUpper);
+        return split;
     }
 
     private QRStep base;

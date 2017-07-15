@@ -93,7 +93,7 @@ public class MutableTableauTest {
         Jacobi.assertEquals(a, this.exclude(mat, 0, 1));
         Jacobi.assertEquals(b, this.column(mat, mat.getRowCount(), mat.getColCount() - 1));
         Jacobi.assertEquals(c, new ColumnVector(tableau.getCoeff()));
-        this.vars = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
+        this.vars = Matrices.wrap(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
         tableau.pivot(0, 1);
     }
     
@@ -109,7 +109,7 @@ public class MutableTableauTest {
         Jacobi.assertEquals(a, this.exclude(mat, 0, 1));
         Jacobi.assertEquals(b, this.column(mat, mat.getRowCount(), mat.getColCount() - 1));
         Jacobi.assertEquals(c, new ColumnVector(tableau.getCoeff()));
-        this.vars = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
+        this.vars = Matrices.wrap(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
         tableau.pivot(0, 1);
     }
     
@@ -119,7 +119,7 @@ public class MutableTableauTest {
     @JacobiEquals(expected = 101, actual = 101)
     public void testConstructAux4x6() {
         MutableTableau tableau = MutableTableau.build(true).use(this.mock()).of(c, a, b);
-        this.vars = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
+        this.vars = Matrices.wrap(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
         tableau.pivot(0, 1);
     }
     
@@ -134,7 +134,7 @@ public class MutableTableauTest {
         Jacobi.assertEquals(b, this.column(mat, mat.getRowCount(), mat.getColCount() - 1));
         Jacobi.assertEquals(c, new ColumnVector(tableau.getCoeff()));
         tableau.pivot(2, 3);
-        this.vars = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });        
+        this.vars = Matrices.wrap(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });        
     }
     
     
@@ -149,7 +149,7 @@ public class MutableTableauTest {
         Jacobi.assertEquals(b, this.column(mat, mat.getRowCount(), mat.getColCount() - 1));
         
         tableau.pivot(3, 8);
-        this.vars = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });        
+        this.vars = Matrices.wrap(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });        
     }
     
     @Test
@@ -158,11 +158,11 @@ public class MutableTableauTest {
     @JacobiEquals(expected = 101, actual = 101)
     public void testSwapAux3And9Then1And3() {
         MutableTableau tableau = MutableTableau.build(true).use(this.mock()).of(c, a, b);
-        this.vars = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
+        this.vars = Matrices.wrap(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
         tableau.pivot(3, 9);
-        this.vars2 = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
+        this.vars2 = Matrices.wrap(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
         tableau.pivot(1, 3);
-        this.vars3 = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
+        this.vars3 = Matrices.wrap(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
     }
     
     @Test
@@ -179,13 +179,13 @@ public class MutableTableauTest {
         this.before = this.asMatrix(tableau);
         tableau.pivot(2, 5);
         this.swapped1 = this.asMatrix(tableau);
-        this.vars = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
+        this.vars = Matrices.wrap(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
         tableau.pivot(2, 2);
         this.swapped2 = this.asMatrix(tableau);
-        this.vars2 = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
+        this.vars2 = Matrices.wrap(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
         tableau = tableau.collapse().get();
         this.collapsed = this.asMatrix(tableau);
-        this.vars3 = Matrices.unsafe(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
+        this.vars3 = Matrices.wrap(new double[][]{ Arrays.stream(tableau.getVars()).mapToDouble((i) -> i).toArray() });
     }
     
     @Test(expected = UnsupportedOperationException.class)

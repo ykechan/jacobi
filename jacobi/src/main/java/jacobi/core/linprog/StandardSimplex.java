@@ -144,10 +144,11 @@ public class StandardSimplex {
             }
             int expire = Math.max(0, (int) Math.floor(this.expireFactor * pivots.length));            
             for(int p : pivots){
+                if(fail > expire){
+                    break;
+                }
                 if(tab.getCoeff(p) < 0.0){
-                    if(++fail > expire){
-                        break;
-                    }
+                    ++fail;
                     continue;
                 }
                 int leave = this.leavingRule.applyAsInt(tab, p);
@@ -158,7 +159,7 @@ public class StandardSimplex {
             }
         }
         throw new IllegalStateException("Exhaused computational limit (" + limit + ")");
-    }
+    }    
     
     /**
      * Find the trivial solution of a given Tableau.

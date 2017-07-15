@@ -158,7 +158,7 @@ public class MatricesTest {
             {1.0, 2.0, 3.0},
             {4.0, 3.0, 2.0},
         };
-        Matrix matrix = Matrices.unsafe(data);
+        Matrix matrix = Matrices.wrap(data);
         Arrays.fill(data[0], 0.0);
         Assert.assertArrayEquals(new double[]{0.0, 0.0, 0.0}, matrix.getRow(0), 1e-12);
     }

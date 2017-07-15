@@ -27,6 +27,7 @@ package jacobi.core.givens;
 import jacobi.api.Matrix;
 import jacobi.core.util.Real;
 import jacobi.core.util.ParallelSupplier;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -75,8 +76,8 @@ public class GivensRQ {
      * @return  The index of row that has a negligible off-diagonal entry, or negative if none are zero.
      */
     public int compute(Matrix matrix, int begin, int end, GivensMode mode) {
-        int opCount = (end - begin) * this.rotList.size(); 
-        return opCount > DEFAULT_LIMIT 
+        int flopCount = (end - begin) * this.rotList.size(); 
+        return flopCount > DEFAULT_LIMIT 
                 ? this.rotateInParallel(matrix, begin, end, mode) 
                 : this.rotateInSerial(matrix, begin, end, mode);
     }
@@ -110,14 +111,9 @@ public class GivensRQ {
     protected int rotateInParallel(Matrix matrix, int begin, int end, GivensMode mode) {
         int beginRow = mode == GivensMode.DEFLATE ? begin : 0;
         int endRow = mode == GivensMode.FULL ? matrix.getRowCount() : end;
-        AtomicInteger index = new AtomicInteger(beginRow);
-        return ParallelSupplier.of(() -> {
-                    int i = index.getAndIncrement();
-                    return i < endRow ? this.rotateByRow(matrix, i, begin, mode) : -1;
-                }).get()
-                .stream()
-                .max(Comparator.comparingInt((i) -> i))
-                .orElse(-1);
+        int[] deflated = new int[endRow - beginRow];        
+        ParallelSupplier.cyclic((i) -> deflated[i - beginRow] = this.rotateByRow(matrix, i, begin, mode), beginRow, endRow);
+        return Arrays.stream(deflated).filter((i) -> i >= 0).findAny().orElse(-1);
     }
     
     /**
