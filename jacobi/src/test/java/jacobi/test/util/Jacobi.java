@@ -62,5 +62,5 @@ public final class Jacobi {
             Assert.assertEquals("Expects " + exp + ", Actual " + act, exp.get(i), act.get(i), epsilon);
         }
     }
-
-}
+    
+        }
