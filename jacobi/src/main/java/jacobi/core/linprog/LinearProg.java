@@ -63,8 +63,17 @@ public class LinearProg {
     public Optional<Matrix> compute(Matrix c, Matrix a, Matrix b) {
         Throw.when().isNull(() -> c, () -> "No objective function.")
                 .isNull(() -> a, () -> "No constraint matrix. Use an empty matrix for no constraint.")
-                .isNull(() -> b, () -> "No constraint boundary. Use an empty matrix for no boundary.");
-        if(a.getRowCount() == 0 || b.getRowCount() == 0){
+                .isNull(() -> b, () -> "No constraint boundary. Use an empty matrix for no boundary.")
+                .isFalse(() -> c.getRowCount() == 0 || a.getRowCount() == 0 || c.getRowCount() == a.getColCount(), 
+                		 () -> "Given " + c.getRowCount() 
+                		 		 + " degree of freedom in objective but have " 
+                				 + a.getColCount()
+                				 + " degree of freedom in constraints." )
+                .isFalse(() -> a.getRowCount() == b.getRowCount(), 
+                		 () -> "Given " + a.getRowCount() 
+                		 		+ " constraints but have " 
+                				+ b.getRowCount() + " boundaries." );
+        if(c.getRowCount() == 0 || a.getRowCount() == 0 || b.getRowCount() == 0){
             // all LP problems are unbounded/infeasible if no constraint
             return Optional.empty(); 
         }

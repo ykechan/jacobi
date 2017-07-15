@@ -67,14 +67,12 @@ public class JacobiJUnit4ClassRunnerTest {
     @Test
     @JacobiImport("testReadEquals5x5")
     @JacobiEquals(expected = 0, actual = 4)
-    public void testReadEquals5x5() {
-        System.out.println(this.c);
+    public void testReadEquals5x5() {        
     }
     
     @Test
     @JacobiImport("testReadEquals5x5")
     @JacobiEquals(expected = 0, actual = 0)
     public void testReadDuplicates() {
-        System.out.println(this.c);
     }
 }

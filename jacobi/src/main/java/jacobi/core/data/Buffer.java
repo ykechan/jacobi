@@ -87,7 +87,6 @@ class Buffer extends AbstractList<Double> {
     public void select(int[] cols) {        
         int k = this.start;
         for(int i : cols){
-            //System.out.println("i = " + cols[i] + ", k = " + k + ", length = " +swapper.length);
             this.swapper[k++] = this.get(i);
         }
         this.offset = this.start;
