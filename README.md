@@ -4,6 +4,8 @@
 ![Travis Latest Build](https://travis-ci.org/ykechan/jacobi.svg?branch=master)
 [![codecov](https://codecov.io/gh/ykechan/jacobi/branch/master/graph/badge.svg)](https://codecov.io/gh/ykechan/jacobi)
 [![codebeat badge](https://codebeat.co/badges/d0e7fd78-849d-47ae-aced-e24e52cd6961)](https://codebeat.co/projects/github-com-ykechan-jacobi-master)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.ykechan/jacobi/badge.svg)
+[![Javadocs](https://www.javadoc.io/badge/com.github.ykechan/jacobi.svg)](https://www.javadoc.io/doc/com.github.ykechan/jacobi)
 
 ## Synopsis
 Jacobi is a comprehensive library for computations involving matrices for
@@ -64,4 +66,5 @@ library with complex computational logic at the fingertip of Java developers.
 ## License
 Jacobi will be licensed under MIT and shall keep on to be a free software in the 
 foreseeable future. 
+
 
