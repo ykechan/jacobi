@@ -24,10 +24,25 @@
 
 package jacobi.core.norm;
 
+import jacobi.api.Matrix;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
+
 /**
  *
  * @author Y.K. Chan
  */
-public class ColBasedNorm {    
+public class ColBasedNorm {
+
+    public ColBasedNorm(BinaryOperator<double[]> rowOper, Function<double[], Double> merger) {
+        this.rowOper = rowOper;
+        this.merger = merger;
+    }
     
+    public double compute(Matrix matrix) {
+        return 0.0;
+    }
+    
+    private BinaryOperator<double[]> rowOper;
+    private Function<double[], Double> merger;
 }

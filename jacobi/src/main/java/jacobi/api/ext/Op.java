@@ -27,6 +27,7 @@ import jacobi.api.Matrix;
 import jacobi.api.annotations.Facade;
 import jacobi.api.annotations.Implementation;
 import jacobi.api.annotations.Immutate;
+import jacobi.core.op.Dot;
 import jacobi.core.op.Mul;
 import jacobi.core.op.MulT;
 import jacobi.core.op.Operators;
@@ -95,6 +96,14 @@ public interface Op extends Supplier<Matrix> {
      * @return  Op instance with Resultant matrix
      */
     @Implementation(Operators.Hadamard.class)
-    public Op mul(double k);        
+    public Op mul(double k);
+    
+    /**
+     * Dot product with column vectors of the matrix.
+     * @param b  2nd Operand. The first operand is the extension parameter.
+     * @return  Op instance with Resultant matrix
+     */
+    @Implementation(Dot.class)
+    public Op dot(Matrix b);
     
 }

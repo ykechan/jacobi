@@ -25,6 +25,7 @@
 package jacobi.core.norm;
 
 import jacobi.api.Matrix;
+import jacobi.core.util.MapReducer;
 import java.util.function.DoubleBinaryOperator;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.DoubleStream;
@@ -35,16 +36,28 @@ import java.util.stream.DoubleStream;
  */
 public class RowBasedNorm { 
     
+    /**
+     * Max norm, aka 1-norm.
+     */
     public static final class Max extends RowBasedNorm {
 
+        /**
+         * Constructor.
+         */
         public Max() {
             super((r) -> DoubleStream.of(r).map((e) -> Math.abs(e)).max().orElse(0.0), (a, b) -> Math.max(a, b));
         }
         
     }
     
+    /**
+     * Frobenius norm, aka L2,2 norm.
+     */
     public static final class Frobenius extends RowBasedNorm {
 
+        /**
+         * Constructor.
+         */
         public Frobenius() {
             super((r) -> DoubleStream.of(r).map((e) -> e * e).sum(), (a, b) -> a + b);
         }
@@ -56,14 +69,25 @@ public class RowBasedNorm {
         
     }
     
+    /**
+     * L-Infinite norm.
+     */
     public static final class LInf extends RowBasedNorm {
 
+        /**
+         * Constructor.
+         */
         public LInf() {
             super((r) -> DoubleStream.of(r).map((e) -> Math.abs(e)).sum(), (a, b) -> Math.max(a, b));
         }
         
     }    
 
+    /**
+     * Constructor.
+     * @param mapper Mapper function from a row vector to a value
+     * @param reducer  Reducer function of values from row vectors.
+     */
     public RowBasedNorm(ToDoubleFunction<double[]> mapper, DoubleBinaryOperator reducer) {
         this.mapper = mapper;
         this.reducer = reducer;
@@ -71,6 +95,14 @@ public class RowBasedNorm {
     
     public double compute(Matrix matrix) {
         return this.serial(matrix, 0, matrix.getRowCount());
+    }
+    
+    protected double parallel(Matrix matrix, int numFlops) {
+        return MapReducer.of(0, matrix.getRowCount())
+                .flop(numFlops)
+                .map((begin, end) -> this.serial(matrix, begin, end))
+                .reduce((a, b) -> this.reducer.applyAsDouble(a, b))
+                .get();
     }
     
     protected double serial(Matrix matrix, int begin, int end) {

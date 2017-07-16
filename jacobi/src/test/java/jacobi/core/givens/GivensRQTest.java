@@ -54,7 +54,7 @@ public class GivensRQTest {
     
     @JacobiInject(2)
     @JacobiResult(11)
-    public Matrix partner;
+    public Matrix partner;    
     
     @Test
     @JacobiImport("4x4")

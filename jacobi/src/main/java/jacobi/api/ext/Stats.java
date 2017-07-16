@@ -28,6 +28,7 @@ import jacobi.api.annotations.Facade;
 import jacobi.api.annotations.Implementation;
 import jacobi.api.annotations.Immutate;
 import jacobi.core.stats.Covar;
+import jacobi.core.stats.HigherMoment;
 import jacobi.core.stats.RowReduce;
 import jacobi.core.stats.Variance;
 
@@ -77,10 +78,24 @@ public interface Stats {
     public double[] stdDev();
     
     /**
+     * Find the biased skewness for each columns
+     * @return  Biased skewness of every columns
+     */
+    @Implementation(HigherMoment.Skewness.class)
+    public double[] skew();
+    
+    /**
+     * Find the biased kurtosis for each columns
+     * @return  Biased kurtosis of every columns
+     */
+    @Implementation(HigherMoment.Kurtosis.class)
+    public double[] kurt();
+    
+    /**
      * Find the covariance matrix between every columns.
      * @return  Covariance matrix between every columns.
      */
     @Implementation(Covar.class)
-    public Matrix covar();
+    public Matrix covar();        
     
 }
