@@ -1,5 +1,5 @@
 
-# Jacobi Java Matrix Library  vers 1.0.0.SNAPSHOT 
+# Jacobi Java Matrix Library
   
 ![Travis Latest Build](https://travis-ci.org/ykechan/jacobi.svg?branch=master)
 [![codecov](https://codecov.io/gh/ykechan/jacobi/branch/master/graph/badge.svg)](https://codecov.io/gh/ykechan/jacobi)
