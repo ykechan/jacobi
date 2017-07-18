@@ -25,6 +25,7 @@ package jacobi.core.data;
 
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
+import jacobi.core.impl.ColumnVector;
 import jacobi.test.util.Jacobi;
 import org.junit.Assert;
 import org.junit.Test;
@@ -58,6 +59,16 @@ public class AugmentedTest {
     @Test(expected = UnsupportedOperationException.class)
     public void testGetColCount() {
         new Augmented(Matrices.zeros(5)).getColCount();
+    }
+    
+    @Test
+    public void testEmpty() {
+        Assert.assertEquals(0, new Augmented(Matrices.zeros(0)).prepend((r) -> 1.0).get().getRowCount());
+    }
+    
+    @Test
+    public void testColumnVector() {
+        Assert.assertTrue(new Augmented(Matrices.zeros(7, 3)).select(1).get() instanceof ColumnVector);
     }
     
 }

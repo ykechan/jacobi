@@ -191,7 +191,7 @@ class PaddingPlan {
         }
         
         private Builder update() {
-            this.maxLength = Math.max(this.maxLength, this.currentLength);
+            this.maxLength = Math.max(this.maxLength, this.currentPrepend + this.currentLength);
             this.maxPrepend = Math.max(this.maxPrepend, this.currentPrepend);
             return this;
         }

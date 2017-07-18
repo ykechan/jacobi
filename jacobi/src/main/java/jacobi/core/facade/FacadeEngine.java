@@ -108,13 +108,12 @@ public class FacadeEngine {
         Functor func = new Functor(method, implClass);
         if(facade.value() != Matrix.class
         || (!method.isAnnotationPresent(Immutate.class)
-         && !method.getDeclaringClass().isAssignableFrom(Immutate.class))){
+         && !method.getDeclaringClass().isAnnotationPresent(Immutate.class))){
             return func;
         }
         return implClass.isAnnotationPresent(Immutate.class)
             || func.getMethod().isAnnotationPresent(Immutate.class)
-            ? (target, args) -> 
-                func.invoke(target, args)
+            ? func::invoke
             : (target, args) -> 
                 func.invoke( Matrices.copy((Matrix) target), args);
     }

@@ -23,6 +23,7 @@
  */
 package jacobi.core.facade;
 
+import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.api.annotations.Facade;
 import jacobi.api.annotations.Immutate;
@@ -273,7 +274,7 @@ public class FacadeEngineTest {
     public void testImmutateFacade() throws Exception {
         FacadeEngine engine = FacadeEngine.getInstance();
         double[] array = {Math.sqrt(2.0), Math.PI, Math.E};
-        Matrix matrix = new DefaultMatrix(new double[][]{array});
+        Matrix matrix = Matrices.of(new double[][]{array});
         
         engine.invoke(FindFromMatrix.class.getMethod("findLies"), 
                 matrix, 
@@ -283,16 +284,16 @@ public class FacadeEngineTest {
         
         matrix.setRow(0, array);
         
-        Assert.assertArrayEquals(matrix.getRow(0), array, 1e-16);
+        Assert.assertArrayEquals(matrix.getRow(0), new double[]{Math.sqrt(2.0), Math.PI, Math.E}, 1e-16);
         
         engine.invoke(FindFromMatrix.class.getMethod("findHonest"), 
                 matrix, 
                 new Object[0]);
         
-        Assert.assertArrayEquals(matrix.getRow(0), array, 1e-16);
+        Assert.assertArrayEquals(matrix.getRow(0), new double[]{Math.sqrt(2.0), Math.PI, Math.E}, 1e-16);
         
         matrix.setRow(0, array);
-        Assert.assertArrayEquals(matrix.getRow(0), array, 1e-16);
+        Assert.assertArrayEquals(matrix.getRow(0), new double[]{Math.sqrt(2.0), Math.PI, Math.E}, 1e-16);
         
         engine.invoke(DeriveFromMatrix.class.getMethod("deriveLies"), 
                 matrix, 
@@ -302,13 +303,13 @@ public class FacadeEngineTest {
         
         matrix.setRow(0, array);
         
-        Assert.assertArrayEquals(matrix.getRow(0), array, 1e-16);
+        Assert.assertArrayEquals(matrix.getRow(0), new double[]{Math.sqrt(2.0), Math.PI, Math.E}, 1e-16);
         
         engine.invoke(DeriveFromMatrix.class.getMethod("deriveHonest"), 
                 matrix, 
                 new Object[0]);
         
-        Assert.assertArrayEquals(matrix.getRow(0), array, 1e-16);
+        Assert.assertArrayEquals(matrix.getRow(0), new double[]{Math.sqrt(2.0), Math.PI, Math.E}, 1e-16);
     }
     
 }

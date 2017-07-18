@@ -23,10 +23,12 @@
  */
 package jacobi.core.data;
 
+import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.api.annotations.Delegate;
 import jacobi.api.annotations.Immutate;
 import jacobi.api.ext.Data;
+import jacobi.core.impl.ColumnVector;
 import jacobi.core.impl.DefaultMatrix;
 import jacobi.core.impl.ImmutableMatrix;
 import java.util.ArrayList;
@@ -203,20 +205,24 @@ public class Augmented extends ImmutableMatrix implements Data {
     @Immutate
     @Delegate(facade = Data.class, method = "get")
     public Matrix build() {
+        if(this.base.getRowCount() == 0){
+            return Matrices.zeros(0);
+        }
         PaddingPlan plan = this.builder.build();
         Buffer buffer = plan.createBuffer();
-        List<double[]> rows = new ArrayList<>();
-        ((ArrayList<?>) rows).ensureCapacity(this.base.getRowCount());
-        for(int i = 0; i < this.base.getRowCount(); i++){
-            rows.add(plan.apply(buffer, this.base.getRow(i)));
+        double[] recon = plan.apply(buffer, this.base.getRow(0));
+        Matrix matrix = Matrices.zeros(this.base.getRowCount(), recon.length);
+        matrix.setRow(0, recon);
+        for(int i = 1; i < this.base.getRowCount(); i++){
+            matrix.setRow(i, plan.apply(buffer, this.base.getRow(i)));
         }
-        return new DefaultMatrix(rows.toArray(new double[rows.size()][]));
+        return matrix;
     }
 
     @Override
     public Matrix get() {
         return this.build();
-    }
+    }    
 
     private Matrix base;
     private PaddingPlan.Builder builder;

@@ -105,6 +105,15 @@ public class PaddingPlanTest {
         Assert.assertEquals(7, buffer.getMaximumLength());
     }
     
+    @Test
+    public void testSelectThenPrepend() {
+        PaddingPlan pp = PaddingPlan.builder(2)
+                .select(0)
+                .prepend((r) -> 1.0)
+                .build();
+        Assert.assertArrayEquals(new double[]{1.0, 2.0}, pp.apply(pp.createBuffer(), new double[]{2.0, 3.0}), 1e-16);
+    }
+    
     @Test(expected = IllegalArgumentException.class)
     public void testSelectNull() {
         PaddingPlan.builder(3)
