@@ -31,12 +31,17 @@ THE SOFTWARE.
     <name>jacobi</name>
     <description>Matrix Library for Java</description>
     <url>https://github.com/ykechan/jacobi</url>
+	<scm>
+		<connection>scm:git:git://github.com/ykechan/jacobi.git</connection>
+		<developerConnection>scm:git:git@github.com:ykechan/jacobi.git</developerConnection>
+		<url>https://github.com/ykechan/jacobi</url>
+	</scm>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <netbeans.hint.license>mit</netbeans.hint.license>
-    </properties>
+    </properties>	
     <developers>
         <developer>
             <id>ykechan</id>
