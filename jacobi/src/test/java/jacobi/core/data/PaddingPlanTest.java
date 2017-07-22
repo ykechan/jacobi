@@ -102,7 +102,7 @@ public class PaddingPlanTest {
         // 2 ! 5 @ # 1 -> 6 5 4 5 # @ 3 -> # @
         Buffer buffer = pp.createBuffer();
         Assert.assertEquals(3, buffer.getStartingPosition());
-        Assert.assertEquals(7, buffer.getMaximumLength());
+        Assert.assertEquals(8, buffer.getMaximumLength());
     }
     
     @Test

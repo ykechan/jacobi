@@ -121,7 +121,7 @@ class PaddingPlan {
          * @return  This object.
          */
         public Builder prepend(Function<List<Double>, Double> func) {
-            this.currentLength++;
+            //this.currentLength++;
             this.currentPrepend++;
             this.funcs.add((buf) -> buf.insert(0, func.apply(buf)) );
             return this.update();
@@ -148,7 +148,7 @@ class PaddingPlan {
          * @param cols  Column indices
          * @return  This object.
          */
-        @SuppressWarnings("null") // false positive
+        @SuppressWarnings("null")
         public Builder select(int... cols) {
             Throw.when()
                 .isTrue(
@@ -158,13 +158,12 @@ class PaddingPlan {
             for(int i : cols){
                 Throw.when()
                     .isTrue(
-                        () -> i < 0 || i >= this.currentLength, 
+                        () -> i < 0 || i >= this.currentLength + this.currentPrepend, 
                         () -> "Invalid column " + i);
             }
             this.funcs.add((buf) -> buf.select(cols));
-            this.maxLength = Math.max(this.maxLength, cols.length + this.maxPrepend);
             this.currentPrepend = 0;
-            this.currentLength = cols.length;            
+            this.currentLength = cols.length;
             return this.update();
         }
         
@@ -175,7 +174,7 @@ class PaddingPlan {
         public PaddingPlan build() {
             int prep = this.maxPrepend;
             int max = this.maxLength;
-            return new PaddingPlan(() -> new Buffer(prep, max), this.funcs);
+            return new PaddingPlan(() -> new Buffer(prep, prep + max), this.funcs);
         }
         
         /**
@@ -183,15 +182,16 @@ class PaddingPlan {
          * @return  New builder
          */
         public Builder copy() {
-            Builder builder = new Builder(this.currentLength);
+            Builder builder = new Builder(this.maxLength);
             builder.maxPrepend = this.maxPrepend;
+            builder.currentLength = this.currentLength;
             builder.currentPrepend = this.currentPrepend;
             builder.funcs = new ArrayList<>(this.funcs);
             return builder;
         }
         
         private Builder update() {
-            this.maxLength = Math.max(this.maxLength, this.currentPrepend + this.currentLength);
+            this.maxLength = Math.max(this.maxLength, this.currentLength);
             this.maxPrepend = Math.max(this.maxPrepend, this.currentPrepend);
             return this;
         }

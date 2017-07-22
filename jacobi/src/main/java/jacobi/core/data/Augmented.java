@@ -28,10 +28,7 @@ import jacobi.api.Matrix;
 import jacobi.api.annotations.Delegate;
 import jacobi.api.annotations.Immutate;
 import jacobi.api.ext.Data;
-import jacobi.core.impl.ColumnVector;
-import jacobi.core.impl.DefaultMatrix;
 import jacobi.core.impl.ImmutableMatrix;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
@@ -121,7 +118,7 @@ public class Augmented extends ImmutableMatrix implements Data {
      */
     public Augmented(Matrix base) {
         this.base = base;
-        this.builder = PaddingPlan.builder(base.getColCount());
+        this.builder = PaddingPlan.builder(base.getColCount());        
     }
 
     /**
