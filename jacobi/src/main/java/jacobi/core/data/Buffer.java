@@ -41,20 +41,15 @@ import java.util.Arrays;
  */
 class Buffer extends AbstractList<Double> {
     
-    public Buffer(int offset, int max) {
-        this(offset, offset, max);
-    }
-    
     /**
      * Constructor.
-     * @param start Starting position
      * @param offset  maximum number of prepend operation
      * @param max   maximum number of elements the array will expand into
      */
-    public Buffer(int start, int offset, int max) {
+    public Buffer(int offset, int max) {
         this.array = new double[max];
         this.swapper = new double[max];
-        this.start = start;
+        this.start = offset;
         this.offset = offset;
         this.length = 0;
     }
@@ -91,7 +86,6 @@ class Buffer extends AbstractList<Double> {
      */
     public void select(int[] cols) {        
         int k = this.start;
-        System.out.println("start " + this.start + ", offset " + this.offset);
         for(int i : cols){
             this.swapper[k++] = this.get(i);
         }
