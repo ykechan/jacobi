@@ -24,6 +24,8 @@
 
 package jacobi.core.filter.fft;
 
+import jacobi.core.util.Throw;
+
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
@@ -40,31 +42,19 @@ public class ComplexVector {
      * For some n special values may be used for numerical accuracy.
      * @param deg  Degree n
      * @return  Roots of unity as a complex vector.
-     * @throws  IllegalArgumentException if n &lt; 0
+     * @throws  IllegalArgumentException if n is not positive
      */
     public static ComplexVector rootsOfUnity(int deg) {
-        switch(deg){
-            case 0 :
-                return ComplexVector.of(new double[0], new double[0]);
-            case 1 :
-                return ComplexVector.of(new double[]{1.0}, new double[]{0.0});
-            case 2 :
-                return ComplexVector.of(new double[]{1.0, -1.0}, new double[]{0.0, 0.0});
-            case 3 :
-            case 4 :
-            case 6 :
-                int period = SIN_12.length / deg;
-                return ComplexVector.of(
+        Throw.when().isFalse(() -> deg > 0, () -> "Invalid degree of roots.");
+        if(SIN_12.length % deg == 0){
+            int period = SIN_12.length / deg;
+            return ComplexVector.of(
                     IntStream.range(0, deg).mapToDouble(i -> COS_12[i * period]).toArray(),
                     IntStream.range(0, deg).mapToDouble(i -> SIN_12[i * period]).toArray()
-                );
-            case 8 :
-                return ComplexVector.of(COS_8, SIN_8).slice(0, deg);
-            default :
-                if(deg < 0){
-                    throw new IllegalArgumentException();
-                }
-                break;
+            );
+        }
+        if(deg == 8){
+            return ComplexVector.of(COS_8, SIN_8).slice(0, deg);
         }
         double arc = 2 * Math.PI / deg;
         return ComplexVector.of(

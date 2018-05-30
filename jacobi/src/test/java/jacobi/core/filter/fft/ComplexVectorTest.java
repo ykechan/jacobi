@@ -105,12 +105,9 @@ public class ComplexVectorTest {
         ComplexVector.rootsOfUnity(-1);
     }
 
-    @Test
-    public void testReturnEmptyOnZeroToRootsOfUnity() {
+    @Test(expected = IllegalArgumentException.class)
+    public void testFailOnZeroToRootsOfUnity() {
         ComplexVector v = ComplexVector.rootsOfUnity(0);
-        Assert.assertNotNull(v.real);
-        Assert.assertNotNull(v.imag);
-        Assert.assertEquals(0, v.length());
     }
 
     @Test(expected = IllegalArgumentException.class)
