@@ -25,8 +25,12 @@
 package jacobi.core.filter.fft;
 
 import jacobi.core.util.Throw;
-
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 
 /**
  * Implementation of merging part of vector that has split by 2 by Cooley-Tukey algorithm.
@@ -39,15 +43,10 @@ public class CooleyTukeyRadix2 implements CooleyTukeyMerger {
      * Constructor.
      */
     public CooleyTukeyRadix2() {
-        this(new ComplexVector[]{
-            ComplexVector.rootsOfUnity(1),
-            ComplexVector.rootsOfUnity(1),
-            ComplexVector.rootsOfUnity(4).slice(0, 2),
-            ComplexVector.rootsOfUnity(6).slice(0, 3),
-            ComplexVector.rootsOfUnity(8).slice(0, 4),
-            ComplexVector.rootsOfUnity(1),
-            ComplexVector.rootsOfUnity(12).slice(0, 6)
-        });
+        this(DEFAULT_PIVOTS
+                .stream()
+                .map(p -> p.slice(0, p.length()))
+                .toArray(n -> new ComplexVector[n]));
     }
 
     /**
@@ -85,9 +84,8 @@ public class CooleyTukeyRadix2 implements CooleyTukeyMerger {
             case 4 :
                 return len % 4 == 0 ? this.pivots[4] : this.pivots[2];
             default :
-                break;
-        }
-        throw new UnsupportedOperationException();
+                throw new UnsupportedOperationException("Invalid length " + len);
+        }        
     }
 
     /**
@@ -105,17 +103,17 @@ public class CooleyTukeyRadix2 implements CooleyTukeyMerger {
         double s = -Math.sin(Math.PI / num);
         int arc = num / pivot.length();
         int mid = offset + num;
-        for(int k = 0; k < pivot.length(); k++){
+        for(int k = 0; k < pivot.length(); k++){ 
             double re = pivot.real[k];
             double im = pivot.imag[k];
             int i = offset + k * arc;
             int j = mid + k * arc;
-            for(int n = 0; n < arc; n++){
+            for(int n = 0; n < arc; n++, i++, j++){
                 double tmpRe = re * vector.real[j] - im * vector.imag[j];
                 double tmpIm = re * vector.imag[j] + im * vector.real[j];
 
                 vector.real[j] = vector.real[i] - tmpRe;
-                vector.imag[j] = vector.real[i] - tmpIm;
+                vector.imag[j] = vector.imag[i] - tmpIm;
 
                 vector.real[i] += tmpRe;
                 vector.imag[i] += tmpIm;
@@ -128,4 +126,14 @@ public class CooleyTukeyRadix2 implements CooleyTukeyMerger {
     }
 
     private ComplexVector[] pivots;
+    
+    private static final List<ComplexVector> DEFAULT_PIVOTS = IntStream.rangeClosed(0, 6)
+            .mapToObj(n -> n < 2 
+                    ? ComplexVector.rootsOfUnity(1)
+                    : 12 % n == 0 
+                        ? ComplexVector.rootsOfUnity(2 * n).slice(0, n)
+                        :  ComplexVector.rootsOfUnity(1)
+            )
+            .map(p -> p.conj())
+            .collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
 }

@@ -24,12 +24,6 @@
 
 package jacobi.core.filter.fft;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
 public class CooleyTukeyFFT {
 
     public void compute(ComplexVector in, ComplexVector out, int offset, int length) {

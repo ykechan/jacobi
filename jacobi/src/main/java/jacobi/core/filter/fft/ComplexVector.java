@@ -46,8 +46,8 @@ public class ComplexVector {
      */
     public static ComplexVector rootsOfUnity(int deg) {
         Throw.when().isFalse(() -> deg > 0, () -> "Invalid degree of roots.");
-        if(SIN_12.length % deg == 0){
-            int period = SIN_12.length / deg;
+        if(COS_12.length % deg == 0){
+            int period = COS_12.length / deg;
             return ComplexVector.of(
                     IntStream.range(0, deg).mapToDouble(i -> COS_12[i * period]).toArray(),
                     IntStream.range(0, deg).mapToDouble(i -> SIN_12[i * period]).toArray()
