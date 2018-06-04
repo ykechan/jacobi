@@ -35,6 +35,12 @@ import java.util.stream.IntStream;
 /**
  * Implementation of merging part of vector that has split by 2 by Cooley-Tukey algorithm.
  *
+ * <p>
+ * To enhance numerical stability, this class uses pre-defined values to calibrate as the loop progress through
+ * the half circle in the Argand plane, if the underlying points coincide. This makes this class suitable for processing
+ * a larger number of elements than some other radix, e.g. 5.
+ * </p>
+ *
  * @author Y.K. Chan
  */
 public class CooleyTukeyRadix2 implements CooleyTukeyMerger {

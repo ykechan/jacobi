@@ -94,4 +94,72 @@ public class CooleyTukeyFFTTest {
         Assert.assertArrayEquals(new double[]{0.0, -4.0, -2.0, -6.0, -1.0, -5.0, -3.0, -7.0}, result.imag, 1e-12);
     }
 
+    @Test
+    public void testFactorizeLength16Radix2Baseline1(){
+        Assert.assertArrayEquals(
+                new int[]{2, 2, 2, 2, 1},
+                new CooleyTukeyFFT().factorize(16, new int[]{2}, new int[]{1}));
+    }
+
+    @Test
+    public void testFactorizeLength6Radix2And3Baseline1(){
+        Assert.assertArrayEquals(
+                new int[]{2, 3, 1},
+                new CooleyTukeyFFT().factorize(6, new int[]{2, 3}, new int[]{1}));
+    }
+
+    @Test
+    public void testFactorizeShouldPreserveThePriorityOfRadixArray() {
+        Assert.assertArrayEquals(
+                new int[]{3, 2, 1},
+                new CooleyTukeyFFT().factorize(6, new int[]{3, 2}, new int[]{1}));
+    }
+
+    @Test
+    public void test1ShouldBeBaselineWithoutSpecifying(){
+        Assert.assertArrayEquals(
+                new int[]{2, 3, 1},
+                new CooleyTukeyFFT().factorize(6, new int[]{2, 3}, new int[]{5}));
+        Assert.assertArrayEquals(
+                new int[]{2, 3, 1},
+                new CooleyTukeyFFT().factorize(6, new int[]{2, 3}, new int[0]));
+    }
+
+    @Test
+    public void testLengthAsBaselineWhenNoRadixSpecified() {
+        Assert.assertArrayEquals(
+                new int[]{6},
+                new CooleyTukeyFFT().factorize(6, new int[0], new int[]{5}));
+    }
+
+    @Test
+    public void testLengthAsBaselineWhenNotDecomposible() {
+        Assert.assertArrayEquals(
+                new int[]{7},
+                new CooleyTukeyFFT().factorize(7, new int[]{2, 3}, new int[]{5}));
+    }
+
+    @Test
+    public void testBaselineShouldBePreferredOverFactorizing() {
+        Assert.assertArrayEquals(
+                new int[]{3, 6},
+                new CooleyTukeyFFT().factorize(18, new int[]{2, 3}, new int[]{6}));
+    }
+
+    @Test
+    public void testFactorizingShouldBePreferredWhenPrimedAfterBaseline() {
+        Assert.assertArrayEquals(
+                new int[]{2, 3, 7},
+                new CooleyTukeyFFT().factorize(7 * 6, new int[]{2, 3}, new int[]{6}));
+    }
+
+    @Test
+    public void testFactorize1920() {
+        Assert.assertArrayEquals(
+                new int[]{2, 2, 2, 2, 2, 2, 2, 3, 5, 1},
+                new CooleyTukeyFFT().factorize(1920,
+                    new int[]{2, 3, 5},
+                    new int[0]));
+    }
+
 }
