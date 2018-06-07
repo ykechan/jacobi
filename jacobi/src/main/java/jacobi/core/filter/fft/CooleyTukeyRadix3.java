@@ -74,6 +74,13 @@ package jacobi.core.filter.fft;
  */
 public class CooleyTukeyRadix3 implements CooleyTukeyMerger {
 
+    public CooleyTukeyRadix3(){
+        this(
+            ComplexVector.rootsOfUnity(6).slice(0, 2).conj(),
+            ComplexVector.rootsOfUnity(12).slice(0, 3).conj()
+        );
+    }
+
     protected CooleyTukeyRadix3(ComplexVector pivot2, ComplexVector pivot3) {
         this.pivot1 = ComplexVector.of(new double[]{1.0}, new double[]{0.0});
         this.pivot2 = pivot2;

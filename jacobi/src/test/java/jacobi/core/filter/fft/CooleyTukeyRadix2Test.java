@@ -128,6 +128,15 @@ public class CooleyTukeyRadix2Test {
     }
 
     @Test
+    @JacobiImport("Complex 10 DFT")
+    @JacobiEquals(expected = 1, actual = 1)
+    public void testComplex10DFT() {
+        ComplexVector vec = ComplexVector.of(this.input.getRow(0), this.input.getRow(1));
+        new CooleyTukeyRadix2().merge(vec, 0, vec.length());
+        this.output = Matrices.of(new double[][]{vec.real, vec.imag});
+    }
+
+    @Test
     public void testSelectingTheBestPivotForArcLength1To128() {
         ComplexVector[] pivots = IntStream.range(0, 7)
                 .mapToObj(n -> ComplexVector.of(new double[n], new double[n]))

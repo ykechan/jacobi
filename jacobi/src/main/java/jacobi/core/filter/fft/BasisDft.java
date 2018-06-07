@@ -33,13 +33,17 @@ public class BasisDft implements CooleyTukeyMerger {
             case 1 :
                 break;
             case 2 :
+                this.compute2(vector, offset);
+                break;
+            case 3 :
+                this.compute3(vector, offset);
                 break;
             default :
                 break;
         }
     }
 
-    protected void merge2(ComplexVector vector, int offset) {
+    protected void compute2(ComplexVector vector, int offset) {
         double tmpRe = vector.real[offset];
         double tmpIm = vector.imag[offset];
 
@@ -50,7 +54,7 @@ public class BasisDft implements CooleyTukeyMerger {
         vector.imag[offset + 1] = tmpIm - vector.imag[offset + 1];
     }
 
-    protected void merge3(ComplexVector vector, int offset) {
+    protected void compute3(ComplexVector vector, int offset) {
         double addRe = vector.real[offset + 1] + vector.real[offset + 2];
         double addIm = vector.imag[offset + 1] + vector.imag[offset + 2];
 
@@ -67,6 +71,13 @@ public class BasisDft implements CooleyTukeyMerger {
         vector.imag[offset] = tmpIm + addIm;
         vector.imag[offset + 1] = tmpIm - (addIm + subRe * SQRT3) / 2.0;
         vector.imag[offset + 2] = tmpIm - (addIm - subRe * SQRT3) / 2.0;
+    }
+
+    protected void computeN(ComplexVector vector, int offset, int length) {
+        double c = Math.cos(2 * Math.PI / length);
+        double s = -Math.sin(2 * Math.PI / length);
+
+        ComplexVector out = ComplexVector.of(new double[length], new double[length]);
     }
 
     private static final double SQRT3 = Math.sqrt(3.0);

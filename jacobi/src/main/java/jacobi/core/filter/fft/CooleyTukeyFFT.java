@@ -40,6 +40,24 @@ import java.util.stream.IntStream;
  */
 public class CooleyTukeyFFT {
 
+    public CooleyTukeyFFT() {
+        this(new CooleyTukeyMerger[]{
+            null,
+            null,
+            new CooleyTukeyRadix2(),
+            new CooleyTukeyRadix3()
+        });
+    }
+
+    protected CooleyTukeyFFT(CooleyTukeyMerger[] mergers) {
+        this.mergers = mergers;
+        this.radices = IntStream.range(0, mergers.length)
+            .filter(i -> i > 1)
+            .filter(i -> mergers[i] != null)
+            .toArray();
+        this.baselines = new int[]{6, 2, 3};
+    }
+
     /**
      * Compute Fourier Transform on the input complex vector.
      * This method changes the value of the input vector.
@@ -61,7 +79,10 @@ public class CooleyTukeyFFT {
         if(baseline == 1){
             return;
         }
-
+        CooleyTukeyMerger merger = this.mergers[0];
+        for(int i = 0; i < vector.length(); i += baseline){
+            merger.merge(vector, i, baseline);
+        }
     }
 
     /**
