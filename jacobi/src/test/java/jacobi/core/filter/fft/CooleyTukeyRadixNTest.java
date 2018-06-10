@@ -56,7 +56,7 @@ public class CooleyTukeyRadixNTest {
 
         Assert.assertArrayEquals(result2.real, resultN.real, 1e-12);
         Assert.assertArrayEquals(result2.imag, resultN.imag, 1e-12);
-        */
+                */
     }
 
 }
