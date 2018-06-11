@@ -35,7 +35,6 @@ public class CooleyTukeyRadixNTest {
 
     @Test
     public void testResultEquivalentWithRadix2Impl() {
-        /*
         Random rand = new Random(Double.doubleToLongBits(Math.E));
         ComplexVector vector = ComplexVector.of(
             new double[]{-45.88028833,88.28727398,103.4633919,70.07072038,124.9423701,96.53219416},
@@ -45,18 +44,27 @@ public class CooleyTukeyRadixNTest {
         ComplexVector result2 = vector.slice(0, vector.length());
         ComplexVector resultN = vector.slice(0, vector.length());
         new CooleyTukeyRadix2().merge(result2, 0, result2.length());
-        new CooleyTukeyRadixN(2){
-
-            @Override
-            protected ComplexVector merge(Slice slice, int mod, Givens giv) {
-                System.out.println("Giv=" + giv);
-                return super.merge(slice, mod, giv);
-            }
-        }.merge(resultN, 0, resultN.length());
+        new CooleyTukeyRadixN(2).merge(resultN, 0, resultN.length());
 
         Assert.assertArrayEquals(result2.real, resultN.real, 1e-12);
         Assert.assertArrayEquals(result2.imag, resultN.imag, 1e-12);
-                */
+    }
+
+    @Test
+    public void testResultEquivalentWithRadix3Impl() {
+        Random rand = new Random(Double.doubleToLongBits(Math.E));
+        ComplexVector vector = ComplexVector.of(
+                new double[]{-121.5070809,101.7238053,100.2187015,-74.50455421,-79.63815707,-138.5028388,-26.01470745,80.10659923,69.2441669},
+                new double[]{257.3535679,89.57200048,-21.11524913,78.07865989,-112.8796867,121.4809527,-178.2078495,-7.154014519,293.3468193}
+        );
+
+        ComplexVector result3 = vector.slice(0, vector.length());
+        ComplexVector resultN = vector.slice(0, vector.length());
+        new CooleyTukeyRadix3().merge(result3, 0, result3.length());
+        new CooleyTukeyRadixN(3).merge(resultN, 0, resultN.length());
+
+        Assert.assertArrayEquals(result3.real, resultN.real, 1e-12);
+        Assert.assertArrayEquals(result3.imag, resultN.imag, 1e-12);
     }
 
 }

@@ -45,7 +45,9 @@ public class CooleyTukeyFFT {
             null,
             null,
             new CooleyTukeyRadix2(),
-            new CooleyTukeyRadix3()
+            new CooleyTukeyRadix3(),
+            null,
+            new CooleyTukeyRadixN(5)
         });
     }
 

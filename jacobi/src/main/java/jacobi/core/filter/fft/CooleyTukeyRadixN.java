@@ -26,6 +26,8 @@ package jacobi.core.filter.fft;
 
 import jacobi.core.givens.Givens;
 
+import java.util.Arrays;
+
 /**
  * Implementation of merging part of vector that has split by N by Cooley-Tukey algorithm.
  * 
@@ -43,7 +45,6 @@ import jacobi.core.givens.Givens;
  *             <sup>M-1</sup>&sum;
  *             x[n + mN] e<sup>-i(nk/NM + np/N + mk/M + mp)*2&pi;</sup><br>
  *           = <sup>N-1</sup>&sum;
- *             <sup>M-1</sup>&sum;
  *             e<sup>-i(nk/NM)2&pi;</sup>e<sup>-i(np/N)2&pi;</sup>F[n]<br>
  * where F[n] is the DFT of the elements which index mod N is n.
  * </p>
@@ -52,7 +53,19 @@ import jacobi.core.givens.Givens;
  */
 public class CooleyTukeyRadixN implements CooleyTukeyMerger {
 
-    public CooleyTukeyRadixN(ComplexVector radix) {
+    /**
+     * Constructor.
+     * @param deg  Degree of radix N
+     */
+    public CooleyTukeyRadixN(int deg){
+        this(ComplexVector.rootsOfUnity(deg).conj());
+    }
+
+    /**
+     * Constructor.
+     * @param radix  Roots in degree of radix N
+     */
+    protected CooleyTukeyRadixN(ComplexVector radix) {
         this.radix = radix;
     }
 
@@ -60,9 +73,58 @@ public class CooleyTukeyRadixN implements CooleyTukeyMerger {
     public void merge(ComplexVector vector, int offset, int length) {
         double zRe = Math.cos(2 * Math.PI / length);
         double zIm = -Math.sin(2 * Math.PI / length);
+        Slice slice = new Slice(vector, offset, length);
+        ComplexVector out = ComplexVector.of(new double[this.radix.length()], new double[this.radix.length()]);
+        int width = length / this.radix.length();
+        double zkRe = 1.0;
+        double zkIm = 0.0;
+        for(int k = 0; k < width; k++){
+            this.merge(slice, out, k, zkRe, zkIm);
+
+            for(int p = 0; p < out.length(); p++){
+                vector.real[offset + k + p * width] = out.real[p];
+                vector.imag[offset + k + p * width] = out.imag[p];
+            }
+
+            double tmp = zRe * zkRe - zIm * zkIm;
+            zkIm = zRe * zkIm + zIm * zkRe;
+            zkRe = tmp;
+        }
     }
-    
-    
+
+    /**
+     *
+     * @param slice
+     * @param out
+     * @param mod
+     * @param zkRe
+     * @param zkIm
+     */
+    protected void merge(Slice slice, ComplexVector out, int mod, double zkRe, double zkIm) {
+        int width = slice.length / this.radix.length();
+        for(int p = 0; p < out.length(); p++){
+            double nkRe = 1.0, nkIm = 0.0;
+            out.real[p] = 0.0;
+            out.imag[p] = 0.0;
+
+            for(int n = 0; n < out.length(); n++){
+                int twiddle = (p * n) % this.radix.length();
+                double re = nkRe * this.radix.real[twiddle] - nkIm * this.radix.imag[twiddle];
+                double im = nkRe * this.radix.imag[twiddle] + nkIm * this.radix.real[twiddle];
+
+                System.out.println("p=" + p + ", n=" + n + ", z=" + re + "+i" + im);
+
+                int target = slice.offset + mod + n * width;
+                out.real[p] += re * slice.vector.real[target] - im * slice.vector.imag[target];
+                out.imag[p] += re * slice.vector.imag[target] + im * slice.vector.real[target];
+
+                double tmp = nkRe * zkRe - nkIm * zkIm;
+                nkIm = nkRe * zkIm + nkIm * zkRe;
+                nkRe = tmp;
+            }
+        }
+    }
+
     private ComplexVector radix;
     
     protected static class Slice {
