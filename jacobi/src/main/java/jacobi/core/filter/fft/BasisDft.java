@@ -24,6 +24,8 @@
 
 package jacobi.core.filter.fft;
 
+import java.util.Arrays;
+
 /**
  * Compute DFT of a vector by applying the basis DFT transformation matrix.
  *
@@ -33,6 +35,10 @@ package jacobi.core.filter.fft;
  * @author Y.K. Chan
  */
 public class BasisDft implements CooleyTukeyMerger {
+
+    public BasisDft(int limit) {
+        this.limit = limit;
+    }
 
     @Override
     public void merge(ComplexVector vector, int offset, int length) {
@@ -80,8 +86,8 @@ public class BasisDft implements CooleyTukeyMerger {
         double tmpIm = vector.imag[offset];
 
         vector.real[offset] = tmpRe + addRe;
-        vector.real[offset + 1] = tmpRe - (addRe + subIm * SQRT3) / 2.0;
-        vector.real[offset + 2] = tmpRe - (addRe - subIm * SQRT3) / 2.0;
+        vector.real[offset + 1] = tmpRe - (addRe - subIm * SQRT3) / 2.0;
+        vector.real[offset + 2] = tmpRe - (addRe + subIm * SQRT3) / 2.0;
 
         vector.imag[offset] = tmpIm + addIm;
         vector.imag[offset + 1] = tmpIm - (addIm + subRe * SQRT3) / 2.0;
@@ -107,29 +113,57 @@ public class BasisDft implements CooleyTukeyMerger {
 
         // re(F) * re(v) - im(F) * im(v)
         vector.real[offset] = addRe03 + addRe12 + addRe45;
-        vector.real[offset + 1] = subRe03 + subRe12 - subRe45 + SQRT3*(addIm03 - addIm45) / 2.0;
-        vector.real[offset + 2] = addRe03 - addRe12 - addRe45 + SQRT3*(subIm03 + subIm45) / 2.0;
+        vector.real[offset + 1] = subRe03 + (subRe12 - subRe45 + SQRT3*(addIm12 - addIm45)) / 2.0;
+        vector.real[offset + 2] = addRe03 - (addRe12 + addRe45 - SQRT3*(subIm12 + subIm45)) / 2.0;
         vector.real[offset + 3] = subRe03 - subRe12 + subRe45;
-        vector.real[offset + 4] = addRe03 - addRe12 - addRe45 - SQRT3*(subIm03 + subIm45) / 2.0;
-        vector.real[offset + 5] = subRe03 + subRe12 - subRe45 - SQRT3*(addIm03 - addIm45) / 2.0;
+        vector.real[offset + 4] = addRe03 - (addRe12 + addRe45 + SQRT3*(subIm12 + subIm45)) / 2.0;
+        vector.real[offset + 5] = subRe03 + (subRe12 - subRe45 - SQRT3*(addIm12 - addIm45)) / 2.0;
 
         // re(F) * im(v) + im(F) * re(v)
         vector.imag[offset] = addIm03 + addIm12 + addIm45;
-        vector.imag[offset + 1] = subIm03 + subIm12 - subIm45 + SQRT3*(addRe03 - addRe45) / 2.0;
-        vector.imag[offset + 2] = addIm03 - addIm12 - addIm45 + SQRT3*(subRe03 + subRe45) / 2.0;
+        vector.imag[offset + 1] = subIm03 + (subIm12 - subIm45 - SQRT3*(addRe12 - addRe45)) / 2.0;
+        vector.imag[offset + 2] = addIm03 - (addIm12 + addIm45 + SQRT3*(subRe12 + subRe45)) / 2.0;
         vector.imag[offset + 3] = subIm03 - subIm12 + subIm45;
-        vector.imag[offset + 4] = addIm03 - addIm12 - addIm45 - SQRT3*(subRe03 + subRe45) / 2.0;
-        vector.imag[offset + 5] = subIm03 + subIm12 - subIm45 - SQRT3*(addRe03 - addRe45) / 2.0;
+        vector.imag[offset + 4] = addIm03 - (addIm12 + addIm45 - SQRT3*(subRe12 + subRe45)) / 2.0;
+        vector.imag[offset + 5] = subIm03 + (subIm12 - subIm45 + SQRT3*(addRe12 - addRe45)) / 2.0;
     }
 
     protected void computeN(ComplexVector vector, int offset, int length) {
+        if(length > this.limit){
+            throw new UnsupportedOperationException("Unable to compute DFT of vector longer than " + this.limit
+                    + "(" + length + ").");
+        }
         double c = Math.cos(2 * Math.PI / length);
         double s = -Math.sin(2 * Math.PI / length);
-
         ComplexVector out = ComplexVector.of(new double[length], new double[length]);
+
+        out.real[0] = Arrays.stream(vector.real, offset, offset + length).sum();
+        out.imag[0] = Arrays.stream(vector.imag, offset, offset + length).sum();
+
+        double zRe = c;
+        double zIm = s;
+        for(int i = 1; i < length; i++){
+            double re = zRe;
+            double im = zIm;
+            out.real[i] = vector.real[offset];
+            out.imag[i] = vector.imag[offset];
+            for(int j = 1; j < length; j++){
+                out.real[i] += re * vector.real[offset + j] - im * vector.imag[offset + j];
+                out.imag[i] += re * vector.imag[offset + j] + im * vector.real[offset + j];
+                double tmp = re * zRe - im * zIm;
+                im = re * zIm + im * zRe;
+                re = tmp;
+            }
+            double tmp = c * zRe - s * zIm;
+            zIm = c * zIm + s * zRe;
+            zRe = tmp;
+        }
+
         System.arraycopy(out.real, 0, vector.real, offset, length);
         System.arraycopy(out.imag, 0, vector.imag, offset, length);
     }
+
+    private int limit;
 
     private static final double SQRT3 = Math.sqrt(3.0);
 }

@@ -69,9 +69,18 @@ public class CooleyTukeyRadix3Test {
     @Test
     @JacobiImport("Complex 9 DFT")
     @JacobiEquals(expected = 1, actual = 1)
-    public void testComplex9DFT() {
+    public void testComplex9DFTNoPivot() {
         ComplexVector vec = ComplexVector.of(this.input.getRow(0), this.input.getRow(1));
         this.mockNoPivot().merge(vec, 0, vec.length());
+        this.output = Matrices.of(new double[][]{vec.real, vec.imag});
+    }
+
+    @Test
+    @JacobiImport("Complex 9 DFT")
+    @JacobiEquals(expected = 1, actual = 1)
+    public void testComplex9DFTWithPivot() {
+        ComplexVector vec = ComplexVector.of(this.input.getRow(0), this.input.getRow(1));
+        new CooleyTukeyRadix3().merge(vec, 0, vec.length());
         this.output = Matrices.of(new double[][]{vec.real, vec.imag});
     }
 
