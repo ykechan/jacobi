@@ -176,7 +176,7 @@ public class CooleyTukeyRadix2Test {
 
     @Test(expected = IllegalArgumentException.class)
     public void testShouldThrowErrorWhenNegativeLength() {
-        this.mockNoPivot().merge(ComplexVector.of(new double[0], new double[0]), 0, -1);
+        this.mockNoPivot().merge(ComplexVector.of(new double[0], new double[0]), 0, -2);
     }
 
     @Test
