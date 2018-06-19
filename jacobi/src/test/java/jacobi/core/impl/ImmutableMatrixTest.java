@@ -26,11 +26,11 @@ package jacobi.core.impl;
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.api.annotations.Facade;
-import jacobi.api.annotations.Immutate;
+import jacobi.api.annotations.Pure;
 import jacobi.api.annotations.Implementation;
 import jacobi.test.util.Jacobi;
 import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -118,7 +118,7 @@ public class ImmutableMatrixTest {
         Empty.getInstance().getRow(0);
     }
     
-    @Immutate
+    @Pure
     @Facade
     public interface SampleFacade {
         
@@ -127,7 +127,7 @@ public class ImmutableMatrixTest {
         
     }
         
-    @Immutate
+    @Pure
     public static class SampleImpl {
         
         public double zero(Matrix input) {

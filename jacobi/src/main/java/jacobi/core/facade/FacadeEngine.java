@@ -27,7 +27,7 @@ import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.api.annotations.Facade;
 import jacobi.api.annotations.Implementation;
-import jacobi.api.annotations.Immutate;
+import jacobi.api.annotations.Pure;
 import jacobi.core.util.Throw;
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -107,12 +107,12 @@ public class FacadeEngine {
         Class<?> implClass = method.getAnnotation(Implementation.class).value();
         Functor func = new Functor(method, implClass);
         if(facade.value() != Matrix.class
-        || (!method.isAnnotationPresent(Immutate.class)
-         && !method.getDeclaringClass().isAnnotationPresent(Immutate.class))){
+        || (!method.isAnnotationPresent(Pure.class)
+         && !method.getDeclaringClass().isAnnotationPresent(Pure.class))){
             return func;
         }
-        return implClass.isAnnotationPresent(Immutate.class)
-            || func.getMethod().isAnnotationPresent(Immutate.class)
+        return implClass.isAnnotationPresent(Pure.class)
+            || func.getMethod().isAnnotationPresent(Pure.class)
             ? func::invoke
             : (target, args) -> 
                 func.invoke( Matrices.copy((Matrix) target), args);

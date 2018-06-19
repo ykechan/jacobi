@@ -26,7 +26,7 @@ package jacobi.core.data;
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.api.annotations.Delegate;
-import jacobi.api.annotations.Immutate;
+import jacobi.api.annotations.Pure;
 import jacobi.api.ext.Data;
 import jacobi.core.impl.ImmutableMatrix;
 import java.util.List;
@@ -42,7 +42,7 @@ public class Augmented extends ImmutableMatrix implements Data {
     /**
      * Append a column to the end of each rows.
      */
-    @Immutate
+    @Pure
     public static class Append {
         
         /**
@@ -60,7 +60,7 @@ public class Augmented extends ImmutableMatrix implements Data {
     /**
      * Prepend a column to the start of each rows.
      */
-    @Immutate
+    @Pure
     public static class Prepend {
         
         /**
@@ -78,7 +78,7 @@ public class Augmented extends ImmutableMatrix implements Data {
     /**
      * Insert a column to each rows.
      */
-    @Immutate
+    @Pure
     public static class Insert {
         
         /**
@@ -97,7 +97,7 @@ public class Augmented extends ImmutableMatrix implements Data {
     /**
      * Retain only selected column to each rows.
      */
-    @Immutate
+    @Pure
     public static class Select {
         
         /**
@@ -152,7 +152,7 @@ public class Augmented extends ImmutableMatrix implements Data {
      * @return   Augmented with new column at the end of each rows
      */
     @Override
-    @Immutate
+    @Pure
     @Delegate(facade = Data.class, method = "append")
     public Data append(Function<List<Double>, Double> func) {
         return new Augmented(this, this.builder.copy().append(func));
@@ -164,7 +164,7 @@ public class Augmented extends ImmutableMatrix implements Data {
      * @return  Augmented with new column at the start of each rows
      */
     @Override
-    @Immutate
+    @Pure
     @Delegate(facade = Data.class, method = "prepend")
     public Data prepend(Function<List<Double>, Double> func) {
         return new Augmented(this, this.builder.copy().prepend(func));
@@ -177,7 +177,7 @@ public class Augmented extends ImmutableMatrix implements Data {
      * @return  Augmented with new column inserted to each rows
      */
     @Override
-    @Immutate
+    @Pure
     @Delegate(facade = Data.class, method = "insert")
     public Data insert(int at, Function<List<Double>, Double> func) {
         return new Augmented(this, this.builder.copy().insert(at, func));
@@ -189,7 +189,7 @@ public class Augmented extends ImmutableMatrix implements Data {
      * @return  Augmented with columns selected from each rows
      */
     @Override
-    @Immutate
+    @Pure
     @Delegate(facade = Data.class, method = "select")
     public Data select(int... cols) {
         return new Augmented(this, this.builder.copy().select(cols));
@@ -199,7 +199,7 @@ public class Augmented extends ImmutableMatrix implements Data {
      * Build the augmented matrix.
      * @return  The augmented matrix.
      */
-    @Immutate
+    @Pure
     @Delegate(facade = Data.class, method = "get")
     public Matrix build() {
         if(this.base.getRowCount() == 0){

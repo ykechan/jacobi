@@ -26,7 +26,7 @@ package jacobi.core.decomp.gauss;
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.api.annotations.Delegate;
-import jacobi.api.annotations.Immutate;
+import jacobi.api.annotations.Pure;
 import jacobi.api.ext.Op;
 import jacobi.api.ext.Prop;
 import jacobi.core.facade.FacadeProxy;
@@ -71,7 +71,7 @@ public class Permutation extends ImmutableMatrix {
      * Determinant of the permutation matrix, which is the order of permutation.
      * @return  Determinant of permutation matrix
      */
-    @Immutate
+    @Pure
     @Delegate(facade = Prop.class, method = "det")
     public double det() {
         return this.order;
@@ -81,7 +81,7 @@ public class Permutation extends ImmutableMatrix {
      * Inverse of the permutation matrix, which is itself a permutation matrix.
      * @return  Inverse of the permutation matrix
      */
-    @Immutate
+    @Pure
     @Delegate(facade = Prop.class, method = "inv")
     public Matrix inv() {
         int[] inverse = new int[this.indices.length];
@@ -96,7 +96,7 @@ public class Permutation extends ImmutableMatrix {
      * @param b  Matrix operand
      * @return  Resultant matrix
      */
-    @Immutate
+    @Pure
     @Delegate(facade = Op.class, method = "mul")
     public Matrix mul(Matrix b) {
         Throw.when()

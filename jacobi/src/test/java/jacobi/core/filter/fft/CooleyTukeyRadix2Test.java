@@ -174,6 +174,24 @@ public class CooleyTukeyRadix2Test {
         }
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testShouldThrowErrorWhenNegativeLength() {
+        this.mockNoPivot().merge(ComplexVector.of(new double[0], new double[0]), 0, -1);
+    }
+
+    @Test
+    public void testShouldThrowWhenNotEnoughPivots() {
+        int count = 0;
+        for(int i = 0; i < 7; i++){
+            try{
+                new CooleyTukeyRadix2(new ComplexVector[i]);
+            }catch(IllegalArgumentException ex){
+                count++;
+            }
+        }
+        Assert.assertEquals(7, count);
+    }
+
     protected CooleyTukeyRadix2 mockNoPivot() {
         return new CooleyTukeyRadix2(IntStream.range(0, 7)
                 .mapToObj(n -> ComplexVector.of(new double[]{1.0}, new double[]{0.0}))

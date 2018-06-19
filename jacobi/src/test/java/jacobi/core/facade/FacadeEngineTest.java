@@ -26,9 +26,9 @@ package jacobi.core.facade;
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.api.annotations.Facade;
-import jacobi.api.annotations.Immutate;
+import jacobi.api.annotations.Pure;
 import jacobi.api.annotations.Implementation;
-import jacobi.core.impl.DefaultMatrix;
+
 import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -206,13 +206,13 @@ public class FacadeEngineTest {
     }
     
     /*
-    The Facade engine centers around Matrix. One key feature is support Immutate
+    The Facade engine centers around Matrix. One key feature is support Pure
     annotation, which specifies this facade method does not mutates the values of
     the underlying matrix, or specifies this implementation class operates without
     changing the value. 
     */
     
-    @Immutate
+    @Pure
     @Facade
     public interface FindFromMatrix {
         
@@ -227,17 +227,17 @@ public class FacadeEngineTest {
     @Facade
     public interface DeriveFromMatrix {
         
-        @Immutate
+        @Pure
         @Implementation(ImmutateImpl.class)
         public String deriveLies();
         
-        @Immutate
+        @Pure
         @Implementation(MutatingImpl.class)
         public String deriveHonest();
         
     }    
     
-    @Immutate
+    @Pure
     public static class ImmutateImpl {
         
         public int find(Matrix matrix) {

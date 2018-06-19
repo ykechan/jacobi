@@ -25,7 +25,7 @@ package jacobi.core.op;
 
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
-import jacobi.api.annotations.Immutate;
+import jacobi.api.annotations.Pure;
 import jacobi.core.impl.ColumnVector;
 import jacobi.core.util.ParallelSupplier;
 import jacobi.core.util.Throw;
@@ -37,7 +37,7 @@ import java.util.stream.IntStream;
  * 
  * @author Y.K. Chan
  */
-@Immutate
+@Pure
 public class Mul {
     
     /**

@@ -26,7 +26,7 @@ package jacobi.api.ext;
 import jacobi.api.Matrix;
 import jacobi.api.annotations.Facade;
 import jacobi.api.annotations.Implementation;
-import jacobi.api.annotations.Immutate;
+import jacobi.api.annotations.Pure;
 import jacobi.core.op.Dot;
 import jacobi.core.op.Mul;
 import jacobi.core.op.MulT;
@@ -46,7 +46,7 @@ import java.util.function.Supplier;
  * 
  * @author Y.K. Chan
  */
-@Immutate
+@Pure
 @Facade
 public interface Op extends Supplier<Matrix> {
     

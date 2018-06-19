@@ -26,7 +26,7 @@ package jacobi.api.ext;
 import jacobi.api.Matrix;
 import jacobi.api.annotations.Facade;
 import jacobi.api.annotations.Implementation;
-import jacobi.api.annotations.Immutate;
+import jacobi.api.annotations.Pure;
 import jacobi.core.stats.Covar;
 import jacobi.core.stats.HigherMoment;
 import jacobi.core.stats.RowReduce;
@@ -38,7 +38,7 @@ import jacobi.core.stats.Variance;
  * 
  * @author Y.K. Chan
  */
-@Immutate
+@Pure
 @Facade
 public interface Stats {
     

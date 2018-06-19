@@ -24,13 +24,12 @@
 
 package jacobi.core.filter.fft;
 
-import jacobi.core.util.Throw;
+import jacobi.api.annotations.Pure;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.function.BinaryOperator;
 import java.util.stream.IntStream;
 
 /**
@@ -38,38 +37,40 @@ import java.util.stream.IntStream;
  *
  * @author Y.K. Chan
  */
+@Pure
 public class CooleyTukeyFFT {
 
-    public CooleyTukeyFFT() {
-        this(new CooleyTukeyMerger[]{
-            null,
-            null,
-            new CooleyTukeyRadix2(),
-            new CooleyTukeyRadix3(),
-            null,
-            new CooleyTukeyRadixN(5)
-        });
-    }
-
-    protected CooleyTukeyFFT(CooleyTukeyMerger[] mergers) {
-        this.mergers = mergers;
+    public CooleyTukeyFFT(int[] baselines, CooleyTukeyMerger[] mergers) {
+        this.mergers = Arrays.copyOf(mergers, mergers.length);
         this.radices = IntStream.range(0, mergers.length)
             .filter(i -> i > 1)
             .filter(i -> mergers[i] != null)
             .toArray();
-        this.baselines = new int[]{6, 2, 3};
+        this.baselines = Arrays.copyOf(baselines, baselines.length);
     }
 
-    /**
-     * Compute Fourier Transform on the input complex vector.
-     * This method changes the value of the input vector.
-     * @param in  Input vector
-     * @param buf  Working vector of the same length
-     * @return  Vector that is representing the FFT of the input vector.
-     *          The instance would be either in or buf.
-     */
-    public ComplexVector compute(ComplexVector in, ComplexVector buf) {
-        return  this.split(in, buf, this.factorize(in.length(), this.radices, this.baselines));
+    public BinaryOperator<ComplexVector> of(int len) {
+        int[] factors = this.factorize(len, this.radices, this.baselines);
+        return (in, buf) -> this.compute(in, buf, factors);
+    }
+
+    protected ComplexVector compute(ComplexVector in, ComplexVector buf, int[] factors) {
+        ComplexVector vector = this.split(in, buf, factors);
+        int base = factors[factors.length - 1];
+        this.transform(vector, base);
+        for(int i = factors.length - 2; i >= 0; i--){
+            int f = factors[i];
+            this.merge(vector, base * f, base);
+            base *= f;
+        }
+        return vector;
+    }
+
+    protected void merge(ComplexVector vector, int width, int radix) {
+        CooleyTukeyMerger merger = this.mergers[radix];
+        for(int i = 0; i < vector.length(); i += width){
+            merger.merge(vector, i, width);
+        }
     }
 
     /**

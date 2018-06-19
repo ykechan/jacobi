@@ -26,7 +26,7 @@ package jacobi.core.op;
 
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
-import jacobi.api.annotations.Immutate;
+import jacobi.api.annotations.Pure;
 import jacobi.core.util.MapReducer;
 import jacobi.core.util.Throw;
 
@@ -35,7 +35,7 @@ import jacobi.core.util.Throw;
  * 
  * @author Y.K. Chan
  */
-@Immutate
+@Pure
 public class MulT {
     
     /**

@@ -90,7 +90,7 @@ public class CooleyTukeyRadix2 implements CooleyTukeyMerger {
             case 4 :
                 return len % 4 == 0 ? this.pivots[4] : this.pivots[2];
             default :
-                throw new UnsupportedOperationException("Invalid length " + len);
+                throw new IllegalArgumentException("Invalid length " + len);
         }        
     }
 

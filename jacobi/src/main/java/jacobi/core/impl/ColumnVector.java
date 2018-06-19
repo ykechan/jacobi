@@ -25,7 +25,7 @@ package jacobi.core.impl;
 
 import jacobi.api.Matrix;
 import jacobi.api.annotations.Delegate;
-import jacobi.api.annotations.Immutate;
+import jacobi.api.annotations.Pure;
 import jacobi.api.ext.Prop;
 import jacobi.core.facade.FacadeProxy;
 import jacobi.core.util.Throw;
@@ -118,7 +118,7 @@ public class ColumnVector implements Matrix {
      * Construct the transpose of the column vector, i.e.&nbsp;a row vector.
      * @return  Row vector
      */
-    @Immutate
+    @Pure
     @Delegate(facade = Prop.class, method = "transpose")
     public Matrix transpose() {
         //return new DefaultMatrix(new double[][]{Arrays.copyOf(vector, )});

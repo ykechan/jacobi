@@ -26,7 +26,7 @@ package jacobi.api.ext;
 import jacobi.api.Matrix;
 import jacobi.api.annotations.Facade;
 import jacobi.api.annotations.Implementation;
-import jacobi.api.annotations.Immutate;
+import jacobi.api.annotations.Pure;
 import jacobi.core.decomp.chol.CholeskyDecomp;
 import jacobi.core.decomp.eigen.EigenFinder;
 import jacobi.core.prop.Determinant;
@@ -46,7 +46,7 @@ import java.util.Optional;
  * @author Y.K. Chan
  */
 @Facade
-@Immutate
+@Pure
 public interface Prop {
     
     /**

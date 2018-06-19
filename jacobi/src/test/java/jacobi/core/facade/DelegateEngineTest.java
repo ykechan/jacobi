@@ -25,13 +25,14 @@ package jacobi.core.facade;
 
 import jacobi.api.annotations.Delegate;
 import jacobi.api.annotations.Facade;
-import jacobi.api.annotations.Immutate;
+import jacobi.api.annotations.Pure;
 import jacobi.api.annotations.Implementation;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -177,7 +178,7 @@ public class DelegateEngineTest {
         public Object doSth(double d);
     }
     
-    @Immutate
+    @Pure
     @Facade(NonFinalString.class)
     public interface ImmutateStringFacade {
         
@@ -364,7 +365,7 @@ public class DelegateEngineTest {
             super(string);
         }
         
-        @Immutate
+        @Pure
         @Delegate(facade = ImmutateStringFacade.class, method = "doSth")
         public NonFinalString doSth(String str) {
             this.string = str;

@@ -25,7 +25,7 @@ package jacobi.core.decomp.chol;
 
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
-import jacobi.api.annotations.Immutate;
+import jacobi.api.annotations.Pure;
 import jacobi.core.impl.CopyOnWriteMatrix;
 import jacobi.core.util.Pair;
 import jacobi.core.util.Throw;
@@ -40,7 +40,7 @@ import java.util.Optional;
  * 
  * @author Y.K. Chan
  */
-@Immutate
+@Pure
 public class CholeskyDecomp {
     
     /**

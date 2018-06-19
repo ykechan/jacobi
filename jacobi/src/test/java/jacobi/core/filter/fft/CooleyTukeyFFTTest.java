@@ -28,6 +28,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.stream.IntStream;
 
 import static org.junit.Assert.*;
 
@@ -41,7 +42,7 @@ public class CooleyTukeyFFTTest {
         );
         ComplexVector out = ComplexVector.of(new double[6], new double[6]);
 
-        new CooleyTukeyFFT().split(in, out, 0, in.length(), 2);
+        this.mock().split(in, out, 0, in.length(), 2);
 
         Assert.assertArrayEquals(new double[]{0.0, 2.0, 4.0, 1.0, 3.0, 5.0}, out.real, 1e-12);
         Assert.assertArrayEquals(new double[]{0.0, -2.0, -4.0, -1.0, -3.0, -5.0}, out.imag, 1e-12);
@@ -55,7 +56,7 @@ public class CooleyTukeyFFTTest {
         );
         ComplexVector out = ComplexVector.of(new double[6], new double[6]);
 
-        new CooleyTukeyFFT().split(in, out, 0, in.length(), 3);
+        this.mock().split(in, out, 0, in.length(), 3);
 
         Assert.assertArrayEquals(new double[]{0.0, 3.0, 1.0, 4.0, 2.0, 5.0}, out.real, 1e-12);
         Assert.assertArrayEquals(new double[]{0.0, -3.0, -1.0, -4.0, -2.0, -5.0}, out.imag, 1e-12);
@@ -69,7 +70,7 @@ public class CooleyTukeyFFTTest {
         );
         ComplexVector out = ComplexVector.of(new double[8], new double[8]);
 
-        new CooleyTukeyFFT().split(in, out, 0, 4, 2).split(in, out, 4, 4, 2);
+        this.mock().split(in, out, 0, 4, 2).split(in, out, 4, 4, 2);
 
         Assert.assertArrayEquals(new double[]{
                 0.0, 4.0, 2.0, 6.0, 1.0, 5.0, 3.0, 7.0
@@ -81,7 +82,7 @@ public class CooleyTukeyFFTTest {
 
     @Test
     public void testSplitLength8() {
-        ComplexVector result = new CooleyTukeyFFT().split(
+        ComplexVector result = this.mock().split(
                 ComplexVector.of(
                         new double[]{0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0},
                         new double[]{0.0, -1.0, -2.0, -3.0, -4.0, -5.0, -6.0, -7.0}
@@ -98,68 +99,78 @@ public class CooleyTukeyFFTTest {
     public void testFactorizeLength16Radix2Baseline1(){
         Assert.assertArrayEquals(
                 new int[]{2, 2, 2, 2, 1},
-                new CooleyTukeyFFT().factorize(16, new int[]{2}, new int[]{1}));
+                this.mock().factorize(16, new int[]{2}, new int[]{1}));
     }
 
     @Test
     public void testFactorizeLength6Radix2And3Baseline1(){
         Assert.assertArrayEquals(
                 new int[]{2, 3, 1},
-                new CooleyTukeyFFT().factorize(6, new int[]{2, 3}, new int[]{1}));
+                this.mock().factorize(6, new int[]{2, 3}, new int[]{1}));
     }
 
     @Test
     public void testFactorizeShouldPreserveThePriorityOfRadixArray() {
         Assert.assertArrayEquals(
                 new int[]{3, 2, 1},
-                new CooleyTukeyFFT().factorize(6, new int[]{3, 2}, new int[]{1}));
+                this.mock().factorize(6, new int[]{3, 2}, new int[]{1}));
     }
 
     @Test
     public void test1ShouldBeBaselineWithoutSpecifying(){
         Assert.assertArrayEquals(
                 new int[]{2, 3, 1},
-                new CooleyTukeyFFT().factorize(6, new int[]{2, 3}, new int[]{5}));
+                this.mock().factorize(6, new int[]{2, 3}, new int[]{5}));
         Assert.assertArrayEquals(
                 new int[]{2, 3, 1},
-                new CooleyTukeyFFT().factorize(6, new int[]{2, 3}, new int[0]));
+                this.mock().factorize(6, new int[]{2, 3}, new int[0]));
     }
 
     @Test
     public void testLengthAsBaselineWhenNoRadixSpecified() {
         Assert.assertArrayEquals(
                 new int[]{6},
-                new CooleyTukeyFFT().factorize(6, new int[0], new int[]{5}));
+                this.mock().factorize(6, new int[0], new int[]{5}));
     }
 
     @Test
     public void testLengthAsBaselineWhenNotDecomposible() {
         Assert.assertArrayEquals(
                 new int[]{7},
-                new CooleyTukeyFFT().factorize(7, new int[]{2, 3}, new int[]{5}));
+                this.mock().factorize(7, new int[]{2, 3}, new int[]{5}));
     }
 
     @Test
     public void testBaselineShouldBePreferredOverFactorizing() {
         Assert.assertArrayEquals(
                 new int[]{3, 6},
-                new CooleyTukeyFFT().factorize(18, new int[]{2, 3}, new int[]{6}));
+                this.mock().factorize(18, new int[]{2, 3}, new int[]{6}));
     }
 
     @Test
     public void testFactorizingShouldBePreferredWhenPrimedAfterBaseline() {
         Assert.assertArrayEquals(
                 new int[]{2, 3, 7},
-                new CooleyTukeyFFT().factorize(7 * 6, new int[]{2, 3}, new int[]{6}));
+                this.mock().factorize(7 * 6, new int[]{2, 3}, new int[]{6}));
     }
 
     @Test
     public void testFactorize1920() {
         Assert.assertArrayEquals(
                 new int[]{2, 2, 2, 2, 2, 2, 2, 3, 5, 1},
-                new CooleyTukeyFFT().factorize(1920,
+                this.mock().factorize(1920,
                     new int[]{2, 3, 5},
                     new int[0]));
+    }
+
+    protected CooleyTukeyFFT mock() {
+        CooleyTukeyMerger unsupport = (v, off, len) -> {
+            throw new UnsupportedOperationException();
+        };
+        return new CooleyTukeyFFT(new int[0], IntStream.range(0, 5)
+                .mapToObj(i -> unsupport)
+                .toArray(n -> new CooleyTukeyMerger[n])
+        );
     }
 
 }

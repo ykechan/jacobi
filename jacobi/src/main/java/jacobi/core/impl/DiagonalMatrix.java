@@ -25,7 +25,7 @@ package jacobi.core.impl;
 
 import jacobi.api.Matrix;
 import jacobi.api.annotations.Delegate;
-import jacobi.api.annotations.Immutate;
+import jacobi.api.annotations.Pure;
 import jacobi.api.ext.Op;
 import jacobi.api.ext.Prop;
 import jacobi.core.util.Throw;
@@ -95,7 +95,7 @@ public class DiagonalMatrix extends ImmutableMatrix {
      * Determinant of the diagonal matrix.
      * @return  det(A), which A is this matrix
      */
-    @Immutate
+    @Pure
     @Delegate(facade = Prop.class, method = "det")
     public double det() {
         return DoubleStream.of(this.vector).reduce(1.0, (a, b) -> a * b);
@@ -105,7 +105,7 @@ public class DiagonalMatrix extends ImmutableMatrix {
      * Inverse of the diagonal matrix.
      * @return  A^-1
      */
-    @Immutate
+    @Pure
     @Delegate(facade = Prop.class, method = "inv")
     public Optional<Matrix> inv() {
         double[] diag = new double[this.vector.length];
@@ -123,7 +123,7 @@ public class DiagonalMatrix extends ImmutableMatrix {
      * @param b  Input matrix B
      * @return  D * B
      */
-    @Immutate
+    @Pure
     @Delegate(facade = Op.class, method = "mul")
     public Matrix mul(Matrix b) {
         Throw.when()

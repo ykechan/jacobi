@@ -25,7 +25,7 @@
 package jacobi.core.linprog;
 
 import jacobi.api.Matrix;
-import jacobi.api.annotations.Immutate;
+import jacobi.api.annotations.Pure;
 import jacobi.core.util.Throw;
 import java.util.Optional;
 
@@ -43,7 +43,7 @@ import java.util.Optional;
  * 
  * @author Y.K. Chan
  */
-@Immutate
+@Pure
 public class LinearProg {
 
     /**

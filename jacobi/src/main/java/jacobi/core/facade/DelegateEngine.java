@@ -25,7 +25,7 @@ package jacobi.core.facade;
 
 import jacobi.api.annotations.Delegate;
 import jacobi.api.annotations.Facade;
-import jacobi.api.annotations.Immutate;
+import jacobi.api.annotations.Pure;
 import jacobi.core.util.Throw;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -185,9 +185,9 @@ public class DelegateEngine extends FacadeEngine {
         }
         
         public boolean isValid() { 
-            boolean needImmutate = this.facade.isAnnotationPresent(Immutate.class)
-                    || this.facade.getDeclaringClass().isAnnotationPresent(Immutate.class);
-            return !needImmutate || this.method.isAnnotationPresent(Immutate.class); 
+            boolean needImmutate = this.facade.isAnnotationPresent(Pure.class)
+                    || this.facade.getDeclaringClass().isAnnotationPresent(Pure.class);
+            return !needImmutate || this.method.isAnnotationPresent(Pure.class);
         }
 
         @Override

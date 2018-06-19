@@ -26,7 +26,7 @@ package jacobi.core.decomp.qr;
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.api.annotations.Delegate;
-import jacobi.api.annotations.Immutate;
+import jacobi.api.annotations.Pure;
 import jacobi.api.ext.Op;
 import jacobi.api.ext.Prop;
 import jacobi.core.impl.ColumnVector;
@@ -148,7 +148,7 @@ public class Householder extends ImmutableMatrix {
      * this matrix is symmetric.
      * @return  Transpose of this matrix
      */
-    @Immutate
+    @Pure
     @Delegate(facade = Prop.class, method = "transpose")
     public Matrix transpose() {
         return this.copy();
@@ -159,7 +159,7 @@ public class Householder extends ImmutableMatrix {
      * this matrix is orthogonal.
      * @return  Transpose of this matrix
      */
-    @Immutate
+    @Pure
     @Delegate(facade = Prop.class, method = "inv")
     public Optional<Matrix> inv() {
         return Optional.of(this.copy());
@@ -171,7 +171,7 @@ public class Householder extends ImmutableMatrix {
      * @param matrix  Matrix A
      * @return   H * A
      */
-    @Immutate
+    @Pure
     @Delegate(facade = Op.class, method = "mul")
     public Matrix mul(Matrix matrix) {
         Matrix clone = Matrices.copy(matrix);
