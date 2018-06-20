@@ -48,11 +48,11 @@ public class DiscreteFourierTransformTest {
     public Matrix outIm;
 
     @Test
-    @JacobiImport("Complex 7x3")
-    //@JacobiEquals(expected =  10, actual = 10)
-    //@JacobiEquals(expected =  11, actual = 11)
-    public void testComplex7x3() {
-        //this.compute(new DiscreteFourierTransform.Forward());
+    @JacobiImport("Complex 7x12")
+    @JacobiEquals(expected =  10, actual = 10)
+    @JacobiEquals(expected =  11, actual = 11)
+    public void testComplex7x12() {
+        this.compute(new DiscreteFourierTransform.Forward());
     }
 
     public void compute(DiscreteFourierTransform dft) {

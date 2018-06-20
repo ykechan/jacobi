@@ -40,6 +40,13 @@ import java.util.stream.IntStream;
 @Pure
 public class CooleyTukeyFFT {
 
+    /**
+     * Constructor.
+     * @param baselines  Lengths that computing DFT of the range efficiently is supported
+     * @param mergers  Implementation of mergers in different radix. The i-th element is in radix i.
+     *                 0-th element is used for computing DFT directly when down to baseline lengths.
+     *                 1-st element is used for computing DFT directly for non-supporting baseline lengths.
+     */
     public CooleyTukeyFFT(int[] baselines, CooleyTukeyMerger[] mergers) {
         this.mergers = Arrays.copyOf(mergers, mergers.length);
         this.radices = IntStream.range(0, mergers.length)
@@ -49,6 +56,11 @@ public class CooleyTukeyFFT {
         this.baselines = Arrays.copyOf(baselines, baselines.length);
     }
 
+    /**
+     * Get the DFT function of given length.
+     * @param len
+     * @return  DFT function that accepts an input vector and a buffer vector, which returns the DFT of the input vector.
+     */
     public BinaryOperator<ComplexVector> of(int len) {
         int[] factors = this.factorize(len, this.radices, this.baselines);
         return (in, buf) -> this.compute(in, buf, factors);
@@ -60,7 +72,7 @@ public class CooleyTukeyFFT {
         this.transform(vector, base);
         for(int i = factors.length - 2; i >= 0; i--){
             int f = factors[i];
-            this.merge(vector, base * f, base);
+            this.merge(vector, base * f, f);
             base *= f;
         }
         return vector;
