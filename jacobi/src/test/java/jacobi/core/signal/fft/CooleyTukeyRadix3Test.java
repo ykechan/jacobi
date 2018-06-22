@@ -22,11 +22,12 @@
  * SOFTWARE.
  */
 
-package jacobi.core.filter.fft;
+package jacobi.core.signal.fft;
 
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.core.givens.Givens;
+import jacobi.core.signal.ComplexVector;
 import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;

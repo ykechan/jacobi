@@ -22,9 +22,10 @@
  * SOFTWARE.
  */
 
-package jacobi.core.filter.fft;
+package jacobi.core.signal.fft;
 
 import jacobi.api.annotations.Pure;
+import jacobi.core.signal.ComplexVector;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,6 +55,24 @@ public class CooleyTukeyFFT {
             .filter(i -> mergers[i] != null)
             .toArray();
         this.baselines = Arrays.copyOf(baselines, baselines.length);
+    }
+
+    /**
+     * Estimate the number of flop required to transform a complex vector of given size using this object.
+     * @param len  Length of the vector
+     * @return  Estimated number of flop to transform a vector of given size
+     */
+    public long estimateCost(int len) {
+        int[] factors = this.factorize(len, this.radices, this.baselines);
+        int base = factors[factors.length - 1];
+        boolean isFast = false;
+        for(int factor : this.baselines){
+            if(factor == base){
+                isFast = true;
+                break;
+            }
+        }
+        return 2 * (isFast ? 1L : base ) * len * factors.length;
     }
 
     /**

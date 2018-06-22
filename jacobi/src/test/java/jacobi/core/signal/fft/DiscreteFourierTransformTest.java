@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package jacobi.core.filter.fft;
+package jacobi.core.signal.fft;
 
 import jacobi.api.Matrix;
 import jacobi.core.util.Pair;

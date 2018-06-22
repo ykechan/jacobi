@@ -22,21 +22,10 @@
  * SOFTWARE.
  */
 
-package jacobi.core.filter.fft;
+package jacobi.core.signal.smooth;
 
-/**
- * Interface for merging split parts of vector by Cooley-Tukey algorithm.
- *
- * @author Y.K. Chan
- */
-public interface CooleyTukeyMerger {
+import static org.junit.Assert.*;
 
-    /**
-     * Merge split parts of vector.
-     * @param vector  Complex vector to be merged
-     * @param offset  Offset index of the range
-     * @param length  Length of the range
-     */
-    public void merge(ComplexVector vector, int offset, int length);
+public class SimpleMovingAvgTest {
 
 }

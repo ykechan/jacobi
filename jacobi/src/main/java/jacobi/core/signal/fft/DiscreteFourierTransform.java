@@ -22,12 +22,13 @@
  * SOFTWARE.
  */
 
-package jacobi.core.filter.fft;
+package jacobi.core.signal.fft;
 
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.api.annotations.Pure;
 import jacobi.core.impl.ImmutableMatrix;
+import jacobi.core.signal.ComplexVector;
 import jacobi.core.util.Pair;
 import jacobi.core.util.ParallelSupplier;
 import jacobi.core.util.Throw;
@@ -39,16 +40,22 @@ import java.util.function.IntConsumer;
 @Pure
 public abstract class DiscreteFourierTransform {
 
+    public static final int DEFAULT_MIN_TASK = 2 * ParallelSupplier.DEFAULT_NUM_THREADS;
+
+    public static final int DEFAULT_MIN_FLOP = ParallelSupplier.DEFAULT_FLOP_THRESHOLD;
+
     public static class Forward extends DiscreteFourierTransform {
 
         public Forward() {
-            super(new CooleyTukeyFFT(new int[]{6, 2, 3}, getImpl()));
+            super(DEFAULT_FORWARD, DEFAULT_MIN_TASK, DEFAULT_MIN_FLOP);
         }
 
     }
 
-    protected DiscreteFourierTransform(CooleyTukeyFFT fft) {
+    protected DiscreteFourierTransform(CooleyTukeyFFT fft, int minTasks, long minFlop) {
         this.fft = fft;
+        this.minTasks = minTasks;
+        this.minFlop = minFlop;
     }
 
     public Pair compute(Matrix matRe) {
@@ -88,36 +95,38 @@ public abstract class DiscreteFourierTransform {
             dftRe.setRow(i, res.real);
             dftIm.setRow(i, res.imag);
         };
-        this.compute(func, matRe.getRowCount(), matRe.getColCount());
+        if(this.isHeavy(matRe.getRowCount(), matRe.getColCount())){
+            ParallelSupplier.cyclic(func, 0, dftRe.getRowCount());
+        }else{
+            for(int i = 0; i < dftRe.getRowCount(); i++){
+                func.accept(i);
+            }
+        }
         return Pair.of(dftRe, dftIm);
     }
 
-    protected void compute(IntConsumer func, int rowCount, int colCount) {
-        if(this.runInParallel(rowCount, colCount)){
-            ParallelSupplier.cyclic(func, 0, rowCount);
-            return;
-        }
-        for(int i = 0; i < rowCount; i++){
-            func.accept(i);
-        }
+    /**
+     * Check if the work load is heavy enough to use parallelism.
+     * @param rowCount  Number of vectors
+     * @param colCount  Vector dimension
+     * @return  True if vectors are numerous and each transform is complicated enough, false otherwise
+     */
+    protected boolean isHeavy(int rowCount, int colCount) {
+        return rowCount > this.minTasks && this.fft.estimateCost(colCount) > this.minFlop;
     }
 
-    protected boolean runInParallel(int rowCount, int colCount) {
-        int numFlop = (int) Math.ceil(Math.log(colCount)) * colCount * rowCount;
-        return rowCount > ParallelSupplier.DEFAULT_NUM_THREADS
-            && numFlop > ParallelSupplier.DEFAULT_FLOP_THRESHOLD;
-    }
-
+    private int minTasks;
+    private long minFlop;
     private CooleyTukeyFFT fft;
 
-    protected static CooleyTukeyMerger[] getImpl() {
-        return new CooleyTukeyMerger[]{
-            new BasisDft(12),
-            new BasisDft(Short.MAX_VALUE),
-            new CooleyTukeyRadix2(),
-            new CooleyTukeyRadix3(),
-            null,
-            new CooleyTukeyRadixN(5)
-        };
-    }
+    private static final CooleyTukeyFFT DEFAULT_FORWARD = new CooleyTukeyFFT(new int[]{}, new CooleyTukeyMerger[]{
+        new BasisDft(6),
+        new BasisDft(1024),
+        new CooleyTukeyRadix2(true),
+        new CooleyTukeyRadix3(),
+        null,
+        new CooleyTukeyRadixN(5)
+    });
+
+    private static final CooleyTukeyFFT DEFAULT_INVERSE = null;
 }

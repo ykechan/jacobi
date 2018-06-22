@@ -22,10 +22,11 @@
  * SOFTWARE.
  */
 
-package jacobi.core.filter.fft;
+package jacobi.core.signal.fft;
 
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
+import jacobi.core.signal.ComplexVector;
 import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
@@ -52,7 +53,7 @@ public class CooleyTukeyRadix2Test {
     @JacobiImport("Pure Real 10")
     @JacobiEquals(expected = 1, actual = 1)
     public void testPureReal10() {
-        ComplexVector vec = ComplexVector.of(this.input.getRow(0), this.input.getRow(1));        
+        ComplexVector vec = ComplexVector.of(this.input.getRow(0), this.input.getRow(1));
         this.mockNoPivot().merge(vec, 0, vec.length());
         this.output = Matrices.of(new double[][]{vec.real, vec.imag});
     }
@@ -80,7 +81,7 @@ public class CooleyTukeyRadix2Test {
     @JacobiEquals(expected = 1, actual = 1)
     public void testComplex6UsingPivot3() {
         ComplexVector vec = ComplexVector.of(this.input.getRow(0), this.input.getRow(1));        
-        new CooleyTukeyRadix2().merge(vec, 0, vec.length());
+        new CooleyTukeyRadix2(true).merge(vec, 0, vec.length());
         Arrays.stream(vec.real).forEach(System.out::println);
         Arrays.stream(vec.imag).forEach(System.out::println);
         this.output = Matrices.of(new double[][]{vec.real, vec.imag});
@@ -91,7 +92,7 @@ public class CooleyTukeyRadix2Test {
     @JacobiEquals(expected = 1, actual = 1)
     public void testComplex8UsingPivot2() {
         ComplexVector vec = ComplexVector.of(this.input.getRow(0), this.input.getRow(1));        
-        new CooleyTukeyRadix2(){
+        new CooleyTukeyRadix2(true){
 
             @Override
             protected ComplexVector select(int len) {
@@ -107,7 +108,7 @@ public class CooleyTukeyRadix2Test {
     @JacobiEquals(expected = 1, actual = 1)
     public void testComplex24UsingPivot4() {
         ComplexVector vec = ComplexVector.of(this.input.getRow(0), this.input.getRow(1));        
-        new CooleyTukeyRadix2(){
+        new CooleyTukeyRadix2(true){
 
             @Override
             protected ComplexVector select(int len) {
@@ -123,7 +124,7 @@ public class CooleyTukeyRadix2Test {
     @JacobiEquals(expected = 1, actual = 1)
     public void testComplex24UsingPivot6() {
         ComplexVector vec = ComplexVector.of(this.input.getRow(0), this.input.getRow(1));        
-        new CooleyTukeyRadix2().merge(vec, 0, vec.length());
+        new CooleyTukeyRadix2(true).merge(vec, 0, vec.length());
         this.output = Matrices.of(new double[][]{vec.real, vec.imag});
     }
 
@@ -132,7 +133,7 @@ public class CooleyTukeyRadix2Test {
     @JacobiEquals(expected = 1, actual = 1)
     public void testComplex10DFT() {
         ComplexVector vec = ComplexVector.of(this.input.getRow(0), this.input.getRow(1));
-        new CooleyTukeyRadix2().merge(vec, 0, vec.length());
+        new CooleyTukeyRadix2(true).merge(vec, 0, vec.length());
         this.output = Matrices.of(new double[][]{vec.real, vec.imag});
     }
 
@@ -159,7 +160,7 @@ public class CooleyTukeyRadix2Test {
     
     @Test
     public void testPivotValues() {
-        CooleyTukeyRadix2 fft = new CooleyTukeyRadix2();
+        CooleyTukeyRadix2 fft = new CooleyTukeyRadix2(true);
         for(int i = 1; i < 129; i++){
             ComplexVector pivot = fft.select(i);
             for(int k = 0; k < pivot.length(); k++){

@@ -22,10 +22,11 @@
  * SOFTWARE.
  */
 
-package jacobi.core.filter.fft;
+package jacobi.core.signal.fft;
 
+import jacobi.core.signal.ComplexVector;
 import jacobi.core.util.Throw;
-import java.util.Arrays;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,22 +49,24 @@ public class CooleyTukeyRadix2 implements CooleyTukeyMerger {
     /**
      * Constructor.
      */
-    public CooleyTukeyRadix2() {
-        this(DEFAULT_PIVOTS
+    public CooleyTukeyRadix2(boolean forward) {
+        this(forward ? 1 : -1, DEFAULT_PIVOTS
                 .stream()
-                .map(p -> p.slice(0, p.length()))
+                .map(p -> forward ? p.slice(0, p.length()) : p.conj())
                 .toArray(n -> new ComplexVector[n]));
     }
 
     /**
      * Constructor.
+     * @param sign  1 for forward transform, -1 for inverse transform
      * @param pivots  Array of pivots for calibration to obtain higher numerical stability.
      * @throws  IllegalArgumentException  if pivots is null or length less than 7
      */
-    protected CooleyTukeyRadix2(ComplexVector[] pivots) {
+    protected CooleyTukeyRadix2(int sign, ComplexVector[] pivots) {
         Throw.when()
                 .isNull(() -> pivots, () -> "No pivot")
-                .isTrue(() -> pivots.length < 7, () -> "Too few pivots. Expected to support 6 partitions.");
+                .isTrue(() -> pivots.length < 7, () -> "Too few pivots. Expected to support minimum 6 partitions.");
+        this.sign = sign;
         this.pivots = pivots;
     }
 
@@ -106,7 +109,7 @@ public class CooleyTukeyRadix2 implements CooleyTukeyMerger {
     protected void merge(ComplexVector vector, int offset, int length, ComplexVector pivot) {
         int num = length / 2;
         double c =  Math.cos(Math.PI / num);
-        double s = -Math.sin(Math.PI / num);
+        double s = -this.sign * Math.sin(Math.PI / num);
         int arc = num / pivot.length();
         int mid = offset + num;
         for(int k = 0; k < pivot.length(); k++){ 
@@ -131,6 +134,7 @@ public class CooleyTukeyRadix2 implements CooleyTukeyMerger {
         }
     }
 
+    private int sign;
     private ComplexVector[] pivots;
     
     private static final List<ComplexVector> DEFAULT_PIVOTS = IntStream.rangeClosed(0, 6)

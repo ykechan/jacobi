@@ -22,14 +22,13 @@
  * SOFTWARE.
  */
 
-package jacobi.core.filter.fft;
+package jacobi.core.signal.fft;
 
-import jacobi.core.givens.Givens;
+import jacobi.core.signal.ComplexVector;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Random;
-import java.util.stream.IntStream;
 
 public class CooleyTukeyRadixNTest {
 

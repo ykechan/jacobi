@@ -22,12 +22,12 @@
  * SOFTWARE.
  */
 
-package jacobi.core.filter.fft;
+package jacobi.core.signal.fft;
 
 
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
-import jacobi.core.givens.Givens;
+import jacobi.core.signal.ComplexVector;
 import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
@@ -37,13 +37,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Random;
-import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.IntStream;
 
 @JacobiImport("/jacobi/test/data/BasisDftTest.xlsx")
 @RunWith(JacobiJUnit4ClassRunner.class)

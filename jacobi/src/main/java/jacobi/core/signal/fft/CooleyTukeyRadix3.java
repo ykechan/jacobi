@@ -22,7 +22,9 @@
  * SOFTWARE.
  */
 
-package jacobi.core.filter.fft;
+package jacobi.core.signal.fft;
+
+import jacobi.core.signal.ComplexVector;
 
 /**
  * Implementation of merging part of vector that has split by 3 by Cooley-Tukey algorithm.

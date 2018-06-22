@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright(c) 2018 Y.K. Chan.
+ * Copyright (c) 2018 Y.K. Chan.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package jacobi.core.filter.fft;
+package jacobi.core.signal;
 
 import jacobi.core.util.Throw;
 
