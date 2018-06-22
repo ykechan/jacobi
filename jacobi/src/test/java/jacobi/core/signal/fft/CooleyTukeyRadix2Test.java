@@ -145,7 +145,7 @@ public class CooleyTukeyRadix2Test {
         // no special value for 3/5
         pivots[3] = pivots[1];
         pivots[5] = pivots[1];
-        CooleyTukeyRadix2 fft = new CooleyTukeyRadix2(pivots);
+        CooleyTukeyRadix2 fft = new CooleyTukeyRadix2(1, pivots);
         for(int i = 1; i < 129; i++){
             ComplexVector pivot = fft.select(i);
             Assert.assertEquals("Pivot " + pivot.length() + " for " + i + " is not correct.", 0, i % pivot.length());
@@ -185,7 +185,7 @@ public class CooleyTukeyRadix2Test {
         int count = 0;
         for(int i = 0; i < 7; i++){
             try{
-                new CooleyTukeyRadix2(new ComplexVector[i]);
+                new CooleyTukeyRadix2(1, new ComplexVector[i]);
             }catch(IllegalArgumentException ex){
                 count++;
             }
@@ -194,7 +194,7 @@ public class CooleyTukeyRadix2Test {
     }
 
     protected CooleyTukeyRadix2 mockNoPivot() {
-        return new CooleyTukeyRadix2(IntStream.range(0, 7)
+        return new CooleyTukeyRadix2(1, IntStream.range(0, 7)
                 .mapToObj(n -> ComplexVector.of(new double[]{1.0}, new double[]{0.0}))
                 .toArray(n -> new ComplexVector[n])
         );

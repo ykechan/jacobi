@@ -42,7 +42,7 @@ public class CooleyTukeyRadixNTest {
 
         ComplexVector result2 = vector.slice(0, vector.length());
         ComplexVector resultN = vector.slice(0, vector.length());
-        new CooleyTukeyRadix2().merge(result2, 0, result2.length());
+        new CooleyTukeyRadix2(true).merge(result2, 0, result2.length());
         new CooleyTukeyRadixN(2).merge(resultN, 0, resultN.length());
 
         Assert.assertArrayEquals(result2.real, resultN.real, 1e-12);
