@@ -42,7 +42,7 @@ public class DefaultMatrixTest {
         };
         Matrix matrix = new DefaultMatrix(rows);
         for(int i = 0; i < rows.length; i++){
-            Assert.assertTrue(matrix.getRow(i) != rows[i]);
+            Assert.assertTrue(matrix.getRow(i) == rows[i]);
         }
         
         Matrix matrix2 = new DefaultMatrix(matrix);
@@ -69,12 +69,12 @@ public class DefaultMatrixTest {
         double[] row = matrix.getRow(0);
         row[1] = Math.exp(2.0);
         
-        Assert.assertEquals(rows[0][1], Math.E, 1e-14);
+        Assert.assertEquals(rows[0][1], Math.exp(2.0), 1e-14);
         
         double[] elem = {1.0, 2.0, 3.0};
         matrix.setRow(1, elem);
         
-        Assert.assertTrue(rows[1] != matrix.getRow(1));
+        Assert.assertTrue(rows[1] == matrix.getRow(1));
         Assert.assertArrayEquals(rows[1], elem, 1e-14);
     }
     
