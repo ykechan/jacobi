@@ -26,6 +26,7 @@ package jacobi.core.decomp.qr;
 import jacobi.core.givens.GivensQR;
 import jacobi.api.Matrix;
 import jacobi.core.givens.Givens;
+import jacobi.core.impl.ImmutableMatrix;
 import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
@@ -186,7 +187,29 @@ public class GivensQRTest {
             @Override
             public Givens applyGivens(double[] upper, double[] lower, int begin, int end) {
                 Givens g = super.applyGivens(upper, lower, begin, end);
-                Jacobi.assertEquals(after[index++], matrix);
+                Jacobi.assertEquals(after[index++], new ImmutableMatrix(){
+
+                    @Override
+                    public int getRowCount() {
+                        return matrix.getRowCount();
+                    }
+
+                    @Override
+                    public int getColCount() {
+                        return matrix.getColCount();
+                    }
+
+                    @Override
+                    public double[] getRow(int index) {
+                        if(index == begin){
+                            return upper;
+                        }
+                        if(index == begin + 1){
+                            return lower;
+                        }
+                        return matrix.getRow(index);
+                    }
+                });
                 return g;
             }
             

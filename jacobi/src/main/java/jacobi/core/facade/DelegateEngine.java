@@ -185,9 +185,9 @@ public class DelegateEngine extends FacadeEngine {
         }
         
         public boolean isValid() { 
-            boolean needImmutate = this.facade.isAnnotationPresent(Pure.class)
+            boolean needPure = this.facade.isAnnotationPresent(Pure.class)
                     || this.facade.getDeclaringClass().isAnnotationPresent(Pure.class);
-            return !needImmutate || this.method.isAnnotationPresent(Pure.class);
+            return !needPure || this.method.isAnnotationPresent(Pure.class);
         }
 
         @Override

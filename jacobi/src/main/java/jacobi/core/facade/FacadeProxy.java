@@ -83,7 +83,7 @@ public class FacadeProxy implements InvocationHandler {
                 returnValue
         );
         return newProxy(facadeClass, handler);
-    }        
+    }
 
     /**
      * Construct a new Facade proxy.
@@ -121,7 +121,8 @@ public class FacadeProxy implements InvocationHandler {
             if(!this.facadeClass.getAnnotation(Facade.class).value().isInstance(result)){
                 throw new UnsupportedOperationException("Unable to create chain with result " + result);
             }
-            InvocationHandler handler = new FacadeProxy(engine, facadeClass, result);
+            InvocationHandler handler = new FacadeProxy(engine, facadeClass, result,
+                    result == facadeArg ? returnValue : result);
             return newProxy(this.facadeClass, handler);
         }
         return result;
@@ -146,8 +147,8 @@ public class FacadeProxy implements InvocationHandler {
                 .filter((t) -> t == facade.value())
                 .findAny()
                 .isPresent();
-    }    
-    
+    }
+
     /**
      * Create new proxy object with given invocation handler.
      * @param <T>  Proxy interface
@@ -160,10 +161,10 @@ public class FacadeProxy implements InvocationHandler {
         try {
             return (T) proxyClass
                     .getConstructor(new Class[] { InvocationHandler.class })
-                    .newInstance(new Object[] { handler });            
-        } catch (NoSuchMethodException  
-               | SecurityException 
-               | InstantiationException 
+                    .newInstance(new Object[] { handler });
+        } catch (NoSuchMethodException
+               | SecurityException
+               | InstantiationException
                | IllegalAccessException ex) {
             throw new UnsupportedOperationException(ex);
         } catch (InvocationTargetException ex) {

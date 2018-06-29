@@ -34,7 +34,7 @@ import java.util.Arrays;
  * 
  * @author Y.K. Chan
  */
-public class DefaultMatrix implements Matrix {
+public final class DefaultMatrix implements Matrix {
     
     /**
      * Constructor.
@@ -79,7 +79,7 @@ public class DefaultMatrix implements Matrix {
 
     @Override
     public double[] getRow(int index) {
-        return this.rows[index];
+        return Arrays.copyOf(this.rows[index], this.getColCount());
     }    
 
     @Override
@@ -119,7 +119,7 @@ public class DefaultMatrix implements Matrix {
 
     @Override
     public <T> T ext(Class<T> clazz) {
-        return FacadeProxy.of(clazz, this);
+        return FacadeProxy.of(clazz, new UnsafeMatrix(this.rows, cls -> this.ext(cls)), this);
     }
 
     @Override

@@ -65,7 +65,8 @@ public class ElementaryPivoting implements Pivoting {
             }
             matrix.getAndSet(k, (r) -> this.eliminate(r, pivot, col));
         }
-        this.normalize(pivot, col);        
+        this.normalize(pivot, col);
+        matrix.setRow(row, pivot);
     }    
     
     /**
