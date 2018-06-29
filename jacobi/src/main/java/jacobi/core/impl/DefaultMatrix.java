@@ -79,7 +79,7 @@ public final class DefaultMatrix implements Matrix {
 
     @Override
     public double[] getRow(int index) {
-        return Arrays.copyOf(this.rows[index], this.getColCount());
+        return this.rows[index];
     }    
 
     @Override
@@ -119,7 +119,7 @@ public final class DefaultMatrix implements Matrix {
 
     @Override
     public <T> T ext(Class<T> clazz) {
-        return FacadeProxy.of(clazz, new UnsafeMatrix(this.rows, cls -> this.ext(cls)), this);
+        return FacadeProxy.of(clazz, this);
     }
 
     @Override
