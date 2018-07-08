@@ -2,9 +2,6 @@ language: java
 jdk:
   - oraclejdk10
 script:
-  - jdk_switcher use openjdk10
-  - export JAVA_HOME=$HOME/openjdk11
-  - $TRAVIS_BUILD_DIR/install-jdk.sh --install openjdk11 --target $JAVA_HOME
   - mvn test
 install:
   - mvn --settings ../travis/settings.xml install -DskipTests=true -Dgpg.skip -Dmaven.javadoc.skip=true -B -V
