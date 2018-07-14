@@ -113,10 +113,14 @@ public class JacobiDataSource {
             .isNull(() -> row.getCell(0), () -> "Undefined number of rows at row #" + row.getRowNum())
             .isNull(() -> row.getCell(1), () -> "Undefined number of columns at row #" + row.getRowNum())
             .isFalse(
-                () -> row.getCell(0).getCellType() == Cell.CELL_TYPE_NUMERIC,
+                () -> row.getCell(0).getCellType() == Cell.CELL_TYPE_NUMERIC
+                    || (row.getCell(0).getCellType() == Cell.CELL_TYPE_FORMULA
+                     && row.getCell(0).getCachedFormulaResultType() == Cell.CELL_TYPE_NUMERIC),
                 () -> "Invalid number of rows at row #" + row.getRowNum())
             .isFalse(
-                () -> row.getCell(1).getCellType() == Cell.CELL_TYPE_NUMERIC,
+                () -> row.getCell(1).getCellType() == Cell.CELL_TYPE_NUMERIC
+                    || (row.getCell(1).getCellType() == Cell.CELL_TYPE_FORMULA
+                     && row.getCell(1).getCachedFormulaResultType() == Cell.CELL_TYPE_NUMERIC),
                 () -> "Invalid number of columns at row #" + row.getRowNum());
         
         double numRows = row.getCell(0).getNumericCellValue();

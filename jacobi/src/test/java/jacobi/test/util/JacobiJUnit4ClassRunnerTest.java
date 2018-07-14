@@ -28,6 +28,7 @@ import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.annotations.JacobiResult;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -74,5 +75,13 @@ public class JacobiJUnit4ClassRunnerTest {
     @JacobiImport("testReadEquals5x5")
     @JacobiEquals(expected = 0, actual = 0)
     public void testReadDuplicates() {
+    }
+
+    @Test
+    @JacobiImport("test Dynamic Dimension 1x7")
+    @JacobiEquals(expected = 0, actual = 0)
+    public void testDynamicDimension() {
+        Assert.assertEquals(1, this.u.getRowCount());
+        Assert.assertEquals(7, this.u.getColCount());
     }
 }
