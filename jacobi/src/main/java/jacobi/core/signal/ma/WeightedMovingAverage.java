@@ -47,30 +47,33 @@ public class WeightedMovingAverage extends AbstractMovingAverage {
     }
 
     protected double[] init(double[] sig, double[] out, int lag) {
+        if(this.mode == Initial.PAD || this.mode == Initial.ZERO){
+            return this.initPad(sig, out, lag, this.mode == Initial.ZERO ? 0.0 : sig[0]);
+        }
         int denom = this.mode == Initial.ADAPT ? 0 : this.sumOfArthSeq(lag);
-        double sum = this.mode == Initial.PAD ? lag * sig[0] : 0.0;
-        double wSum = this.mode == Initial.PAD ? denom * sig[0] : 0.0;
+        double sum = 0.0;
+        double wSum = 0.0;
         for(int i = 0; i < lag; i++){
             sum += sig[i];
             wSum += (i + 1) * sig[i];
-            switch(this.mode){
-                case SHRINK:
-                    break;
-                case ADAPT:
-                    out[i] = wSum / (denom += (i + 1));
-                    break;
-                case PAD:
-                    wSum -= sum;
-                    sum -= sig[0];
-                case ZERO:
-                    out[i] = wSum / denom;
-                    break;
-                default :
-                    throw new IllegalStateException("Unknown initial mode " + this.mode);
+            if(this.mode == Initial.ADAPT){
+                out[i] = wSum / (denom += (i + 1));
             }
         }
         if(this.mode == Initial.SHRINK){
             out[0] = wSum / denom;
+        }
+        return new double[]{sum, wSum};
+    }
+
+    protected double[] initPad(double[] sig, double[] out, int lag, double pad) {
+        int denom = this.sumOfArthSeq(lag);
+        double sum = lag * pad;
+        double wSum = denom * pad;
+        for(int i = 0; i < lag; i++){
+            wSum += lag * sig[i] - sum;
+            sum += sig[i] - pad;
+            out[i] = wSum / denom;
         }
         return new double[]{sum, wSum};
     }

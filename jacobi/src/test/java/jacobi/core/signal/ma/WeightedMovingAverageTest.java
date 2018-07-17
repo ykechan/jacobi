@@ -32,8 +32,6 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.IntStream;
 
-import static org.junit.Assert.*;
-
 public class WeightedMovingAverageTest {
 
     @Test
@@ -64,8 +62,69 @@ public class WeightedMovingAverageTest {
         Random rand = new Random(Double.doubleToLongBits(-Math.E));
         double[] signal = IntStream.range(0, 17).mapToDouble(i -> rand.nextDouble()).toArray();
         int lag = 5;
-
         Assert.assertArrayEquals(this.shrink(signal, 5), this.mock(Initial.SHRINK).compute(signal, 5), 1e-12);
+        Assert.assertArrayEquals(
+                this.shrink(this.padLeft(signal, 4, 0.0), 5),
+                this.mock(Initial.ZERO).compute(signal, 5), 1e-12);
+    }
+
+    @Test
+    public void testRandomSignalInShrinkMode() {
+        Random rand = new Random(Double.doubleToLongBits(-Math.E));
+        double[] signal = IntStream.range(0, 17).mapToDouble(i -> rand.nextDouble()).toArray();
+        int lag = 5;
+        Assert.assertArrayEquals(this.shrink(signal, lag), this.mock(Initial.SHRINK).compute(signal, lag), 1e-12);
+    }
+
+    @Test
+    public void testZeroModeIsEquivToPaddingZeroBeforeShrink() {
+        Random rand = new Random(Double.doubleToLongBits(-Math.E));
+        double[] signal = IntStream.range(0, 17).mapToDouble(i -> rand.nextDouble()).toArray();
+        int lag = 5;
+        Assert.assertArrayEquals(
+                this.shrink(this.padLeft(signal, lag-1, 0.0), lag),
+                this.mock(Initial.ZERO).compute(signal, lag),
+                1e-12
+        );
+    }
+
+    @Test
+    public void testPadModeIsEquivToPadding1stElementBeforeShrink() {
+        Random rand = new Random(Double.doubleToLongBits(-Math.E));
+        double[] signal = IntStream.range(0, 17).mapToDouble(i -> rand.nextDouble()).toArray();
+        int lag = 5;
+        Assert.assertArrayEquals(
+                this.shrink(this.padLeft(signal, lag-1, signal[0]), lag),
+                this.mock(Initial.PAD).compute(signal, lag),
+                1e-12
+        );
+    }
+
+    @Test
+    public void testImplShouldBeEquivToOracleImplForVariousLengths() {
+        Random rand = new Random(Double.doubleToLongBits(Math.E * Math.PI));
+        int limit = 64;
+        double max = 100.0;
+        for(int n = 3; n < limit; n++){
+            double[] signal = IntStream.range(0, n).mapToDouble(i -> max * rand.nextDouble()).toArray();
+            for(int lag = 2; lag < n; lag++){
+                Assert.assertArrayEquals(
+                        "Length = " + n + ", Lag = " + lag + ", Shrink",
+                        this.shrink(signal, lag),
+                        this.mock(Initial.SHRINK).compute(signal, lag),
+                        1e-8);
+                Assert.assertArrayEquals(
+                        "Length = " + n + ", Lag = " + lag + ", Zero",
+                        this.shrink(this.padLeft(signal, lag-1, 0.0), lag),
+                        this.mock(Initial.ZERO).compute(signal, lag),
+                        1e-8);
+                Assert.assertArrayEquals(
+                        "Length = " + n + ", Lag = " + lag + ", Pad",
+                        this.shrink(this.padLeft(signal, lag-1, signal[0]), lag),
+                        this.mock(Initial.PAD).compute(signal, lag),
+                        1e-8);
+            }
+        }
     }
 
     private double[] shrink(double[] signal, int lag) {
