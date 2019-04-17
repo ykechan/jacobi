@@ -34,6 +34,6 @@ import jacobi.api.Matrix;
  */
 public interface LogisticRegr {
     
-    public Matrix compute(Matrix input, Matrix outcome, double[] weights);
+    public double[] compute(Matrix input, double[] outcome, double[] weights);
 
 }
