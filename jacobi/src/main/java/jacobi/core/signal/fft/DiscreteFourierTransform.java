@@ -36,6 +36,7 @@ import jacobi.core.util.Throw;
 import java.util.Arrays;
 import java.util.function.BinaryOperator;
 import java.util.function.IntConsumer;
+import java.util.function.UnaryOperator;
 
 @Pure
 public abstract class DiscreteFourierTransform {
@@ -56,6 +57,19 @@ public abstract class DiscreteFourierTransform {
         this.fft = fft;
         this.minTasks = minTasks;
         this.minFlop = minFlop;
+    }
+    
+    public UnaryOperator<ComplexVector> toFunc(int width) {
+    	return v -> {
+    		Pair result = this.compute(
+    			Matrices.wrap(new double[][] {v.real}), 
+    			Matrices.wrap(new double[][] {v.imag})
+    		);
+    		return ComplexVector.of(
+    			result.getLeft().getRow(0),
+    			result.getRight().getRow(0)
+    		);
+    	};
     }
 
     public Pair compute(Matrix matRe) {
