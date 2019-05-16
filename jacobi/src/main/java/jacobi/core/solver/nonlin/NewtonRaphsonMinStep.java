@@ -63,9 +63,10 @@ import jacobi.core.solver.Substitution;
  * @author Y.K. Chan
  *
  */
-public class NewtonRaphsonMinStep implements NonLinearOptimizingStep {
+public class NewtonRaphsonMinStep implements IterativeOptimizerStep {
     
-    public NewtonRaphsonMinStep(NonLinearOptimizingStep base) {
+    
+    public NewtonRaphsonMinStep(IterativeOptimizerStep base) {
         this(new CholeskyDecomp(),
             m -> new Substitution(Substitution.Mode.BACKWARD, m),
             m -> new Substitution(Substitution.Mode.FORWARD, m),
@@ -76,7 +77,7 @@ public class NewtonRaphsonMinStep implements NonLinearOptimizingStep {
     public NewtonRaphsonMinStep(CholeskyDecomp chol, 
             Function<Matrix, Substitution> backSub,
             Function<Matrix, Substitution> fwdSub,
-            NonLinearOptimizingStep base) {
+            IterativeOptimizerStep base) {
         this.chol = chol;
         this.backSub = backSub;
         this.fwdSub = fwdSub;
@@ -123,5 +124,5 @@ public class NewtonRaphsonMinStep implements NonLinearOptimizingStep {
 
     private CholeskyDecomp chol;
     private Function<Matrix, Substitution> backSub, fwdSub;
-    private NonLinearOptimizingStep base;
+    private IterativeOptimizerStep base;
 }

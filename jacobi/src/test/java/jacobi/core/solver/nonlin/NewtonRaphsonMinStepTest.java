@@ -18,6 +18,9 @@ public class NewtonRaphsonMinStepTest {
     @JacobiInject(0)
     public Matrix input;
     
+    @JacobiInject(1)
+    public Matrix params;
+    
     @JacobiResult(100)
     public Matrix output;
     
@@ -28,6 +31,11 @@ public class NewtonRaphsonMinStepTest {
         double[] dx = new NewtonRaphsonMinStep(null)
                 .delta(this.halfSphere(1, 0, 1, 0), this.input.getRow(0));
         this.output = Matrices.wrap(new double[][] {dx});
+    }
+    
+    @Test
+    @JacobiImport("test std normal dist 2D")
+    public void testStdNormalDist2D() {
     }
     
     // f(x) = (px - q)^2 + (uy - v)^2
@@ -50,8 +58,15 @@ public class NewtonRaphsonMinStepTest {
                     2 * u * u
                 });
             }
+
+            @Override
+            public double at(double[] pos) {
+                return (p * pos[0] - q) * (p * pos[0] - q)
+                     + (u * pos[1] - v) * (u * pos[1] - v);
+            }
             
         };
     }
+    
 
 }
