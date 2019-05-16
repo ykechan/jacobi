@@ -26,13 +26,20 @@ public class SumLinearArgFuncTest {
     public Matrix hessian;
     
     @Test
+    public void test() {
+        
+    }
+    
+    @Test
     @JacobiImport("test g(x) = x")
     @JacobiEquals(expected = 100, actual = 100)
     @JacobiEquals(expected = 101, actual = 101)
     public void testGxIsTheIdentityFunction() {
-        VectorFunction func = new SumLinearArgFunc(this.coeffs, i -> this.identity());
+        
+        VectorFunction func = new SumLinearArgFunc(this.coeffs, 
+                args -> FunctionSeries.of(i -> this.identity()));
         this.gradient = func.grad(this.input.getRow(0));
-        this.hessian = func.hess(this.input.getRow(0));
+        this.hessian = func.hess(this.input.getRow(0));        
     }
     
     @Test
@@ -40,9 +47,12 @@ public class SumLinearArgFuncTest {
     @JacobiEquals(expected = 100, actual = 100)
     @JacobiEquals(expected = 101, actual = 101)
     public void testGxIsTheSinFunction() {
-        VectorFunction func = new SumLinearArgFunc(this.coeffs, i -> this.sin());
+        
+        VectorFunction func = new SumLinearArgFunc(this.coeffs, 
+                args -> FunctionSeries.of(i -> this.sin()));
         this.gradient = func.grad(this.input.getRow(0));
         this.hessian = func.hess(this.input.getRow(0));
+        
     }
     
     protected ScalarFunction identity() {
@@ -86,5 +96,5 @@ public class SumLinearArgFuncTest {
             
         };
     }
-
+    
 }

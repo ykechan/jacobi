@@ -39,6 +39,13 @@ import jacobi.core.impl.ColumnVector;
 public interface VectorFunction {
     
     /**
+     * Value of the vector function at a given position
+     * @param pos  Input position
+     * @return  Scalar value of the function
+     */
+    public double at(double[] pos);
+    
+    /**
      * Gradient of the vector function at a given position.
      * @param pos  Input position
      * @return  Gradient value as a column vector
