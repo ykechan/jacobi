@@ -1,5 +1,7 @@
 package jacobi.core.solver.nonlin;
 
+import java.util.Arrays;
+
 import jacobi.api.Matrix;
 import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
@@ -26,20 +28,36 @@ public class SumLinearArgFuncTest {
     public Matrix hessian;
     
     @Test
-    public void test() {
-        
-    }
-    
-    @Test
     @JacobiImport("test g(x) = x")
     @JacobiEquals(expected = 100, actual = 100)
     @JacobiEquals(expected = 101, actual = 101)
     public void testGxIsTheIdentityFunction() {
         
-        VectorFunction func = new SumLinearArgFunc(this.coeffs, 
-                args -> FunctionSeries.of(i -> this.identity()));
-        this.gradient = func.grad(this.input.getRow(0));
-        this.hessian = func.hess(this.input.getRow(0));        
+        VectorFunction id = new SumLinearArgFunc<Void>(this.coeffs) {
+
+            @Override
+            protected double valueAt(Void inter, int index, double x) {
+                return x;
+            }
+
+            @Override
+            protected double slopeAt(Void inter, int index, double x) {
+                return 1.0;
+            }
+
+            @Override
+            protected double convexityAt(Void inter, int index, double x) {
+                return 0.0;
+            }
+
+            @Override
+            protected Void prepare(double[] pos, double[] args) {
+                return null;
+            }
+            
+        };
+        this.gradient = id.grad(this.input.getRow(0));
+        this.hessian = id.hess(this.input.getRow(0));
     }
     
     @Test
@@ -47,54 +65,31 @@ public class SumLinearArgFuncTest {
     @JacobiEquals(expected = 100, actual = 100)
     @JacobiEquals(expected = 101, actual = 101)
     public void testGxIsTheSinFunction() {
-        
-        VectorFunction func = new SumLinearArgFunc(this.coeffs, 
-                args -> FunctionSeries.of(i -> this.sin()));
-        this.gradient = func.grad(this.input.getRow(0));
-        this.hessian = func.hess(this.input.getRow(0));
-        
-    }
-    
-    protected ScalarFunction identity() {
-        return new ScalarFunction() {
+        VectorFunction sinFunc = new SumLinearArgFunc<Void>(this.coeffs) {
 
             @Override
-            public double valueAt(double x) {
-                return x;
-            }
-
-            @Override
-            public double slopeAt(double x) {
-                return 1.0;
-            }
-
-            @Override
-            public double convexityAt(double x) {
-                return 0;
-            }
-            
-        };
-    }
-    
-    protected ScalarFunction sin() {
-        return new ScalarFunction() {
-
-            @Override
-            public double valueAt(double x) {
+            protected double valueAt(Void inter, int index, double x) {
                 return Math.sin(x);
             }
 
             @Override
-            public double slopeAt(double x) {
+            protected double slopeAt(Void inter, int index, double x) {
                 return Math.cos(x);
             }
 
             @Override
-            public double convexityAt(double x) {
+            protected double convexityAt(Void inter, int index, double x) {
                 return -Math.sin(x);
+            }
+
+            @Override
+            protected Void prepare(double[] pos, double[] args) {
+                return null;
             }
             
         };
-    }
+        this.gradient = sinFunc.grad(this.input.getRow(0));
+        this.hessian = sinFunc.hess(this.input.getRow(0));
+    }    
     
 }
