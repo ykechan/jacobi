@@ -2,6 +2,7 @@ package jacobi.core.logit;
 
 import jacobi.api.Matrix;
 import jacobi.core.solver.nonlin.SumLinearArgFunc;
+import jacobi.core.util.Throw;
 
 /**
  * Negated Log of Likelihood function of the logistic probabilistic model in a weighted Bernoulli trial. 
@@ -41,13 +42,37 @@ import jacobi.core.solver.nonlin.SumLinearArgFunc;
  *
  */
 public class LnLikeLogistic extends SumLinearArgFunc<double[]> {
+    
+    public static LnLikeLogistic of(Matrix obs, boolean[] outcomes, double[] weights) {
+        Throw.when()
+            .isNull(() -> obs, () -> "No observations.")
+            .isNull(() -> outcomes, () -> "No outcomes.")
+            .isNull(() -> outcomes, () -> "No observation weights.")
+            .isTrue(
+                () -> obs.getRowCount() != outcomes.length, 
+                () -> "Mismatch count of observations and outcomes."
+            ) 
+            .isTrue(
+                () -> obs.getRowCount() != weights.length, 
+                () -> "Mismatch count of observations and weights."
+            );
+        double[] norms = new double[weights.length];
+        for(int i = 0; i < norms.length; i++) {
+            if(weights[i] < 0.0) {
+                throw new IllegalArgumentException("Negative weight not supported.");
+            }
+            norms[i] = (outcomes[i] ? 1 : -1) * weights[i];
+        }
+        return new LnLikeLogistic(obs, norms);
+    }
 
     public LnLikeLogistic(Matrix consts, double[] weights) {
         super(consts);
+        this.weights = weights;
     }
 
     @Override
-    protected double valueAt(double[] inter, int index, double x) {
+    protected double valueAt(double[] inter, int index, double x) {        
         return this.weights[index] < 0.0 
             ?  this.weights[index] * Math.log(1.0 - inter[index])
             : -this.weights[index] * Math.log(inter[index]);
@@ -69,7 +94,7 @@ public class LnLikeLogistic extends SumLinearArgFunc<double[]> {
     protected double[] prepare(double[] pos, double[] args) {
         double[] probs = new double[args.length];
         for(int i = 0; i < probs.length; i++) {
-            probs[i] = 1.0 / (1.0 + Math.exp(-args[i] * args[i]));
+            probs[i] = 1.0 / (1.0 + Math.exp(-args[i]));
         }
         return probs;
     }

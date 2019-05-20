@@ -65,7 +65,10 @@ import jacobi.core.solver.Substitution;
  */
 public class NewtonRaphsonMinStep implements IterativeOptimizerStep {
     
-    
+    /**
+     * Constructor.
+     * @param base  Fallback step if method is not supported
+     */
     public NewtonRaphsonMinStep(IterativeOptimizerStep base) {
         this(new CholeskyDecomp(),
             m -> new Substitution(Substitution.Mode.BACKWARD, m),
@@ -74,7 +77,14 @@ public class NewtonRaphsonMinStep implements IterativeOptimizerStep {
         );
     }
     
-    public NewtonRaphsonMinStep(CholeskyDecomp chol, 
+    /**
+     * Constructor
+     * @param chol Cholesky Decomposition Implementation
+     * @param backSub  Supplier for backward substitution
+     * @param fwdSub  Supplier for forward substitution
+     * @param base  Fallback step if method is not supported
+     */
+    protected NewtonRaphsonMinStep(CholeskyDecomp chol, 
             Function<Matrix, Substitution> backSub,
             Function<Matrix, Substitution> fwdSub,
             IterativeOptimizerStep base) {
@@ -85,17 +95,22 @@ public class NewtonRaphsonMinStep implements IterativeOptimizerStep {
     }
 
     @Override
-    public double[] delta(VectorFunction func, double[] init) {
-        ColumnVector gradient = func.grad(init);
-        Matrix hessian = func.hess(init);        
+    public double[] delta(VectorFunction func, double[] pos) {
+        ColumnVector gradient = func.grad(pos);
+        Matrix hessian = func.hess(pos);        
         return this.chol.compute(hessian)
-                .map(this::mirror)
+                .map(this::symmetrize)
                 .map(l -> this.doubleSub(l, gradient))
                 .map(g -> this.negate(g))
-                .orElse(null);
+                .orElseGet(() -> this.base.delta(func, pos));
     }        
     
-    protected Matrix mirror(Matrix lower) {
+    /**
+     * Make a symmetric matrix by copying the lower part to the upper part.
+     * @param mat  Input matrix
+     * @return  Input matrix with upper part copied
+     */
+    protected Matrix symmetrize(Matrix lower) {
         Matrix upper = lower;
         for(int i = 0; i < upper.getRowCount(); i++) {
             int index = i;
@@ -108,12 +123,23 @@ public class NewtonRaphsonMinStep implements IterativeOptimizerStep {
         return upper;
     }
     
+    /**
+     * Perform forward substitution and then backward substitution
+     * @param lowerUpper  Matrix to perform substitution
+     * @param y  R.H.S of the system of linear equations
+     * @return  Solution to the system of linear equations
+     */
     protected ColumnVector doubleSub(Matrix lowerUpper, ColumnVector y) {
         this.fwdSub.apply(lowerUpper).compute(y);
         this.backSub.apply(lowerUpper).compute(y);
         return y;
     }
     
+    /**
+     * Negate every element in a column vector
+     * @param vector  Input vector
+     * @return  Array of elements negated
+     */
     protected double[] negate(ColumnVector vector) {
         double[] v = vector.getVector();
         for(int i = 0; i < v.length; i++) {
