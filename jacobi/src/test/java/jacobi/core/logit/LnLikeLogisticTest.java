@@ -46,10 +46,10 @@ public class LnLikeLogisticTest {
     @JacobiEquals(expected = 101, actual = 101)
     @JacobiEquals(expected = 102, actual = 102)
     public void test3VarsWithNoise() {
-        VectorFunction func = LnLikeLogistic.of(this.data, 
-            this.toBools(this.outcome), 
-            IntStream.range(0, this.data.getRowCount()).mapToDouble(i -> 1.0).toArray()
-        );
+        VectorFunction func = new LnLikeLogistic(this.data, 
+                IntStream.range(0, this.outcome.getRowCount())
+                    .mapToDouble(i -> this.outcome.get(i, 0))
+                    .toArray());
         
         this.value = Matrices.scalar(func.at(this.position.getRow(0)));
         this.gradient = func.grad(this.position.getRow(0));

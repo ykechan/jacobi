@@ -1,3 +1,26 @@
+/*
+ * The MIT License
+ *
+ * Copyright 2019 Y.K. Chan
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package jacobi.core.logit;
 
 import jacobi.api.Matrix;
@@ -43,30 +66,12 @@ import jacobi.core.util.Throw;
  */
 public class LnLikeLogistic extends SumLinearArgFunc<double[]> {
     
-    public static LnLikeLogistic of(Matrix obs, boolean[] outcomes, double[] weights) {
-        Throw.when()
-            .isNull(() -> obs, () -> "No observations.")
-            .isNull(() -> outcomes, () -> "No outcomes.")
-            .isNull(() -> outcomes, () -> "No observation weights.")
-            .isTrue(
-                () -> obs.getRowCount() != outcomes.length, 
-                () -> "Mismatch count of observations and outcomes."
-            ) 
-            .isTrue(
-                () -> obs.getRowCount() != weights.length, 
-                () -> "Mismatch count of observations and weights."
-            );
-        double[] norms = new double[weights.length];
-        for(int i = 0; i < norms.length; i++) {
-            if(weights[i] < 0.0) {
-                throw new IllegalArgumentException("Negative weight not supported.");
-            }
-            norms[i] = (outcomes[i] ? 1 : -1) * weights[i];
-        }
-        return new LnLikeLogistic(obs, norms);
-    }
-
-    public LnLikeLogistic(Matrix consts, double[] weights) {
+    /**
+     * Constructor.
+     * @param consts  Constant coefficients for arguments
+     * @param weights  Signed weights with signs representing outcomes
+     */
+    protected LnLikeLogistic(Matrix consts, double[] weights) {
         super(consts);
         this.weights = weights;
     }
