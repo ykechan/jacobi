@@ -23,23 +23,37 @@
  */
 package jacobi.core.solver.nonlin;
 
+import java.util.Optional;
+import java.util.function.Supplier;
+
+import jacobi.core.impl.ColumnVector;
+
 /**
- * Common interface for an iteration in a numeric iterative optimizer.
+ * Common interface of an numerical iterative optimizer for vector functions.
  * 
- * <p></p>
+ * <p>A numeric iterative optimizer starts from a starting position, and according to different
+ * methods move the vector to other positions. The stopping criteria is the movement is smaller
+ * than an acceptable range, or a solution is found. Normally these two criteria coincide.</p>
+ * 
+ * <p>The problem here is assume to be a minimization problem. For maximization problems,
+ * one can always negate the vector function.</p>
  * 
  * @author Y.K. Chan
  *
  */
-public interface IterativeOptimizerStep {
+public interface IterativeOptimizer {
     
     /**
-     * Given the current position, find the delta vector to move to a more optimized
-     * position.
-     * @param func  Vector function to be optimized
-     * @param curr  Current position
-     * @return  Delta vector to move to new position
+     * Find the optima of a given vector function.
+     * @param func  Input vector function
+     * @param init  Factory method for starting position
+     * @param limit  Maximum number of iteration
+     * @param epsilon  Error tolerance
+     * @return  The position of optima if found, empty if iteration exhaused
      */
-    public double[] delta(VectorFunction func, double[] curr);
-
+    public Optional<ColumnVector> optimize(
+            VectorFunction func, 
+            Supplier<double[]> init,
+            long limit, double epsilon);
+    
 }
