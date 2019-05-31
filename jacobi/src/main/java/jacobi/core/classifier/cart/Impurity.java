@@ -21,31 +21,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jacobi.core.classifier;
-
-import java.util.function.ToIntFunction;
-
-import jacobi.api.Matrix;
+package jacobi.core.classifier.cart;
 
 /**
- * Common interface for a supervised learner of classifier.
+ * Common interface for measurement function for impurities in distribution. 
  * 
- * <p>A classifier in this context is a mapping from a set of attributes in form
- * of a real-valued vector as an array to a discrete category encoded as an integer.</p>
+ * Common measure e.g. entropy and gini function is provided.
  * 
  * @author Y.K. Chan
  *
- * @param <T> Model class of the classifier
- * 
  */
-public interface SupervisedClassifierLearner<T extends ToIntFunction<double[]>> {
+public interface Impurity {
     
     /**
-     * Learn a classifier from a set of attributes and given classified categories.
-     * @param obs  Observations
-     * @param outcomes  Outcomes of the observations
-     * @return  Classifier model
+     * Entropy function
      */
-    public T learn(Matrix obs, int[] outcomes);
-
+    public static final Impurity ENTROPY = dist -> {
+        double sum = 0.0;
+        double rand = 0.0;
+        for(int i = 0; i < dist.length; i++) {
+            if(dist[i] == 0.0) {
+                continue;
+            }
+            rand += dist[i] * Math.log(dist[i]);
+            sum += dist[i];
+        }
+        return sum == 0.0 ? 0.0 : Math.log(sum) - rand / sum;
+    };
+    
+    /**
+     * Find the measurement of impurity given the distribution of items
+     * @param dist  Distribution of items
+     * @return  Measurement of impurity
+     */
+    public double of(double[] dist);
 }
