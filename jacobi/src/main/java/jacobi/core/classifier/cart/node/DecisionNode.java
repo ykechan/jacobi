@@ -21,39 +21,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jacobi.core.classifier.cart;
+package jacobi.core.classifier.cart.node;
+
+import java.util.Optional;
 
 /**
- * Common interface for measurement function for impurities in distribution. 
- * 
- * Common measure e.g. entropy and gini function is provided.
+ * Common interface for a decision node in CART model.
  * 
  * @author Y.K. Chan
  *
  */
-public interface Impurity {
+public interface DecisionNode {
     
     /**
-     * Entropy function
+     * Get the column index this node depends on when deciding
+     * @return  Column index this node depends on, or -1 if this is leaf
      */
-    public static final Impurity ENTROPY = dist -> {
-        double sum = 0.0;
-        double rand = 0.0;
-        for(int i = 0; i < dist.length; i++) {
-            if(dist[i] == 0.0) {
-                continue;
-            }
-            rand += dist[i] * Math.log(dist[i]);
-            sum += dist[i];
-        }
-        return sum == 0.0 ? 0.0 : Math.log(sum) - rand / sum;
-    };
+    public int splitAt();
     
     /**
-     * Find the measurement of impurity given the distribution of items
-     * @param dist  Distribution of items
-     * @return  Measurement of impurity
+     * Decide the outcome regardless of input
+     * @return  Decision
      */
-    public double of(double[] dist);
+    public int decide();
     
+    /**
+     * Decide the outcome given an attribute value.
+     * @param value  Attribute value
+     * @return  Next decision node to determine the outcome, or empty if this is leaf
+     */
+    public Optional<DecisionNode> decide(double value);
+    
+    /**
+     * Decide the outcome given the input vector
+     * @param inst  Input vector
+     * @return  Next decision node to determine the outcome, or empty if this is leaf
+     */
+    public default Optional<DecisionNode> decide(double[] inst) {
+        return this.decide(inst[this.splitAt()]);
+    }
+
 }
