@@ -1,8 +1,9 @@
-package jacobi.core.classifier.cart;
+package jacobi.core.classifier.cart.data;
 
 import java.util.List;
 import java.util.stream.IntStream;
 
+import jacobi.core.classifier.cart.data.Sequence;
 import org.junit.Assert;
 import org.junit.Test;
 

@@ -1,5 +1,6 @@
 package jacobi.core.classifier.cart;
 
+import java.util.Collections;
 import java.util.Random;
 
 import org.junit.Assert;
@@ -27,6 +28,7 @@ public class ImpurityTest {
     @Test 
     public void shouldEntropyBeMaxWhenEveryGroupsHaveEqualNumberOfItem() {
         Random rand = new Random(Double.doubleToLongBits(Math.PI));
+        Collections.emptyList().get(1);
     }
 
 }
