@@ -30,10 +30,12 @@ import jacobi.api.Matrix;
 /**
  * Common interface of a data table in CART model.
  * 
+ * <p>A data table consists of feature vectors and its paired outcome.</p>
+ * 
  * @author Y.K. Chan
  *
  */
-public interface DataTable extends Matrix {
+public interface DataTable {
     
     /**
      * Get all column types
@@ -42,10 +44,17 @@ public interface DataTable extends Matrix {
     public List<Column<?>> getColumns();
     
     /**
-     * Get all column types for nominal columns only.
-     * @return  List of all nominal columns
+     * Get the data matrix for numeric values
+     * @return  Numeric values as matrix
      */
-    public List<Column<?>> getNominalColumns();
+    public Matrix getMatrix();
+    
+    /**
+     * Get the nominal values of a column
+     * @param index  Column index
+     * @return  Nominal values
+     */
+    public int[] nominals(int index);
     
     /**
      * Get the column type for outcome
@@ -54,32 +63,17 @@ public interface DataTable extends Matrix {
     public Column<?> getOutcomeColumn();
     
     /**
-     * Get the nominal values of a row
-     * @param index  Row index
-     * @return  Nominal values
+     * Get the outcomes of the instances
+     * @return  Outcomes of a row
      */
-    public int[] nominals(int index);
+    public int[] outcomes();
     
     /**
-     * Get the outcome of a row
-     * @param index  Row index
-     * @return  Outcome of a row
+     * Get the number of rows in this data table
+     * @return  Number of rows
      */
-    public int outcome(int index);
-
-    @Override
-    public default Matrix setRow(int index, double[] values) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public default Matrix set(int i, int j, double value) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public default Matrix swapRow(int i, int j) {
-        throw new UnsupportedOperationException();
-    }
+    public default int size() {
+        return this.outcomes().length;
+    }                        
     
 }

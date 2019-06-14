@@ -25,6 +25,8 @@ package jacobi.core.classifier.cart.node;
 
 import java.util.Optional;
 
+import jacobi.core.classifier.cart.data.Column;
+
 /**
  * Common interface for a decision node in CART model.
  * 
@@ -34,10 +36,10 @@ import java.util.Optional;
 public interface DecisionNode {
     
     /**
-     * Get the column index this node depends on when deciding
-     * @return  Column index this node depends on, or -1 if this is leaf
+     * Get the column this node depends on when deciding
+     * @return  Column this node depends on, or null if this is leaf
      */
-    public int splitAt();
+    public Column<?> split();
     
     /**
      * Decide the outcome regardless of input
@@ -58,7 +60,8 @@ public interface DecisionNode {
      * @return  Next decision node to determine the outcome, or empty if this is leaf
      */
     public default Optional<DecisionNode> decide(double[] inst) {
-        return this.decide(inst[this.splitAt()]);
+        Column<?> col = this.split();
+        return col == null ? Optional.empty() : this.decide(inst[col.getIndex()]);
     }
 
 }

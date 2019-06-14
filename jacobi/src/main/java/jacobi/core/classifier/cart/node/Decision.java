@@ -2,6 +2,8 @@ package jacobi.core.classifier.cart.node;
 
 import java.util.Optional;
 
+import jacobi.core.classifier.cart.data.Column;
+
 /**
  * A decision node that make decision regardless of input, i.e. a leaf node in a decision tree.
  * 
@@ -18,8 +20,8 @@ public class Decision implements DecisionNode {
     }
 
     @Override
-    public int splitAt() {
-        return -1;
+    public Column<?> split() {
+        return null;
     }
 
     @Override
