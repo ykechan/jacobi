@@ -23,18 +23,19 @@
  */
 package jacobi.core.classifier.cart;
 
+import java.util.List;
+
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.core.classifier.cart.data.Column;
-import jacobi.core.classifier.cart.data.DataTable;
-import jacobi.core.classifier.cart.data.Sequence;
+import jacobi.core.util.Throw;
 import jacobi.core.util.Weighted;
 
 /**
- * Partitioning a data set by a nominal attribute.
+ * Partition a data set based on a nominal feature.
  * 
- * <p>Partitioning a data set by a discrete nominal attribute is trivial: split the
- * data by their nominal value. Thus no additional information is provided.</p>
+ * <p>Partitioning on a nominal feature is trivial: split for each of the discrete values.
+ * Therefore no extra information about the partition is provided.</p>
  * 
  * @author Y.K. Chan
  *
@@ -43,46 +44,54 @@ public class NominalPartitioner implements Partitioner<Void> {
     
     /**
      * Constructor.
-     * @param impurity  Impurity measurement function
+     * @param impurity  Function to measure impurity
      */
     public NominalPartitioner(Impurity impurity) {
         this.impurity = impurity;
     }
 
     @Override
-    public Weighted<Void> partition(DataTable table, 
-            double[] weights, 
-            Column<?> col, 
-            Sequence seq) {
-        if(col.isNumeric()){
-            throw new UnsupportedOperationException("Numeric attribute not supported.");
-        }
+    public Weighted<Void> partition(Column<?> target, Column<?> goal, List<Instance> instances) {
+        Throw.when()
+            .isTrue(
+                () -> target.isNumeric(), 
+                () -> "Feature column #" + target.getIndex() + " is not nominal.")
+            .isTrue(
+                () -> goal.isNumeric(), 
+                () -> "Outcome column is not nominal.");
         
-        Matrix dist = Matrices.zeros(col.cardinality(), table.getOutcomeColumn().cardinality());
-        int[] values = table.nominals(col.getIndex());
-        int[] outcomes = table.outcomes();
+        Matrix dist = this.outcomeDist(instances, 
+            Matrices.zeros(target.cardinality(), goal.cardinality()));
         
-        for(int i = 0; i < seq.length(); i++) {
-            int index = seq.indexAt(i);
-            double[] row = dist.getRow(values[index]);
-            row[outcomes[index]] += weights[index];
-            dist.setRow(index, row);
-        }
         return new Weighted<>(null, this.weightedImpurity(dist));
     }
     
     /**
-     * Find the impurity given the weights of different outcomes 
-     * of different nominal values.
-     * @param dist  Matrix of weight values
-     * @return  Impurity measurement
+     * Create the distribution matrix in the feature by outcome manner
+     * @param instances  Instances of the data set
+     * @param dist  Input distribution matrix
+     * @return  Distribution matrix, instance of dist
+     */
+    protected Matrix outcomeDist(List<Instance> instances, Matrix dist) {
+        for(Instance inst : instances) {
+            double[] row = dist.getRow(inst.feature);
+            row[inst.outcome] += inst.weight;
+            dist.setRow(inst.feature, row);
+        }
+        return dist;
+    }
+    
+    /**
+     * Compute the total impurity measure given a distribution matrix
+     * @param dist  Distribution matrix
+     * @return  Total impurity measure
      */
     protected double weightedImpurity(Matrix dist) {
-        double rand = 0.0;
-        for(int i = 0; i < dist.getRowCount(); i++) {
-            rand += this.impurity.of(dist.getRow(i));
+        double measure = 0.0;
+        for(int i = 0; i < dist.getRowCount(); i++){
+            measure += this.impurity.of(dist.getRow(i));
         }
-        return rand;
+        return measure;
     }
 
     private Impurity impurity;

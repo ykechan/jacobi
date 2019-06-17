@@ -23,37 +23,64 @@
  */
 package jacobi.core.classifier.cart;
 
+import java.util.List;
+
 import jacobi.core.classifier.cart.data.Column;
-import jacobi.core.classifier.cart.data.DataTable;
-import jacobi.core.classifier.cart.data.Sequence;
 import jacobi.core.util.Weighted;
 
 /**
- * Common interface for partition the data set based on a given column.
+ * Common interface for accessing and evaluate the strategy and impurity measure if partitioning
+ * a data set by a certain feature attribute.
  * 
- * <p>The function returns the impurity measure of partitioning the outcome 
- * based on a given column, together with some additional information to describe
- * the partition.</p>
+ * <p>Implementations can provide additional information on the best strategy found
+ * to partitioning a data set, typically for numeric attributes.
+ * </p>
  * 
  * @author Y.K. Chan
- * @param <T>  Type for additional information of the partitions
+ * @param <T>  Type of additional information on the partition
  */
 public interface Partitioner<T> {
     
     /**
-     * Find the impurity measure together with additional information 
-     * of the partition given a column.
-     * @param table  Data set
-     * @param weights  Weights of each instances
-     * @param col  Input column
-     * @param seq  Sequence of instances
-     * @return  Impurity measure with additional information
+     * Analyze the partition strategy and impurity measure given a list of instances.
+     * @param target  Target attribute to base the partition on
+     * @param goal  Goal attribute i.e. the column type of outcome values
+     * @param instances  List of instances
+     * @return  The impurity measure and additional information of the partition
      */
-    public Weighted<T> partition(
-        DataTable table, 
-        double[] weights, 
-        Column<?> col, 
-        Sequence seq
-    );
+    public Weighted<T> partition(Column<?> target, Column<?> goal, List<Instance> instances);
+    
+    /**
+     * Data class for an instance of data.
+     * 
+     * This class is immutable.
+     * 
+     * @author Y.K. Chan
+     */
+    public static class Instance {
+       
+        /**
+         * Feature value and outcome value of this instance.
+         */
+        public final int feature, outcome;
+        
+        /**
+         * Weight of this instance
+         */
+        public final double weight;
+
+        /**
+         * Constructor.
+         * @param feature  Feature value
+         * @param outcome  Outcome value
+         * @param weight  Weight of this instance
+         */
+        public Instance(int feature, int outcome, double weight) {
+            this.feature = feature;
+            this.outcome = outcome;
+            this.weight = weight;
+        }
+        
+    }
 
 }
