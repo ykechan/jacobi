@@ -30,50 +30,56 @@ import jacobi.api.Matrix;
 /**
  * Common interface of a data table in CART model.
  * 
- * <p>A data table consists of feature vectors and its paired outcome.</p>
+ * <p>A data table is a tuple of a matrix with column types defined, a typed outcome
+ * value associated with each row of the matrix, and a weight value associated with 
+ * each row of the matrix 
+ * </p>
+ * 
+ * <p>This data structure is designed to view the table by pairing a feature value
+ * and its outcome together with an associated weight, in a certain access sequence.</p>
+ * 
+ * <p>For numeric column, the feature value given in the Instance object is the reference 
+ * index of the corresponding row instead of the actual numeric value.</p>
+ * 
+ * <p>All implementations of this interface should be immutable. Neither the content nor
+ * the ordering of the instances should change.</p>
  * 
  * @author Y.K. Chan
  *
  */
-public interface DataTable {
+public interface DataTable {        
     
     /**
-     * Get all column types
-     * @return  List of all columns
+     * Get the list of feature columns in this data table
+     * @return  List of feature columns
      */
     public List<Column<?>> getColumns();
     
     /**
-     * Get the data matrix for numeric values
-     * @return  Numeric values as matrix
-     */
-    public Matrix getMatrix();
-    
-    /**
-     * Get the nominal values of a column
-     * @param index  Column index
-     * @return  Nominal values
-     */
-    public int[] nominals(int index);
-    
-    /**
-     * Get the column type for outcome
-     * @return  Column type for outcome
+     * Get the type of outcome column in this data table
+     * @return  Column of outcome
      */
     public Column<?> getOutcomeColumn();
     
     /**
-     * Get the outcomes of the instances
-     * @return  Outcomes of a row
-     */
-    public int[] outcomes();
-    
-    /**
-     * Get the number of rows in this data table
-     * @return  Number of rows
+     * Get the number of instances in this table
+     * @return  Number of instances
      */
     public default int size() {
-        return this.outcomes().length;
-    }                        
+        return this.getMatrix().getRowCount();
+    }
+    
+    /**
+     * Get the backing matrix of this data table.
+     * @return  Numerical data matrix
+     */
+    public Matrix getMatrix();
+    
+    /**
+     * Get the instances of rows in a particular access sequence
+     * @param column  Column of feature attribute, null for all 0 values as feature
+     * @return  List of instances, i.e. pair of feature value and its outcome with an associated weight
+     */
+    public List<Instance> getInstances(Column<?> column);
     
 }

@@ -35,6 +35,14 @@ public class Sequence {
     }
     
     /**
+     * Get the start position of this sub-sequence
+     * @return  Start position
+     */
+    public int start() {
+        return this.begin;
+    }
+    
+    /**
      * Get the index of item to access given the rank
      * @param rank  Rank of the item
      * @return  Index of item to access
@@ -44,24 +52,22 @@ public class Sequence {
     }
     
     /**
-     * Get an iterator from a list of items which will be access in sequence order.
+     * Get a list from a list of items which will be access in sequence order.
      * @param items  List of items
      * @return  Iterator to access the items in sequence order
      */
-    public <T> Iterator<T> iterator(List<T> items) {
-        return new Iterator<T>() {
+    public <T> List<T> apply(List<T> items) {
+        return new AbstractList<T>() {
 
             @Override
-            public boolean hasNext() {
-                return curr < end;
+            public T get(int index) {
+                return items.get(indexAt(index));
             }
 
             @Override
-            public T next() {
-                return items.get(curr++);
+            public int size() {
+                return length();
             }
-            
-            private int curr = begin;
         }; 
     }
     

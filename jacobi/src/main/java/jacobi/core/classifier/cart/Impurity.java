@@ -49,6 +49,18 @@ public interface Impurity {
         return sum == 0.0 ? 0.0 : Math.log(sum) - rand / sum;
     };
     
+    public static final Impurity ERROR = dist -> {
+        double sum = 0.0;
+        double max = 0.0;
+        for(int i = 0; i < dist.length; i++) {            
+            sum += dist[i];
+            if(dist[i] > max) {
+                max = dist[i];
+            }
+        }
+        return sum - max;
+    };
+    
     /**
      * Find the measurement of impurity given the distribution of items
      * @param dist  Distribution of items
