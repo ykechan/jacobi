@@ -40,6 +40,11 @@ public class RankedPartition<T> implements Partition<T> {
     @Override
     public Weighted<T> measure(DataTable table, Column<?> target, Sequence seq) {
         Sequence rank = this.ranks.get(new Tuple(seq.start(), target.getIndex()));
+        
+        if(rank != null && rank.length() != seq.length()) {
+            throw new IllegalArgumentException("Partition overlapped");
+        }
+        
         return this.partition.measure(table, target, rank == null ? rank : seq);
     }
     
