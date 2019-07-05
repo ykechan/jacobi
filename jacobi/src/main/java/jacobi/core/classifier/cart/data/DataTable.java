@@ -47,7 +47,7 @@ import jacobi.api.Matrix;
  * @author Y.K. Chan
  *
  */
-public interface DataTable {        
+public interface DataTable<T> {        
     
     /**
      * Get the list of feature columns in this data table
@@ -59,7 +59,7 @@ public interface DataTable {
      * Get the type of outcome column in this data table
      * @return  Column of outcome
      */
-    public Column<?> getOutcomeColumn();
+    public Column<T> getOutcomeColumn();
     
     /**
      * Get the number of instances in this table
