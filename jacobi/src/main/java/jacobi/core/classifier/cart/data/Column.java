@@ -24,8 +24,10 @@
 package jacobi.core.classifier.cart.data;
 
 import java.util.AbstractList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.DoubleToIntFunction;
 
 /**
@@ -42,7 +44,7 @@ import java.util.function.DoubleToIntFunction;
  * @author Y.K. Chan
  * @param <T>  Type of nominal items
  */
-public class Column<T> {
+public class Column<T> implements Comparable<Column<?>> {
     
     /**
      * Create a numeric column
@@ -78,6 +80,19 @@ public class Column<T> {
             }
             
         }, mapping);
+    }
+    
+    /**
+     * Create a boolean column that is true when value positive, and false otherwise.
+     * Zero is not considered positive, and thus will be rendered as false. 
+     * @param index  Index of the column
+     * @return  A boolean column
+     */
+    public static Column<Boolean> signed(int index) {
+    	return new Column<>(index, 
+    		Arrays.asList(Boolean.FALSE, Boolean.TRUE),
+    		v -> v > 0.0 ? 1 : 0
+    	);
     }
     
     /**
@@ -151,6 +166,45 @@ public class Column<T> {
     public boolean isNumeric() {
         return this.items.isEmpty();
     }
+    
+    @Override
+	public int hashCode() {
+		return Objects.hash(this.index, this.items);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Column){
+			return this.compareTo((Column<?>) obj) == 0;
+		}
+		return false;
+	}
+
+	@Override
+	public int compareTo(Column<?> col) {
+    	if(this == col){
+    		return 0;
+    	}
+    	
+    	if(this.getIndex() != col.getIndex()){
+    		return this.getIndex() < col.getIndex() ? -1 : 1;
+    	}
+    	
+    	if(this.cardinality() != col.cardinality()){
+    		throw new IllegalArgumentException("Unable to compare conflicting columns "
+    			+ "#" + this.getIndex() + this.items
+    			+ " and #" + col.getIndex() + col.items 
+    		);
+    	}
+    	
+    	for(int i = 0; i < this.cardinality(); i++) {
+    		if(!Objects.equals(this.valueOf(i), col.valueOf(i))) {
+    			throw new IllegalArgumentException();
+    		}
+    	}
+		return 0;
+	}
+    
 
     private int index;
     private List<T> items;
