@@ -33,7 +33,7 @@ import jacobi.core.classifier.cart.data.Column;
  * @author Y.K. Chan
  *
  */
-public interface DecisionNode {
+public interface DecisionNode<T> {
     
     /**
      * Get the column this node depends on when deciding
@@ -45,21 +45,21 @@ public interface DecisionNode {
      * Decide the outcome regardless of input
      * @return  Decision
      */
-    public int decide();
+    public T decide();
     
     /**
      * Decide the outcome given an attribute value.
      * @param value  Attribute value
      * @return  Next decision node to determine the outcome, or empty if this is leaf
      */
-    public Optional<DecisionNode> decide(double value);
+    public Optional<DecisionNode<T>> decide(double value);
     
     /**
      * Decide the outcome given the input vector
      * @param inst  Input vector
      * @return  Next decision node to determine the outcome, or empty if this is leaf
      */
-    public default Optional<DecisionNode> decide(double[] inst) {
+    public default Optional<DecisionNode<T>> decide(double[] inst) {
         Column<?> col = this.split();
         return col == null ? Optional.empty() : this.decide(inst[col.getIndex()]);
     }

@@ -24,11 +24,34 @@
 package jacobi.core.classifier.cart.data;
 
 import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.function.DoubleToIntFunction;
+import java.util.stream.Collectors;
 
 import jacobi.api.Matrix;
 
 public class DataMatrix<T> implements DataTable<T> {
+	
+	public static <T> DataMatrix<T> of(Matrix matrix, Set<Column<?>> colDefs, Column<T> outcomeCol) {
+		// ...
+		
+		List<Column<?>> cols = colDefs.stream()
+			.filter(c -> !c.equals(outcomeCol))
+			.collect(Collectors.toList());
+		
+		TypedMatrix<T> typedMat = new TypedMatrix<>(matrix, cols, outcomeCol);
+		
+		double[] weights = new double[matrix.getRowCount()];
+		Arrays.fill(weights, 1.0);
+		
+		return new DataMatrix<>(typedMat, 
+			extractNominals(typedMat), 
+			weights
+		);
+	}
 
 	protected DataMatrix(TypedMatrix<T> numData, List<int[]> nomData, double[] weights) {
 		this.numData = numData;
@@ -56,7 +79,7 @@ public class DataMatrix<T> implements DataTable<T> {
 		int[] features = this.nomData.get(column.getIndex());
 		
 		if((features == null) != column.isNumeric()) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Conflicting column type");
 		}
 		
 		int[] outcomes = this.nomData.get(this.getOutcomeColumn().getIndex());		
@@ -64,9 +87,6 @@ public class DataMatrix<T> implements DataTable<T> {
 	}
 	
 	protected List<Instance> instancesOf(int[] features, int[] outcomes, double[] weights) {
-		if(features == null){
-			
-		}
 		return features == null
 			? new AbstractList<Instance>() {
 	
@@ -99,6 +119,33 @@ public class DataMatrix<T> implements DataTable<T> {
 	private TypedMatrix<T> numData;
 	private List<int[]> nomData;
 	private double[] weights;
+	
+	protected static List<int[]> extractNominals(TypedMatrix<?> typedMat) {
+		Matrix matrix = typedMat.matrix;
+		
+		int[][] nomList = new int[matrix.getColCount()][];
+		
+		List<Column<?>> nomCols = typedMat.featureColumns
+				.stream()
+				.filter(c -> !c.isNumeric())
+				.collect(Collectors.toCollection(ArrayList::new));
+		nomCols.add(typedMat.outcomeColumn);
+		
+		for(Column<?> col : nomCols) {
+			nomList[col.getIndex()] = extractColumn(matrix, col.getIndex(), col.getMapping());
+		}
+		
+		return Arrays.asList(nomList);
+	}
+	
+	protected static int[] extractColumn(Matrix matrix, int colIdx, DoubleToIntFunction mapper) {
+		int[] nom = new int[matrix.getRowCount()];
+		for(int i = 0; i < nom.length; i++) {
+			double[] row = matrix.getRow(i);
+			nom[i] = mapper.applyAsInt(row[colIdx]);
+		}
+		return nom;
+	}
 	
 	protected static class TypedMatrix<T> {
 		

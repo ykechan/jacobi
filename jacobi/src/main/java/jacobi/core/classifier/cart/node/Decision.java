@@ -9,13 +9,13 @@ import jacobi.core.classifier.cart.data.Column;
  * 
  * @author Y.K. Chan
  */
-public class Decision implements DecisionNode {
+public class Decision<T> implements DecisionNode<T> {
     
     /**
      * Constructor.
      * @param decision  Decision value
      */
-    public Decision(int decision) {
+    public Decision(T decision) {
         this.decision = decision;
     }
 
@@ -25,14 +25,14 @@ public class Decision implements DecisionNode {
     }
 
     @Override
-    public int decide() {
+    public T decide() {
         return this.decision;
     }
 
     @Override
-    public Optional<DecisionNode> decide(double value) {
+    public Optional<DecisionNode<T>> decide(double value) {
         return Optional.empty();
     }
 
-    private int decision;
+    private T decision;
 }
