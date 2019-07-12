@@ -54,7 +54,7 @@ public class NominalPartition implements Partition<Void> {
     }
 
     @Override
-    public Weighted<Void> measure(DataTable<?> table, Column<?> target, Sequence seq) {
+    public <V> Weighted<Void> measure(DataTable<V> table, Column<?> target, Sequence seq) {
         List<Instance> instances = seq.apply(table.getInstances(target));
         return new Weighted<>(null, this.measure(target, table.getOutcomeColumn(), instances));
     }

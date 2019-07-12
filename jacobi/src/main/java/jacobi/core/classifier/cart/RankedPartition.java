@@ -38,7 +38,7 @@ public class RankedPartition<T> implements Partition<T> {
     }
 
     @Override
-    public Weighted<T> measure(DataTable<?> table, Column<?> target, Sequence seq) {
+    public <V> Weighted<T> measure(DataTable<V> table, Column<?> target, Sequence seq) {
         Sequence rank = this.ranks.get(new Tuple(seq.start(), target.getIndex()));
         
         if(rank != null && rank.length() != seq.length()) {

@@ -1,28 +1,35 @@
 package jacobi.core.classifier.cart.node;
 
+import java.util.List;
 import java.util.Optional;
 
 import jacobi.core.classifier.cart.data.Column;
 
 public class NominalSplit<T> implements DecisionNode<T> {
+	
+	public NominalSplit(Column<?> target, T majority, List<DecisionNode<T>> children) {
+		this.target = target;
+		this.majority = majority;
+		this.children = children;
+	}
 
 	@Override
 	public Column<?> split() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.target;
 	}
 
 	@Override
 	public T decide() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.majority;
 	}
 
 	@Override
 	public Optional<DecisionNode<T>> decide(double value) {
-		// TODO Auto-generated method stub
-		return null;
+		int nom = this.target.getMapping().applyAsInt(value);
+		return Optional.of(this.children.get(nom));
 	}
 
-	
+	private Column<?> target;
+	private T majority;
+	private List<DecisionNode<T>> children;	
 }

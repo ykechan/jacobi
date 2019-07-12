@@ -63,15 +63,15 @@ public class Column<T> implements Comparable<Column<?>> {
      * @return  Column object representing a nominal attribute
      * @throws  IllegalArgumentException if number of items is negative or zero.
      */
-    public static Column<Void> nominal(int index, int numItems, DoubleToIntFunction mapping) {
+    public static Column<Integer> nominal(int index, int numItems, DoubleToIntFunction mapping) {
         if(numItems < 1){
             throw new IllegalArgumentException();
         }
-        return new Column<>(index, new AbstractList<Void>() {
+        return new Column<>(index, new AbstractList<Integer>() {
 
             @Override
-            public Void get(int index) {
-                return null;
+            public Integer get(int index) {
+                return index;
             }
 
             @Override

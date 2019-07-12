@@ -7,107 +7,128 @@ import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.function.DoubleToIntFunction;
+import java.util.stream.IntStream;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.core.classifier.cart.data.Column;
 import jacobi.core.classifier.cart.data.DataMatrix;
+import jacobi.core.classifier.cart.data.DataTable;
+import jacobi.core.classifier.cart.data.JacobiCsvDataTable;
+import jacobi.core.classifier.cart.data.JacobiCsvDataTable.Outlook;
+import jacobi.core.classifier.cart.data.JacobiCsvDataTable.YesOrNo;
+import jacobi.core.classifier.cart.data.Sequence;
+import jacobi.core.classifier.cart.node.DecisionNode;
+import jacobi.core.util.Weighted;
 
 public class ZeroRTest {
+
+	@Test
+	public void shouldBeAbleToLearnGolfDataOnPlayToYes() throws IOException {
+		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.csv")){
+			Matrix matrix = new JacobiCsvDataTable().encodeCsv(input, Arrays.asList(
+				Outlook.class, double.class, double.class, boolean.class, YesOrNo.class
+			), true);
+
+			DoubleToIntFunction flr = v -> (int) Math.floor(v);
+			
+			DataTable<YesOrNo> dataTab = DataMatrix.of(matrix, 
+				new TreeSet<>(Arrays.asList(
+					new Column<>(0, Arrays.asList(Outlook.values()), flr),
+					Column.numeric(1),
+					Column.numeric(2),
+					new Column<>(3, Arrays.asList(Boolean.FALSE, Boolean.TRUE), v -> v > 0 ? 1 : 0),
+					new Column<>(4, Arrays.asList(YesOrNo.values()), flr)
+				)), 
+				new Column<>(4, Arrays.asList(YesOrNo.values()), flr)
+			);
+			
+			Weighted<DecisionNode<YesOrNo>> ans = new ZeroR(dist -> { 
+					Assert.assertEquals(9.0, dist[0], 1e-12);
+					Assert.assertEquals(5.0, dist[1], 1e-12);
+					return Math.PI;
+				})
+				.make(dataTab, Collections.emptySet(), this.defaultSeq(dataTab.size()));
+			
+			Assert.assertEquals(Math.PI, ans.weight, 1e-12);
+			Assert.assertEquals(YesOrNo.YES, ans.item.decide());
+		}
+	}
 	
 	@Test
-	public void shouldBeAbleToEncodeGolfCsv() throws IOException {
+	public void shouldBeAbleToLearnGolfDataOnWindToFalse() throws IOException {
 		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.csv")){
-			Matrix matrix = this.encodeCsv(input, Arrays.asList(
-					Outlook.class, double.class, double.class, boolean.class, YesOrNo.class
-				), true);
-				
-				DoubleToIntFunction flr = v -> (int) Math.floor(v);
-							
-				DataMatrix<YesOrNo> dataMat = DataMatrix.of(matrix, 
-					new TreeSet<>(Arrays.asList(
-						new Column<>(0, Arrays.asList(Outlook.values()), flr),
-						Column.numeric(1),
-						Column.numeric(2),
-						new Column<>(3, Arrays.asList(Boolean.FALSE, Boolean.TRUE), v -> v > 0 ? 1 : 0),
-						new Column<>(4, Arrays.asList(YesOrNo.values()), flr)
-					)), 
+			Matrix matrix = new JacobiCsvDataTable().encodeCsv(input, Arrays.asList(
+				Outlook.class, double.class, double.class, boolean.class, YesOrNo.class
+			), true);
+
+			DoubleToIntFunction flr = v -> (int) Math.floor(v);
+			
+			DataTable<Boolean> dataTab = DataMatrix.of(matrix, 
+				new TreeSet<>(Arrays.asList(
+					new Column<>(0, Arrays.asList(Outlook.values()), flr),
+					Column.numeric(1),
+					Column.numeric(2),
+					Column.signed(3),
 					new Column<>(4, Arrays.asList(YesOrNo.values()), flr)
-				);
+				)), 
+				Column.signed(3)
+			);
+			
+			Weighted<DecisionNode<Boolean>> ans = new ZeroR(dist -> { 
+					Assert.assertEquals(8.0, dist[0], 1e-12);
+					Assert.assertEquals(6.0, dist[1], 1e-12);
+					return Math.PI;
+				})
+				.make(dataTab, Collections.emptySet(), this.defaultSeq(dataTab.size()));
+			
+			Assert.assertEquals(Math.PI, ans.weight, 1e-12);
+			Assert.assertFalse(ans.item.decide());
 		}
 	}
 	
-	protected Matrix encodeCsv(InputStream input, List<Class<?>> colTypes, boolean skipHeader) 
-			throws IOException {
-		BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-		String line = null;
-		
-		int lineNum = 0;
-		
-		List<double[]> rows = new ArrayList<>();
-		
-		while((line = reader.readLine()) != null){
-			if(lineNum++ == 0 && skipHeader) {
-				continue;
-			}
+	@Test
+	public void shouldBeAbleToLearnGolfDataOnOutcaseToSunny() throws IOException {
+		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.csv")){
+			Matrix matrix = new JacobiCsvDataTable().encodeCsv(input, Arrays.asList(
+				Outlook.class, double.class, double.class, boolean.class, YesOrNo.class
+			), true);
+
+			DoubleToIntFunction flr = v -> (int) Math.floor(v);
 			
-			String[] tokens = line.split(",");
-			if(tokens.length != colTypes.size()) {
-				throw new IllegalArgumentException("Mismatch number of tokens in line #" 
-					+ (lineNum - 1)
-					+ ", expected " + colTypes.size() + " found " + tokens.length);
-			}
+			DataTable<Outlook> dataTab = DataMatrix.of(matrix, 
+				new TreeSet<>(Arrays.asList(
+					new Column<>(0, Arrays.asList(Outlook.values()), flr),
+					Column.numeric(1),
+					Column.numeric(2),
+					Column.signed(3),
+					new Column<>(4, Arrays.asList(YesOrNo.values()), flr)
+				)), 
+				new Column<>(0, Arrays.asList(Outlook.values()), flr)
+			);
 			
-			double[] row = new double[tokens.length];
-			for(int i = 0; i < row.length; i++) {
-				row[i] = this.encode(colTypes.get(i), tokens[i].trim());
-			}
+			Weighted<DecisionNode<Outlook>> ans = new ZeroR(dist -> { 
+					Assert.assertEquals(5.0, dist[0], 1e-12); // sunny
+					Assert.assertEquals(4.0, dist[1], 1e-12); // overcast
+					Assert.assertEquals(5.0, dist[2], 1e-12); // rain
+					return Math.PI;
+				})
+				.make(dataTab, Collections.emptySet(), this.defaultSeq(dataTab.size()));
 			
-			rows.add(row);
+			Assert.assertEquals(Math.PI, ans.weight, 1e-12);
+			Assert.assertEquals(Outlook.SUNNY, ans.item.decide());
 		}
-		
-		return Matrices.of(rows.toArray(new double[0][]));
 	}
-    
-    protected double encode(Class<?> clazz, String token) {
-        if(clazz == double.class || clazz == Double.class) {
-            return Double.valueOf(token);
-        }
-        
-        if(clazz == boolean.class || clazz == Boolean.class) {
-            return Boolean.parseBoolean(token) ? 1.0 : 0.0;
-        }
-        
-        if(clazz.isEnum()) {
-            try {
-                Object enumVal = clazz.getMethod("valueOf", String.class)
-                    .invoke(null, token.toUpperCase());
-                
-                return ((Integer) clazz.getMethod("ordinal").invoke(enumVal))
-                    .doubleValue();
-            } catch (IllegalAccessException 
-                    | IllegalArgumentException 
-                    | InvocationTargetException
-                    | NoSuchMethodException 
-                    | SecurityException e) {
-                throw new UnsupportedOperationException(e);
-            }
-        }
-        
-        throw new UnsupportedOperationException("Unsupport type " + clazz.getName());
-    }
-    
-    public enum Outlook {
-        SUNNY, OVERCAST, RAIN
-    }
-    
-    public enum YesOrNo {
-        YES, NO
-    }
+	
+	protected Sequence defaultSeq(int len) {
+		return new Sequence(IntStream.range(0, len).toArray(), 0, len);
+	}
 
 }
