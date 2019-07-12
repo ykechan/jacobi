@@ -75,27 +75,25 @@ public class RankedBinaryPartition implements Partition<Double> {
             Instance inst = instances.get(i);
             if(prev < 0){
                 prev = inst.outcome;
-            }                        
+            }                       
+            
+            if(prev != inst.outcome) {
+            	double imp = left * this.impurity.of(leftDist)
+                        + right * this.impurity.of(rightDist);
+             
+	             if(imp < min) {
+	                 min = imp;
+	                 at = i;
+	             }
+	             
+	             prev = inst.outcome;
+            }
             
             left += inst.weight;
             leftDist[inst.outcome] += inst.weight;
             
             right -= inst.weight;
-            rightDist[inst.outcome] -= inst.weight;
-            
-            if(prev == inst.outcome) {
-                continue;
-            }
-            
-            double imp = left * this.impurity.of(leftDist)
-                       + right * this.impurity.of(rightDist);
-            
-            if(imp < min) {
-                min = imp;
-                at = i;
-            }
-            
-            prev = inst.outcome;
+            rightDist[inst.outcome] -= inst.weight;            
         }
         
         return new Weighted<>(this.split(table.getMatrix(), instances, target, at), min);
