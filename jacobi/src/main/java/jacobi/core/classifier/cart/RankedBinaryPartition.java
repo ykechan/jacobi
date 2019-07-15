@@ -96,7 +96,9 @@ public class RankedBinaryPartition implements Partition<Double> {
             rightDist[inst.outcome] -= inst.weight;            
         }
         
-        return new Weighted<>(this.split(table.getMatrix(), instances, target, at), min);
+        return at < 0
+        	? new Weighted<>(Double.NaN, 0.0)
+        	: new Weighted<>(this.split(table.getMatrix(), instances, target, at), min);
     }
     
     /**
