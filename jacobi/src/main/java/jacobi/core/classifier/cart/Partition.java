@@ -50,6 +50,6 @@ public interface Partition<T> {
      * @param seq  Access sequence
      * @return
      */
-    public <V> Weighted<T> measure(DataTable<V> table, Column<?> target, Sequence seq);
+    public Weighted<T> measure(DataTable<?> table, Column<?> target, Sequence seq);
 
 }

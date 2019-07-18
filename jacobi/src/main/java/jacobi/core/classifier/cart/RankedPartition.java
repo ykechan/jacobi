@@ -1,6 +1,7 @@
 package jacobi.core.classifier.cart;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.IntUnaryOperator;
@@ -23,7 +24,7 @@ import jacobi.core.util.Weighted;
  * <p>This class is stateful.</p>
  * 
  * @author Y.K. Chan
- * @param <T>
+ * @param <T>  Type for partition information
  */
 public class RankedPartition<T> implements Partition<T> {
     
@@ -33,12 +34,27 @@ public class RankedPartition<T> implements Partition<T> {
     }
 
     public RankedPartition<T> partition(Sequence seq, IntUnaryOperator grouper) {
-        Map<Tuple, Sequence> map = new TreeMap<>();
+        Map<Tuple, Sequence> targets = new TreeMap<>(this.ranks.subMap(
+        	Tuple.floor(seq.start()), 
+        	Tuple.ceiling(seq.start())
+        ));
+        
+        for(Map.Entry<Tuple, Sequence> entry : targets.entrySet()) {
+        	this.ranks.putAll(
+        		entry.getValue().groupBy(grouper)
+        			.stream()
+        			.collect(Collectors.toMap(
+        				s -> new Tuple(s.start(), entry.getKey().lower), 
+        				s -> s
+        			))
+        	);
+        	this.ranks.remove(entry.getKey());
+        }
         return this;
     }
 
     @Override
-    public <V> Weighted<T> measure(DataTable<V> table, Column<?> target, Sequence seq) {
+    public Weighted<T> measure(DataTable<?> table, Column<?> target, Sequence seq) {
         Sequence rank = this.ranks.get(new Tuple(seq.start(), target.getIndex()));
         
         if(rank != null && rank.length() != seq.length()) {
@@ -80,8 +96,24 @@ public class RankedPartition<T> implements Partition<T> {
             this.upper = upper;
             this.lower = lower;
         }
+        
+        
 
         @Override
+		public int hashCode() {
+        	return Objects.hash(this.lower, this.upper);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if(obj instanceof Tuple) {
+				Tuple oth = (Tuple) obj;
+				return this.lower == oth.lower && this.upper == oth.upper;
+			}
+			return false;
+		}
+
+		@Override
         public int compareTo(Tuple oth) {
             return this.upper == oth.upper
                  ? this.lower < oth.lower ? -1 : this.lower > oth.lower ? 1 : 0

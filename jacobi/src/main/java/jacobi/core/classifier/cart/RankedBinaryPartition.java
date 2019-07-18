@@ -55,7 +55,7 @@ public class RankedBinaryPartition implements Partition<Double> {
     }
 
     @Override
-    public <V> Weighted<Double> measure(DataTable<V> table, Column<?> target, Sequence seq) {
+    public Weighted<Double> measure(DataTable<?> table, Column<?> target, Sequence seq) {
         List<Instance> instances = seq.apply(table.getInstances(target));
         
         Column<?> goal = table.getOutcomeColumn();
