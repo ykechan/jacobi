@@ -36,7 +36,7 @@ public class DataMatrixTest {
 				matrix.getRow(0), 1e-12);
 			
 			Assert.assertArrayEquals(
-				new double[] {0.0, 85.0, 85.0, 0.0, 1.0}, 
+				new double[] {0.0, 80.0, 90.0, 1.0, 1.0}, 
 				matrix.getRow(1), 1e-12);
 			
 			Assert.assertArrayEquals(
