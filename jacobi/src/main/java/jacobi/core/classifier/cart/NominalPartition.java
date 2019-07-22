@@ -23,6 +23,7 @@
  */
 package jacobi.core.classifier.cart;
 
+import java.util.Arrays;
 import java.util.List;
 
 import jacobi.api.Matrices;
@@ -67,11 +68,11 @@ public class NominalPartition implements Partition<Void> {
      * @return  Impurity measurement
      */
     protected double measure(Column<?> target, Column<?> goal, List<Instance> instances) {
-        double[] weights = new double[goal.cardinality()];
+        double[] weights = new double[target.cardinality()];
         Matrix dist = Matrices.zeros(target.cardinality(), goal.cardinality());
         
         for(Instance inst : instances){
-            weights[inst.outcome] += inst.weight;
+            weights[inst.feature] += inst.weight;
             double[] row = dist.getRow(inst.feature);
             row[inst.outcome] += inst.weight;
             dist.setRow(inst.feature, row);
