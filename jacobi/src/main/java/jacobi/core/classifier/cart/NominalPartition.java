@@ -23,7 +23,6 @@
  */
 package jacobi.core.classifier.cart;
 
-import java.util.Arrays;
 import java.util.List;
 
 import jacobi.api.Matrices;

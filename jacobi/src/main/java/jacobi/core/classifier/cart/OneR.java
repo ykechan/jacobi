@@ -1,3 +1,26 @@
+/* 
+ * The MIT License
+ *
+ * Copyright 2019 Y.K. Chan
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package jacobi.core.classifier.cart;
 
 import java.util.Arrays;
@@ -18,8 +41,29 @@ import jacobi.core.classifier.cart.node.DecisionNode;
 import jacobi.core.classifier.cart.node.NominalSplit;
 import jacobi.core.util.Weighted;
 
+/**
+ * Implementation of 1-R decision rule learning algorithm.
+ * 
+ * <p>1-R algorithm chooses the feature having minimum impurity of outcome distribution
+ * after split, and decide for each distinct value of features its best guess according
+ * to the instance.</p>
+ * 
+ * <p>Making the guess after feature split is delegated to a baseline implementation. 
+ * If the baseline implementation is 0-R, this class would create a decision tree with
+ * depth 1. Other baseline implementations can also be used.</p>
+ * 
+ * <p>If no feature is found, the class would fallback to it's baseline implementation.</p>
+ * 
+ * @author Y.K. Chan
+ *
+ */
 public class OneR implements Rule {
 	
+	/**
+	 * Constructor
+	 * @param zeroR  Baseline implementation
+	 * @param partition  Partition function
+	 */
 	public OneR(Rule zeroR, Partition<?> partition) {
 		this.zeroR = zeroR;
 		this.partition = partition;
@@ -32,7 +76,6 @@ public class OneR implements Rule {
 		Weighted<?> min = null;
 		Column<?> target = null;
 		for(Column<?> feat : features) {
-			System.out.println("Measure " + feat.getIndex());
 			Weighted<?> split = this.partition.measure(dataTable, feat, seq);
 			if(min == null || split.weight < min.weight) {
 				min = split;
@@ -56,6 +99,12 @@ public class OneR implements Rule {
 		return new Weighted<>(this.<T>mergeFunc(target, min.item).apply(nodes), min.weight);
 	}
 	
+	/**
+	 * Get the merging function according to a feature column and given generic split info
+	 * @param col  Feature column
+	 * @param splitInfo  Split info
+	 * @return  Merging function
+	 */
 	public <T> Merger<T> mergeFunc(Column<?> col, Object splitInfo) {
 		if(!col.isNumeric()){
 			return ls ->  new NominalSplit<>(col, null, ls);
@@ -69,6 +118,12 @@ public class OneR implements Rule {
 		throw new UnsupportedOperationException("Unable to merge by " + splitInfo);
 	}
 	
+	/**
+	 * Get the splitting function from a decision node created by this class
+	 * @param dataTab  Data table
+	 * @param node  Decision node created
+	 * @return  Splitting function
+	 */
 	public IntUnaryOperator splitFunc(DataTable<?> dataTab, DecisionNode<?> node) {
 		if(node instanceof NominalSplit){ 
 			return this.splitFunc(dataTab, node.split(), null);
@@ -82,6 +137,13 @@ public class OneR implements Rule {
 		throw new UnsupportedOperationException();
 	}
 	
+	/**
+	 * Get the splitting function from a target feature column and split info
+	 * @param dataTab  Data table
+	 * @param col  Feature column
+	 * @param splitInfo Split info
+	 * @return  Splitting function
+	 */
 	protected IntUnaryOperator splitFunc(DataTable<?> dataTab, Column<?> col, Object splitInfo) {
 		
 		if(!col.isNumeric()){
@@ -107,6 +169,11 @@ public class OneR implements Rule {
 	private Rule zeroR;
 	private Partition<?> partition;
 	
+	/**
+	 * 
+	 * @author Y.K. Chan
+	 * @param <T>  Type of outcome
+	 */
 	public interface Merger<T> extends Function<List<DecisionNode<T>>, DecisionNode<T>> {
 		
 	}
