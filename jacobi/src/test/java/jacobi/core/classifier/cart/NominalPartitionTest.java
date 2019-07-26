@@ -1,15 +1,8 @@
 package jacobi.core.classifier.cart;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.AbstractList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.DoubleToIntFunction;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -17,15 +10,7 @@ import org.junit.runner.RunWith;
 
 import jacobi.api.Matrix;
 import jacobi.core.classifier.cart.data.Column;
-import jacobi.core.classifier.cart.data.DataMatrix;
-import jacobi.core.classifier.cart.data.DataTable;
 import jacobi.core.classifier.cart.data.Instance;
-import jacobi.core.classifier.cart.data.JacobiCsvDataTable;
-import jacobi.core.classifier.cart.data.Sequence;
-import jacobi.core.classifier.cart.data.JacobiCsvDataTable.Outlook;
-import jacobi.core.classifier.cart.data.JacobiCsvDataTable.YesOrNo;
-import jacobi.core.classifier.cart.node.DecisionNode;
-import jacobi.core.util.Weighted;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
@@ -81,6 +66,8 @@ public class NominalPartitionTest {
 		Assert.assertEquals(3, count.get());
 		Assert.assertEquals(10 * Math.E, result, 1e-12);
 	}
+	
+	
 	
 	protected List<Instance> toInstances(Matrix matrix, 
 			int featCol, int outcomeCol, int weightCol) {
