@@ -21,11 +21,12 @@ import jacobi.api.Matrix;
 import jacobi.core.classifier.cart.data.Column;
 import jacobi.core.classifier.cart.data.DataMatrix;
 import jacobi.core.classifier.cart.data.DataTable;
-import jacobi.core.classifier.cart.data.JacobiCsvDataTable;
-import jacobi.core.classifier.cart.data.JacobiCsvDataTable.Outlook;
-import jacobi.core.classifier.cart.data.JacobiCsvDataTable.YesOrNo;
 import jacobi.core.classifier.cart.data.Sequence;
 import jacobi.core.classifier.cart.node.DecisionNode;
+import jacobi.core.classifier.cart.util.JacobiCsvDataTable;
+import jacobi.core.classifier.cart.util.JacobiDefCsvDataTable;
+import jacobi.core.classifier.cart.util.JacobiEnums.Outlook;
+import jacobi.core.classifier.cart.util.JacobiEnums.YesOrNo;
 import jacobi.core.util.Weighted;
 
 public class ZeroRTest {
@@ -33,22 +34,8 @@ public class ZeroRTest {
 	@Test
 	public void shouldBeAbleToLearnGolfDataOnPlayToYes() throws IOException {
 		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.csv")){
-			Matrix matrix = new JacobiCsvDataTable().encodeCsv(input, Arrays.asList(
-				Outlook.class, double.class, double.class, boolean.class, YesOrNo.class
-			), true);
-
-			DoubleToIntFunction flr = v -> (int) Math.floor(v);
-			
-			DataTable<YesOrNo> dataTab = DataMatrix.of(matrix, 
-				new TreeSet<>(Arrays.asList(
-					new Column<>(0, Arrays.asList(Outlook.values()), flr),
-					Column.numeric(1),
-					Column.numeric(2),
-					new Column<>(3, Arrays.asList(Boolean.FALSE, Boolean.TRUE), v -> v > 0 ? 1 : 0),
-					new Column<>(4, Arrays.asList(YesOrNo.values()), flr)
-				)), 
-				new Column<>(4, Arrays.asList(YesOrNo.values()), flr)
-			);
+			DataTable<YesOrNo> dataTab = new JacobiDefCsvDataTable()
+					.read(input, YesOrNo.class);
 			
 			Weighted<DecisionNode<YesOrNo>> ans = new ZeroR(dist -> { 
 					Assert.assertEquals(9.0, dist[0], 1e-12);
@@ -65,22 +52,8 @@ public class ZeroRTest {
 	@Test
 	public void shouldBeAbleToLearnGolfDataOnWindToFalse() throws IOException {
 		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.csv")){
-			Matrix matrix = new JacobiCsvDataTable().encodeCsv(input, Arrays.asList(
-				Outlook.class, double.class, double.class, boolean.class, YesOrNo.class
-			), true);
-
-			DoubleToIntFunction flr = v -> (int) Math.floor(v);
-			
-			DataTable<Boolean> dataTab = DataMatrix.of(matrix, 
-				new TreeSet<>(Arrays.asList(
-					new Column<>(0, Arrays.asList(Outlook.values()), flr),
-					Column.numeric(1),
-					Column.numeric(2),
-					Column.signed(3),
-					new Column<>(4, Arrays.asList(YesOrNo.values()), flr)
-				)), 
-				Column.signed(3)
-			);
+			DataTable<Boolean> dataTab = new JacobiDefCsvDataTable()
+					.read(input, Boolean.class);
 			
 			Weighted<DecisionNode<Boolean>> ans = new ZeroR(dist -> { 
 					Assert.assertEquals(8.0, dist[0], 1e-12);
@@ -96,23 +69,9 @@ public class ZeroRTest {
 	
 	@Test
 	public void shouldBeAbleToLearnGolfDataOnOutcaseToSunny() throws IOException {
-		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.csv")){
-			Matrix matrix = new JacobiCsvDataTable().encodeCsv(input, Arrays.asList(
-				Outlook.class, double.class, double.class, boolean.class, YesOrNo.class
-			), true);
-
-			DoubleToIntFunction flr = v -> (int) Math.floor(v);
-			
-			DataTable<Outlook> dataTab = DataMatrix.of(matrix, 
-				new TreeSet<>(Arrays.asList(
-					new Column<>(0, Arrays.asList(Outlook.values()), flr),
-					Column.numeric(1),
-					Column.numeric(2),
-					Column.signed(3),
-					new Column<>(4, Arrays.asList(YesOrNo.values()), flr)
-				)), 
-				new Column<>(0, Arrays.asList(Outlook.values()), flr)
-			);
+		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.def.csv")){
+			DataTable<Outlook> dataTab = new JacobiDefCsvDataTable()
+					.read(input, Outlook.class);
 			
 			Weighted<DecisionNode<Outlook>> ans = new ZeroR(dist -> { 
 					Assert.assertEquals(5.0, dist[0], 1e-12); // sunny

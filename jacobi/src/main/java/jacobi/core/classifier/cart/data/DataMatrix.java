@@ -35,7 +35,7 @@ import jacobi.api.Matrix;
 
 public class DataMatrix<T> implements DataTable<T> {
 	
-	public static <T> DataMatrix<T> of(Matrix matrix, Set<Column<?>> colDefs, Column<T> outcomeCol) {
+	public static <T> DataMatrix<T> of(Matrix matrix, List<Column<?>> colDefs, Column<T> outcomeCol) {
 		// ...
 		
 		List<Column<?>> cols = colDefs.stream()
@@ -132,6 +132,7 @@ public class DataMatrix<T> implements DataTable<T> {
 		nomCols.add(typedMat.outcomeColumn);
 		
 		for(Column<?> col : nomCols) {
+			System.out.println("col = " + col);
 			nomList[col.getIndex()] = extractColumn(matrix, col.getIndex(), col.getMapping());
 		}
 		

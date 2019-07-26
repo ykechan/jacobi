@@ -1,32 +1,25 @@
 package jacobi.core.classifier.cart.data;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.TreeSet;
-import java.util.function.DoubleToIntFunction;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import jacobi.api.Matrices;
 import jacobi.api.Matrix;
-import jacobi.core.classifier.cart.data.JacobiCsvDataTable.Outlook;
-import jacobi.core.classifier.cart.data.JacobiCsvDataTable.YesOrNo;
+import jacobi.core.classifier.cart.util.JacobiDefCsvDataTable;
+import jacobi.core.classifier.cart.util.JacobiEnums.Outlook;
+import jacobi.core.classifier.cart.util.JacobiEnums.YesOrNo;
 
 public class DataMatrixTest {
 	
 	@Test
 	public void shouldBeAbleToEncodeGolfCsv() throws IOException {
-		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.csv")){
-			Matrix matrix = new JacobiCsvDataTable().encodeCsv(input, Arrays.asList(
-				Outlook.class, double.class, double.class, boolean.class, YesOrNo.class
-			), true);
+		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.def.csv")){
+			Matrix matrix = new JacobiDefCsvDataTable().read(input, YesOrNo.class)
+					.getMatrix();
 						
 			Assert.assertEquals(14, matrix.getRowCount());
 			Assert.assertEquals(5, matrix.getColCount());
@@ -47,26 +40,11 @@ public class DataMatrixTest {
 	
 	@Test
 	public void shouldBeAbleToInitGolfData() throws IOException {
-		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.csv")){
-			Matrix matrix = new JacobiCsvDataTable().encodeCsv(input, Arrays.asList(
-				Outlook.class, double.class, double.class, boolean.class, YesOrNo.class
-			), true);
-			
-			DoubleToIntFunction flr = v -> (int) Math.floor(v);
-						
-			DataMatrix<YesOrNo> dataMat = DataMatrix.of(matrix, 
-				new TreeSet<>(Arrays.asList(
-					new Column<>(0, Arrays.asList(Outlook.values()), flr),
-					Column.numeric(1),
-					Column.numeric(2),
-					new Column<>(3, Arrays.asList(Boolean.FALSE, Boolean.TRUE), v -> v > 0 ? 1 : 0),
-					new Column<>(4, Arrays.asList(YesOrNo.values()), flr)
-				)), 
-				new Column<>(4, Arrays.asList(YesOrNo.values()), flr)
-			);
+		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.def.csv")){
+			DataTable<YesOrNo> dataMat = new JacobiDefCsvDataTable().read(input, YesOrNo.class);
 			
 			List<Instance> insts = dataMat.getInstances(
-				new Column<>(0, Arrays.asList(Outlook.values()), flr)
+				new Column<>(0, Arrays.asList(Outlook.values()), v -> (int) v)
 			);
 			
 			Assert.assertEquals(14, insts.size());
@@ -105,25 +83,11 @@ public class DataMatrixTest {
 	
 	@Test
 	public void shouldBeAbleToInitGolfDataExcludingOutcomeColInColList() throws IOException {
-		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.csv")){
-			Matrix matrix = new JacobiCsvDataTable().encodeCsv(input, Arrays.asList(
-				Outlook.class, double.class, double.class, boolean.class, YesOrNo.class
-			), true);
-			
-			DoubleToIntFunction flr = v -> (int) Math.floor(v);
-						
-			DataMatrix<YesOrNo> dataMat = DataMatrix.of(matrix, 
-				new TreeSet<>(Arrays.asList(
-					new Column<>(0, Arrays.asList(Outlook.values()), flr),
-					Column.numeric(1),
-					Column.numeric(2),
-					new Column<>(3, Arrays.asList(Boolean.FALSE, Boolean.TRUE), v -> v > 0 ? 1 : 0)
-				)), 
-				new Column<>(4, Arrays.asList(YesOrNo.values()), flr)
-			);
+		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.def.csv")){
+			DataTable<YesOrNo> dataMat = new JacobiDefCsvDataTable().read(input, YesOrNo.class);
 			
 			List<Instance> insts = dataMat.getInstances(
-				new Column<>(3, Arrays.asList(Boolean.FALSE, Boolean.TRUE), flr)
+				new Column<>(3, Arrays.asList(Boolean.FALSE, Boolean.TRUE), v -> (int) v)
 			);
 			
 			Assert.assertEquals(14, insts.size());
@@ -162,23 +126,8 @@ public class DataMatrixTest {
 	
 	@Test
 	public void shouldBeAbleToReturnIndexAsFeatureForNumericCol() throws IOException {
-		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.csv")){
-			Matrix matrix = new JacobiCsvDataTable().encodeCsv(input, Arrays.asList(
-				Outlook.class, double.class, double.class, boolean.class, YesOrNo.class
-			), true);
-			
-			DoubleToIntFunction flr = v -> (int) Math.floor(v);
-						
-			DataMatrix<YesOrNo> dataMat = DataMatrix.of(matrix, 
-				new TreeSet<>(Arrays.asList(
-					new Column<>(0, Arrays.asList(Outlook.values()), flr),
-					Column.numeric(1),
-					Column.numeric(2),
-					new Column<>(3, Arrays.asList(Boolean.FALSE, Boolean.TRUE), v -> v > 0 ? 1 : 0),
-					new Column<>(4, Arrays.asList(YesOrNo.values()), flr)
-				)), 
-				new Column<>(4, Arrays.asList(YesOrNo.values()), flr)
-			);
+		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.def.csv")){
+			DataTable<YesOrNo> dataMat = new JacobiDefCsvDataTable().read(input, YesOrNo.class);			
 			
 			List<Instance> insts = dataMat.getInstances(
 				Column.numeric(1)
@@ -202,23 +151,8 @@ public class DataMatrixTest {
 	
 	@Test(expected = IllegalArgumentException.class)
 	public void shouldFailWhenGetInstancesOfNominalColByNumericDef() throws IOException {
-		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.csv")){
-			Matrix matrix = new JacobiCsvDataTable().encodeCsv(input, Arrays.asList(
-				Outlook.class, double.class, double.class, boolean.class, YesOrNo.class
-			), true);
-			
-			DoubleToIntFunction flr = v -> (int) Math.floor(v);
-						
-			DataMatrix<YesOrNo> dataMat = DataMatrix.of(matrix, 
-				new TreeSet<>(Arrays.asList(
-					new Column<>(0, Arrays.asList(Outlook.values()), flr),
-					Column.numeric(1),
-					Column.numeric(2),
-					new Column<>(3, Arrays.asList(Boolean.FALSE, Boolean.TRUE), v -> v > 0 ? 1 : 0),
-					new Column<>(4, Arrays.asList(YesOrNo.values()), flr)
-				)), 
-				new Column<>(4, Arrays.asList(YesOrNo.values()), flr)
-			);
+		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.def.csv")){
+			DataTable<YesOrNo> dataMat = new JacobiDefCsvDataTable().read(input, YesOrNo.class);
 			
 			dataMat.getInstances(Column.numeric(0));
 		}
@@ -226,25 +160,10 @@ public class DataMatrixTest {
 	
 	@Test(expected = IllegalArgumentException.class)
 	public void shouldFailWhenGetInstancesOfNumericColByNominalDef() throws IOException {
-		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.csv")){
-			Matrix matrix = new JacobiCsvDataTable().encodeCsv(input, Arrays.asList(
-				Outlook.class, double.class, double.class, boolean.class, YesOrNo.class
-			), true);
+		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.def.csv")){
+			DataTable<YesOrNo> dataMat = new JacobiDefCsvDataTable().read(input, YesOrNo.class);
 			
-			DoubleToIntFunction flr = v -> (int) Math.floor(v);
-						
-			DataMatrix<YesOrNo> dataMat = DataMatrix.of(matrix, 
-				new TreeSet<>(Arrays.asList(
-					new Column<>(0, Arrays.asList(Outlook.values()), flr),
-					Column.numeric(1),
-					Column.numeric(2),
-					new Column<>(3, Arrays.asList(Boolean.FALSE, Boolean.TRUE), v -> v > 0 ? 1 : 0),
-					new Column<>(4, Arrays.asList(YesOrNo.values()), flr)
-				)), 
-				new Column<>(4, Arrays.asList(YesOrNo.values()), flr)
-			);
-			
-			dataMat.getInstances(new Column<>(1, Arrays.asList(Outlook.values()), flr));
+			dataMat.getInstances(new Column<>(1, Arrays.asList(Outlook.values()), v -> (int) v));
 		}
 	}
 	
