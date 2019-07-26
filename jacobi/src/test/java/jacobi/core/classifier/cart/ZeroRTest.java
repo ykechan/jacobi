@@ -1,29 +1,16 @@
 package jacobi.core.classifier.cart;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
-import java.util.TreeSet;
-import java.util.function.DoubleToIntFunction;
 import java.util.stream.IntStream;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import jacobi.api.Matrices;
-import jacobi.api.Matrix;
-import jacobi.core.classifier.cart.data.Column;
-import jacobi.core.classifier.cart.data.DataMatrix;
 import jacobi.core.classifier.cart.data.DataTable;
 import jacobi.core.classifier.cart.data.Sequence;
 import jacobi.core.classifier.cart.node.DecisionNode;
-import jacobi.core.classifier.cart.util.JacobiCsvDataTable;
 import jacobi.core.classifier.cart.util.JacobiDefCsvDataTable;
 import jacobi.core.classifier.cart.util.JacobiEnums.Outlook;
 import jacobi.core.classifier.cart.util.JacobiEnums.YesOrNo;

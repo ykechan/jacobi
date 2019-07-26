@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.IntStream;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import jacobi.core.classifier.cart.data.Column;
@@ -35,8 +36,32 @@ public class OneRTest {
 					this.defaultSeq(dataTab.size())
 				);
 			
-			System.out.println(ans.weight);
-			System.out.println(ans.item.split().getIndex());
+			/*
+			 * sunny,85,85,false,no
+				sunny,80,90,true,no
+				overcast,83,78,false,yes
+				rain,70,96,false,yes
+				rain,68,80,false,yes
+				rain,65,70,true,no
+				overcast,64,65,true,yes
+				sunny,72,95,false,no
+				sunny,69,70,false,yes
+				rain,75,80,false,yes
+				sunny,75,70,true,yes
+				overcast,72,90,true,yes
+				overcast,81,75,false,yes
+				rain,71,80,true,no
+			 */
+			// sunny: yes(2) no(3)
+			// overcast: yes(4) no(0)
+			// rain: yes(3) no(2)
+			
+			Assert.assertEquals(
+				  5 * Impurity.ENTROPY.of(new double[] {2, 3})
+				+ 4 * Impurity.ENTROPY.of(new double[] {4, 0})
+				+ 5 * Impurity.ENTROPY.of(new double[] {3, 2}), ans.weight, 1e-12);
+			
+			
 		}
 	}
 	

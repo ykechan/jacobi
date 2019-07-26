@@ -9,5 +9,22 @@ public class JacobiEnums {
 	public enum YesOrNo {
 		YES, NO
 	}
+	
+	public enum AgeForLens {
+		
+		YOUNG, PREPRESBYOPIC, PRESBYOPIC
+	}
+	
+	public enum Spectacle {
+		MYOPE, HYPERMETROPE
+	}
+	
+	public enum TearRate {
+		REDUCED, NORMAL
+	}
+	
+	public enum Lens {
+		SOFT, HARD, NONE
+	}
 
 }

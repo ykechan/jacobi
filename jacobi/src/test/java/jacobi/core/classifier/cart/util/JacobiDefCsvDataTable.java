@@ -20,6 +20,7 @@ import jacobi.api.Matrix;
 import jacobi.core.classifier.cart.data.Column;
 import jacobi.core.classifier.cart.data.DataMatrix;
 import jacobi.core.classifier.cart.data.DataTable;
+import jacobi.core.classifier.cart.util.JacobiEnums.Lens;
 import jacobi.core.classifier.cart.util.JacobiEnums.YesOrNo;
 
 public class JacobiDefCsvDataTable {
@@ -104,15 +105,21 @@ public class JacobiDefCsvDataTable {
 	public void shouldBeAbleToReadGolfDefCsvByOutcomeType() throws IOException {
 		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.def.csv")){
 			DataTable<YesOrNo> dataTab = this.read(input, YesOrNo.class);
-			for(Column<?> col : dataTab.getColumns()) {
-				System.out.println("#" + col.getIndex() + " -> " + col.getItems());
-			}
-			
 			Column<?> col = dataTab.getColumns().get(0);
-			System.out.println("#" + col.getIndex() + " -> " + col.getItems());
 			Assert.assertEquals(14, dataTab.size());
 			Assert.assertEquals(YesOrNo.YES, dataTab.getOutcomeColumn().getItems().get(0));
 			Assert.assertEquals(YesOrNo.NO, dataTab.getOutcomeColumn().getItems().get(1));
+		}
+	}
+	
+	@Test
+	public void shouldBeAbleToReadLensDefCsvByOutcomeType() throws IOException {
+		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/contact-lenses.def.csv")){
+			DataTable<Lens> dataTab = this.read(input, Lens.class);
+			Column<?> col = dataTab.getColumns().get(0);			
+			Assert.assertEquals(24, dataTab.size());
+			Assert.assertEquals(Lens.SOFT, dataTab.getOutcomeColumn().getItems().get(0));
+			Assert.assertEquals(Lens.HARD, dataTab.getOutcomeColumn().getItems().get(1));
 		}
 	}
 	
