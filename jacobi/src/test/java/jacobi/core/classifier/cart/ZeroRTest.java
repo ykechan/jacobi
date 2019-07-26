@@ -20,7 +20,7 @@ public class ZeroRTest {
 
 	@Test
 	public void shouldBeAbleToLearnGolfDataOnPlayToYes() throws IOException {
-		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.csv")){
+		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.def.csv")){
 			DataTable<YesOrNo> dataTab = new JacobiDefCsvDataTable()
 					.read(input, YesOrNo.class);
 			
@@ -38,7 +38,7 @@ public class ZeroRTest {
 	
 	@Test
 	public void shouldBeAbleToLearnGolfDataOnWindToFalse() throws IOException {
-		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.csv")){
+		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.def.csv")){
 			DataTable<Boolean> dataTab = new JacobiDefCsvDataTable()
 					.read(input, Boolean.class);
 			
