@@ -11,7 +11,7 @@ import org.junit.Test;
 import jacobi.core.classifier.cart.data.DataTable;
 import jacobi.core.classifier.cart.data.Sequence;
 import jacobi.core.classifier.cart.node.DecisionNode;
-import jacobi.core.classifier.cart.util.JacobiDefCsvDataTable;
+import jacobi.core.classifier.cart.util.JacobiDefCsvReader;
 import jacobi.core.classifier.cart.util.JacobiEnums.Outlook;
 import jacobi.core.classifier.cart.util.JacobiEnums.YesOrNo;
 import jacobi.core.util.Weighted;
@@ -21,7 +21,7 @@ public class ZeroRTest {
 	@Test
 	public void shouldBeAbleToLearnGolfDataOnPlayToYes() throws IOException {
 		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.def.csv")){
-			DataTable<YesOrNo> dataTab = new JacobiDefCsvDataTable()
+			DataTable<YesOrNo> dataTab = new JacobiDefCsvReader()
 					.read(input, YesOrNo.class);
 			
 			Weighted<DecisionNode<YesOrNo>> ans = new ZeroR(dist -> { 
@@ -39,7 +39,7 @@ public class ZeroRTest {
 	@Test
 	public void shouldBeAbleToLearnGolfDataOnWindToFalse() throws IOException {
 		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.def.csv")){
-			DataTable<Boolean> dataTab = new JacobiDefCsvDataTable()
+			DataTable<Boolean> dataTab = new JacobiDefCsvReader()
 					.read(input, Boolean.class);
 			
 			Weighted<DecisionNode<Boolean>> ans = new ZeroR(dist -> { 
@@ -57,7 +57,7 @@ public class ZeroRTest {
 	@Test
 	public void shouldBeAbleToLearnGolfDataOnOutcaseToSunny() throws IOException {
 		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.def.csv")){
-			DataTable<Outlook> dataTab = new JacobiDefCsvDataTable()
+			DataTable<Outlook> dataTab = new JacobiDefCsvReader()
 					.read(input, Outlook.class);
 			
 			Weighted<DecisionNode<Outlook>> ans = new ZeroR(dist -> { 

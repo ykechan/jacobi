@@ -44,18 +44,18 @@ import jacobi.core.util.Weighted;
  * @author Y.K. Chan
  *
  */
-public class RankedBinaryPartition implements Partition<Double> {
+public class RankedBinaryPartition implements Partition {
     
     /**
      * Constructor.
-     * @param impurity  Impurint function
+     * @param impurity  Impurity function
      */
     public RankedBinaryPartition(Impurity impurity) {
         this.impurity = impurity;
     }
 
     @Override
-    public Weighted<Double> measure(DataTable<?> table, Column<?> target, Sequence seq) {
+    public Weighted<double[]> measure(DataTable<?> table, Column<?> target, Sequence seq) {
         List<Instance> instances = seq.apply(table.getInstances(target));
         
         Column<?> goal = table.getOutcomeColumn();
@@ -97,8 +97,10 @@ public class RankedBinaryPartition implements Partition<Double> {
         }
         
         return at < 0
-        	? new Weighted<>(Double.NaN, 0.0)
-        	: new Weighted<>(this.split(table.getMatrix(), instances, target, at), min);
+        	? new Weighted<>(new double[0], Double.NaN)
+        	: new Weighted<>(new double[] {
+        		this.split(table.getMatrix(), instances, target, at)
+        	  }, min);
     }
     
     /**

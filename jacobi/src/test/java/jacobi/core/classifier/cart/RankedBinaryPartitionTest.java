@@ -21,7 +21,7 @@ public class RankedBinaryPartitionTest {
 	
 	@Test
 	public void shouldBeAbleToBreakAtPurePartition() {
-		Weighted<Double> split = new RankedBinaryPartition(Impurity.ENTROPY)
+		Weighted<double[]> split = new RankedBinaryPartition(Impurity.ENTROPY)
 			.measure(
 				this.mock(
 					new double[] {1.0, 2.0, 3.0, 4.0, 5.0}, 
@@ -32,12 +32,13 @@ public class RankedBinaryPartitionTest {
 			);
 		
 		Assert.assertEquals(0.0, split.weight, 1e-12);
-		Assert.assertEquals(2.5, split.item, 1e-12);
+		Assert.assertEquals(1, split.item.length, 1e-12);
+		Assert.assertEquals(2.5, split.item[0], 1e-12);
 	}
 	
 	@Test
 	public void shouldBeAbleToBreakAtPurePartitionBySequence() {
-		Weighted<Double> split = new RankedBinaryPartition(Impurity.ENTROPY)
+		Weighted<double[]> split = new RankedBinaryPartition(Impurity.ENTROPY)
 			.measure(
 				this.mock(
 					new double[] {5.0, 1.0, 3.0, 4.0, 2.0}, 
@@ -48,12 +49,13 @@ public class RankedBinaryPartitionTest {
 			);
 		
 		Assert.assertEquals(0.0, split.weight, 1e-12);
-		Assert.assertEquals(2.5, split.item, 1e-12);
+		Assert.assertEquals(1, split.item.length, 1e-12);
+		Assert.assertEquals(2.5, split.item[0], 1e-12);
 	}
 	
 	@Test
 	public void shouldBeAbleToReturnNaNAtPureOutcome() {
-		Weighted<Double> split = new RankedBinaryPartition(Impurity.ENTROPY)
+		Weighted<double[]> split = new RankedBinaryPartition(Impurity.ENTROPY)
 				.measure(
 					this.mock(
 						new double[] {5.0, 1.0, 3.0, 4.0, 2.0}, 
@@ -63,8 +65,8 @@ public class RankedBinaryPartitionTest {
 					new Sequence(new int[] {1, 4, 2, 3, 0}, 0, 5)
 				);
 			
-			Assert.assertEquals(0.0, split.weight, 1e-12);
-			Assert.assertTrue(Double.isNaN(split.item));
+		Assert.assertTrue(Double.isNaN(split.weight));
+		Assert.assertEquals(0, split.item.length);
 	}
 	
 	protected <T> DataTable<T> mockWeighted(double[] values, List<Weighted<T>> list) {

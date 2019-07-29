@@ -32,8 +32,11 @@ import jacobi.core.util.Weighted;
  * Common interface for measuring the impurity of the outcome distribution after partitioning 
  * a data table by a certain column.
  * 
- * <p>Additional information on the partitioning measured, should there are multiple
- * ways to partition by that given column, may also be provided.</p>
+ * <p>For a pure data set, i.e. all instances have the same outcome, NaN is returned as weight.
+ * </p>
+ * 
+ * <p>Implementations should return the threshold for the partitions for numeric attributes,
+ * or an empty array for nominal attributes.</p>
  * 
  * <p>Implementations should access the data in a given access sequence, and only instances
  * appearing in the access sequence is considered.</p>
@@ -41,7 +44,7 @@ import jacobi.core.util.Weighted;
  * @author Y.K. Chan
  * @param <T>  Type for partition information
  */
-public interface Partition<T> {
+public interface Partition {
     
     /**
      * Measure the impurity of outcome distribution
@@ -50,6 +53,6 @@ public interface Partition<T> {
      * @param seq  Access sequence
      * @return
      */
-    public Weighted<T> measure(DataTable<?> table, Column<?> target, Sequence seq);
+    public Weighted<double[]> measure(DataTable<?> table, Column<?> target, Sequence seq);
 
 }

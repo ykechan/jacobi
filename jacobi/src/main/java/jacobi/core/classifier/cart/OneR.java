@@ -23,7 +23,6 @@
  */
 package jacobi.core.classifier.cart;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -37,6 +36,7 @@ import jacobi.core.classifier.cart.data.DataTable;
 import jacobi.core.classifier.cart.data.Instance;
 import jacobi.core.classifier.cart.data.Sequence;
 import jacobi.core.classifier.cart.node.BinaryNumericSplit;
+import jacobi.core.classifier.cart.node.Decision;
 import jacobi.core.classifier.cart.node.DecisionNode;
 import jacobi.core.classifier.cart.node.NominalSplit;
 import jacobi.core.util.Weighted;
@@ -64,7 +64,7 @@ public class OneR implements Rule {
 	 * @param zeroR  Baseline implementation
 	 * @param partition  Partition function
 	 */
-	public OneR(Rule zeroR, Partition<?> partition) {
+	public OneR(Rule zeroR, Partition partition) {
 		this.zeroR = zeroR;
 		this.partition = partition;
 	}
@@ -73,10 +73,15 @@ public class OneR implements Rule {
 	public <T> Weighted<DecisionNode<T>> make(DataTable<T> dataTable, 
 			Set<Column<?>> features, 
 			Sequence seq) {
-		Weighted<?> min = null;
+		Weighted<double[]> min = null;
 		Column<?> target = null;
+		
 		for(Column<?> feat : features) {
-			Weighted<?> split = this.partition.measure(dataTable, feat, seq);
+			Weighted<double[]> split = this.partition.measure(dataTable, feat, seq);
+			if(Double.isNaN(split.weight)) {
+				return new Weighted<>(this.decidePure(dataTable, seq), 0.0);
+			}
+			
 			if(min == null || split.weight < min.weight) {
 				min = split;
 				target = feat;
@@ -100,22 +105,47 @@ public class OneR implements Rule {
 	}
 	
 	/**
-	 * Get the merging function according to a feature column and given generic split info
-	 * @param col  Feature column
-	 * @param splitInfo  Split info
+	 * Get the merging function according to a decision node. The decision node should be created
+	 * by this implementation.
+	 * @param node  Decision node
 	 * @return  Merging function
 	 */
-	public <T> Merger<T> mergeFunc(Column<?> col, Object splitInfo) {
-		if(!col.isNumeric()){
-			return ls ->  new NominalSplit<>(col, null, ls);
+	public <T> Merger<T> mergeFunc(DecisionNode<T> node) {
+		if(node.split() == null){
+			throw new IllegalArgumentException("Leaf node has no merge function");
 		}
 		
-		if(splitInfo instanceof Double){
-			double thres = (Double) splitInfo;
-			return ls -> new BinaryNumericSplit<>(col, thres, ls.get(0), ls.get(1));
+		if(node instanceof NominalSplit){
+			return this.mergeFunc(node.split(), null);
 		}
 		
-		throw new UnsupportedOperationException("Unable to merge by " + splitInfo);
+		if(node instanceof BinaryNumericSplit){
+			return this.mergeFunc(node.split(), 
+				new double[] {((BinaryNumericSplit<?>) node).getThreshold()}
+			);
+		}
+		
+		throw new UnsupportedOperationException("Un-identified decision node " + node);
+	}
+	
+	/**
+	 * Get the merging function according to a feature column and given split boundaries
+	 * @param col  Feature column
+	 * @param bounds  Boundaries of split
+	 * @return  Merging function
+	 */
+	protected <T> Merger<T> mergeFunc(Column<?> col, double[] bounds) {
+		this.validateColumnAndBounds(col, bounds);
+		
+		switch(bounds.length) {
+			case 0 :
+				return ls -> new NominalSplit<>(col, null, ls);
+			case 1 :
+				return ls -> new BinaryNumericSplit<>(col, bounds[0], ls.get(0), ls.get(1));
+			default :
+				break;
+		}
+		throw new UnsupportedOperationException();
 	}
 	
 	/**
@@ -131,7 +161,8 @@ public class OneR implements Rule {
 
 		if(node instanceof BinaryNumericSplit){
 			return this.splitFunc(dataTab, node.split(), 
-				((BinaryNumericSplit<?>) node).getThreshold());
+				new double[] { ((BinaryNumericSplit<?>) node).getThreshold() }
+			);
 		}
 		
 		throw new UnsupportedOperationException();
@@ -141,35 +172,68 @@ public class OneR implements Rule {
 	 * Get the splitting function from a target feature column and split info
 	 * @param dataTab  Data table
 	 * @param col  Feature column
-	 * @param splitInfo Split info
+	 * @param bounds Split info
 	 * @return  Splitting function
 	 */
-	protected IntUnaryOperator splitFunc(DataTable<?> dataTab, Column<?> col, Object splitInfo) {
+	protected IntUnaryOperator splitFunc(DataTable<?> dataTab, Column<?> col, double[] bounds) {
+		this.validateColumnAndBounds(col, bounds);
 		
-		if(!col.isNumeric()){
-			List<Instance> instances = dataTab.getInstances(col);
-			return i -> instances.get(i).feature;
+		switch(bounds.length) {
+			case 0 : {
+				List<Instance> instances = dataTab.getInstances(col);
+				return i -> instances.get(i).feature;
+			}
+			case 1 : {
+				Matrix mat = dataTab.getMatrix();
+				return i -> mat.get(i, col.getIndex()) < bounds[0] ? 0 : 1;
+			}
+			default :
+				break;
 		}
-		
-		if(splitInfo instanceof Double) {
-			double thres = (Double) splitInfo;
-			Matrix mat = dataTab.getMatrix();
-			return i -> mat.get(i, col.getIndex()) < thres ? 0 : 1;
-		}
-		
-		if(splitInfo instanceof double[]){
-			double[] bounds = (double[]) splitInfo;
-			Matrix mat = dataTab.getMatrix();
-			return i -> Math.abs(Arrays.binarySearch(bounds, mat.get(i, col.getIndex())));
-		}
-
-		throw new UnsupportedOperationException("Unable to split by " + splitInfo);
-	}			
-	
-	private Rule zeroR;
-	private Partition<?> partition;
+		throw new UnsupportedOperationException();
+	}	
 	
 	/**
+	 * Validate column type and given boundaries, i.e. no boundaries for nominal column,
+	 * and non-empty boundaries for numeric column
+	 * @param col  Input column
+	 * @param bounds  Boundaries
+	 * @throws  IllegalArgumentException if no boundaries for numeric column, and 
+	 *                                   non-empty boundaries for nominal column
+	 */
+	protected void validateColumnAndBounds(Column<?> col, double[] bounds) {
+		if(col.isNumeric() == (bounds.length > 0)){
+			return;
+		}
+		throw new IllegalArgumentException(String.format(
+			"Given %d boundaries for %s column #%d",
+			bounds.length, col.isNumeric() ? "numeric" : "nominal", col.getIndex()
+		));
+	}
+	
+	/**
+	 * Make decision on a pure data (sub)set, i.e. all instances having the same outcome.
+	 * If no instance is found, decide on the first choice of outcome.
+	 * @param dataTab  Input data set
+	 * @param seq  Sequence of access
+	 * @return  Decision leaf node
+	 */
+	protected <T> Decision<T> decidePure(DataTable<T> dataTab, Sequence seq) {
+		
+		return new Decision<>(dataTab.getOutcomeColumn().valueOf(
+			seq.length() == 0
+			? 0
+			: dataTab.getInstances(dataTab.getOutcomeColumn())
+				.get(seq.indexAt(0))
+				.feature
+		));
+	}
+	
+	private Rule zeroR;
+	private Partition partition;
+	
+	/**
+	 * Short-hand for List&lt;DecisioNode&lt;T&gt;&gt; -&gt; DecisionNode&lt;T&gt; 
 	 * 
 	 * @author Y.K. Chan
 	 * @param <T>  Type of outcome

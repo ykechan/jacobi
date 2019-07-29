@@ -23,7 +23,7 @@ import jacobi.core.classifier.cart.data.DataTable;
 import jacobi.core.classifier.cart.util.JacobiEnums.Lens;
 import jacobi.core.classifier.cart.util.JacobiEnums.YesOrNo;
 
-public class JacobiDefCsvDataTable {
+public class JacobiDefCsvReader {
 	
 	@Test
 	public void shouldBeAbleToCreateNumericColumn() {

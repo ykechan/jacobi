@@ -43,7 +43,7 @@ import jacobi.core.util.Weighted;
  * @author Y.K. Chan
  *
  */
-public class NominalPartition implements Partition<Void> {
+public class NominalPartition implements Partition {
 
     /**
      * Constructor.
@@ -54,9 +54,10 @@ public class NominalPartition implements Partition<Void> {
     }
 
     @Override
-    public Weighted<Void> measure(DataTable<?> table, Column<?> target, Sequence seq) {
+    public Weighted<double[]> measure(DataTable<?> table, Column<?> target, Sequence seq) {
         List<Instance> instances = seq.apply(table.getInstances(target));
-        return new Weighted<>(null, this.measure(target, table.getOutcomeColumn(), instances));
+        double score = this.measure(target, table.getOutcomeColumn(), instances);
+        return new Weighted<>(new double[0], score);
     }
     
     /**
@@ -67,17 +68,30 @@ public class NominalPartition implements Partition<Void> {
      * @return  Impurity measurement
      */
     protected double measure(Column<?> target, Column<?> goal, List<Instance> instances) {
+    	if(instances.isEmpty()) {
+    		return Double.NaN;
+    	}
+    	
         double[] weights = new double[target.cardinality()];
         Matrix dist = Matrices.zeros(target.cardinality(), goal.cardinality());
+        
+        int prev = instances.get(0).outcome;
+        boolean pure = true;
         
         for(Instance inst : instances){
             weights[inst.feature] += inst.weight;
             double[] row = dist.getRow(inst.feature);
             row[inst.outcome] += inst.weight;
             dist.setRow(inst.feature, row);
+            
+            if(inst.outcome != prev) {
+            	pure = false;
+            }
+            
+            prev = inst.outcome;
         }
         
-        return this.measure(dist, weights);
+        return pure ? Double.NaN : this.measure(dist, weights);
     }
     
     /**

@@ -72,8 +72,10 @@ public class Sequence {
     }
     
     /**
-     * Re-arrange this sequence into different groups, in which groups will be accessed having
-     * lower group number, and maintain in-place access sequence within each groups.
+     * Re-arrange this sequence into different groups in-place. Items are assigned to groups, and
+     * re-arranged such that the following properties hold: all items in group i comes before
+     * any items in group j if i &lt; j, and if item a comes before item b in the original
+     * sequence and both items are in group k, item a comes before item b after re-arrangement.
      * @param grouper  Function to get the group number given the index of item
      * @return  Sequence to access in different groups.
      */

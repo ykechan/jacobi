@@ -26,9 +26,14 @@ import jacobi.core.util.Weighted;
  * @author Y.K. Chan
  * @param <T>  Type for partition information
  */
-public class RankedPartition<T> implements Partition<T> {
+public class RankedPartition<T> implements Partition {
     
-    public RankedPartition(Partition<T> partition, Map<Column<?>, Sequence> ranks) {
+	/**
+	 * Constructor
+	 * @param partition  Base partition function
+	 * @param ranks  Initial ranked sequence
+	 */
+    public RankedPartition(Partition partition, Map<Column<?>, Sequence> ranks) {
         this.partition = partition;
         this.ranks = this.toSortedMap(ranks);
     }
@@ -54,7 +59,7 @@ public class RankedPartition<T> implements Partition<T> {
     }
 
     @Override
-    public Weighted<T> measure(DataTable<?> table, Column<?> target, Sequence seq) {
+    public Weighted<double[]> measure(DataTable<?> table, Column<?> target, Sequence seq) {
         Sequence rank = this.ranks.get(new Tuple(seq.start(), target.getIndex()));
         
         if(rank != null && rank.length() != seq.length()) {
@@ -73,13 +78,20 @@ public class RankedPartition<T> implements Partition<T> {
                    "Duplicated column in ranks "
                 );
             },
-            () -> new TreeMap<>()
+            TreeMap::new
         ));
     }
     
     private SortedMap<Tuple, Sequence> ranks;
-    private Partition<T> partition;
+    private Partition partition;
     
+    /**
+     * A tuple of integer that is comparable for using as keys of sequences
+     * 
+     * <p>A sequence should be idenifiable by its starting position and </p>
+     * @author Y.K. Chan
+     *
+     */
     protected static class Tuple implements Comparable<Tuple> {
         
         public static Tuple floor(int upper) {
@@ -97,8 +109,6 @@ public class RankedPartition<T> implements Partition<T> {
             this.lower = lower;
         }
         
-        
-
         @Override
 		public int hashCode() {
         	return Objects.hash(this.lower, this.upper);
