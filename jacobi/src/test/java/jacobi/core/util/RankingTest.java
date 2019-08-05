@@ -1,5 +1,6 @@
 package jacobi.core.util;
 
+import java.util.Arrays;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
@@ -38,7 +39,7 @@ public class RankingTest {
 	
 	@Test
 	@JacobiImport("test random 10x5")
-	public void testShouldBeSelectMedianOf5() {
+	public void testShouldBeAbleToSelectMedianOf5() {
 		double[] buffer = new double[2 * this.input.getRowCount()];
 		
 		int pivot = new Ranking(buffer, n -> 2).init(i -> this.input.get(i, 0))
@@ -71,6 +72,57 @@ public class RankingTest {
 		values.add(this.input.get(1, 2));
 		values.add(this.input.get((this.input.getRowCount() / 2) + 1, 2));
 		Assert.assertEquals(values.toArray(new Double[0])[2], this.input.get(pivot / 2, 2), 1e-12);
+	}
+	
+	@Test
+	@JacobiImport("test random 10x5")
+	public void testShouldBeAbleToSortByHeapSort() {
+		double[] buf = new double[2 * this.input.getRowCount()];
+		
+		Ranking ranking = new Ranking(buf, n -> 2).init(i -> this.input.get(i, 0));
+		ranking.hsort(0, this.input.getRowCount());
+		
+		for(int i = 2; i < buf.length; i += 2) {
+			Assert.assertTrue(buf[i] >= buf[i - 2]);
+		}
+		
+		Arrays.fill(buf, 0.0);
+		ranking = new Ranking(buf, n -> 2).init(i -> this.input.get(i, 1));
+		ranking.hsort(0, this.input.getRowCount());
+		
+		for(int i = 2; i < buf.length; i += 2) {
+			Assert.assertTrue(buf[i] >= buf[i - 2]);
+		}
+		
+		Arrays.fill(buf, 0.0);
+		ranking = new Ranking(buf, n -> 2).init(i -> this.input.get(i, 2));
+		ranking.hsort(0, this.input.getRowCount());
+		
+		for(int i = 2; i < buf.length; i += 2) {
+			Assert.assertTrue(buf[i] >= buf[i - 2]);
+		}
+		
+		Arrays.fill(buf, 0.0);
+		ranking = new Ranking(buf, n -> 2).init(i -> this.input.get(i, 3));
+		ranking.hsort(0, this.input.getRowCount());
+		
+		for(int i = 2; i < buf.length; i += 2) {
+			Assert.assertTrue(buf[i] >= buf[i - 2]);
+		}
+		
+		Arrays.fill(buf, 0.0);
+		ranking = new Ranking(buf, n -> 2).init(i -> this.input.get(i, 4));
+		ranking.hsort(0, this.input.getRowCount());
+		
+		for(int i = 2; i < buf.length; i += 2) {
+			Assert.assertTrue(buf[i] >= buf[i - 2]);
+		}
+	}
+	
+	@Test
+	@JacobiImport("test random 20x3 with pivot 2")
+	public void testShouldBeAbleToPartitionBy2Pivots() {
+		
 	}
 
 }

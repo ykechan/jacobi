@@ -23,18 +23,18 @@
  */
 package jacobi.core.util;
 
-import java.util.Arrays;
 import java.util.function.IntToDoubleFunction;
 import java.util.function.IntUnaryOperator;
 
 /**
  * Implementation of ranking a sequence of real numbers. 
  * 
- * <p>Sorting is readily available and largely optimized by the standard library. However one
- * case is not covered: sorting primitives by comparators. This is essential if the developer
- * want to obtain the ranking of a sequence of real numbers. Since the sequence can potentially
- * be very long, boxing may impact performance both in memory usage and cache miss, which are
- * totally un-necessary when all of the items are primitives to begin with.</p>
+ * <p>Sorting is a readily available and largely optimized function provided by the standard library. 
+ * However one case is not covered: sorting primitives by comparators. This is essential if the developer
+ * want to obtain the ranking of a sequence of real numbers.</p>
+ * 
+ * <p>This class is to prevent the un-necessary boxing or memory usage for using the out-of-the-box
+ * sorting implementation.</p>
  * 
  * <p>This class implements sorting on a double array with each number having a payload attached.</p>
  * 
@@ -74,6 +74,111 @@ public class Ranking {
 	 */
 	public int[] sort() {
 		return this.toArray();
+	}
+	
+	protected void qsort3() {
+		
+	}
+	
+	protected int[] pivoting3(int begin, int end, int lower, int upper) {
+		if(this.entries[2 * lower] > this.entries[2 * upper]) {
+			return this.pivoting3(begin, end, upper, lower);					
+		}
+		
+		this.swap(begin, lower);
+		this.swap(end - 1, upper);
+		
+		double lowerPivot = this.entries[2 * begin];
+		double upperPivot = this.entries[2 * end - 2];
+		
+		if(lowerPivot > upperPivot) {
+			throw new IllegalArgumentException();
+		}
+		
+		int j = end - 1;
+		int i = begin + 1;
+		for(int k = begin + 1; k < end - 1; k++){
+			if(this.entries[2 * k] < lowerPivot) {
+				this.swap(k, i++);
+			}
+			
+			if(this.entries[2 * k] > upperPivot) {
+				this.swap(k, --j);
+			}
+		}
+		
+		this.swap(--i, begin);
+		this.swap(j, end - 1);
+		return new int[] {i, j};
+	}
+	
+	/**
+	 * Perform heap sort on range. This method accepts entry index instead of array index.
+	 * @param begin  Begin index of range of entries
+	 * @param end  End index of range of entries
+	 */
+	protected void hsort(int begin, int end) {
+		int last = end - 1;
+		
+		// heapify
+		if(last % 2 > 0 && this.entries[2 * last] > this.entries[last - 1]) {
+			this.swap(last, last / 2);
+		}
+		
+		for(int i = (last / 2) - 1; i >= 0; i--){						
+			this.heapify(i, end);
+		}
+		
+		// extract max
+		int len = end - begin;
+		for(int i = 0; i < len; i++){
+			this.swap(begin, end - 1 - i);
+			this.heapify(begin, end - 1 - i);
+		}
+	}
+	
+	/**
+	 * Re-construct a branch of heap while only the root is out-of-place
+	 * @param target  Root index of branch
+	 * @param end  End index of heap
+	 */
+	protected void heapify(int target, int end) {
+		int prev = target;
+		int next = 2 * target + 1;
+		
+		while(next < end){
+			if(next + 1 < end && this.entries[2 * next + 2] > this.entries[2 * next]){
+				next++;
+			}
+			
+			if(this.entries[2 * prev] > this.entries[2 * next]){
+				break;
+			}
+			
+			this.swap(prev, next);
+			prev = next;
+			next = 2 * prev + 1;
+		}
+	}
+	
+	/**
+	 * Swap two entries. This method accepts entry index instead of array index.
+	 * @param i  Index of first entry
+	 * @param j  Index of second entry.
+	 */
+	protected void swap(int i, int j) {
+		if(i == j){
+			return;
+		}
+		
+		double tmp0 = this.entries[2 * i];
+		double tmp1 = this.entries[2 * i + 1];
+		
+		this.entries[2 * i] = this.entries[2 * j];
+		this.entries[2 * i + 1] = this.entries[2 * j + 1];
+		
+		this.entries[2 * j] = tmp0;
+		this.entries[2 * j + 1] = tmp1;
 	}
 	
 	/**
