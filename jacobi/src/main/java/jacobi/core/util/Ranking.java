@@ -73,51 +73,97 @@ public class Ranking {
 	 * @return  Ranking of each values
 	 */
 	public int[] sort() {
+		
 		return this.toArray();
 	}
 	
-	protected void qsort3() {
+	protected void introsort(int begin, int end, int limit) {
+		int len = end - begin;
 		
+		if(len < 2) {
+			return;
+		}
+		
+		if(limit < 0) {
+			this.heapsort(begin, end);
+			return;
+		}
+		
+		int upper = begin;
+		int lower = end - 1;
+		
+		int[] piv = this.pivoting3(begin, end, lower, upper);
+		
+		if(piv[0] == begin 
+		&& piv[1] == end - 1 
+		&& this.entries[2 * begin] == this.entries[2 * end - 2]) {
+			// degenerate case that all elements are the same
+			return;
+		}
+		
+		this.introsort(begin, piv[0] - 1, limit - 1);
+		this.introsort(piv[0] + 1, piv[1] - 1, limit - 1);
+		this.introsort(piv[1] + 1, end, limit - 1);
 	}
 	
-	protected int[] pivoting3(int begin, int end, int lower, int upper) {
+	/**
+	 * Perform pivoting using 2 pivots. The range would be partitioned into lesser than both pivots,
+	 * between the pivots and greater than both pivots, in sequence.
+	 * @param begin  Begin index of range
+	 * @param end  End index of range
+	 * @param lower  Index of 1st pivot. If this is greater than the 2nd pivot, the pivots are swapped.
+	 * @param upper  Index of 2nd pivot. If this is lesser than the 2nd pivot, the pivots are swapped.
+	 * @return  Array of two integer of the pivots final position.
+	 */
+	protected int[] pivoting3(int begin, int end, int lower, int upper) {		
+		if(upper == lower) {
+			throw new IllegalArgumentException("Pivots #" 
+				+ lower + " and #" + upper + " duplicated.");
+		}
+		
 		if(this.entries[2 * lower] > this.entries[2 * upper]) {
 			return this.pivoting3(begin, end, upper, lower);					
 		}
 		
 		this.swap(begin, lower);
-		this.swap(end - 1, upper);
+		this.swap(end - 1, upper == begin ? lower : upper);
 		
 		double lowerPivot = this.entries[2 * begin];
 		double upperPivot = this.entries[2 * end - 2];
 		
 		if(lowerPivot > upperPivot) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Lower pivot " 
+				+ lowerPivot + " is larger than upper pivot " 
+				+ upperPivot );
 		}
 		
 		int j = end - 1;
 		int i = begin + 1;
-		for(int k = begin + 1; k < end - 1; k++){
+		int k = begin + 1;
+		while(k < j){
+			if(this.entries[2 * k] > upperPivot) {
+				this.swap(k, --j);
+				continue;
+			}
+			
 			if(this.entries[2 * k] < lowerPivot) {
 				this.swap(k, i++);
 			}
 			
-			if(this.entries[2 * k] > upperPivot) {
-				this.swap(k, --j);
-			}
+			k++;
 		}
 		
 		this.swap(--i, begin);
 		this.swap(j, end - 1);
 		return new int[] {i, j};
-	}
+	}	
 	
 	/**
 	 * Perform heap sort on range. This method accepts entry index instead of array index.
 	 * @param begin  Begin index of range of entries
 	 * @param end  End index of range of entries
 	 */
-	protected void hsort(int begin, int end) {
+	protected void heapsort(int begin, int end) {
 		int last = end - 1;
 		
 		// heapify
@@ -179,68 +225,7 @@ public class Ranking {
 		
 		this.entries[2 * j] = tmp0;
 		this.entries[2 * j + 1] = tmp1;
-	}
-	
-	/**
-	 * Select a pivot within the range.
-	 * @param begin  Begin index of range
-	 * @param end  End index of range
-	 * @return  Pivot index
-	 */
-	protected int select(int begin, int end) {
-		int len = (end - begin) / 2;
-		
-		if(len < LIMIT_NO_PIVOT) {
-			return end - 2;
-		}
-		
-		double val0 = this.entries[begin];
-		double val1 = this.entries[(begin + end) / 2];
-		double val2 = this.entries[end - 2];
-		
-		if(len < LIMIT_PIVOT_3) {
-			return val0 < val1
-				? val1 < val2 ? (begin + end) / 2 : end - 2
-				: end - 2;
-		}
-		
-		int idx0 = begin;
-		int idx1 = (begin + end) / 2;		
-		int idx2 = end - 2;
-		
-		int idx3 = idx0 + 2 * this.rand.applyAsInt((idx1 - idx0) / 2);
-		int idx4 = idx1 + 2 * this.rand.applyAsInt((idx2 - idx1) / 2);
-		
-		double val3 = this.entries[idx3];
-		double val4 = this.entries[idx4];
-		
-		if(val0 < val1){
-			double tmp = val0; val0 = val1; val1 = tmp;
-			int temp = idx0; idx0 = idx1; idx1 = temp;
-		}
-		
-		if(val2 < val3){
-			double tmp = val2; val2 = val3; val3 = tmp;
-			int temp = idx2; idx2 = idx3; idx3 = temp;
-		}
-		
-		if(val0 < val2){
-			double tmp = val0; val0 = val2; val2 = tmp;
-			int temp = idx0; idx0 = idx2; idx2 = temp;
-			
-			tmp = val1; val1 = val3; val3 = tmp;
-			temp = idx1; idx1 = idx3; idx3 = temp;
-		}
-		
-		if(val1 < val4){
-			double tmp = val1; val1 = val4; val4 = tmp;
-			int temp = idx1; idx1 = idx4; idx4 = temp;
-		}
-				
-		return val1 > val2 
-			? val2 > val4 ? idx2 : idx4
-			: val1 > val3 ? idx1 : idx3;
-	}
+	}	
 	
 	/**
 	 * Extract the ranking of each entry
