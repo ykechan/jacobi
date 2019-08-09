@@ -2,7 +2,6 @@ package jacobi.core.classifier.cart.data;
 
 import java.util.AbstractList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.IntUnaryOperator;
 
@@ -97,7 +96,7 @@ public class Sequence {
             }
             if(nextLen > dist.length) {
                 dist = Arrays.copyOf(dist, nextLen);
-            }            
+            } 
             dist[groups[i]]++;
         }
         this.regroup(groups, dist, maxGp + 1);

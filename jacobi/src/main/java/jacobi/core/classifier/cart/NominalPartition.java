@@ -36,9 +36,7 @@ import jacobi.core.util.Weighted;
 /**
  * Implementation to measure the impurity when partitioning by a nominal attribute.
  * 
- * <p>Partitioning by a nominal attribute is trivial: partition by the discrete 
- * value of that attribute. Thus no additional information about the partition
- * is provided.</p>
+ * <p>An empty array will be returned as no boundaries for nominal attribute.</p>
  * 
  * @author Y.K. Chan
  *
@@ -68,11 +66,7 @@ public class NominalPartition implements Partition {
      * @return  Impurity measurement
      */
     protected double measure(Column<?> target, Column<?> goal, List<Instance> instances) {
-    	if(instances.isEmpty()) {
-    		return Double.NaN;
-    	}
-    	
-        double[] weights = new double[target.cardinality()];
+    	double[] weights = new double[target.cardinality()];
         Matrix dist = Matrices.zeros(target.cardinality(), goal.cardinality());
         
         int prev = instances.get(0).outcome;

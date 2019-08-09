@@ -116,7 +116,7 @@ public class OneR implements Rule {
 		}
 		
 		if(node instanceof NominalSplit){
-			return this.mergeFunc(node.split(), null);
+			return this.mergeFunc(node.split(), new double[0]);
 		}
 		
 		if(node instanceof BinaryNumericSplit){
@@ -156,7 +156,7 @@ public class OneR implements Rule {
 	 */
 	public IntUnaryOperator splitFunc(DataTable<?> dataTab, DecisionNode<?> node) {
 		if(node instanceof NominalSplit){ 
-			return this.splitFunc(dataTab, node.split(), null);
+			return this.splitFunc(dataTab, node.split(), new double[0]);
 		}
 
 		if(node instanceof BinaryNumericSplit){

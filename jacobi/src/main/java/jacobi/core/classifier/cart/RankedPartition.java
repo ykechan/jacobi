@@ -24,9 +24,8 @@ import jacobi.core.util.Weighted;
  * <p>This class is stateful.</p>
  * 
  * @author Y.K. Chan
- * @param <T>  Type for partition information
  */
-public class RankedPartition<T> implements Partition {
+public class RankedPartition implements Partition {
     
 	/**
 	 * Constructor
@@ -38,7 +37,14 @@ public class RankedPartition<T> implements Partition {
         this.ranks = this.toSortedMap(ranks);
     }
 
-    public RankedPartition<T> partition(Sequence seq, IntUnaryOperator grouper) {
+    /**
+     * Group the related ranked sequences given an event of grouping occurred to 
+     * the default sequence
+     * @param seq  Default sequence
+     * @param grouper  Grouping function
+     * @return  This instance with ranked sequences updated
+     */
+    public RankedPartition groupBy(Sequence seq, IntUnaryOperator grouper) {
         Map<Tuple, Sequence> targets = new TreeMap<>(this.ranks.subMap(
         	Tuple.floor(seq.start()), 
         	Tuple.ceiling(seq.start())
@@ -69,6 +75,11 @@ public class RankedPartition<T> implements Partition {
         return this.partition.measure(table, target, rank == null ? rank : seq);
     }
     
+    /**
+     * Create a sorted map of ranked sequence map on column 
+     * @param ranks  Ranked sequence map on column
+     * @return  Sorted map of ranked sequence on start position and column index
+     */
     private SortedMap<Tuple, Sequence> toSortedMap(Map<Column<?>, Sequence> ranks) {
         return ranks.entrySet().stream().collect(Collectors.toMap(
             e -> new Tuple(e.getValue().start(), e.getKey().getIndex()),
@@ -86,24 +97,44 @@ public class RankedPartition<T> implements Partition {
     private Partition partition;
     
     /**
-     * A tuple of integer that is comparable for using as keys of sequences
+     * A tuple of integer &lt;a, b&gt; that is comparable for using as keys of sequences.
      * 
-     * <p>A sequence should be idenifiable by its starting position and </p>
+     * <p>A tuple &lt;a, b&gt; is less than &lt;c, d&gt; iff a &lt; b, or a = b and c &lt; d.
+     * Greater than is similarly defined.</p>
+     * 
      * @author Y.K. Chan
      *
      */
     protected static class Tuple implements Comparable<Tuple> {
         
+    	/**
+    	 * Minimum value of a tuple having the upper part equals to the specified value
+    	 * @param upper  Upper value
+    	 * @return  Minimum value of a tuple with given upper part
+    	 */
         public static Tuple floor(int upper) {
             return new Tuple(upper, Integer.MIN_VALUE);
         }
         
+        /**
+    	 * Maximum value of a tuple having the upper part equals to the specified value
+    	 * @param upper  Upper value
+    	 * @return  Minimum value of a tuple with given upper part
+    	 */
         public static Tuple ceiling(int upper) {
             return new Tuple(upper, Integer.MAX_VALUE);
         }
         
+        /**
+         * Upper and lower part of value.
+         */
         public final int upper, lower;
 
+        /**
+         * Constructor.
+         * @param upper  Upper part
+         * @param lower  Lower part
+         */
         public Tuple(int upper, int lower) {
             this.upper = upper;
             this.lower = lower;

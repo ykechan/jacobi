@@ -25,6 +25,9 @@ package jacobi.core.util;
 
 import java.util.function.IntToDoubleFunction;
 import java.util.function.IntUnaryOperator;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Implementation of ranking a sequence of real numbers. 
@@ -44,13 +47,28 @@ import java.util.function.IntUnaryOperator;
 public class Ranking {	
 	
 	/**
+	 * Create a instance of ranking object
+	 * @param length  Fixed length of elements
+	 * @return  Instance of ranking for sorting
+	 */
+	public static Ranking of(int length) {
+		
+		return new Ranking(
+			new double[2 * length], 
+			n -> (int) Math.floor(n * Math.random()),
+			0
+		);
+	}
+	
+	/**
 	 * Constructor.
 	 * @param entries  Array of entries
 	 * @param rand  Random function that accepts an integer n and returns a random integer in [0, n).
 	 */
-	protected Ranking(double[] entries, IntUnaryOperator rand) {
+	protected Ranking(double[] entries, IntUnaryOperator rand, int threshold) {
 		this.rand = rand;
 		this.entries = entries;
+		this.threshold = threshold;
 	}
 	
 	/**
@@ -74,11 +92,28 @@ public class Ranking {
 	 */
 	public int[] sort() {
 		
+		int limit = (int) Math.ceil(Math.E * Math.log(this.entries.length / 2));
+		this.introsort(0, this.entries.length / 2, limit);
+		
+		System.out.println(IntStream.range(0, this.entries.length / 2)
+			.map(i -> 2 * i)
+			.mapToDouble(k -> this.entries[k])
+			.mapToObj(Double::toString)
+			.collect(Collectors.joining(","))
+		);
+		
 		return this.toArray();
 	}
 	
+	/**
+	 * Sort the elements by introsort, which is a dual-pivot quicksort and fallback to heapsort
+	 * when the call recursed too deep.
+	 * @param begin  Begin index
+	 * @param end  End index
+	 * @param limit  Remaining limit for using quicksort
+	 */
 	protected void introsort(int begin, int end, int limit) {
-		int len = end - begin;
+		int len = end - begin;				
 		
 		if(len < 2) {
 			return;
@@ -89,20 +124,45 @@ public class Ranking {
 			return;
 		}
 		
-		int upper = begin;
-		int lower = end - 1;
-		
-		int[] piv = this.pivoting3(begin, end, lower, upper);
-		
-		if(piv[0] == begin 
-		&& piv[1] == end - 1 
-		&& this.entries[2 * begin] == this.entries[2 * end - 2]) {
-			// degenerate case that all elements are the same
+		if(len < this.threshold) {
+			this.insertsort(begin, end);
 			return;
 		}
 		
-		this.introsort(begin, piv[0] - 1, limit - 1);
-		this.introsort(piv[0] + 1, piv[1] - 1, limit - 1);
+		int[] piv = this.select(this.rand, begin, end);
+		if(piv[0] == piv[1] || this.entries[2 * piv[0]] == this.entries[2 * piv[1]]){
+			int pos = this.pivoting2(begin, end, piv[0]);
+			System.out.println(
+				"Sort [" + begin + "," + end + "): " +
+				IntStream.range(begin, end)
+					.map(i -> 2 * i)
+					.mapToDouble(k -> this.entries[k])
+					.mapToObj(Double::toString)
+					.collect(Collectors.joining(","))
+				+ " @ " + pos
+			);
+			this.introsort(begin, pos, limit - 1);
+			this.introsort(pos + 1, end, limit - 1);
+			return;
+		}
+		
+		System.out.println("Pivot = " 
+			+ this.entries[2 * piv[0]] + ","
+			+ this.entries[2 * piv[1]]);
+		piv = this.pivoting3(begin, end, piv[0], piv[1]);
+		
+		System.out.println(
+				"Sort [" + begin + "," + end + "): " +
+				IntStream.range(begin, end)
+					.map(i -> 2 * i)
+					.mapToDouble(k -> this.entries[k])
+					.mapToObj(Double::toString)
+					.collect(Collectors.joining(","))
+				+ " @ " + piv[0] + "," + piv[1]
+			);		
+		
+		this.introsort(begin, piv[0], limit - 1);
+		this.introsort(piv[0] + 1, piv[1], limit - 1);
 		this.introsort(piv[1] + 1, end, limit - 1);
 	}
 	
@@ -141,7 +201,7 @@ public class Ranking {
 		int i = begin + 1;
 		int k = begin + 1;
 		while(k < j){
-			if(this.entries[2 * k] > upperPivot) {
+			if(this.entries[2 * k] >= upperPivot) {
 				this.swap(k, --j);
 				continue;
 			}
@@ -156,7 +216,88 @@ public class Ranking {
 		this.swap(--i, begin);
 		this.swap(j, end - 1);
 		return new int[] {i, j};
-	}	
+	}
+	
+	/**
+	 * Perform pivoting using a single pivot. This is to cater the degenerate case that duplicated
+	 * pivots are selected in dual-pivoting scheme due to any reason such as insufficient number 
+	 * of elements. 
+	 * @param begin  Begin index of range
+	 * @param end  End index of range
+	 * @param pivot  Index of pivot
+	 * @return  Final position of pivot element
+	 */
+	protected int pivoting2(int begin, int end, int pivot) {
+		this.swap(end - 1, pivot);
+		double pivotVal = this.entries[2 * end - 2];
+		
+		int j = begin;
+		for(int i = begin; i < end; i++) {
+			if(this.entries[2 * i] < pivotVal) {
+				this.swap(i, j++);
+			}
+		}
+		
+		this.swap(end - 1, j);
+		return j;
+	}
+	
+	/**
+	 * Select dual pivots for pivoting. The selection are based on 5 sample values: 3 fixed point
+	 * values (first, middle and last), and 2 random values. The function then select the 2nd
+	 * maximum and 2nd minimum elements. 
+	 * @param rand  Random function n -&gt; k where k &lt; n;
+	 * @param begin  Begin index
+	 * @param end  End index
+	 * @return  Array of 2 pivots
+	 */
+	protected int[] select(IntUnaryOperator rand, int begin, int end) {
+		int argmax = begin;
+		double max = this.entries[2 * begin];
+		
+		int argmin = begin;
+		double min = max;
+		
+		int argmax2 = end - 1;
+		double max2 = this.entries[2 * argmax2];
+		
+		int argmin2 = end - 1;
+		double min2 = max2;				
+		
+		if(max2 > max) {
+			// swap
+			int tmp = argmax; argmax = argmax2; argmax2 = tmp;
+			double temp = max; max = max2; max2 = temp;
+		}
+		if(min2 < min){
+			// swap
+			int tmp = argmin; argmin = argmin2; argmin2 = tmp;
+			double temp = min; min = min2; min2 = temp;
+		}
+		
+		
+		for(int i = 0; i < 3; i++){
+			int target = i == 0 ? (begin + end) / 2 : begin + rand.applyAsInt(end - begin);
+			double tgtVal = this.entries[2 * target];
+			
+			if(tgtVal < min){
+				min2 = min; argmin2 = argmin;
+				min = tgtVal; argmin = target;
+			}else if(tgtVal < min2){
+				min2 = tgtVal; argmin2 = target;
+			}
+			
+			if(tgtVal > max){
+				max2 = max; argmax2 = argmax;
+				max = tgtVal; argmax = target;
+			}else if(tgtVal > max2){
+				max2 = tgtVal; argmax2 = target;
+			}
+			
+		}
+		
+		return new int[] {argmin2, argmax2};
+	}
 	
 	/**
 	 * Perform heap sort on range. This method accepts entry index instead of array index.
@@ -228,6 +369,32 @@ public class Ranking {
 	}	
 	
 	/**
+	 * Sort by insertion sort. 
+	 * @param begin  Begin index
+	 * @param end  End index
+	 */
+	protected void insertsort(int begin, int end) {
+		
+		for(int i = begin + 1; i < end; i++) {
+			int j = i - 1;
+			while(j >= begin){
+				if(this.entries[2 * j] <= this.entries[2 * i]){
+					break;
+				}
+				j--;
+			}
+			
+			if(++j >= i) {
+				continue;
+			}
+			double tmp0 = this.entries[2 * i]; double tmp1 = this.entries[2 * i + 1];
+			System.arraycopy(entries, 2 * j, entries, 2 * j + 2, 2 * (i - j));
+			
+			this.entries[2 * j] = tmp0; this.entries[2 * j + 1] = tmp1;
+		}		
+	}
+	
+	/**
 	 * Extract the ranking of each entry
 	 * @return  Ranking of each entry
 	 */
@@ -241,8 +408,5 @@ public class Ranking {
 	
 	private IntUnaryOperator rand;
 	private double[] entries;
-	
-	protected static final int LIMIT_NO_PIVOT = 4;
-	
-	protected static final int LIMIT_PIVOT_3 = 9;
+	private int threshold;
 }
