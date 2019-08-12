@@ -1,4 +1,4 @@
-package jacobi.core.classifier.cart;
+package jacobi.core.classifier.cart.measure;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,10 +10,12 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import jacobi.api.Matrix;
-import jacobi.core.classifier.cart.data.Column;
+import jacobi.api.classifier.cart.Column;
 import jacobi.core.classifier.cart.data.DataTable;
 import jacobi.core.classifier.cart.data.Instance;
 import jacobi.core.classifier.cart.data.Sequence;
+import jacobi.core.classifier.cart.measure.Impurity;
+import jacobi.core.classifier.cart.measure.RankedBinaryPartition;
 import jacobi.core.impl.ColumnVector;
 import jacobi.core.util.Weighted;
 

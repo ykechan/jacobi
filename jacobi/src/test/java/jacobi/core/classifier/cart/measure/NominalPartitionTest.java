@@ -1,4 +1,4 @@
-package jacobi.core.classifier.cart;
+package jacobi.core.classifier.cart.measure;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,11 +12,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import jacobi.api.Matrix;
-import jacobi.core.classifier.cart.data.Column;
+import jacobi.api.classifier.cart.Column;
+import jacobi.api.classifier.cart.DecisionNode;
 import jacobi.core.classifier.cart.data.DataTable;
 import jacobi.core.classifier.cart.data.Instance;
 import jacobi.core.classifier.cart.data.Sequence;
-import jacobi.core.classifier.cart.node.DecisionNode;
+import jacobi.core.classifier.cart.measure.Impurity;
+import jacobi.core.classifier.cart.measure.NominalPartition;
 import jacobi.core.classifier.cart.util.JacobiDefCsvReader;
 import jacobi.core.classifier.cart.util.JacobiEnums.YesOrNo;
 import jacobi.core.util.Weighted;

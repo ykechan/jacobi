@@ -6,6 +6,8 @@ import java.util.Random;
 import org.junit.Assert;
 import org.junit.Test;
 
+import jacobi.api.classifier.cart.Column;
+
 public class ColumnTest {
 
     @Test

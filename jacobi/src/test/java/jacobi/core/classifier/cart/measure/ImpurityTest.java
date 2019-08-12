@@ -1,10 +1,12 @@
-package jacobi.core.classifier.cart;
+package jacobi.core.classifier.cart.measure;
 
 import java.util.Collections;
 import java.util.Random;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import jacobi.core.classifier.cart.measure.Impurity;
 
 public class ImpurityTest {
     

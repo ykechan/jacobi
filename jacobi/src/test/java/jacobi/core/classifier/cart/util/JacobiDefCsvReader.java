@@ -17,7 +17,7 @@ import org.junit.Test;
 
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
-import jacobi.core.classifier.cart.data.Column;
+import jacobi.api.classifier.cart.Column;
 import jacobi.core.classifier.cart.data.DataMatrix;
 import jacobi.core.classifier.cart.data.DataTable;
 import jacobi.core.classifier.cart.util.JacobiEnums.Lens;

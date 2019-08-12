@@ -27,13 +27,23 @@ import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.function.DoubleToIntFunction;
 import java.util.stream.Collectors;
 
 import jacobi.api.Matrix;
+import jacobi.api.classifier.cart.Column;
 
-public class DataMatrix<T> implements DataTable<T> {
+/**
+ * Implementation of a data table in CART model.
+ * 
+ * @author Y.K. Chan
+ * @param <T>  Type of outcome
+ */
+public class DataMatrix<T> implements DataTable<T> {	
+	
+	public static <T> DataMatrix<T> of(Matrix matrix, List<?> colDefs, List<T> outcomes) {
+		return null;
+	}
 	
 	public static <T> DataMatrix<T> of(Matrix matrix, List<Column<?>> colDefs, Column<T> outcomeCol) {
 		// ...
@@ -84,7 +94,7 @@ public class DataMatrix<T> implements DataTable<T> {
 		
 		int[] outcomes = this.nomData.get(this.getOutcomeColumn().getIndex());		
 		return this.instancesOf(features, outcomes, this.weights);
-	}
+	}		
 	
 	protected List<Instance> instancesOf(int[] features, int[] outcomes, double[] weights) {
 		return features == null
@@ -120,6 +130,15 @@ public class DataMatrix<T> implements DataTable<T> {
 	private List<int[]> nomData;
 	private double[] weights;
 	
+	protected static Column<?> detectDef(int columnIndex, Object obj) {
+		if(obj == Double.class
+		
+		|| obj == Float.class) {
+			
+		}
+		return null;
+	}
+	
 	protected static List<int[]> extractNominals(TypedMatrix<?> typedMat) {
 		Matrix matrix = typedMat.matrix;
 		
@@ -132,7 +151,6 @@ public class DataMatrix<T> implements DataTable<T> {
 		nomCols.add(typedMat.outcomeColumn);
 		
 		for(Column<?> col : nomCols) {
-			System.out.println("col = " + col);
 			nomList[col.getIndex()] = extractColumn(matrix, col.getIndex(), col.getMapping());
 		}
 		

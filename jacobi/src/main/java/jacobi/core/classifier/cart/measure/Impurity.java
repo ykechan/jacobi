@@ -21,38 +21,51 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jacobi.core.classifier.cart;
-
-import jacobi.core.classifier.cart.data.Column;
-import jacobi.core.classifier.cart.data.DataTable;
-import jacobi.core.classifier.cart.data.Sequence;
-import jacobi.core.util.Weighted;
+package jacobi.core.classifier.cart.measure;
 
 /**
- * Common interface for measuring the impurity of the outcome distribution after partitioning 
- * a data table by a certain column.
+ * Common interface for measurement function for impurities in distribution. 
  * 
- * <p>For a pure data set, i.e. all instances have the same outcome, NaN is returned as weight.
- * </p>
- * 
- * <p>Implementations should return the threshold for the partitions for numeric attributes,
- * or an empty array for nominal attributes.</p>
- * 
- * <p>Implementations should access the data in a given access sequence, and only instances
- * appearing in the access sequence is considered.</p>
+ * Common measure e.g. entropy and gini function is provided.
  * 
  * @author Y.K. Chan
- * @param <T>  Type for partition information
+ *
  */
-public interface Partition {
+public interface Impurity {
     
     /**
-     * Measure the impurity of outcome distribution
-     * @param table  Data set
-     * @param target  Partitioning column
-     * @param seq  Access sequence
-     * @return
+     * Entropy function
      */
-    public Weighted<double[]> measure(DataTable<?> table, Column<?> target, Sequence seq);
-
+    public static final Impurity ENTROPY = dist -> {
+        double sum = 0.0;
+        double rand = 0.0;
+        for(int i = 0; i < dist.length; i++) {
+            if(dist[i] == 0.0) {
+                continue;
+            }
+            rand += dist[i] * Math.log(dist[i]);
+            sum += dist[i];
+        }
+        return sum == 0.0 ? 0.0 : Math.log(sum) - rand / sum;
+    };
+    
+    public static final Impurity ERROR = dist -> {
+        double sum = 0.0;
+        double max = 0.0;
+        for(int i = 0; i < dist.length; i++) {            
+            sum += dist[i];
+            if(dist[i] > max) {
+                max = dist[i];
+            }
+        }
+        return sum - max;
+    };
+    
+    /**
+     * Find the measurement of impurity given the distribution of items
+     * @param dist  Distribution of items
+     * @return  Measurement of impurity
+     */
+    public double of(double[] dist);
+    
 }

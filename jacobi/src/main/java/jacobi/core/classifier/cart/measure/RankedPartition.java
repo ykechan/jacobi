@@ -1,4 +1,4 @@
-package jacobi.core.classifier.cart;
+package jacobi.core.classifier.cart.measure;
 
 import java.util.Map;
 import java.util.Objects;
@@ -7,7 +7,7 @@ import java.util.TreeMap;
 import java.util.function.IntUnaryOperator;
 import java.util.stream.Collectors;
 
-import jacobi.core.classifier.cart.data.Column;
+import jacobi.api.classifier.cart.Column;
 import jacobi.core.classifier.cart.data.DataTable;
 import jacobi.core.classifier.cart.data.Sequence;
 import jacobi.core.util.Weighted;

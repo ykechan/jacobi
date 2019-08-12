@@ -21,13 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jacobi.core.classifier.cart.data;
+package jacobi.api.classifier.cart;
 
 import java.util.AbstractList;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.DoubleToIntFunction;
 
 /**
@@ -93,6 +96,54 @@ public class Column<T> implements Comparable<Column<?>> {
     		Arrays.asList(Boolean.FALSE, Boolean.TRUE),
     		v -> v > 0.0 ? 1 : 0
     	);
+    }
+    
+    /**
+     * Create a column with type object. The following objects are supported:
+     * <ul>
+     *   <li>double.class / Double.class for numeric column</li>
+     *   <li>boolean.class / Boolean.class for true / false column determined by sign of value</li>
+     *   <li>A Class of a Enum for Enum column determined by ordinal of enum value</li>
+     *   <li>An array of String</li>
+     * </ul>
+     * @param index
+     * @param type
+     * @return
+     * @throws  IllegalArgumentException if type parameter is not of the listed object/type
+     */
+    public static Column<?> of(int index, Object type) {
+    	if(type == double.class || type == Double.class) {
+    		return Column.numeric(index);
+    	}
+    	
+    	if(type == boolean.class || type == Boolean.class) {
+    		return Column.signed(index);
+    	}
+    	
+    	if(type instanceof Class && ((Class<?>) type).isEnum()) {
+    		return new Column<>(index, 
+    			Collections.unmodifiableList(Arrays.asList( 
+    				((Class<?>) type).getEnumConstants() 
+    			)), 
+    			v -> (int) v);
+    	}
+    	
+    	if(type instanceof String[]) {
+    		return new Column<>(index, 
+        		Arrays.asList((String[]) type), 
+        		v -> (int) v
+        	);
+    	}
+    	
+    	if(type instanceof Set){
+    		return Column.of(index, Arrays.asList(((Set<?>) type).toArray()));
+    	}
+    	
+    	if(type instanceof Collection){
+    		// ...
+    	}
+    	
+    	throw new IllegalArgumentException("Un-recogized type " + type);
     }
     
     /**

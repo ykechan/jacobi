@@ -21,47 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jacobi.core.classifier.cart.node;
+package jacobi.api.ext;
 
-import java.util.Optional;
-
-import jacobi.core.classifier.cart.data.Column;
+import jacobi.api.annotations.Facade;
 
 /**
- * Common interface for a decision node in CART model.
+ * Extension for training classifiers.
+ * 
+ * <p>Classifiers in this context are functions that maps a vector to an item in a discrete set.</p>
+ * 
+ * <p></p>
  * 
  * @author Y.K. Chan
  *
  */
-public interface DecisionNode<T> {
-    
-    /**
-     * Get the column this node depends on when deciding
-     * @return  Column this node depends on, or null if this is leaf
-     */
-    public Column<?> split();
-    
-    /**
-     * Decide the outcome regardless of input
-     * @return  Decision
-     */
-    public T decide();
-    
-    /**
-     * Decide the outcome given an attribute value.
-     * @param value  Attribute value
-     * @return  Next decision node to determine the outcome, or empty if this is leaf
-     */
-    public Optional<DecisionNode<T>> decide(double value);
-    
-    /**
-     * Decide the outcome given the input vector
-     * @param inst  Input vector
-     * @return  Next decision node to determine the outcome, or empty if this is leaf
-     */
-    public default Optional<DecisionNode<T>> decide(double[] inst) {
-        Column<?> col = this.split();
-        return col == null ? Optional.empty() : this.decide(inst[col.getIndex()]);
-    }
+@Facade
+public interface Classifier {
 
 }

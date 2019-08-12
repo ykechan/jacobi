@@ -3,7 +3,8 @@ package jacobi.core.classifier.cart.node;
 import java.util.List;
 import java.util.Optional;
 
-import jacobi.core.classifier.cart.data.Column;
+import jacobi.api.classifier.cart.Column;
+import jacobi.api.classifier.cart.DecisionNode;
 
 public class NominalSplit<T> implements DecisionNode<T> {
 	

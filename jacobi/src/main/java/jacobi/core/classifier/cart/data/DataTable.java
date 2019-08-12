@@ -26,6 +26,7 @@ package jacobi.core.classifier.cart.data;
 import java.util.List;
 
 import jacobi.api.Matrix;
+import jacobi.api.classifier.cart.Column;
 
 /**
  * Common interface of a data table in CART model.

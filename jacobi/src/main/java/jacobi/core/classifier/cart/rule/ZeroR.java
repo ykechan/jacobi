@@ -21,18 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jacobi.core.classifier.cart;
+package jacobi.core.classifier.cart.rule;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import jacobi.core.classifier.cart.data.Column;
+import jacobi.api.classifier.cart.Column;
+import jacobi.api.classifier.cart.DecisionNode;
 import jacobi.core.classifier.cart.data.DataTable;
 import jacobi.core.classifier.cart.data.Instance;
 import jacobi.core.classifier.cart.data.Sequence;
+import jacobi.core.classifier.cart.measure.Impurity;
 import jacobi.core.classifier.cart.node.Decision;
-import jacobi.core.classifier.cart.node.DecisionNode;
 import jacobi.core.util.Weighted;
 
 /**

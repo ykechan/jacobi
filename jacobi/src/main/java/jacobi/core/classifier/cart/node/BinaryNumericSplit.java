@@ -25,7 +25,8 @@ package jacobi.core.classifier.cart.node;
 
 import java.util.Optional;
 
-import jacobi.core.classifier.cart.data.Column;
+import jacobi.api.classifier.cart.Column;
+import jacobi.api.classifier.cart.DecisionNode;
 
 /**
  * Decision node that split a numeric feature into two parts by a threshold value.

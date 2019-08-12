@@ -21,51 +21,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jacobi.core.classifier.cart;
+package jacobi.api.classifier.cart;
+
+import java.util.Optional;
 
 /**
- * Common interface for measurement function for impurities in distribution. 
- * 
- * Common measure e.g. entropy and gini function is provided.
+ * Common interface for a decision node in CART model.
  * 
  * @author Y.K. Chan
  *
  */
-public interface Impurity {
+public interface DecisionNode<T> {
     
     /**
-     * Entropy function
+     * Get the column this node depends on when deciding
+     * @return  Column this node depends on, or null if this is leaf
      */
-    public static final Impurity ENTROPY = dist -> {
-        double sum = 0.0;
-        double rand = 0.0;
-        for(int i = 0; i < dist.length; i++) {
-            if(dist[i] == 0.0) {
-                continue;
-            }
-            rand += dist[i] * Math.log(dist[i]);
-            sum += dist[i];
-        }
-        return sum == 0.0 ? 0.0 : Math.log(sum) - rand / sum;
-    };
-    
-    public static final Impurity ERROR = dist -> {
-        double sum = 0.0;
-        double max = 0.0;
-        for(int i = 0; i < dist.length; i++) {            
-            sum += dist[i];
-            if(dist[i] > max) {
-                max = dist[i];
-            }
-        }
-        return sum - max;
-    };
+    public Column<?> split();
     
     /**
-     * Find the measurement of impurity given the distribution of items
-     * @param dist  Distribution of items
-     * @return  Measurement of impurity
+     * Decide the outcome regardless of input
+     * @return  Decision
      */
-    public double of(double[] dist);
+    public T decide();
     
+    /**
+     * Decide the outcome given an attribute value.
+     * @param value  Attribute value
+     * @return  Next decision node to determine the outcome, or empty if this is leaf
+     */
+    public Optional<DecisionNode<T>> decide(double value);
+    
+    /**
+     * Decide the outcome given the input vector
+     * @param inst  Input vector
+     * @return  Next decision node to determine the outcome, or empty if this is leaf
+     */
+    public default Optional<DecisionNode<T>> decide(double[] inst) {
+        Column<?> col = this.split();
+        return col == null ? Optional.empty() : this.decide(inst[col.getIndex()]);
+    }
+
 }

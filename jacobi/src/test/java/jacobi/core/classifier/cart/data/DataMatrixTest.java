@@ -9,6 +9,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import jacobi.api.Matrix;
+import jacobi.api.classifier.cart.Column;
 import jacobi.core.classifier.cart.util.JacobiDefCsvReader;
 import jacobi.core.classifier.cart.util.JacobiEnums.Outlook;
 import jacobi.core.classifier.cart.util.JacobiEnums.YesOrNo;

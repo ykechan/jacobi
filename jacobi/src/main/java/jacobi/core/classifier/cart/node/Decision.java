@@ -25,7 +25,8 @@ package jacobi.core.classifier.cart.node;
 
 import java.util.Optional;
 
-import jacobi.core.classifier.cart.data.Column;
+import jacobi.api.classifier.cart.Column;
+import jacobi.api.classifier.cart.DecisionNode;
 
 /**
  * A decision node that make decision regardless of input, i.e. a leaf node in a decision tree.

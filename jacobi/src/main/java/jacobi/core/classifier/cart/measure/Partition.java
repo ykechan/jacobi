@@ -21,31 +21,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jacobi.core.classifier;
+package jacobi.core.classifier.cart.measure;
 
-import java.util.function.ToIntFunction;
-
-import jacobi.api.Matrix;
+import jacobi.api.classifier.cart.Column;
+import jacobi.core.classifier.cart.data.DataTable;
+import jacobi.core.classifier.cart.data.Sequence;
+import jacobi.core.util.Weighted;
 
 /**
- * Common interface for a supervised learner of classifier.
+ * Common interface for measuring the impurity of the outcome distribution after partitioning 
+ * a data table by a certain column.
  * 
- * <p>A classifier in this context is a mapping from a set of attributes in form
- * of a real-valued vector as an array to a discrete category encoded as an integer.</p>
+ * <p>For a pure data set, i.e. all instances have the same outcome, NaN is returned as weight.
+ * </p>
+ * 
+ * <p>Implementations should return the threshold for the partitions for numeric attributes,
+ * or an empty array for nominal attributes.</p>
+ * 
+ * <p>Implementations should access the data in a given access sequence, and only instances
+ * appearing in the access sequence is considered.</p>
  * 
  * @author Y.K. Chan
- *
- * @param <T> Model class of the classifier
- * 
+ * @param <T>  Type for partition information
  */
-public interface SupervisedClassifierLearner<T extends ToIntFunction<double[]>> {
+public interface Partition {
     
     /**
-     * Learn a classifier from a set of attributes and given classified categories.
-     * @param obs  Observations
-     * @param outcomes  Outcomes of the observations
-     * @return  Classifier model
+     * Measure the impurity of outcome distribution
+     * @param table  Data set
+     * @param target  Partitioning column
+     * @param seq  Access sequence
+     * @return
      */
-    public T learn(Matrix obs, int[] outcomes);
+    public Weighted<double[]> measure(DataTable<?> table, Column<?> target, Sequence seq);
 
 }

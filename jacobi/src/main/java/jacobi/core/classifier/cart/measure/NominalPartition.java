@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jacobi.core.classifier.cart;
+package jacobi.core.classifier.cart.measure;
 
 import java.util.List;
 
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
-import jacobi.core.classifier.cart.data.Column;
+import jacobi.api.classifier.cart.Column;
 import jacobi.core.classifier.cart.data.DataTable;
 import jacobi.core.classifier.cart.data.Instance;
 import jacobi.core.classifier.cart.data.Sequence;
