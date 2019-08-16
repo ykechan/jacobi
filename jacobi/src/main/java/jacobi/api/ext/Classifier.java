@@ -23,7 +23,13 @@
  */
 package jacobi.api.ext;
 
+import java.util.List;
+
 import jacobi.api.annotations.Facade;
+import jacobi.api.annotations.Implementation;
+import jacobi.api.classifier.Column;
+import jacobi.api.classifier.DefinedSupervised;
+import jacobi.core.classifier.DefinedSupervisedFactory;
 
 /**
  * Extension for training classifiers.
@@ -37,5 +43,18 @@ import jacobi.api.annotations.Facade;
  */
 @Facade
 public interface Classifier {
+	
+	/**
+	 * Define the column types of the underlying numerical matrix
+	 * and associate each row with an outcome.
+	 * @param features  List of type of feature columns
+	 * @param outcomes  List of outcome
+	 * @return  Extension to learner of classifier models
+	 */
+	@Implementation(DefinedSupervisedFactory.class)
+	public <T> DefinedSupervised<T> define(
+		List<Column<?>> features, 
+		List<T> outcomes
+	);
 
 }

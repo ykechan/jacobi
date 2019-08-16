@@ -21,10 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jacobi.api.classifier.cart;
+package jacobi.api.classifier;
 
 import java.util.AbstractList;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -32,6 +31,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.DoubleToIntFunction;
+import java.util.stream.Collectors;
 
 /**
  * This class represents the type of column in a data set in CART model.
@@ -54,8 +54,21 @@ public class Column<T> implements Comparable<Column<?>> {
      * @param index  Index of the column
      * @return  Column object representing a numeric attribute
      */
-    public static Column<Void> numeric(int index) {
+    public static Column<Double> numeric(int index) {
         return new Column<>(index, Collections.emptyList(), v -> -1);
+    }
+    
+    /**
+     * Create a boolean column that is true when value positive, and false otherwise.
+     * Zero is not considered positive, and thus will be rendered as false. 
+     * @param index  Index of the column
+     * @return  A boolean column
+     */
+    public static Column<Boolean> signed(int index) {
+    	return new Column<>(index, 
+    		Arrays.asList(Boolean.FALSE, Boolean.TRUE),
+    		v -> v > 0.0 ? 1 : 0
+    	);
     }
     
     /**
@@ -83,65 +96,56 @@ public class Column<T> implements Comparable<Column<?>> {
             }
             
         }, mapping);
-    }
+    }                
     
     /**
-     * Create a boolean column that is true when value positive, and false otherwise.
-     * Zero is not considered positive, and thus will be rendered as false. 
+     * Create a nominal column with a collection of items.
      * @param index  Index of the column
-     * @return  A boolean column
+     * @param items  Collection of items, can be duplicated.
+     * @throws  IllegalArgumentException if number of items is negative or zero.
      */
-    public static Column<Boolean> signed(int index) {
-    	return new Column<>(index, 
-    		Arrays.asList(Boolean.FALSE, Boolean.TRUE),
-    		v -> v > 0.0 ? 1 : 0
-    	);
+    public static <T> Column<T> of(int index, Collection<T> items) {
+    	if(items == null || items.isEmpty()) {
+    		throw new IllegalArgumentException("Unable to create nominal column with no items.");
+    	}
+    	
+    	return new Column<>(index,
+        	Collections.unmodifiableList(
+        		items instanceof Set
+        		? items.stream().collect(Collectors.toList())
+        		: items.stream().distinct().collect(Collectors.toList())
+        	),
+        	v -> (int) v
+        );
     }
     
     /**
-     * Create a column with type object. The following objects are supported:
-     * <ul>
-     *   <li>double.class / Double.class for numeric column</li>
-     *   <li>boolean.class / Boolean.class for true / false column determined by sign of value</li>
-     *   <li>A Class of a Enum for Enum column determined by ordinal of enum value</li>
-     *   <li>An array of String</li>
-     * </ul>
-     * @param index
-     * @param type
-     * @return
-     * @throws  IllegalArgumentException if type parameter is not of the listed object/type
+     * Create a column with given type class. Supports double.class/Double.class
+     * for numeric column, boolean.class/Boolean.class for boolean column on signs,
+     * and any Enum class.
+     * @param index  Index of the column
+     * @param type  Type of column items
+     * @return  Column with given type class
+     * @throws  IllegalArgumentException when type class is not supported.
      */
-    public static Column<?> of(int index, Object type) {
+    @SuppressWarnings("unchecked")
+	public static <T> Column<T> of(int index, Class<T> type) {
     	if(type == double.class || type == Double.class) {
-    		return Column.numeric(index);
+    		return (Column<T>) Column.numeric(index);
     	}
     	
     	if(type == boolean.class || type == Boolean.class) {
-    		return Column.signed(index);
+    		return (Column<T>) Column.signed(index);
     	}
     	
-    	if(type instanceof Class && ((Class<?>) type).isEnum()) {
+    	if(type.isEnum()) {
     		return new Column<>(index, 
     			Collections.unmodifiableList(Arrays.asList( 
-    				((Class<?>) type).getEnumConstants() 
+    				type.getEnumConstants() 
     			)), 
-    			v -> (int) v);
-    	}
-    	
-    	if(type instanceof String[]) {
-    		return new Column<>(index, 
-        		Arrays.asList((String[]) type), 
-        		v -> (int) v
-        	);
-    	}
-    	
-    	if(type instanceof Set){
-    		return Column.of(index, Arrays.asList(((Set<?>) type).toArray()));
-    	}
-    	
-    	if(type instanceof Collection){
-    		// ...
-    	}
+    			v -> (int) v
+    		);
+    	}    	
     	
     	throw new IllegalArgumentException("Un-recogized type " + type);
     }

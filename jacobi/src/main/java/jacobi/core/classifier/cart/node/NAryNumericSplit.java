@@ -2,7 +2,7 @@ package jacobi.core.classifier.cart.node;
 
 import java.util.Optional;
 
-import jacobi.api.classifier.cart.Column;
+import jacobi.api.classifier.Column;
 import jacobi.api.classifier.cart.DecisionNode;
 
 public class NAryNumericSplit<T> implements DecisionNode<T> {

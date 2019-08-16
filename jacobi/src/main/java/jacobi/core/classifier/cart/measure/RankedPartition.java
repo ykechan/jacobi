@@ -7,7 +7,7 @@ import java.util.TreeMap;
 import java.util.function.IntUnaryOperator;
 import java.util.stream.Collectors;
 
-import jacobi.api.classifier.cart.Column;
+import jacobi.api.classifier.Column;
 import jacobi.core.classifier.cart.data.DataTable;
 import jacobi.core.classifier.cart.data.Sequence;
 import jacobi.core.util.Weighted;
@@ -72,7 +72,7 @@ public class RankedPartition implements Partition {
             throw new IllegalArgumentException("Partition overlapped");
         }
         
-        return this.partition.measure(table, target, rank == null ? rank : seq);
+        return this.partition.measure(table, target, rank != null ? rank : seq);
     }
     
     /**

@@ -31,7 +31,7 @@ import java.util.function.DoubleToIntFunction;
 import java.util.stream.Collectors;
 
 import jacobi.api.Matrix;
-import jacobi.api.classifier.cart.Column;
+import jacobi.api.classifier.Column;
 
 /**
  * Implementation of a data table in CART model.
@@ -39,11 +39,7 @@ import jacobi.api.classifier.cart.Column;
  * @author Y.K. Chan
  * @param <T>  Type of outcome
  */
-public class DataMatrix<T> implements DataTable<T> {	
-	
-	public static <T> DataMatrix<T> of(Matrix matrix, List<?> colDefs, List<T> outcomes) {
-		return null;
-	}
+public class DataMatrix<T> implements DataTable<T> {
 	
 	public static <T> DataMatrix<T> of(Matrix matrix, List<Column<?>> colDefs, Column<T> outcomeCol) {
 		// ...
@@ -129,15 +125,7 @@ public class DataMatrix<T> implements DataTable<T> {
 	private TypedMatrix<T> numData;
 	private List<int[]> nomData;
 	private double[] weights;
-	
-	protected static Column<?> detectDef(int columnIndex, Object obj) {
-		if(obj == Double.class
-		
-		|| obj == Float.class) {
-			
-		}
-		return null;
-	}
+	 
 	
 	protected static List<int[]> extractNominals(TypedMatrix<?> typedMat) {
 		Matrix matrix = typedMat.matrix;

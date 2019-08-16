@@ -27,7 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import jacobi.api.classifier.cart.Column;
+import jacobi.api.classifier.Column;
 import jacobi.api.classifier.cart.DecisionNode;
 import jacobi.core.classifier.cart.data.DataTable;
 import jacobi.core.classifier.cart.data.Instance;

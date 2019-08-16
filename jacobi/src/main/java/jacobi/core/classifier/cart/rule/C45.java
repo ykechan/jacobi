@@ -7,7 +7,7 @@ import java.util.function.BiConsumer;
 import java.util.function.IntUnaryOperator;
 
 import jacobi.api.Matrix;
-import jacobi.api.classifier.cart.Column;
+import jacobi.api.classifier.Column;
 import jacobi.api.classifier.cart.DecisionNode;
 import jacobi.core.classifier.cart.data.DataTable;
 import jacobi.core.classifier.cart.data.Sequence;

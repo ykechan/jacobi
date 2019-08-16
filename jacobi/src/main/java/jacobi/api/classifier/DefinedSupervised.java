@@ -21,47 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jacobi.api.classifier.cart;
+package jacobi.api.classifier;
 
-import java.util.Optional;
-
-import jacobi.api.classifier.Column;
+import jacobi.api.classifier.cart.DecisionNode;
 
 /**
- * Common interface for a decision node in CART model.
+ * Proxy interface for supervised classifier learners with feature type defined.
  * 
  * @author Y.K. Chan
- *
+ * @param <T>  Type of outcome
  */
-public interface DecisionNode<T> {
-    
-    /**
-     * Get the column this node depends on when deciding
-     * @return  Column this node depends on, or null if this is leaf
-     */
-    public Column<?> split();
-    
-    /**
-     * Decide the outcome regardless of input
-     * @return  Decision value
-     */
-    public T decide();
-    
-    /**
-     * Decide the outcome given an attribute value.
-     * @param value  Attribute value
-     * @return  Next decision node to determine the outcome, or empty if this is leaf
-     */
-    public Optional<DecisionNode<T>> decide(double value);
-    
-    /**
-     * Decide the outcome given the input vector
-     * @param inst  Input vector
-     * @return  Next decision node to determine the outcome, or empty if this is leaf
-     */
-    public default Optional<DecisionNode<T>> decide(double[] inst) {
-        Column<?> col = this.split();
-        return col == null ? Optional.empty() : this.decide(inst[col.getIndex()]);
-    }
+public interface DefinedSupervised<T> {
+	
+	public DecisionNode<T> zeroR();
+	
+	public DecisionNode<T> oneR();
+	
+	public DecisionNode<T> id3();
+	
+	public DecisionNode<T> c45();
 
 }

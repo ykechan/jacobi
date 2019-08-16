@@ -23,7 +23,7 @@
  */
 package jacobi.core.classifier.cart.measure;
 
-import jacobi.api.classifier.cart.Column;
+import jacobi.api.classifier.Column;
 import jacobi.core.classifier.cart.data.DataTable;
 import jacobi.core.classifier.cart.data.Sequence;
 import jacobi.core.util.Weighted;
