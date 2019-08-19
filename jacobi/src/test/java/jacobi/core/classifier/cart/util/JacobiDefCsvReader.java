@@ -20,6 +20,7 @@ import jacobi.api.Matrix;
 import jacobi.api.classifier.Column;
 import jacobi.core.classifier.cart.data.DataMatrix;
 import jacobi.core.classifier.cart.data.DataTable;
+import jacobi.core.classifier.cart.data.DefinedMatrix;
 import jacobi.core.classifier.cart.util.JacobiEnums.Lens;
 import jacobi.core.classifier.cart.util.JacobiEnums.YesOrNo;
 
@@ -150,10 +151,7 @@ public class JacobiDefCsvReader {
 					)
 				: colDefs.get(outcomeIndex);
 		
-		return DataMatrix.of(matrix, 
-			colDefs.stream().filter(c -> c != outcomeCol).collect(Collectors.toList()), 
-			(Column<T>) outcomeCol
-		);
+		return DefinedMatrix.of(matrix, (Column<T>) outcomeCol).apply(colDefs);
 	}
 	
 	protected Matrix readData(BufferedReader reader, List<Column<?>> colDefs) throws IOException {

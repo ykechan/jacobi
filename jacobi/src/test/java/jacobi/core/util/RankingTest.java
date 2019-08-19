@@ -262,7 +262,7 @@ public class RankingTest {
 			Assert.assertTrue(val == buf[2 * i]);
 		}
 		for(int i = pos[1] + 1; i < this.input.getRowCount(); i++) {
-			Assert.assertTrue(val < buf[2 * i]);
+			Assert.assertTrue(val <= buf[2 * i]);
 		}
 	}
 	
@@ -275,7 +275,7 @@ public class RankingTest {
 		
 		int[] pos = ranking.pivoting3(0, this.input.getRowCount(), 0, 1);
 		Assert.assertEquals(0, pos[0]);
-		Assert.assertEquals(this.input.getRowCount() - 1, pos[1]);
+		Assert.assertEquals(1, pos[1]);
 	}
 	
 	@Test

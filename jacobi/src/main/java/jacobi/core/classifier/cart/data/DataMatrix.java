@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 
 import jacobi.api.Matrix;
 import jacobi.api.classifier.Column;
+import jacobi.core.util.Throw;
 
 /**
  * Implementation of a data table in CART model.
@@ -57,6 +58,11 @@ public class DataMatrix<T> implements DataTable<T> {
 			extractNominals(typedMat), 
 			weights
 		);
+	}
+	
+	public static <T> DataMatrix<T> of(Matrix matrix, List<Column<?>> colDefs, List<T> outcomes) {
+		validateDefs(matrix, colDefs, outcomes);
+		return null;
 	}
 
 	protected DataMatrix(TypedMatrix<T> numData, List<int[]> nomData, double[] weights) {
@@ -152,6 +158,31 @@ public class DataMatrix<T> implements DataTable<T> {
 			nom[i] = mapper.applyAsInt(row[colIdx]);
 		}
 		return nom;
+	}
+	
+	protected static int[] extractColumn(Column<?> def, List<?> outcomes) {
+		return null;
+	}
+	
+	protected static void validateDefs(Matrix data, List<Column<?>> features, List<?> outcomes) {
+		Throw.when()
+			.isNull(() -> data, () -> "Missing input data.")
+			.isNull(() -> features, () -> "Missing features.")
+			.isNull(() -> outcomes, () -> "Missing outcomes.")
+			.isTrue(() -> data.getRowCount() == 0, () -> "No training instances")
+			.isTrue(
+				() -> data.getRowCount() != outcomes.size(), 
+				() -> "Number of instances (" + data.getRowCount() + ") and outcomes (" 
+						+ outcomes.size() +  ") mismatch"
+			);
+		
+		for(Column<?> col : features) {
+			if(col.getIndex() < 0 || col.getIndex() >= data.getColCount()) {
+				throw new IllegalArgumentException(
+					"Invalid column index #" + col.getIndex() + " found."
+				);
+			}
+		}
 	}
 	
 	protected static class TypedMatrix<T> {

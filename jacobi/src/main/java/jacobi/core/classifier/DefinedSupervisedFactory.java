@@ -5,6 +5,7 @@ import java.util.List;
 import jacobi.api.Matrix;
 import jacobi.api.classifier.Column;
 import jacobi.api.classifier.DefinedSupervised;
+import jacobi.core.classifier.cart.data.DataTable;
 import jacobi.core.util.Throw;
 
 public class DefinedSupervisedFactory {
@@ -31,6 +32,10 @@ public class DefinedSupervisedFactory {
 				);
 			}
 		}
+		return null;
+	}
+	
+	protected <T> DataTable<T> createDataTable() {
 		return null;
 	}
 

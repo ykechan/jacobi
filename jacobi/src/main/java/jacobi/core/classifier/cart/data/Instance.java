@@ -1,5 +1,8 @@
 package jacobi.core.classifier.cart.data;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+
 /**
  * Data class for an instance of data.
  * 
@@ -12,12 +15,12 @@ public class Instance {
     /**
      * Feature value and outcome value of this instance.
      */
-    public int feature, outcome;
+    public final int feature, outcome;
     
     /**
      * Weight of this instance
      */
-    public double weight;
+    public final double weight;
 
     /**
      * Constructor.
@@ -30,5 +33,27 @@ public class Instance {
         this.outcome = outcome;
         this.weight = weight;
     }
+
+	@Override
+	public int hashCode() {
+		return Arrays.hashCode(new Object[] {this.feature, this.outcome, this.weight});
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if(this == obj) {
+			return true;
+		}
+		
+		if(obj instanceof Instance) {
+			Instance oth = (Instance) obj;
+			return this.feature == oth.feature
+				&& this.outcome == oth.outcome
+				&& this.weight == oth.weight;
+		}
+		return false;
+	}
+    
+    
     
 }
