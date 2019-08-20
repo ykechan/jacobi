@@ -25,7 +25,12 @@ package jacobi.core.facade;
 
 import jacobi.api.annotations.Facade;
 import jacobi.api.annotations.Implementation;
+
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 import org.junit.Assert;
 import org.junit.Test;
@@ -92,6 +97,25 @@ public class FacadeProxyTest {
         FacadeProxy.of(TestFluentWrongSupplier.class, 1337L);
     }
     
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testFacadeArgumentIsGenericInterface() {    	    	
+		FacadeInterfaceHasGenericArg<String> proxy = 
+    			FacadeProxy.of(FacadeInterfaceHasGenericArg.class, Collections.singletonList("ABC"));
+    	
+    	Assert.assertEquals("ABC", proxy.first().get());
+    }
+    
+    @Test(expected = ClassCastException.class)
+    @SuppressWarnings("unchecked")
+    public void testFacadeArgumentIsGenericInterfaceWithWrong() {    	    	
+    	FacadeInterfaceHasGenericArgAndWrongImpl<Date> proxy = 
+    			FacadeProxy.of(FacadeInterfaceHasGenericArgAndWrongImpl.class, 
+    				Collections.singletonList(new Date()));
+    	
+    	Date date = proxy.first().get();
+    }
+    
     @Facade(String.class)
     public interface TestFluentInterface extends Supplier<String> {
         
@@ -134,6 +158,22 @@ public class FacadeProxyTest {
         public TestUsingDifferentObjectAsReturn assertAndReturn(String str, String ret);
 
     }
+    
+    @Facade(List.class)
+    public interface FacadeInterfaceHasGenericArg<T> {
+    	
+    	@Implementation(FirstOfListIfAny.class)
+    	public Optional<T> first();
+    	
+    }
+    
+    @Facade(List.class)
+    public interface FacadeInterfaceHasGenericArgAndWrongImpl<T> {
+    	
+    	@Implementation(ReturnOptionalString.class)
+    	public Optional<T> first();
+    	
+    }
 
     public static class DoSthImpl {
         
@@ -167,6 +207,22 @@ public class FacadeProxyTest {
             return ret;
         }
 
+    }
+    
+    public static class FirstOfListIfAny<T> {
+    	
+    	public Optional<T> compute(List<T> list) {
+    		return list.isEmpty() ? Optional.empty() : Optional.of(list.get(0));
+    	}
+    	
+    }
+    
+    public static class ReturnOptionalString<T> {
+    	
+    	public Optional<String> compute(List<T> list) {
+    		return Optional.of("const");
+    	}
+    	
     }
 
 }

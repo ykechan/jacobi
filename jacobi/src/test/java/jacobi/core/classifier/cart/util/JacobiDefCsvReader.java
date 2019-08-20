@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -18,7 +17,6 @@ import org.junit.Test;
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.api.classifier.Column;
-import jacobi.core.classifier.cart.data.DataMatrix;
 import jacobi.core.classifier.cart.data.DataTable;
 import jacobi.core.classifier.cart.data.DefinedMatrix;
 import jacobi.core.classifier.cart.util.JacobiEnums.Lens;
@@ -80,6 +78,7 @@ public class JacobiDefCsvReader {
 	
 	@Test
 	public void shouldBeAbleToCreateStringColumn() {
+		@SuppressWarnings("unchecked")
 		Column<String> col = (Column<String>) this.defColumn(10, "?");
 		Assert.assertEquals(0, col.cardinality());
 		col.getItems().add("A");
@@ -106,7 +105,7 @@ public class JacobiDefCsvReader {
 	public void shouldBeAbleToReadGolfDefCsvByOutcomeType() throws IOException {
 		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.def.csv")){
 			DataTable<YesOrNo> dataTab = this.read(input, YesOrNo.class);
-			Column<?> col = dataTab.getColumns().get(0);
+			
 			Assert.assertEquals(14, dataTab.size());
 			Assert.assertEquals(YesOrNo.YES, dataTab.getOutcomeColumn().getItems().get(0));
 			Assert.assertEquals(YesOrNo.NO, dataTab.getOutcomeColumn().getItems().get(1));
@@ -117,7 +116,7 @@ public class JacobiDefCsvReader {
 	public void shouldBeAbleToReadLensDefCsvByOutcomeType() throws IOException {
 		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/contact-lenses.def.csv")){
 			DataTable<Lens> dataTab = this.read(input, Lens.class);
-			Column<?> col = dataTab.getColumns().get(0);			
+						
 			Assert.assertEquals(24, dataTab.size());
 			Assert.assertEquals(Lens.SOFT, dataTab.getOutcomeColumn().getItems().get(0));
 			Assert.assertEquals(Lens.HARD, dataTab.getOutcomeColumn().getItems().get(1));
@@ -129,6 +128,7 @@ public class JacobiDefCsvReader {
 		return this.read(input, -1, outcomeType);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public <T> DataTable<T> read(InputStream input, int outcomeIndex, Class<T> outcomeType) 
 			throws IOException {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(input));
@@ -182,6 +182,7 @@ public class JacobiDefCsvReader {
 			
 			if(def.getItems() instanceof ArrayList) {
 				// dynamic column
+				@SuppressWarnings("unchecked")
 				List<String> items = (List<String>) def.getItems();
 				int value = -1;
 				for(int j = 0; j < items.size(); j++){

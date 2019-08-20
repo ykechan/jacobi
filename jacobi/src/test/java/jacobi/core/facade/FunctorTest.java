@@ -23,16 +23,21 @@
  */
 package jacobi.core.facade;
 
-import jacobi.api.annotations.Facade;
-import jacobi.api.annotations.Implementation;
-import jacobi.core.impl.Empty;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import jacobi.api.annotations.Facade;
+import jacobi.api.annotations.Implementation;
 
 /**
  *
@@ -121,6 +126,28 @@ public class FunctorTest {
             CantUseThis.class);
     }
     
+    @Test
+    public void testGenericInterface() throws Exception {
+    	Invocator func = new Functor(GenericFacade.class.getMethod("firstOf", List.class),
+    			FirstOf.class);
+    	Date target = new SimpleDateFormat("yyyy-MM-dd").parse("1991-07-10");
+    	
+    	Object result = func.invoke("", new Object[] {Collections.singletonList(target)});
+    	Assert.assertTrue(result instanceof Optional);
+    	Assert.assertTrue(target == ((Optional<?>) result).get());
+    }
+    
+    @Test(expected = ClassCastException.class)
+    public void testGenericInterfaceWithWrongGenericReturnType() throws Exception {
+    	Invocator func = new Functor(GenericFacade.class.getMethod("firstOf", List.class),
+    			WrongGeneric.class);
+    	Date target = new SimpleDateFormat("yyyy-MM-dd").parse("1991-07-10");
+    	
+    	Object result = func.invoke("", new Object[] {Collections.singletonList(target)});
+    	Assert.assertTrue(result instanceof Optional);
+    	((Optional<Date>) result).get();
+    }
+    
     @Facade(String.class)
     public interface TestInterface {
 
@@ -134,6 +161,14 @@ public class FunctorTest {
         @Implementation(DoSthImpl.class)
         public int doSth(int i);
         
+    }
+    
+    @Facade(String.class)
+    public interface GenericFacade {
+    	
+    	@Implementation(FirstOf.class)
+    	public <T> Optional<T> firstOf(List<T> list);
+    	
     }
     
     public static class DoSthImpl {
@@ -194,5 +229,23 @@ public class FunctorTest {
         }
 
     }    
+    
+    public static class FirstOf {
+    	
+    	public <T> Optional<T> first(String str, List<T> list) {
+    		return list == null || list.isEmpty() 
+    			? Optional.empty() 
+    			: Optional.of(list.get(0));
+    	}
+    	
+    }
+    
+    public static class WrongGeneric {
+    	
+    	public <T> Optional<String> first(String str, List<T> list) {
+    		return Optional.of(str);
+    	}
+    	
+    }
     
 }

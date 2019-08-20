@@ -25,8 +25,12 @@ package jacobi.core.facade;
 
 import jacobi.api.annotations.Facade;
 import jacobi.core.util.Throw;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.Arrays;
 
 /**
@@ -175,12 +179,9 @@ public class Functor implements Invocator {
     private Method findImpl(Class<?> implClass, Facade facade, Method facadeMethod) {
         return Arrays.asList(implClass.getMethods())
             .stream()
-            .filter((m) -> m.getDeclaringClass() != Object.class)
-            .filter((m) -> m.getReturnType() == facadeMethod.getReturnType()
-                        || m.getReturnType() == facade.value() )
-            .filter((m) -> m.getReturnType() == facade.value()
-                        || m.getGenericReturnType().equals(facadeMethod.getGenericReturnType()))
-            .filter((m) -> this.argumentMatches(m, facade.value(), facadeMethod.getParameterTypes())) 
+            .filter(m -> m.getDeclaringClass() != Object.class)
+            .filter(m -> this.returnTypeMatches(m, facade, facadeMethod))
+            .filter(m -> this.argumentMatches(m, facade.value(), facadeMethod.getParameterTypes())) 
             .reduce((a, b) -> {
                 throw new UnsupportedOperationException(
                     "Ambiguous implementation method "
@@ -190,7 +191,8 @@ public class Functor implements Invocator {
                 );
             })
             .orElseThrow(() -> 
-                new UnsupportedOperationException("No implementation method found.")
+                new UnsupportedOperationException("No implementation method found for " 
+                		+ facadeMethod.getName())
             );
     }
     
@@ -212,6 +214,27 @@ public class Functor implements Invocator {
             }
         }
         return true;
+    }
+    
+    /**
+     * Check if the return type of input method matches with the return type of facade method. 
+     * @param method  Input method
+     * @param facade  Facade annotation
+     * @param facadeMethod  Facade method
+     * @return  true if matches, false otherwise
+     */
+    private boolean returnTypeMatches(Method method, Facade facade, Method facadeMethod) {
+    	if(method.getReturnType() == facadeMethod.getReturnType()) {
+    		return true;
+    	}
+    	
+    	if(method.getReturnType() == facade.value()){ 
+    		Class<?> retType = facadeMethod.getReturnType();
+    		return retType.isAnnotationPresent(Facade.class)
+    			&& retType.getDeclaredAnnotation(Facade.class).value() == facade.value();
+    	}
+    	
+    	return false;
     }
     
     private Method method;
