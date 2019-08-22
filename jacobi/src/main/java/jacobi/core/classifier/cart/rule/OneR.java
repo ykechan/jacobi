@@ -141,8 +141,10 @@ public class OneR implements Rule {
 		switch(bounds.length) {
 			case 0 :
 				return ls -> new NominalSplit<>(col, null, ls);
+				
 			case 1 :
 				return ls -> new BinaryNumericSplit<>(col, bounds[0], ls.get(0), ls.get(1));
+				
 			default :
 				break;
 		}
@@ -166,7 +168,7 @@ public class OneR implements Rule {
 			);
 		}
 		
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException("Unable to detect splitting function on " + node);
 	}
 	
 	/**

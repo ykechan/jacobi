@@ -49,6 +49,9 @@ public interface Impurity {
         return sum == 0.0 ? 0.0 : Math.log(sum) - rand / sum;
     };
     
+    /**
+     * Error function
+     */
     public static final Impurity ERROR = dist -> {
         double sum = 0.0;
         double max = 0.0;

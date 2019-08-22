@@ -21,26 +21,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jacobi.api.classifier;
-
-import jacobi.api.annotations.Facade;
-import jacobi.api.annotations.Implementation;
-import jacobi.api.classifier.cart.DecisionNode;
-import jacobi.api.classifier.cart.Strategy;
-import jacobi.core.classifier.cart.DecisionTreeLearner;
-import jacobi.core.classifier.cart.data.DataTable;
-import jacobi.core.classifier.cart.measure.Impurity;
+package jacobi.api.classifier.cart;
 
 /**
- * Proxy interface for supervised classifier learners with feature type defined.
+ * Strategies in learning a decision trees.
  * 
  * @author Y.K. Chan
- * @param <T>  Type of outcome
  */
-@Facade(value = DataTable.class)
-public interface DefinedSupervised<T> {
+public enum Strategy {
+	/**
+	 * Use the 0-R algorithm. 
+	 */
+	ZERO_R, 
 	
-	@Implementation(DecisionTreeLearner.class)
-	public DecisionNode<T> learnTree(Strategy strategy, Impurity impurityMeasure);
-
+	/**
+	 * Use the 1-R algorithm. 1-R supports numeric features.
+	 */
+	ONE_R,
+	
+	/**
+	 * Use the ID-3 algorithm. ID-3 ignores any numeric features.
+	 */
+	ID3, 
+	
+	/**
+	 * Use the C4.5 algorithm. C4.5 supports numeric features.
+	 */
+	C45
 }

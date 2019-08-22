@@ -34,7 +34,9 @@ import jacobi.api.classifier.Column;
 import jacobi.api.classifier.cart.DecisionNode;
 import jacobi.core.classifier.cart.data.DataTable;
 import jacobi.core.classifier.cart.data.Sequence;
-import jacobi.core.classifier.cart.rule.OneR.Merger;
+import jacobi.core.classifier.cart.measure.Impurity;
+import jacobi.core.classifier.cart.measure.NominalPartition;
+import jacobi.core.classifier.cart.measure.Partition;
 import jacobi.core.util.Weighted;
 
 /**
@@ -44,82 +46,88 @@ import jacobi.core.util.Weighted;
  * on the subsets of data until the data is pure, i.e. all instances are with a single outcome,
  * or features are exhausted. </p>
  * 
- * <p>This implementation repeated invoked 1-R and inspects the result. Numeric features
- * are not supported and ignored.</p>
+ * <p>This implementation repeated invoked 1-R and inspects the result.</p>
  * 
  * @author Y.K. Chan
  *
  */
 public class Id3 implements Rule {
+
+	/**
+	 * Factory method of standard Id3 rule maker.
+	 * @param impurity  Impurity measurement
+	 * @return  Instance of Id3
+	 */
+	public static Id3 of(Impurity impurity) {
+		return new Id3(
+			new ZeroR(impurity), 
+			new OneR(NO_RULE, new NominalPartition(impurity)),
+			(s, g) -> {}
+		);
+	}
 	
 	/**
-	 * Constructor
-	 * @param oneR  1-R implementation
-	 * @param beforeSplit  Listener on splitting dataset
+	 * Constructor.
+	 * @param zeroR Implementation of 0-R
+	 * @param oneR  Implementation of 1-R
+	 * @param beforeSplit  Listener on splitting the data set
 	 */
-	public Id3(OneR oneR, BiConsumer<Sequence, IntUnaryOperator> beforeSplit) {
+	public Id3(Rule zeroR, OneR oneR, BiConsumer<Sequence, IntUnaryOperator> beforeSplit) {
+		this.zeroR = zeroR;
 		this.oneR = oneR;
 		this.beforeSplit = beforeSplit;
 	}
 
 	@Override
-	public <T> Weighted<DecisionNode<T>> make(DataTable<T> dataTable, Set<Column<?>> features, Sequence seq) {
-		return this.make(new DataView<>(
-			dataTable,
-			features.stream()
-				.filter(c -> !c.isNumeric())
-				.collect(Collectors.toSet()),
-			seq
-		));
-	}
-	
-	/**
-	 * Create decision branch on a subset of data
-	 * @param view  Subset of data table
-	 * @return  Decision branch with associated impurity
-	 */
-	protected <T> Weighted<DecisionNode<T>> make(DataView<T> view) {
-		Weighted<DecisionNode<T>> result = this.oneR.make(view.dataTab, view.features, view.subseq);
-		if(result.item.split() == null) {
+	public <T> Weighted<DecisionNode<T>> make(DataTable<T> dataTab, Set<Column<?>> feats, Sequence seq) {
+		
+		Weighted<DecisionNode<T>> result = this.oneR.make(dataTab, feats, seq);
+		if(result.item == null) {
+			// no feature to split
+			return this.zeroR.make(dataTab, feats, seq);
+		}
+		
+		if(result.item.split() == null){
+			// already is a leaf node
 			return result;
 		}
 		
-		Set<Column<?>> subfeat = view.features.stream()
+		Set<Column<?>> subfeat = feats.stream()
 				.filter(f -> !f.equals(result.item.split()))
 				.collect(Collectors.toSet());
-				
-		List<DataView<T>> views = this.split(view, subfeat, result.item);
-		Merger<T> merger = this.oneR.mergeFunc(result.item);
 		
-		List<DecisionNode<T>> nodes = new ArrayList<>();
+		List<Sequence> subseqs = this.split(dataTab, seq, result.item);
+		Weighted<List<DecisionNode<T>>> subNodes = this.make(dataTab, subfeat, subseqs);
 		
-		double dot = 0.0;
-		double norm = 0.0;
-		
-		for(DataView<T> subView : views) {
-			Weighted<DecisionNode<T>> subNode = this.make(subView);
-			double partWeight = this.totalWeight(view.dataTab, view.subseq);
-			dot += partWeight * subNode.weight;
-			norm += partWeight;
-			nodes.add(subNode.item);
-		}
-		
-		return new Weighted<>(merger.apply(nodes), norm == 0.0 ? 0.0 : dot / norm);
+		return new Weighted<>(
+			this.oneR
+				.mergeFunc(result.item)
+				.apply(subNodes.item),
+			subNodes.weight
+		);
 	}
 	
 	/**
-	 * Compute the total weight of a subset of data
-	 * @param dataTab  Full data
-	 * @param seq  Subset sequence of data
-	 * @return  Sum of weights of the subset
+	 * Learn decision nodes for a list of subset of the data
+	 * @param dataTab  Input data table
+	 * @param feats  Set of feature columns
+	 * @param seqs  List of sub-sequences
+	 * @return  List of decision node with impurity measurement
 	 */
-	protected double totalWeight(DataTable<?> dataTab, Sequence seq) {
+	protected <T> Weighted<List<DecisionNode<T>>> make(DataTable<T> dataTab, 
+			Set<Column<?>> feats, 
+			List<Sequence> seqs) {
+		List<DecisionNode<T>> nodes = new ArrayList<>(seqs.size());
 		
-		return seq.apply(dataTab.getInstances(dataTab.getOutcomeColumn()))
-			.stream()
-			.mapToDouble(i -> i.weight)
-			.sum();
-	}
+		double sum = 0.0;
+		for(Sequence seq : seqs) {
+			Weighted<DecisionNode<T>> subNode = this.make(dataTab, feats, seq);
+			sum += subNode.weight;
+			nodes.add(subNode.item);
+		}
+		
+		return new Weighted<>(nodes, sum);
+	}		
 	
 	/**
 	 * Split the subset of data by a decision node
@@ -128,52 +136,22 @@ public class Id3 implements Rule {
 	 * @param node  Decision node
 	 * @return  Split list of subset
 	 */
-	protected <T> List<DataView<T>> split(DataView<T> view, 
-			Set<Column<?>> subfeat, 
+	protected <T> List<Sequence> split(DataTable<T> dataTab,
+			Sequence subseq,
 			DecisionNode<T> node) {
-		IntUnaryOperator splitFn = this.oneR.splitFunc(view.dataTab, node);
-		this.beforeSplit.accept(view.subseq, splitFn);
+		IntUnaryOperator splitFn = this.oneR.splitFunc(dataTab, node);
+		this.beforeSplit.accept(subseq, splitFn);
 		
-		return view.subseq.groupBy(splitFn)
-			.stream()
-			.map(s -> new DataView<>(view.dataTab, subfeat, s))
-			.collect(Collectors.toList());
+		return subseq.groupBy(splitFn);
 	}
 	
+	private Rule zeroR;
 	private OneR oneR;
-	private BiConsumer<Sequence, IntUnaryOperator> beforeSplit;
+	private BiConsumer<Sequence, IntUnaryOperator> beforeSplit;	
 	
 	/**
-	 * Data object representing a subset of data table
-	 * 
-	 * @author Y.K. Chan
-	 * @param <T>  Type of outcome
+	 * Rule that returns null as decision.
 	 */
-	protected static class DataView<T> {
-		
-		/**
-		 * Data table
-		 */
-		public final DataTable<T> dataTab;
-		
-		/**
-		 * Set of feature to consider
-		 */
-		public final Set<Column<?>> features;
-		
-		/**
-		 * Sub-Sequence of instances
-		 */
-		public final Sequence subseq;
-
-		public DataView(DataTable<T> dataTab, Set<Column<?>> features, Sequence subseq) {
-			this.dataTab = dataTab;
-			this.features = features;
-			this.subseq = subseq;
-		}
-		
-	}	
-	
 	protected static final Rule NO_RULE = new Rule() {
 
 		@Override
@@ -181,7 +159,7 @@ public class Id3 implements Rule {
 				Set<Column<?>> features, 
 				Sequence seq) {
 			
-			return new Weighted<>(null, Double.MAX_VALUE);
+			return new Weighted<>(null, 0.0);
 		}
 		
 	};	

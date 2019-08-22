@@ -53,6 +53,10 @@ public class NominalPartition implements Partition {
 
     @Override
     public Weighted<double[]> measure(DataTable<?> table, Column<?> target, Sequence seq) {
+    	if(target.isNumeric()) {
+    		throw new IllegalArgumentException("Unable to partition nominal feature.");
+    	}
+    	
         List<Instance> instances = seq.apply(table.getInstances(target));
         double score = this.measure(target, table.getOutcomeColumn(), instances);
         return new Weighted<>(new double[0], score);

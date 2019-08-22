@@ -1,3 +1,26 @@
+/* 
+ * The MIT License
+ *
+ * Copyright 2019 Y.K. Chan
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package jacobi.core.classifier;
 
 import java.util.List;
@@ -6,37 +29,36 @@ import jacobi.api.Matrix;
 import jacobi.api.classifier.Column;
 import jacobi.api.classifier.DefinedSupervised;
 import jacobi.core.classifier.cart.data.DataTable;
+import jacobi.core.classifier.cart.data.DefinedMatrix;
+import jacobi.core.facade.FacadeProxy;
 import jacobi.core.util.Throw;
 
+/**
+ * Implementation of creating proxy for supervised learning with column types defined.
+ * 
+ * @author Y.K. Chan
+ */
 public class DefinedSupervisedFactory {
 	
-	public <T> DefinedSupervised<T> create(Matrix data, 
-			List<Column<?>> features, 
-			List<T> outcomes) {
-		
+	@SuppressWarnings("unchecked")
+	public <T> DefinedSupervised<T> create(Matrix matrix, List<Column<?>> colDefs, List<T> outcomes) {
 		Throw.when()
-			.isNull(() -> data, () -> "Missing input data.")
-			.isNull(() -> features, () -> "Missing features.")
-			.isNull(() -> outcomes, () -> "Missing outcomes.")
-			.isTrue(() -> data.getRowCount() == 0, () -> "No training instances")
+			.isNull(() -> matrix, () -> "No input matrix.")
+			.isNull(() -> colDefs, () -> "No column definition.")
+			.isTrue(() -> outcomes == null || outcomes.isEmpty(), () -> "No outcome")
 			.isTrue(
-				() -> data.getRowCount() != outcomes.size(), 
-				() -> "Number of instances (" + data.getRowCount() + ") and outcomes (" 
-						+ outcomes.size() +  ") mismatch"
+				() -> matrix.getRowCount() != outcomes.size(), 
+				() -> "Number of instances mismatch."
 			);
 		
-		for(Column<?> col : features) {
-			if(col.getIndex() < 0 || col.getIndex() >= data.getColCount()) {
-				throw new IllegalArgumentException(
-					"Invalid column index #" + col.getIndex() + " found."
-				);
+		for(Column<?> cols : colDefs) {
+			if(cols.getIndex() < 0 || cols.getIndex() >= matrix.getColCount()) {
+				throw new IllegalArgumentException("Invalid column #" + cols.getIndex());
 			}
 		}
-		return null;
-	}
-	
-	protected <T> DataTable<T> createDataTable() {
-		return null;
+		
+		DataTable<T> dataTab = DefinedMatrix.of(matrix, outcomes).apply(colDefs);
+		return FacadeProxy.of(DefinedSupervised.class, dataTab);
 	}
 
 }

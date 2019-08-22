@@ -35,7 +35,6 @@ import jacobi.api.classifier.Column;
 import jacobi.core.classifier.cart.data.DataTable;
 import jacobi.core.classifier.cart.data.Instance;
 import jacobi.core.classifier.cart.data.Sequence;
-import jacobi.core.util.Real;
 import jacobi.core.util.Weighted;
 
 /**

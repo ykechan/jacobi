@@ -52,14 +52,26 @@ public class BinaryNumericSplit<T> implements DecisionNode<T> {
 		this.right = right;
 	}
 	
+	/**
+	 * Get the threshold value of splitting
+	 * @return
+	 */
 	public double getThreshold() {
 		return threshold;
 	}
 
+	/**
+	 * Get the left node which is for cases having the value lesser than the threshold
+	 * @return  Left decision node
+	 */
 	public DecisionNode<T> getLeft() {
 		return left;
 	}
 
+	/**
+	 * Get the right node which is for cases having the value lesser than the threshold
+	 * @return  Right decision node
+	 */
 	public DecisionNode<T> getRight() {
 		return right;
 	}

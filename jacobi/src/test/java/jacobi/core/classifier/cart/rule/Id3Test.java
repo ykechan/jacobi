@@ -45,12 +45,14 @@ public class Id3Test {
 	
 	@Test
 	public void testShouldBeAbleToBuildFromGolf() throws IOException {
+		
 		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.def.csv")){
 			DataTable<YesOrNo> dataTab = new JacobiDefCsvReader()
 					.read(input, YesOrNo.class);
 			
 			Weighted<DecisionNode<YesOrNo>> ans = new Id3(
-					new OneR(
+					new ZeroR(Impurity.ENTROPY), 
+					new OneR(	
 						new ZeroR(Impurity.ENTROPY), 
 						new NominalPartition(Impurity.ENTROPY)
 					), (seq, fn) -> {})
@@ -90,6 +92,7 @@ public class Id3Test {
 			Assert.assertEquals(YesOrNo.NO, ifrain.decide(1.0).get().decide()); // windy: true
 		}
 	}
+	
 	protected Sequence defaultSeq(int len) {
         return new Sequence(IntStream.range(0, len).toArray(), 0, len);
     }

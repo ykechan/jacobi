@@ -11,6 +11,7 @@ import jacobi.api.classifier.Column;
 import jacobi.api.classifier.cart.DecisionNode;
 import jacobi.core.classifier.cart.data.DataTable;
 import jacobi.core.classifier.cart.data.Sequence;
+import jacobi.core.classifier.cart.measure.Impurity;
 import jacobi.core.classifier.cart.measure.Partition;
 import jacobi.core.classifier.cart.measure.RankedPartition;
 import jacobi.core.util.Ranking;
@@ -20,13 +21,27 @@ import jacobi.core.util.Weighted;
  * Implementation of the C4.5 algorithm.
  * 
  * <p>This implementation of C4.5 is not standard, i.e. this does not covers all the enhancements 
- * C4.5 bought to Id3. This class focuses on handling numerical attribute. Missing values and 
+ * C4.5 bought to Id3. This class focuses on handling numerical attributes. Missing values and 
  * pruning are handled by other classes.</p>
  * 
  * @author Y.K. Chan
  *
  */
 public class C45 implements Rule {
+	
+	/**
+	 * Factory method for standard C4.5 implementation
+	 * @param impurity  Impurity measurement function
+	 * @param partition  Partition function
+	 * @return  Implementation of C4.5
+	 */
+	public static C45 of(Impurity impurity, Partition partition) {
+		return new C45(partition, (p, f) -> new Id3(
+			new ZeroR(impurity),
+			new OneR(Id3.NO_RULE, partition),
+			f
+		));
+	}
 	
 	/**
 	 * Constructor.
@@ -44,6 +59,14 @@ public class C45 implements Rule {
 			Sequence seq) {
 		
 		Map<Column<?>, Sequence> sortSeq = this.sortByCols(dataTab);
+		
+		if(sortSeq.isEmpty()) {
+			// no numeric feature
+			return this.ruleFact
+				.create(this.partition, (s, g) -> {})
+				.make(dataTab, features, seq);
+		}
+		
 		RankedPartition rankPart = new RankedPartition(this.partition, sortSeq);
 		
 		return this.ruleFact
