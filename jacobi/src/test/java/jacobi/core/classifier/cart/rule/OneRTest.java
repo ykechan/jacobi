@@ -48,8 +48,8 @@ public class OneRTest {
             DataTable<YesOrNo> dataTab = new JacobiDefCsvReader()
                     .read(input, YesOrNo.class);
             
-            Weighted<DecisionNode<YesOrNo>> ans = new OneR(
-                    new ZeroR(Impurity.ENTROPY), 
+            DecisionNode<YesOrNo> ans = new OneR(
+                    new ZeroR(), 
                     new NominalPartition(Impurity.ENTROPY)
                 ).make(dataTab, 
                     this.columnSet(
@@ -63,19 +63,14 @@ public class OneRTest {
             // overcast: yes(4) no(0)
             // rain: yes(3) no(2)
             
-            Assert.assertEquals(
-                  5 * Impurity.ENTROPY.of(new double[] {2, 3})
-                + 4 * Impurity.ENTROPY.of(new double[] {4, 0})
-                + 5 * Impurity.ENTROPY.of(new double[] {3, 2}), ans.weight, 1e-12);
-            
-            Assert.assertEquals(dataTab.getColumns().get(0), ans.item.split());
-            Assert.assertTrue(ans.item instanceof NominalSplit);
-            Assert.assertTrue(ans.item.decide(0.0).get() instanceof Decision);
-            Assert.assertEquals(YesOrNo.NO, ans.item.decide(0.0).get().decide());
-            Assert.assertTrue(ans.item.decide(1.0).get() instanceof Decision);
-            Assert.assertEquals(YesOrNo.YES, ans.item.decide(1.0).get().decide());
-            Assert.assertTrue(ans.item.decide(2.0).get() instanceof Decision);
-            Assert.assertEquals(YesOrNo.YES, ans.item.decide(2.0).get().decide());
+            Assert.assertEquals(dataTab.getColumns().get(0), ans.split());
+            Assert.assertTrue(ans instanceof NominalSplit);
+            Assert.assertTrue(ans.decide(0.0).get() instanceof Decision);
+            Assert.assertEquals(YesOrNo.NO, ans.decide(0.0).get().decide());
+            Assert.assertTrue(ans.decide(1.0).get() instanceof Decision);
+            Assert.assertEquals(YesOrNo.YES, ans.decide(1.0).get().decide());
+            Assert.assertTrue(ans.decide(2.0).get() instanceof Decision);
+            Assert.assertEquals(YesOrNo.YES, ans.decide(2.0).get().decide());
         }
     }
     
@@ -85,8 +80,8 @@ public class OneRTest {
             DataTable<YesOrNo> dataTab = new JacobiDefCsvReader()
                     .read(input, YesOrNo.class);
             
-            Weighted<DecisionNode<YesOrNo>> ans = new OneR(
-                    new ZeroR(Impurity.ENTROPY), 
+            DecisionNode<YesOrNo> ans = new OneR(
+                    new ZeroR(), 
                     new NominalPartition(Impurity.ENTROPY)
                 ).make(dataTab, 
                     this.columnSet(
@@ -98,16 +93,12 @@ public class OneRTest {
             // true: yes(3) no(3)
             // false: yes(6) no(2)
             
-            Assert.assertEquals(
-  				  6 * Impurity.ENTROPY.of(new double[] {3, 3})
-  				+ 8 * Impurity.ENTROPY.of(new double[] {6, 2}), ans.weight, 1e-12); 
-            
-            Assert.assertEquals(dataTab.getColumns().get(3), ans.item.split());
-            Assert.assertTrue(ans.item instanceof NominalSplit);
-            Assert.assertTrue(ans.item.decide(0.0).get() instanceof Decision);
-            Assert.assertEquals(YesOrNo.YES, ans.item.decide(0.0).get().decide());
-            Assert.assertTrue(ans.item.decide(1.0).get() instanceof Decision);
-            Assert.assertEquals(YesOrNo.YES, ans.item.decide(1.0).get().decide());
+            Assert.assertEquals(dataTab.getColumns().get(3), ans.split());
+            Assert.assertTrue(ans instanceof NominalSplit);
+            Assert.assertTrue(ans.decide(0.0).get() instanceof Decision);
+            Assert.assertEquals(YesOrNo.YES, ans.decide(0.0).get().decide());
+            Assert.assertTrue(ans.decide(1.0).get() instanceof Decision);
+            Assert.assertEquals(YesOrNo.YES, ans.decide(1.0).get().decide());
         }
     }
     
@@ -117,8 +108,8 @@ public class OneRTest {
             DataTable<YesOrNo> dataTab = new JacobiDefCsvReader()
                     .read(input, YesOrNo.class);
             
-            Weighted<DecisionNode<YesOrNo>> ans = new OneR(
-                    new ZeroR(Impurity.ENTROPY), 
+            DecisionNode<YesOrNo> ans = new OneR(
+                    new ZeroR(), 
                     new NominalPartition(Impurity.ENTROPY)
                 ).make(dataTab, 
                     this.columnSet(
@@ -127,14 +118,11 @@ public class OneRTest {
                     new Sequence(new int[] {
                     	0, 2, 3, 4, 6, 1, 5, 7
                     }, 1, 5)
-                );
+                );            
             
-            
-            Assert.assertEquals(0.0, ans.weight, 1e-12); 
-            
-            Assert.assertNull(ans.item.split());
-            Assert.assertTrue(ans.item instanceof Decision);
-            Assert.assertEquals(YesOrNo.YES, ans.item.decide());
+            Assert.assertNull(ans.split());
+            Assert.assertTrue(ans instanceof Decision);
+            Assert.assertEquals(YesOrNo.YES, ans.decide());
             
         }
     }
@@ -145,8 +133,8 @@ public class OneRTest {
             DataTable<YesOrNo> dataTab = new JacobiDefCsvReader()
                     .read(input, YesOrNo.class);
             
-            Weighted<DecisionNode<YesOrNo>> ans = new OneR(
-                    new ZeroR(Impurity.ENTROPY), 
+            DecisionNode<YesOrNo> ans = new OneR(
+                    new ZeroR(), 
                     new NominalPartition(Impurity.ENTROPY)
                 ).make(dataTab, 
                     this.columnSet(
@@ -155,14 +143,11 @@ public class OneRTest {
                     new Sequence(new int[] {
                     	0, 2, 3, 4, 6, 1, 5, 7
                     }, 1, 1)
-                );
+                );            
             
-            
-            Assert.assertEquals(0.0, ans.weight, 1e-12); 
-            
-            Assert.assertNull(ans.item.split());
-            Assert.assertTrue(ans.item instanceof Decision);
-            Assert.assertEquals(YesOrNo.YES, ans.item.decide());
+            Assert.assertNull(ans.split());
+            Assert.assertTrue(ans instanceof Decision);
+            Assert.assertEquals(YesOrNo.YES, ans.decide());
             
         }
     }

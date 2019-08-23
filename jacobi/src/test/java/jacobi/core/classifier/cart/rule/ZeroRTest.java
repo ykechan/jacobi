@@ -11,11 +11,9 @@ import org.junit.Test;
 import jacobi.api.classifier.cart.DecisionNode;
 import jacobi.core.classifier.cart.data.DataTable;
 import jacobi.core.classifier.cart.data.Sequence;
-import jacobi.core.classifier.cart.rule.ZeroR;
 import jacobi.core.classifier.cart.util.JacobiDefCsvReader;
 import jacobi.core.classifier.cart.util.JacobiEnums.Outlook;
 import jacobi.core.classifier.cart.util.JacobiEnums.YesOrNo;
-import jacobi.core.util.Weighted;
 
 public class ZeroRTest {
 
@@ -24,16 +22,17 @@ public class ZeroRTest {
 		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.def.csv")){
 			DataTable<YesOrNo> dataTab = new JacobiDefCsvReader()
 					.read(input, YesOrNo.class);
-			
-			Weighted<DecisionNode<YesOrNo>> ans = new ZeroR(dist -> { 
+			DecisionNode<YesOrNo> ans = new ZeroR() {
+
+				@Override
+				protected int argmax(double[] dist) {
 					Assert.assertEquals(9.0, dist[0], 1e-12);
 					Assert.assertEquals(5.0, dist[1], 1e-12);
-					return Math.PI;
-				})
-				.make(dataTab, Collections.emptySet(), this.defaultSeq(dataTab.size()));
-			
-			Assert.assertEquals(Math.PI, ans.weight, 1e-12);
-			Assert.assertEquals(YesOrNo.YES, ans.item.decide());
+					return super.argmax(dist);
+				}
+				
+			}.make(dataTab, Collections.emptySet(), this.defaultSeq(dataTab.size()));
+			Assert.assertEquals(YesOrNo.YES, ans.decide());
 		}
 	}
 	
@@ -43,15 +42,18 @@ public class ZeroRTest {
 			DataTable<Boolean> dataTab = new JacobiDefCsvReader()
 					.read(input, Boolean.class);
 			
-			Weighted<DecisionNode<Boolean>> ans = new ZeroR(dist -> { 
+			DecisionNode<Boolean> ans = new ZeroR() {
+
+				@Override
+				protected int argmax(double[] dist) {
 					Assert.assertEquals(8.0, dist[0], 1e-12);
 					Assert.assertEquals(6.0, dist[1], 1e-12);
-					return Math.PI;
-				})
-				.make(dataTab, Collections.emptySet(), this.defaultSeq(dataTab.size()));
+					return super.argmax(dist);
+				}
+				
+			}.make(dataTab, Collections.emptySet(), this.defaultSeq(dataTab.size()));
 			
-			Assert.assertEquals(Math.PI, ans.weight, 1e-12);
-			Assert.assertFalse(ans.item.decide());
+			Assert.assertFalse(ans.decide());
 		}
 	}
 	
@@ -61,16 +63,19 @@ public class ZeroRTest {
 			DataTable<Outlook> dataTab = new JacobiDefCsvReader()
 					.read(input, Outlook.class);
 			
-			Weighted<DecisionNode<Outlook>> ans = new ZeroR(dist -> { 
+			DecisionNode<Outlook> ans = new ZeroR() {
+
+				@Override
+				protected int argmax(double[] dist) {
 					Assert.assertEquals(5.0, dist[0], 1e-12); // sunny
 					Assert.assertEquals(4.0, dist[1], 1e-12); // overcast
 					Assert.assertEquals(5.0, dist[2], 1e-12); // rain
-					return Math.PI;
-				})
-				.make(dataTab, Collections.emptySet(), this.defaultSeq(dataTab.size()));
+					return super.argmax(dist);
+				}
+				
+			}.make(dataTab, Collections.emptySet(), this.defaultSeq(dataTab.size()));
 			
-			Assert.assertEquals(Math.PI, ans.weight, 1e-12);
-			Assert.assertEquals(Outlook.SUNNY, ans.item.decide());
+			Assert.assertEquals(Outlook.SUNNY, ans.decide());
 		}
 	}
 	

@@ -62,7 +62,7 @@ public class C45Test {
 		return new Rule() {
 
 			@Override
-			public <T> Weighted<DecisionNode<T>> make(DataTable<T> dataTable, 
+			public <T> DecisionNode<T> make(DataTable<T> dataTable, 
 					Set<Column<?>> features, 
 					Sequence seq) {
 				for(Column<?> target : features) {

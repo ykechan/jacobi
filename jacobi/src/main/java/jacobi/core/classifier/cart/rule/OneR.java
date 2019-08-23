@@ -71,7 +71,7 @@ public class OneR implements Rule {
 	}
 
 	@Override
-	public <T> Weighted<DecisionNode<T>> make(DataTable<T> dataTable, 
+	public <T> DecisionNode<T> make(DataTable<T> dataTable, 
 			Set<Column<?>> features, 
 			Sequence seq) {
 		Weighted<double[]> min = null;
@@ -80,7 +80,7 @@ public class OneR implements Rule {
 		for(Column<?> feat : features) {
 			Weighted<double[]> split = this.partition.measure(dataTable, feat, seq);
 			if(Double.isNaN(split.weight)) {
-				return new Weighted<>(this.decidePure(dataTable, seq), 0.0);
+				return this.decidePure(dataTable, seq);
 			}
 			
 			if(min == null || split.weight < min.weight) {
@@ -99,10 +99,9 @@ public class OneR implements Rule {
 		List<Sequence> subseq = seq.groupBy(this.splitFunc(dataTable, target, min.item));
 		List<DecisionNode<T>> nodes = subseq.stream()
 				.map(s -> this.zeroR.make(dataTable, subfeats, s))
-				.map(w -> w.item)
 				.collect(Collectors.toList());
 		
-		return new Weighted<>(this.<T>mergeFunc(target, min.item).apply(nodes), min.weight);
+		return this.<T>mergeFunc(target, min.item).apply(nodes);
 	}
 	
 	/**

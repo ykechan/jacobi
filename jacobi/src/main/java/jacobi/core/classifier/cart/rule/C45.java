@@ -15,7 +15,6 @@ import jacobi.core.classifier.cart.measure.Impurity;
 import jacobi.core.classifier.cart.measure.Partition;
 import jacobi.core.classifier.cart.measure.RankedPartition;
 import jacobi.core.util.Ranking;
-import jacobi.core.util.Weighted;
 
 /**
  * Implementation of the C4.5 algorithm.
@@ -37,7 +36,7 @@ public class C45 implements Rule {
 	 */
 	public static C45 of(Impurity impurity, Partition partition) {
 		return new C45(partition, (p, f) -> new Id3(
-			new ZeroR(impurity),
+			new ZeroR(),
 			new OneR(Id3.NO_RULE, partition),
 			f
 		));
@@ -54,7 +53,7 @@ public class C45 implements Rule {
 	}
 
 	@Override
-	public <T> Weighted<DecisionNode<T>> make(DataTable<T> dataTab, 
+	public <T> DecisionNode<T> make(DataTable<T> dataTab, 
 			Set<Column<?>> features, 
 			Sequence seq) {
 		

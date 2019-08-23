@@ -48,4 +48,5 @@ public enum Strategy {
 	 * Use the C4.5 algorithm. C4.5 supports numeric features.
 	 */
 	C45
+	;
 }

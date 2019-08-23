@@ -32,9 +32,7 @@ import jacobi.api.classifier.cart.DecisionNode;
 import jacobi.core.classifier.cart.data.DataTable;
 import jacobi.core.classifier.cart.data.Instance;
 import jacobi.core.classifier.cart.data.Sequence;
-import jacobi.core.classifier.cart.measure.Impurity;
 import jacobi.core.classifier.cart.node.Decision;
-import jacobi.core.util.Weighted;
 
 /**
  * Implementation of 0-R decision making rule, which disregards any feature columns
@@ -46,17 +44,9 @@ import jacobi.core.util.Weighted;
  *
  */
 public class ZeroR implements Rule {
-	
-	/**
-	 * Constructor.
-	 * @param impurity  Measure function of the impurity of a distribution
-	 */
-	public ZeroR(Impurity impurity) {
-		this.impurity = impurity;
-	}
 
 	@Override
-	public <T> Weighted<DecisionNode<T>> make(
+	public <T> DecisionNode<T> make(
 			DataTable<T> dataTable, 
 			Set<Column<?>> features, 
 			Sequence seq) {
@@ -66,10 +56,7 @@ public class ZeroR implements Rule {
 		double[] dist = this.distribute(instances, new double[outCol.cardinality()]);
 		int ans = this.argmax(dist);
 		
-		return new Weighted<>(
-			new Decision<>(outCol.valueOf(ans)), 
-			this.impurity.of(dist)
-		);
+		return new Decision<>(outCol.valueOf(ans));
 	}
 	
 	/**
@@ -101,5 +88,4 @@ public class ZeroR implements Rule {
 		return max;
 	}
 
-	private Impurity impurity;
 }

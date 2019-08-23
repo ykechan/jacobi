@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
+import java.util.stream.Collectors;
 
 import jacobi.api.Matrix;
 import jacobi.api.classifier.Column;
@@ -98,7 +99,9 @@ public class DefinedMatrix<T> implements DataTable<T> {
 			
 			nomVals[outNom.def.getIndex()] = outNom.values;
 			return new DefinedMatrix<>(
-				new ColumnDefs<>(ls, outNom.def),
+				new ColumnDefs<>(ls.stream()
+					.filter(c -> c.getIndex() != outNom.def.getIndex())
+					.collect(Collectors.toList()), outNom.def),
 				new ColumnData(matrix, Arrays.asList(nomVals)),
 				weights
 			);

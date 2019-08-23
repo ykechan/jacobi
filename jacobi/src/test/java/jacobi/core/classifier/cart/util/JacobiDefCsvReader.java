@@ -20,6 +20,7 @@ import jacobi.api.classifier.Column;
 import jacobi.core.classifier.cart.data.DataTable;
 import jacobi.core.classifier.cart.data.DefinedMatrix;
 import jacobi.core.classifier.cart.util.JacobiEnums.Lens;
+import jacobi.core.classifier.cart.util.JacobiEnums.Outlook;
 import jacobi.core.classifier.cart.util.JacobiEnums.YesOrNo;
 
 public class JacobiDefCsvReader {
@@ -113,6 +114,37 @@ public class JacobiDefCsvReader {
 	}
 	
 	@Test
+	public void shouldBeAbleToReadGolfNomOnlyDefCsv() throws IOException {
+		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf-nom-only.def.csv")){
+			DataTable<YesOrNo> dataTab = this.read(input, YesOrNo.class);
+			
+			Assert.assertEquals(14, dataTab.size());
+			Assert.assertEquals(YesOrNo.YES, dataTab.getOutcomeColumn().getItems().get(0));
+			Assert.assertEquals(YesOrNo.NO, dataTab.getOutcomeColumn().getItems().get(1));
+			
+			Assert.assertArrayEquals(
+				Outlook.values(), 
+				dataTab.getColumns().get(0).getItems().toArray()
+			);
+			
+			Assert.assertArrayEquals(
+				new Object[] {"HOT", "MILD", "COOL"}, 
+				dataTab.getColumns().get(1).getItems().toArray()
+			);
+			
+			Assert.assertArrayEquals(
+				new Object[] {"HIGH", "NORMAL"}, 
+				dataTab.getColumns().get(2).getItems().toArray()
+			);
+			
+			Assert.assertArrayEquals(
+				new Object[] {"WEAK", "STRONG"}, 
+				dataTab.getColumns().get(3).getItems().toArray()
+			);
+		}
+	}
+	
+	@Test
 	public void shouldBeAbleToReadLensDefCsvByOutcomeType() throws IOException {
 		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/contact-lenses.def.csv")){
 			DataTable<Lens> dataTab = this.read(input, Lens.class);
@@ -197,6 +229,8 @@ public class JacobiDefCsvReader {
 				}else {
 					num[i] = value;
 				}
+				
+				continue;
 			}
 			
 			if(def.isNumeric()) {
@@ -213,7 +247,7 @@ public class JacobiDefCsvReader {
 			if(clazz.isEnum()){
 				try {
 					Object enumVal = clazz.getMethod("valueOf", String.class)
-							.invoke(null, cols[i].toUpperCase());
+							.invoke(null, cols[i].trim().toUpperCase());
 					
 					num[i] = ((Integer) clazz.getMethod("ordinal").invoke(enumVal))
 							.doubleValue();

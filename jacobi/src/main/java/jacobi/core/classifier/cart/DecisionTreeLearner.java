@@ -36,27 +36,37 @@ import jacobi.core.classifier.cart.measure.Impurity;
 import jacobi.core.classifier.cart.measure.NominalPartition;
 import jacobi.core.classifier.cart.measure.Partition;
 import jacobi.core.classifier.cart.measure.RankedBinaryPartition;
+import jacobi.core.classifier.cart.rule.C45;
+import jacobi.core.classifier.cart.rule.Id3;
 import jacobi.core.classifier.cart.rule.OneR;
 import jacobi.core.classifier.cart.rule.Rule;
 import jacobi.core.classifier.cart.rule.ZeroR;
+import jacobi.core.util.Throw;
 
 public class DecisionTreeLearner {
 	
 	public <T> DecisionNode<T> learn(DataTable<T> dataTab, Strategy strategy, Impurity impurity) {
+		Throw.when()
+			.isNull(() -> dataTab, () -> "No training data.")
+			.isNull(() -> strategy, () -> "No training strategy provided.")
+			.isNull(() -> impurity, () -> "No impurity measurement function provided.");
+		
 		Set<Column<?>> featSet = new TreeSet<>();
 		boolean nomOnly = true;
 		for(Column<?> col : dataTab.getColumns()){
+			if(strategy == Strategy.ID3 && col.isNumeric()) {
+				continue;
+			}
+			
 			if(col.isNumeric()) {
 				nomOnly = false;
 			}
-			
+						
 			featSet.add(col);
-		}		
+		}
 		
 		Sequence seq = this.defaultSeq(dataTab.size());
-		return this.createRule(strategy, impurity, nomOnly)
-			.make(dataTab, featSet, seq)
-			.item;
+		return this.createRule(strategy, impurity, nomOnly).make(dataTab, featSet, seq);
 	}
 	
 	protected Rule createRule(Strategy strategy, Impurity impurity, boolean nominalOnly) {
@@ -64,16 +74,16 @@ public class DecisionTreeLearner {
 		
 		switch(strategy) {
 			case ZERO_R :
-				return new ZeroR(impurity);
+				return new ZeroR();
 				
 			case ONE_R :
-				return new OneR(new ZeroR(impurity), partFunc);
+				return new OneR(new ZeroR(), partFunc);
 				
 			case ID3 : 
-				break;
+				return Id3.of(impurity);
 				
 			case C45 :
-				break;
+				return C45.of(impurity, partFunc);
 				
 			default :
 				break;

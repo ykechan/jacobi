@@ -36,8 +36,6 @@ import jacobi.core.classifier.cart.data.DataTable;
 import jacobi.core.classifier.cart.data.Sequence;
 import jacobi.core.classifier.cart.measure.Impurity;
 import jacobi.core.classifier.cart.measure.NominalPartition;
-import jacobi.core.classifier.cart.measure.Partition;
-import jacobi.core.util.Weighted;
 
 /**
  * Implementation of the Iterative Dichotomizer (ID3) algorithm.
@@ -60,7 +58,7 @@ public class Id3 implements Rule {
 	 */
 	public static Id3 of(Impurity impurity) {
 		return new Id3(
-			new ZeroR(impurity), 
+			new ZeroR(), 
 			new OneR(NO_RULE, new NominalPartition(impurity)),
 			(s, g) -> {}
 		);
@@ -79,32 +77,29 @@ public class Id3 implements Rule {
 	}
 
 	@Override
-	public <T> Weighted<DecisionNode<T>> make(DataTable<T> dataTab, Set<Column<?>> feats, Sequence seq) {
+	public <T> DecisionNode<T> make(DataTable<T> dataTab, Set<Column<?>> feats, Sequence seq) {
 		
-		Weighted<DecisionNode<T>> result = this.oneR.make(dataTab, feats, seq);
-		if(result.item == null) {
+		DecisionNode<T> result = this.oneR.make(dataTab, feats, seq);
+		if(result == null) {
 			// no feature to split
 			return this.zeroR.make(dataTab, feats, seq);
 		}
 		
-		if(result.item.split() == null){
+		if(result.split() == null){
 			// already is a leaf node
 			return result;
 		}
 		
 		Set<Column<?>> subfeat = feats.stream()
-				.filter(f -> !f.equals(result.item.split()))
+				.filter(f -> !f.equals(result.split()))
 				.collect(Collectors.toSet());
 		
-		List<Sequence> subseqs = this.split(dataTab, seq, result.item);
-		Weighted<List<DecisionNode<T>>> subNodes = this.make(dataTab, subfeat, subseqs);
+		List<Sequence> subseqs = this.split(dataTab, seq, result);
+		List<DecisionNode<T>> subNodes = this.make(dataTab, subfeat, subseqs);
 		
-		return new Weighted<>(
-			this.oneR
-				.mergeFunc(result.item)
-				.apply(subNodes.item),
-			subNodes.weight
-		);
+		return this.oneR
+				.mergeFunc(result)
+				.apply(subNodes);
 	}
 	
 	/**
@@ -114,20 +109,17 @@ public class Id3 implements Rule {
 	 * @param seqs  List of sub-sequences
 	 * @return  List of decision node with impurity measurement
 	 */
-	protected <T> Weighted<List<DecisionNode<T>>> make(DataTable<T> dataTab, 
+	protected <T> List<DecisionNode<T>> make(DataTable<T> dataTab, 
 			Set<Column<?>> feats, 
 			List<Sequence> seqs) {
 		List<DecisionNode<T>> nodes = new ArrayList<>(seqs.size());
 		
-		double sum = 0.0;
 		for(Sequence seq : seqs) {
-			Weighted<DecisionNode<T>> subNode = this.make(dataTab, feats, seq);
-			sum += subNode.weight;
-			nodes.add(subNode.item);
+			nodes.add(this.make(dataTab, feats, seq));
 		}
 		
-		return new Weighted<>(nodes, sum);
-	}		
+		return nodes;
+	}
 	
 	/**
 	 * Split the subset of data by a decision node
@@ -155,11 +147,11 @@ public class Id3 implements Rule {
 	protected static final Rule NO_RULE = new Rule() {
 
 		@Override
-		public <T> Weighted<DecisionNode<T>> make(DataTable<T> dataTab, 
+		public <T> DecisionNode<T> make(DataTable<T> dataTab, 
 				Set<Column<?>> features, 
 				Sequence seq) {
 			
-			return new Weighted<>(null, 0.0);
+			return null;
 		}
 		
 	};	

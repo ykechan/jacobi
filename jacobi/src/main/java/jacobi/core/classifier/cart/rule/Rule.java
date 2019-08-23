@@ -29,7 +29,6 @@ import jacobi.api.classifier.Column;
 import jacobi.api.classifier.cart.DecisionNode;
 import jacobi.core.classifier.cart.data.DataTable;
 import jacobi.core.classifier.cart.data.Sequence;
-import jacobi.core.util.Weighted;
 
 /**
  * Common interface for inferring decision rule on a subset of data table.
@@ -50,7 +49,7 @@ public interface Rule {
 	 * @param seq  Sequence of access
 	 * @return  Decision Node with impurity measurement
 	 */
-	public <T> Weighted<DecisionNode<T>> make(
+	public <T> DecisionNode<T> make(
 		DataTable<T> dataTable, 
 		Set<Column<?>> features, 
 		Sequence seq

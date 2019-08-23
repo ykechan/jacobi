@@ -1,7 +1,12 @@
 package jacobi.core.classifier.cart.rule;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.IntStream;
@@ -15,14 +20,12 @@ import jacobi.core.classifier.cart.data.DataTable;
 import jacobi.core.classifier.cart.data.Sequence;
 import jacobi.core.classifier.cart.measure.Impurity;
 import jacobi.core.classifier.cart.measure.NominalPartition;
+import jacobi.core.classifier.cart.node.BinaryNumericSplit;
 import jacobi.core.classifier.cart.node.Decision;
 import jacobi.core.classifier.cart.node.NominalSplit;
-import jacobi.core.classifier.cart.rule.Id3;
-import jacobi.core.classifier.cart.rule.OneR;
-import jacobi.core.classifier.cart.rule.ZeroR;
 import jacobi.core.classifier.cart.util.JacobiDefCsvReader;
+import jacobi.core.classifier.cart.util.JacobiEnums.Lens;
 import jacobi.core.classifier.cart.util.JacobiEnums.YesOrNo;
-import jacobi.core.util.Weighted;
 
 public class Id3Test {
 	
@@ -50,12 +53,9 @@ public class Id3Test {
 			DataTable<YesOrNo> dataTab = new JacobiDefCsvReader()
 					.read(input, YesOrNo.class);
 			
-			Weighted<DecisionNode<YesOrNo>> ans = new Id3(
-					new ZeroR(Impurity.ENTROPY), 
-					new OneR(	
-						new ZeroR(Impurity.ENTROPY), 
-						new NominalPartition(Impurity.ENTROPY)
-					), (seq, fn) -> {})
+			DecisionNode<YesOrNo> ans = new Id3(new ZeroR(), 
+					new OneR(new ZeroR(), new NominalPartition(Impurity.ENTROPY)), 
+					(seq, fn) -> {})
 				.make(dataTab, 
 					this.columnSet(
 						dataTab.getColumns().get(0),
@@ -63,10 +63,10 @@ public class Id3Test {
 					), 
 					this.defaultSeq(dataTab.size()));
 			
-			Assert.assertEquals(0, ans.item.split().getIndex());
-			Assert.assertTrue(ans.item instanceof NominalSplit);
+			Assert.assertEquals(0, ans.split().getIndex());
+			Assert.assertTrue(ans instanceof NominalSplit);
 			
-			NominalSplit<YesOrNo> root = (NominalSplit<YesOrNo>) ans.item;
+			NominalSplit<YesOrNo> root = (NominalSplit<YesOrNo>) ans;
 			Assert.assertTrue(root.decide(0.0).get() instanceof NominalSplit); // sunny
 			Assert.assertTrue(root.decide(1.0).get() instanceof Decision); // overcast
 			Assert.assertTrue(root.decide(2.0).get() instanceof NominalSplit); // rain
@@ -90,7 +90,195 @@ public class Id3Test {
 			
 			Assert.assertEquals(YesOrNo.YES, ifrain.decide(0.0).get().decide()); // windy: false
 			Assert.assertEquals(YesOrNo.NO, ifrain.decide(1.0).get().decide()); // windy: true
+			
+			System.out.println(this.toJson(root));
 		}
+	}
+
+	@Test
+	public void shouldBeAbleToBuildFromContactLensesDefCsv() throws IOException {
+		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/contact-lenses.def.csv")){
+			DataTable<Lens> dataTab = new JacobiDefCsvReader()
+					.read(input, Lens.class);
+			
+			DecisionNode<Lens> ans = new Id3(new ZeroR(), 
+					new OneR(new ZeroR(), new NominalPartition(Impurity.ENTROPY)), 
+					(seq, fn) -> {})
+				.make(dataTab, 
+					new TreeSet<>(dataTab.getColumns()), 
+					this.defaultSeq(dataTab.size()));
+			
+			Assert.assertEquals(dataTab.getColumns().get(3), ans.split());
+			Assert.assertTrue(ans instanceof NominalSplit);
+			NominalSplit<Lens> root = (NominalSplit<Lens>) ans;
+			
+			Assert.assertTrue(root.decide(0.0).get() instanceof Decision); // reduced			
+			Assert.assertTrue(root.decide(1.0).get() instanceof NominalSplit); // normal
+			
+			Assert.assertEquals(Lens.NONE, root.decide(0.0).get().decide());
+			
+			NominalSplit<Lens> ifNormal = (NominalSplit<Lens>) root.decide(1.0).get();
+			
+			//
+			Assert.assertEquals(dataTab.getColumns().get(2), ifNormal.split());			
+			Assert.assertTrue(ifNormal.decide(0.0).get() instanceof NominalSplit); // Yes			
+			Assert.assertTrue(ifNormal.decide(1.0).get() instanceof NominalSplit); // No
+			
+			Assert.assertTrue(ifNormal
+				.decide(0.0).get() // astigmatism: yes
+				.decide(0.0).get() // spectacle: myope 
+				instanceof Decision);
+			
+			Assert.assertEquals(Lens.HARD, ifNormal
+				.decide(0.0).get() 			// astigmatism: yes
+				.decide(0.0).get().decide() // spectacle: myope
+			);
+			
+			Assert.assertEquals(dataTab.getColumns().get(0),
+				ifNormal
+					.decide(0.0).get() // astigmatism: yes
+					.decide(1.0).get() // spectacle: hypermetrope
+					.split()
+			);
+			
+			Assert.assertEquals(null,
+				ifNormal
+					.decide(0.0).get() // astigmatism: yes
+					.decide(1.0).get() // spectacle: hypermetrope
+					.decide(0.0).get() // age: young
+					.split()
+			);
+			
+			Assert.assertEquals(Lens.HARD,
+				ifNormal
+					.decide(0.0).get() // astigmatism: yes
+					.decide(1.0).get() // spectacle: hypermetrope
+					.decide(0.0).get() // age: young
+					.decide()
+			);
+			
+			Assert.assertEquals(null, ifNormal
+				.decide(0.0).get() // astigmatism: yes
+				.decide(1.0).get() // spectacle: hypermetrope
+				.decide(0.0).get() // age: young
+				.split()
+			);
+				
+			Assert.assertEquals(Lens.HARD, ifNormal
+				.decide(0.0).get() // astigmatism: yes
+				.decide(1.0).get() // spectacle: hypermetrope
+				.decide(0.0).get() // age: young
+				.decide()
+			);
+			
+			Assert.assertEquals(null, ifNormal
+				.decide(0.0).get() // astigmatism: yes
+				.decide(1.0).get() // spectacle: hypermetrope
+				.decide(1.0).get() // age: prepresbyopic
+				.split()
+			);
+					
+			Assert.assertEquals(Lens.NONE, ifNormal
+				.decide(0.0).get() // astigmatism: yes
+				.decide(1.0).get() // spectacle: hypermetrope
+				.decide(1.0).get() // age: prepresbyopic
+				.decide()
+			);
+			
+			Assert.assertEquals(null, ifNormal
+				.decide(0.0).get() // astigmatism: yes
+				.decide(1.0).get() // spectacle: hypermetrope
+				.decide(2.0).get() // age: presbyopic
+				.split()
+			);
+						
+			Assert.assertEquals(Lens.NONE, ifNormal
+				.decide(0.0).get() // astigmatism: yes
+				.decide(1.0).get() // spectacle: hypermetrope
+				.decide(2.0).get() // age: presbyopic
+				.decide()
+			);
+			
+			Assert.assertEquals(dataTab.getColumns().get(0),
+				ifNormal
+					.decide(1.0).get() // astigmatism: no
+					.split()
+			);
+			
+			Assert.assertEquals(null, 
+				ifNormal
+					.decide(1.0).get() // astigmatism: no
+					.decide(0.0).get() // age: young
+					.split()
+			);
+			
+			Assert.assertEquals(Lens.SOFT, 
+				ifNormal
+					.decide(1.0).get() // astigmatism: no
+					.decide(0.0).get() // age: young
+					.decide()
+			);
+			
+			Assert.assertEquals(null, 
+				ifNormal
+					.decide(1.0).get() // astigmatism: no
+					.decide(1.0).get() // age: prepresbyopic
+					.split()
+			);
+				
+			Assert.assertEquals(Lens.SOFT, 
+				ifNormal
+					.decide(1.0).get() // astigmatism: no
+					.decide(1.0).get() // age: prepresbyopic
+					.decide()
+			);
+			
+			Assert.assertEquals(dataTab.getColumns().get(1), 
+				ifNormal
+					.decide(1.0).get() // astigmatism: no
+					.decide(2.0).get() // age: presbyopic
+					.split()
+			);
+					
+			Assert.assertEquals(Lens.NONE, 
+				ifNormal
+					.decide(1.0).get() // astigmatism: no
+					.decide(2.0).get() // age: presbyopic
+					.decide(0.0).get() // spectacle: myope
+					.decide()
+			);
+			
+			Assert.assertEquals(Lens.SOFT, 
+				ifNormal
+					.decide(1.0).get() // astigmatism: no
+					.decide(2.0).get() // age: presbyopic
+					.decide(1.0).get() // spectacle: hypermetrope
+					.decide()
+			);
+		}
+	}
+	
+	protected String toJson(DecisionNode<?> node) {
+		if(node.split() == null){
+			return "\"" + node.decide() + "\"";
+		}
+		
+		StringBuilder buf = new StringBuilder().append('{');
+		if(node instanceof NominalSplit){
+			List<DecisionNode<?>> children = ((NominalSplit) node).getChildren();
+			for(int i = 0; i < node.split().cardinality(); i++) {
+				if(i > 0) {
+					buf.append(',');
+				}
+				buf.append('\"').append('#').append(node.split().getIndex()).append('=')				
+					.append(node.split().valueOf(i))
+					.append('\"')
+					.append(':')
+					.append(this.toJson(children.get(i)));				
+			}
+		}
+		
+		return buf.append('}').toString();
 	}
 	
 	protected Sequence defaultSeq(int len) {
