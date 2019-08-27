@@ -21,12 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jacobi.core.classifier.cart.data;
+package jacobi.api.classifier;
 
 import java.util.List;
 
 import jacobi.api.Matrix;
-import jacobi.api.classifier.Column;
 
 /**
  * Common interface of a data table in CART model.

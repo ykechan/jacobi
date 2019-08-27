@@ -8,10 +8,9 @@ import java.util.function.IntUnaryOperator;
 
 import jacobi.api.Matrix;
 import jacobi.api.classifier.Column;
+import jacobi.api.classifier.DataTable;
 import jacobi.api.classifier.cart.DecisionNode;
-import jacobi.core.classifier.cart.data.DataTable;
-import jacobi.core.classifier.cart.data.Sequence;
-import jacobi.core.classifier.cart.measure.Impurity;
+import jacobi.core.classifier.cart.Sequence;
 import jacobi.core.classifier.cart.measure.Partition;
 import jacobi.core.classifier.cart.measure.RankedPartition;
 import jacobi.core.util.Ranking;
@@ -34,10 +33,10 @@ public class C45 implements Rule {
 	 * @param partition  Partition function
 	 * @return  Implementation of C4.5
 	 */
-	public static C45 of(Impurity impurity, Partition partition) {
+	public static C45 of(Partition partition) {
 		return new C45(partition, (p, f) -> new Id3(
 			new ZeroR(),
-			new OneR(Id3.NO_RULE, partition),
+			new OneR(Id3.NO_RULE, p),
 			f
 		));
 	}
@@ -57,7 +56,7 @@ public class C45 implements Rule {
 			Set<Column<?>> features, 
 			Sequence seq) {
 		
-		Map<Column<?>, Sequence> sortSeq = this.sortByCols(dataTab);
+		Map<Column<?>, Sequence> sortSeq = this.sortByCols(dataTab, seq);
 		
 		if(sortSeq.isEmpty()) {
 			// no numeric feature
@@ -78,17 +77,23 @@ public class C45 implements Rule {
 	 * @param dataTab  Input data table
 	 * @return  Map of columns to rankings of instances
 	 */
-	protected Map<Column<?>, Sequence> sortByCols(DataTable<?> dataTab) {
+	protected Map<Column<?>, Sequence> sortByCols(DataTable<?> dataTab, Sequence defaultSeq) {
 		Map<Column<?>, Sequence> map = new TreeMap<>();
 		Matrix matrix = dataTab.getMatrix();
-		Ranking ranking = Ranking.of(dataTab.size());
+		Ranking ranking = Ranking.of(defaultSeq.length());
 		
 		for(Column<?> col : dataTab.getColumns()) {
 			if(!col.isNumeric()){
 				continue;
 			}
 			
-			int[] seq = ranking.init(i -> matrix.get(i, col.getIndex())).sort();
+			int[] seq = ranking
+					.init(i -> matrix.get(defaultSeq.indexAt(i), col.getIndex()))
+					.sort();
+			for(int i = 0; i < seq.length; i++) {
+				seq[i] = defaultSeq.indexAt(seq[i]);
+			}
+			
 			map.put(col, new Sequence(seq, 0, seq.length));
 		}
 		

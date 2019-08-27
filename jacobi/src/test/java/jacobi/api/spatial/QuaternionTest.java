@@ -2,12 +2,11 @@ package jacobi.api.spatial;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
-import jacobi.core.util.Real;
 import org.junit.Assert;
 import org.junit.Test;
+
+import jacobi.core.util.Real;
 
 public class QuaternionTest {
     

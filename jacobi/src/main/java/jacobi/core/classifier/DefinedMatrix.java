@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jacobi.core.classifier.cart.data;
+package jacobi.core.classifier;
 
 import java.util.AbstractList;
 import java.util.Arrays;
@@ -34,6 +34,8 @@ import java.util.stream.Collectors;
 
 import jacobi.api.Matrix;
 import jacobi.api.classifier.Column;
+import jacobi.api.classifier.DataTable;
+import jacobi.api.classifier.Instance;
 import jacobi.core.util.Throw;
 
 /**

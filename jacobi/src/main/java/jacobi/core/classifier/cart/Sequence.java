@@ -1,4 +1,4 @@
-package jacobi.core.classifier.cart.data;
+package jacobi.core.classifier.cart;
 
 import java.util.AbstractList;
 import java.util.Arrays;

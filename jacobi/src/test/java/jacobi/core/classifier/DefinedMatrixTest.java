@@ -1,4 +1,4 @@
-package jacobi.core.classifier.cart.data;
+package jacobi.core.classifier;
 
 import java.util.Arrays;
 
@@ -8,7 +8,9 @@ import org.junit.Test;
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.api.classifier.Column;
-import jacobi.core.classifier.cart.data.DefinedMatrix.Nominal;
+import jacobi.api.classifier.Instance;
+import jacobi.core.classifier.DefinedMatrix;
+import jacobi.core.classifier.DefinedMatrix.Nominal;
 
 public class DefinedMatrixTest {
 	

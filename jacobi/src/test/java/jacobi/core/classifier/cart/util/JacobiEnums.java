@@ -26,5 +26,9 @@ public class JacobiEnums {
 	public enum Lens {
 		SOFT, HARD, NONE
 	}
+	
+	public enum Iris {
+		SETOSA, VERSICOLOR, VIRGINICA
+	}
 
 }

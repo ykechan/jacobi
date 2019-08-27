@@ -8,8 +8,8 @@ import java.util.function.IntUnaryOperator;
 import java.util.stream.Collectors;
 
 import jacobi.api.classifier.Column;
-import jacobi.core.classifier.cart.data.DataTable;
-import jacobi.core.classifier.cart.data.Sequence;
+import jacobi.api.classifier.DataTable;
+import jacobi.core.classifier.cart.Sequence;
 import jacobi.core.util.Weighted;
 
 /**

@@ -11,9 +11,9 @@ import org.junit.Test;
 
 import jacobi.api.Matrix;
 import jacobi.api.classifier.Column;
-import jacobi.core.classifier.cart.data.DataTable;
-import jacobi.core.classifier.cart.data.Instance;
-import jacobi.core.classifier.cart.data.Sequence;
+import jacobi.api.classifier.DataTable;
+import jacobi.api.classifier.Instance;
+import jacobi.core.classifier.cart.Sequence;
 import jacobi.core.classifier.cart.measure.Impurity;
 import jacobi.core.classifier.cart.measure.RankedBinaryPartition;
 import jacobi.core.impl.ColumnVector;

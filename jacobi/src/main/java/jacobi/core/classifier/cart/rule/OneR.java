@@ -32,10 +32,10 @@ import java.util.stream.Collectors;
 
 import jacobi.api.Matrix;
 import jacobi.api.classifier.Column;
+import jacobi.api.classifier.DataTable;
+import jacobi.api.classifier.Instance;
 import jacobi.api.classifier.cart.DecisionNode;
-import jacobi.core.classifier.cart.data.DataTable;
-import jacobi.core.classifier.cart.data.Instance;
-import jacobi.core.classifier.cart.data.Sequence;
+import jacobi.core.classifier.cart.Sequence;
 import jacobi.core.classifier.cart.measure.Partition;
 import jacobi.core.classifier.cart.node.BinaryNumericSplit;
 import jacobi.core.classifier.cart.node.Decision;
@@ -135,7 +135,7 @@ public class OneR implements Rule {
 	 * @return  Merging function
 	 */
 	protected <T> Merger<T> mergeFunc(Column<?> col, double[] bounds) {
-		this.validateColumnAndBounds(col, bounds);
+		this.validateColumnAndBounds(col, bounds);	
 		
 		switch(bounds.length) {
 			case 0 :
@@ -203,7 +203,7 @@ public class OneR implements Rule {
 	 * @throws  IllegalArgumentException if no boundaries for numeric column, and 
 	 *                                   non-empty boundaries for nominal column
 	 */
-	protected void validateColumnAndBounds(Column<?> col, double[] bounds) {
+	protected void validateColumnAndBounds(Column<?> col, double[] bounds) {		
 		if(col.isNumeric() == (bounds.length > 0)){
 			return;
 		}

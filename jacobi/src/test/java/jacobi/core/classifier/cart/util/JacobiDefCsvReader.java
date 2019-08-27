@@ -17,8 +17,8 @@ import org.junit.Test;
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.api.classifier.Column;
-import jacobi.core.classifier.cart.data.DataTable;
-import jacobi.core.classifier.cart.data.DefinedMatrix;
+import jacobi.api.classifier.DataTable;
+import jacobi.core.classifier.DefinedMatrix;
 import jacobi.core.classifier.cart.util.JacobiEnums.Lens;
 import jacobi.core.classifier.cart.util.JacobiEnums.Outlook;
 import jacobi.core.classifier.cart.util.JacobiEnums.YesOrNo;
@@ -179,7 +179,7 @@ public class JacobiDefCsvReader {
 						);
 					})
 					.orElseThrow(
-						() -> new IllegalArgumentException()
+						() -> new IllegalArgumentException("No column is of type " + outcomeType)
 					)
 				: colDefs.get(outcomeIndex);
 		

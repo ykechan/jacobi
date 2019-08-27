@@ -23,11 +23,9 @@
  */
 package jacobi.core.util;
 
+import java.util.Random;
 import java.util.function.IntToDoubleFunction;
 import java.util.function.IntUnaryOperator;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * Implementation of ranking a sequence of real numbers. 
@@ -52,12 +50,7 @@ public class Ranking {
 	 * @return  Instance of ranking for sorting
 	 */
 	public static Ranking of(int length) {
-		
-		return new Ranking(
-			new double[2 * length], 
-			n -> (int) Math.floor(n * Math.random()),
-			0
-		);
+		return new Ranking(new double[2 * length], RANDOM::nextInt, 0);
 	}
 	
 	/**
@@ -93,20 +86,13 @@ public class Ranking {
 	public int[] sort() {
 		
 		int limit = (int) Math.ceil(Math.E * Math.log(this.entries.length / 2));
-		this.introsort(0, this.entries.length / 2, limit);
-		
-		System.out.println(IntStream.range(0, this.entries.length / 2)
-			.map(i -> 2 * i)
-			.mapToDouble(k -> this.entries[k])
-			.mapToObj(Double::toString)
-			.collect(Collectors.joining(","))
-		);
+		this.introsort(0, this.entries.length / 2, limit);		
 		
 		return this.toArray();
 	}
 	
 	/**
-	 * Sort the elements by introsort, which is a dual-pivot quicksort and fallback to heapsort
+	 * Sort the elements by introsort, which is a dual-pivot quicksort and would fallback to heapsort
 	 * when the call recursed too deep.
 	 * @param begin  Begin index
 	 * @param end  End index
@@ -130,40 +116,48 @@ public class Ranking {
 		}
 		
 		int[] piv = this.select(this.rand, begin, end);
-		if(piv[0] == piv[1] || this.entries[2 * piv[0]] == this.entries[2 * piv[1]]){
-			int pos = this.pivoting2(begin, end, piv[0]);
-			System.out.println(
-				"Sort [" + begin + "," + end + "): " +
-				IntStream.range(begin, end)
-					.map(i -> 2 * i)
-					.mapToDouble(k -> this.entries[k])
-					.mapToObj(Double::toString)
-					.collect(Collectors.joining(","))
-				+ " @ " + pos
-			);
+		
+		if(piv[0] != piv[1] && this.entries[2 * piv[0]] != this.entries[2 * piv[1]]) {
+			// found different pivot, use both pivots
+			piv = this.pivoting3(begin, end, piv[0], piv[1]);
+			
+			this.introsort(begin, piv[0], limit - 1);
+			this.introsort(piv[0] + 1, piv[1], limit - 1);
+			this.introsort(piv[1] + 1, end, limit - 1);
+			return;
+		}
+		
+		// the pivots collide, use single pivot
+		int pos = this.pivoting2(begin, end, piv[0]);
+		/*
+		if(pos > begin) {
 			this.introsort(begin, pos, limit - 1);
 			this.introsort(pos + 1, end, limit - 1);
 			return;
 		}
 		
-		System.out.println("Pivot = " 
-			+ this.entries[2 * piv[0]] + ","
-			+ this.entries[2 * piv[1]]);
-		piv = this.pivoting3(begin, end, piv[0], piv[1]);
+		// the pivot is an extrema, are all elements the same?
+		double pivVal = this.entries[2 * pos];
+		for(int i = begin + 1; i < end; i++){
+			if(this.entries[2 * i] > pivVal){
+				// found different element, ignore the equal portion
+				this.introsort(i, end, limit - 1);
+				return;
+			}
+		}
+		*/
+		int next = pos + 1;
+		double pivVal = this.entries[2 * pos];
+		for(int i = pos + 1; i < end; i++) {
+			if(this.entries[2 * i] > pivVal){				
+				break;
+			}
+			
+			next = i;
+		}
 		
-		System.out.println(
-				"Sort [" + begin + "," + end + "): " +
-				IntStream.range(begin, end)
-					.map(i -> 2 * i)
-					.mapToDouble(k -> this.entries[k])
-					.mapToObj(Double::toString)
-					.collect(Collectors.joining(","))
-				+ " @ " + piv[0] + "," + piv[1]
-			);		
-		
-		this.introsort(begin, piv[0], limit - 1);
-		this.introsort(piv[0] + 1, piv[1], limit - 1);
-		this.introsort(piv[1] + 1, end, limit - 1);
+		this.introsort(begin, pos, limit - 1);
+		this.introsort(next, end, limit - 1);
 	}
 	
 	/**
@@ -409,4 +403,6 @@ public class Ranking {
 	private IntUnaryOperator rand;
 	private double[] entries;
 	private int threshold;
+	
+	private static final Random RANDOM = new Random();
 }

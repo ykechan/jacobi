@@ -2,6 +2,7 @@ package jacobi.core.classifier.cart.rule;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -14,11 +15,16 @@ import org.junit.Test;
 
 import jacobi.api.Matrix;
 import jacobi.api.classifier.Column;
+import jacobi.api.classifier.DataTable;
 import jacobi.api.classifier.cart.DecisionNode;
-import jacobi.core.classifier.cart.data.DataTable;
-import jacobi.core.classifier.cart.data.Sequence;
+import jacobi.core.classifier.cart.Sequence;
+import jacobi.core.classifier.cart.measure.Impurity;
 import jacobi.core.classifier.cart.measure.Partition;
+import jacobi.core.classifier.cart.measure.RankedBinaryPartition;
+import jacobi.core.classifier.cart.node.BinaryNumericSplit;
+import jacobi.core.classifier.cart.node.NominalSplit;
 import jacobi.core.classifier.cart.util.JacobiDefCsvReader;
+import jacobi.core.classifier.cart.util.JacobiEnums.Iris;
 import jacobi.core.classifier.cart.util.JacobiEnums.YesOrNo;
 import jacobi.core.util.Weighted;
 
@@ -56,6 +62,59 @@ public class C45Test {
 			
 			Assert.assertEquals(2, count.get());
 		}
+	}
+	
+	@Test
+	public void testShouldBeAbleToSortIrisData() throws IOException {
+		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/iris.def.csv")){
+			DataTable<Iris> dataTab = new JacobiDefCsvReader()
+					.read(input, Iris.class);
+			
+			DecisionNode<Iris> root = C45.of(new RankedBinaryPartition(Impurity.ENTROPY)).make(
+				dataTab, 
+				new TreeSet<>(dataTab.getColumns()), 
+				this.defaultSeq(dataTab.size())
+			);
+			
+			System.out.println(this.toJson(root));
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected String toJson(DecisionNode<?> node) {
+		if(node.split() == null){
+			return "\"" + node.decide() + "\"";
+		}
+		
+		StringBuilder buf = new StringBuilder().append('{');
+		if(node instanceof NominalSplit){			
+			List<DecisionNode<?>> children = ((NominalSplit) node).getChildren();
+			for(int i = 0; i < node.split().cardinality(); i++) {
+				if(i > 0) {
+					buf.append(',');
+				}
+				buf.append('\"').append('#').append(node.split().getIndex()).append('=')				
+					.append(node.split().valueOf(i))
+					.append('\"')
+					.append(':')
+					.append(this.toJson(children.get(i)));				
+			}
+		}
+		
+		if(node instanceof BinaryNumericSplit) {
+			BinaryNumericSplit<?> split = (BinaryNumericSplit<?>) node;
+			buf.append('\"')
+				.append('#').append(split.split().getIndex())
+					.append(" < ").append(split.getThreshold())
+				.append('\"').append(':').append(this.toJson(split.getLeft()))
+				.append(',')
+				.append('\"')
+				.append('#').append(split.split().getIndex())
+					.append(" > ").append(split.getThreshold())
+				.append('\"').append(':').append(this.toJson(split.getRight()));
+		}
+		
+		return buf.append('}').toString();
 	}
 	
 	protected Rule mock(Partition part, BiConsumer<Sequence, IntUnaryOperator> listener) {

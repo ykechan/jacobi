@@ -10,6 +10,8 @@ import org.junit.Test;
 
 import jacobi.api.Matrix;
 import jacobi.api.classifier.Column;
+import jacobi.api.classifier.DataTable;
+import jacobi.api.classifier.Instance;
 import jacobi.core.classifier.cart.util.JacobiDefCsvReader;
 import jacobi.core.classifier.cart.util.JacobiEnums.Outlook;
 import jacobi.core.classifier.cart.util.JacobiEnums.YesOrNo;

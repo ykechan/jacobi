@@ -23,15 +23,17 @@
  */
 package jacobi.api.classifier;
 
-import jacobi.api.annotations.Facade;
+import java.util.function.Function;
 
 /**
- * Proxy interface for supervised classifier learners with feature type defined.
+ * Common interface of a classifier.
+ * 
+ * <p>In this context, a classifier is simply a function that maps an input feature vector
+ * to an item in a set.</p>
  * 
  * @author Y.K. Chan
- * @param <T>  Type of outcome
+ * @param <T>  Type of item of classification
  */
-@Facade(value = DataTable.class)
-public interface DefinedSupervised<T> {
+public interface Classifier<T> extends Function<double[], T> {
 
 }

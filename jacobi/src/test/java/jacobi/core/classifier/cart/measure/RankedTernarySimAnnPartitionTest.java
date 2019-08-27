@@ -6,7 +6,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-import jacobi.core.classifier.cart.data.Instance;
+import jacobi.api.classifier.Instance;
 
 public class RankedTernarySimAnnPartitionTest {
 	

@@ -1,11 +1,12 @@
-package jacobi.core.classifier.cart.data;
+package jacobi.core.classifier.cart;
 
 import java.util.List;
 import java.util.stream.IntStream;
 
-import jacobi.core.classifier.cart.data.Sequence;
 import org.junit.Assert;
 import org.junit.Test;
+
+import jacobi.core.classifier.cart.Sequence;
 
 public class SequenceTest {
     

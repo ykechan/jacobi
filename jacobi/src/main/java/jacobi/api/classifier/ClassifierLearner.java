@@ -21,32 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jacobi.api.classifier.cart;
+package jacobi.api.classifier;
 
 /**
- * Strategies in learning a decision trees.
+ * Common interface for learning a classifier.
+ * 
+ * <p>Learning a classifier is a task in the category of supervised learning. This 
+ * interface accepts a data table, which is a numerical matrix with column type
+ * defined for nominal columns, associated with an outcome value for each row,
+ * and a generic learning parameter.</p>
  * 
  * @author Y.K. Chan
+ *
+ * @param <T>  Type of outcome
+ * @param <C>  Type of classifier model
+ * @param <P>  Type of learning parameters
  */
-public enum Strategy {
-	/**
-	 * Use the 0-R algorithm. 
-	 */
-	ZERO_R, 
+public interface ClassifierLearner<T, C extends Classifier<T>, P> {
 	
 	/**
-	 * Use the 1-R algorithm. 1-R supports numeric features.
+	 * Learn a classifier on input instances and given learning parameters.
+	 * @param dataTab  Input instances
+	 * @param params  Learning parameters.
+	 * @return  Classifier
 	 */
-	ONE_R,
-	
-	/**
-	 * Use the ID-3 algorithm. ID-3 ignores any numeric features.
-	 */
-	ID3, 
-	
-	/**
-	 * Use the C4.5 algorithm. C4.5 supports numeric features.
-	 */
-	C45
-	;
+	public C learn(DataTable<T> dataTab, P params);
+
 }

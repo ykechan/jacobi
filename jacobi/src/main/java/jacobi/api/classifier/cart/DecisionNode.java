@@ -25,6 +25,7 @@ package jacobi.api.classifier.cart;
 
 import java.util.Optional;
 
+import jacobi.api.classifier.Classifier;
 import jacobi.api.classifier.Column;
 
 /**
@@ -33,7 +34,7 @@ import jacobi.api.classifier.Column;
  * @author Y.K. Chan
  *
  */
-public interface DecisionNode<T> {
+public interface DecisionNode<T> extends Classifier<T> {
     
     /**
      * Get the column this node depends on when deciding
@@ -63,5 +64,12 @@ public interface DecisionNode<T> {
         Column<?> col = this.split();
         return col == null ? Optional.empty() : this.decide(inst[col.getIndex()]);
     }
+
+	@Override
+	default T apply(double[] inst) {
+		return this.decide(inst)
+			.map(n -> n.apply(inst))
+			.orElse(this.decide());
+	}
 
 }

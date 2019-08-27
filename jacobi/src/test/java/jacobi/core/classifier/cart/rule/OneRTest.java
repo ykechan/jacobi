@@ -10,9 +10,9 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import jacobi.api.classifier.Column;
+import jacobi.api.classifier.DataTable;
 import jacobi.api.classifier.cart.DecisionNode;
-import jacobi.core.classifier.cart.data.DataTable;
-import jacobi.core.classifier.cart.data.Sequence;
+import jacobi.core.classifier.cart.Sequence;
 import jacobi.core.classifier.cart.measure.Impurity;
 import jacobi.core.classifier.cart.measure.NominalPartition;
 import jacobi.core.classifier.cart.node.Decision;

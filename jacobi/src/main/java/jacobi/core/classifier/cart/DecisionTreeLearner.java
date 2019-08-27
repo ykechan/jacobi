@@ -23,93 +23,86 @@
  */
 package jacobi.core.classifier.cart;
 
-import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.IntStream;
 
-import jacobi.api.classifier.Column;
+import jacobi.api.classifier.ClassifierLearner;
+import jacobi.api.classifier.DataTable;
 import jacobi.api.classifier.cart.DecisionNode;
-import jacobi.api.classifier.cart.Strategy;
-import jacobi.core.classifier.cart.data.DataTable;
-import jacobi.core.classifier.cart.data.Sequence;
-import jacobi.core.classifier.cart.measure.Impurity;
+import jacobi.api.classifier.cart.DecisionTreeParams;
 import jacobi.core.classifier.cart.measure.NominalPartition;
 import jacobi.core.classifier.cart.measure.Partition;
 import jacobi.core.classifier.cart.measure.RankedBinaryPartition;
 import jacobi.core.classifier.cart.rule.C45;
-import jacobi.core.classifier.cart.rule.Id3;
 import jacobi.core.classifier.cart.rule.OneR;
 import jacobi.core.classifier.cart.rule.Rule;
 import jacobi.core.classifier.cart.rule.ZeroR;
-import jacobi.core.util.Throw;
 
-public class DecisionTreeLearner {
-	
-	public <T> DecisionNode<T> learn(DataTable<T> dataTab, Strategy strategy, Impurity impurity) {
-		Throw.when()
-			.isNull(() -> dataTab, () -> "No training data.")
-			.isNull(() -> strategy, () -> "No training strategy provided.")
-			.isNull(() -> impurity, () -> "No impurity measurement function provided.");
-		
-		Set<Column<?>> featSet = new TreeSet<>();
-		boolean nomOnly = true;
-		for(Column<?> col : dataTab.getColumns()){
-			if(strategy == Strategy.ID3 && col.isNumeric()) {
-				continue;
-			}
-			
-			if(col.isNumeric()) {
-				nomOnly = false;
-			}
-						
-			featSet.add(col);
-		}
-		
-		Sequence seq = this.defaultSeq(dataTab.size());
-		return this.createRule(strategy, impurity, nomOnly).make(dataTab, featSet, seq);
+/**
+ * Learn decision tree classifier on a data set.
+ * 
+ * @author Y.K. Chan
+ * @param <T>  Type of outcome
+ */
+public class DecisionTreeLearner<T> implements ClassifierLearner<T, DecisionNode<T>, DecisionTreeParams> {
+
+	@Override
+	public DecisionNode<T> learn(DataTable<T> dataTab, DecisionTreeParams params) {
+		return this.createRule(dataTab, params).make(
+			dataTab, 
+			new TreeSet<>(dataTab.getColumns()), 
+			this.allIndices(dataTab.size())
+		);
 	}
 	
-	protected Rule createRule(Strategy strategy, Impurity impurity, boolean nominalOnly) {
-		Partition partFunc = this.createPartition(strategy, impurity, nominalOnly);
+	/**
+	 * Create rule maker by input data set and parameters
+	 * @param dataTab  Input data set
+	 * @param params  Decision tree parameters
+	 * @return  Rule maker
+	 */
+	protected Rule createRule(DataTable<?> dataTab, DecisionTreeParams params) {	
+		Partition partFunc = this.createPartition(params, false);
 		
-		switch(strategy) {
-			case ZERO_R :
-				return new ZeroR();
-				
-			case ONE_R :
-				return new OneR(new ZeroR(), partFunc);
-				
-			case ID3 : 
-				return Id3.of(impurity);
-				
-			case C45 :
-				return C45.of(impurity, partFunc);
-				
-			default :
-				break;
+		if(params.maxHeight >= dataTab.getColumns().size()){
+			// no limit
+			return C45.of(partFunc);
 		}
 		
-		throw new UnsupportedOperationException("Unknown strategy " + strategy);
+		Rule rule = ZERO_R;
+		for(int i = 0; i < params.maxHeight; i++) {
+			rule = new OneR(rule, partFunc);
+		}
+		return rule;
 	}
 	
-	protected Partition createPartition(Strategy strategy, Impurity impurity, boolean nominalOnly) {
-		if(strategy == Strategy.ZERO_R) {
-			return null;
-		}
-		
-		Partition nomPart = new NominalPartition(impurity);
-		
+	/**
+	 * Create partition function by given parameters
+	 * @param params  Decision tree parameters
+	 * @param nominalOnly  For nominal only
+	 * @return  Partition function
+	 */
+	protected Partition createPartition(DecisionTreeParams params, boolean nominalOnly) {
+		Partition nom = new NominalPartition(params.impurityMeasure);
 		if(nominalOnly) {
-			return nomPart;
+			return nom;
 		}
-				
-		Partition biPart = new RankedBinaryPartition(impurity);
-		return (dataTab, target, seq) -> (target.isNumeric() ? biPart : nomPart)
-				.measure(dataTab, target, seq);
+		
+		Partition num = new RankedBinaryPartition(params.impurityMeasure);
+		return (tab, col, seq) -> (col.isNumeric() ? num : nom).measure(tab, col, seq);
 	}
 	
-	protected Sequence defaultSeq(int n) {
-		return new Sequence(IntStream.range(0, n).toArray(), 0, n);
+	/**
+	 * Get the default sequence for all instances
+	 * @param len  Length of data set
+	 * @return  Default sequence
+	 */
+	protected Sequence allIndices(int len) {
+		return new Sequence(IntStream.range(0, len).toArray(), 0, len);
 	}
-
+	
+	/**
+	 * Common instance for 0-R implementation
+	 */
+	protected static final Rule ZERO_R = new ZeroR();
 }

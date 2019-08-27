@@ -28,10 +28,10 @@ import java.util.List;
 import java.util.Set;
 
 import jacobi.api.classifier.Column;
+import jacobi.api.classifier.DataTable;
+import jacobi.api.classifier.Instance;
 import jacobi.api.classifier.cart.DecisionNode;
-import jacobi.core.classifier.cart.data.DataTable;
-import jacobi.core.classifier.cart.data.Instance;
-import jacobi.core.classifier.cart.data.Sequence;
+import jacobi.core.classifier.cart.Sequence;
 import jacobi.core.classifier.cart.node.Decision;
 
 /**

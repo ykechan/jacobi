@@ -1,12 +1,8 @@
 package jacobi.core.classifier.cart.rule;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.IntStream;
@@ -15,12 +11,11 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import jacobi.api.classifier.Column;
+import jacobi.api.classifier.DataTable;
 import jacobi.api.classifier.cart.DecisionNode;
-import jacobi.core.classifier.cart.data.DataTable;
-import jacobi.core.classifier.cart.data.Sequence;
+import jacobi.core.classifier.cart.Sequence;
 import jacobi.core.classifier.cart.measure.Impurity;
 import jacobi.core.classifier.cart.measure.NominalPartition;
-import jacobi.core.classifier.cart.node.BinaryNumericSplit;
 import jacobi.core.classifier.cart.node.Decision;
 import jacobi.core.classifier.cart.node.NominalSplit;
 import jacobi.core.classifier.cart.util.JacobiDefCsvReader;
@@ -258,6 +253,7 @@ public class Id3Test {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	protected String toJson(DecisionNode<?> node) {
 		if(node.split() == null){
 			return "\"" + node.decide() + "\"";

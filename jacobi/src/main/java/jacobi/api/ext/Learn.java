@@ -32,27 +32,23 @@ import jacobi.api.classifier.DefinedSupervised;
 import jacobi.core.classifier.DefinedSupervisedFactory;
 
 /**
- * Extension for training classifiers.
- * 
- * <p>Classifiers in this context are functions that maps a vector to an item in a discrete set.</p>
- * 
- * <p></p>
+ * Extension for models of Machine learning.
  * 
  * @author Y.K. Chan
  *
  */
 @Facade
-public interface Classifier {
+public interface Learn {
 	
 	/**
 	 * Define the column types of the underlying numerical matrix
-	 * and associate each row with an outcome.
+	 * and associate each row with an outcome for training classifiers.
 	 * @param features  List of type of feature columns
 	 * @param outcomes  List of outcome
-	 * @return  Extension to learner of classifier models
+	 * @return  Extension to learners of classifier models
 	 */
 	@Implementation(DefinedSupervisedFactory.class)
-	public <T> DefinedSupervised<T> define(
+	public <T> DefinedSupervised<T> classify(
 		List<Column<?>> features, 
 		List<T> outcomes
 	);

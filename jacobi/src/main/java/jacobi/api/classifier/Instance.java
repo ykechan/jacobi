@@ -1,6 +1,5 @@
-package jacobi.core.classifier.cart.data;
+package jacobi.api.classifier;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
 
 /**
