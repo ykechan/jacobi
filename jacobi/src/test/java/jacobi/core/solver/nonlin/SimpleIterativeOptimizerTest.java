@@ -1,18 +1,18 @@
 package jacobi.core.solver.nonlin;
 
 import java.util.Arrays;
-import java.util.Optional;
-import java.util.function.Supplier;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import jacobi.api.Matrix;
 import jacobi.core.impl.ColumnVector;
 import jacobi.core.util.Real;
+import jacobi.core.util.Weighted;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 @JacobiImport("/jacobi/test/data/SimpleIterativeOptimizerTest.xlsx")
 @RunWith(JacobiJUnit4ClassRunner.class)
@@ -33,11 +33,10 @@ public class SimpleIterativeOptimizerTest {
     @Test
     @JacobiImport("test pre-defined deltas")
     public void testPreDefinedDeltas() {
-        Optional<ColumnVector> ans = new SimpleIterativeOptimizer(() -> new IterativeOptimizerStep() {
+        Weighted<ColumnVector> ans = new SimpleIterativeOptimizer(() -> new IterativeOptimizerStep() {
 
             @Override
             public double[] delta(VectorFunction func, double[] curr) {
-                System.out.println(Arrays.toString(curr));
                 if(this.step > 0) {
                     Assert.assertArrayEquals(steps.getRow(step - 1), curr, Real.TOLERANCE);
                 }

@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import jacobi.core.impl.ColumnVector;
+import jacobi.core.util.Weighted;
 
 /**
  * Common interface of an numerical iterative optimizer for vector functions.
@@ -51,7 +52,7 @@ public interface IterativeOptimizer {
      * @param epsilon  Error tolerance
      * @return  The position of optima if found, empty if iteration exhaused
      */
-    public Optional<ColumnVector> optimize(
+    public Weighted<ColumnVector> optimize(
             VectorFunction func, 
             Supplier<double[]> init,
             long limit, double epsilon);

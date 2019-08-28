@@ -25,7 +25,6 @@ package jacobi.core.logit;
 
 import jacobi.api.Matrix;
 import jacobi.core.solver.nonlin.SumLinearArgFunc;
-import jacobi.core.util.Throw;
 
 /**
  * Negated Log of Likelihood function of the logistic probabilistic model in a weighted Bernoulli trial. 
