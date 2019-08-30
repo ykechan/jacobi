@@ -24,6 +24,10 @@
 package jacobi.api.classifier;
 
 import jacobi.api.annotations.Facade;
+import jacobi.api.annotations.Implementation;
+import jacobi.api.classifier.cart.DecisionNode;
+import jacobi.api.classifier.cart.DecisionTreeParams;
+import jacobi.core.classifier.cart.DecisionTreeLearner;
 
 /**
  * Proxy interface for supervised classifier learners with feature type defined.
@@ -33,5 +37,8 @@ import jacobi.api.annotations.Facade;
  */
 @Facade(value = DataTable.class)
 public interface DefinedSupervised<T> {
+	
+	@Implementation(DecisionTreeLearner.class)
+	public DecisionNode<T> learnTree(DecisionTreeParams param);
 
 }

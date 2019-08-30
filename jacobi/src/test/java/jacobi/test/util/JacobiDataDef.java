@@ -1,33 +1,9 @@
-/* 
- * The MIT License
- *
- * Copyright 2019 Y.K. Chan
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
 package jacobi.test.util;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.function.BiFunction;
 import java.util.function.IntFunction;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -36,56 +12,138 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import jacobi.api.classifier.Column;
-import jacobi.core.util.Throw;
 
 public class JacobiDataDef {
-		
+	
 	public JacobiDataDef(Workbook workbook, List<Class<?>> enumTypes) {
 		this.workbook = workbook;
 		this.enumTypes = enumTypes;
 	}
 	
-	public BiFunction<String, Integer, Column<?>> getDef(String name) {
-		Sheet sheet = this.workbook.getSheet(name);
-		Throw.when()
-	        .isNull(() -> sheet, () -> "Worksheet " + name + " not found.");
-	    
-		int k = sheet.getFirstRowNum();
-		while(k <= sheet.getLastRowNum()){
-			Row row = sheet.getRow(k++);
+	public Map<Integer, Column<?>> getColumnDefs(String sheetName) {
+		Sheet sheet = this.workbook.getSheet(sheetName);
+		if(sheet == null){
+			throw new IllegalArgumentException("Sheet " + sheetName + " not found.");
+		}
+		
+		return this.readColumnDefs(sheet, this.readTypeDefs(sheet));
+	}
+	
+	protected Map<Integer, Column<?>> readColumnDefs(
+			Sheet sheet, 
+			Map<String, IntFunction<Column<?>>> typedefs) {
+		
+		Map<Integer, Column<?>> columnDefs = new TreeMap<>();
+		for(int i = sheet.getFirstRowNum(); i < sheet.getLastRowNum(); i++) {
+			Row row = sheet.getRow(i);
 			if(row == null 
 			|| row.getFirstCellNum() < 0
-			|| !this.getString(row.getCell(0)).contains("#")) {
+			|| !"column-def".equals(this.getString(row.getCell(0)))) {
 				continue;
 			}
 			
-			
+			try {
+				int index = (int) Double.parseDouble(this.getString(row.getCell(1)));
+				String typeName = this.getString(row.getCell(2));
+				
+				if(columnDefs.containsKey(index)) {
+					throw new IllegalArgumentException("Duplicated column def of #" +index);
+				}
+				
+				if(!typedefs.containsKey(typeName)){
+					throw new IllegalArgumentException("Type " + typeName + " not found.");
+				}
+				
+				columnDefs.put(index, typedefs.get(typeName).apply(index));
+			}catch(NumberFormatException ex){
+				throw new IllegalArgumentException("Invalid column index at row #"
+						+ row.getRowNum(), ex);
+			}
 		}
-		return null;
+		return columnDefs;
 	}
 	
-	protected List<String> readItems(Sheet sheet, int begin) {
+	protected Map<String, IntFunction<Column<?>>> readTypeDefs(Sheet sheet) {
+		Map<String, IntFunction<Column<?>>> typedefs = new TreeMap<>();
+		
+		int k = sheet.getFirstRowNum();
+		while(k <= sheet.getLastRowNum()) {
+			Row row = sheet.getRow(k++);
+			if(row == null || row.getFirstCellNum() < 0) {
+				continue;
+			}
+			
+			String anchor = this.getString(row.getCell(0));
+			if(!"typedef".equals(anchor.trim())){
+				continue;
+			}
+			
+			String typeName = this.getString(row.getCell(1));
+			
+			if(typeName.trim().isEmpty()) {
+				throw new IllegalArgumentException("Unable to define type with no name on row #" 
+					+ row.getRowNum());
+			}
+			
+			List<String> items = this.getItems(sheet, k);
+			typedefs.put(typeName, this.columnOf(items));
+			k += items.size();
+		}
+		
+		return typedefs;
+	}
+	
+	protected List<String> getItems(Sheet sheet, int begin) {
 		Map<Integer, String> map = new TreeMap<>();
+		for(int i = begin; i < sheet.getLastRowNum(); i++) {
+			Row row = sheet.getRow(i);
+			if(row == null || row.getFirstCellNum() < 0){
+				break;
+			}
+			
+			String item = this.getString(row.getCell(0));
+			if(item.trim().isEmpty()){
+				break;
+			}			
+			
+			String nom = this.getString(row.getCell(1));
+			
+			try {
+				int value = (int) Double.parseDouble(nom);
+				if(map.containsKey(value)){
+					throw new IllegalArgumentException("Duplicated nomminal value " + value);
+				}
+				
+				map.put(value, item.toUpperCase());
+			}catch(NumberFormatException ex){
+				throw new IllegalArgumentException("Invalid nominal value " + nom);
+			}
+		}
+		
+		for(int i = 0; i < map.size(); i++) {
+			if(!map.containsKey(i)){
+				throw new IllegalArgumentException("Nominal value " + i + " is undefined.");
+			}
+		}
 		return Arrays.asList(map.values().toArray(new String[0]));
 	}
 	
-	protected IntFunction<Column<?>> determine(List<String> items) {
+	protected IntFunction<Column<?>> columnOf(List<String> items) {
+		System.out.println("items = " + items);
 		if(items.size() == 2
-		&& Boolean.FALSE.toString().equals(items.get(0))
-		&& Boolean.TRUE.toString().equals(items.get(1))) {
-			return Column::signed;
+		&& Boolean.FALSE.toString().equalsIgnoreCase(items.get(0))
+		&& Boolean.TRUE.toString().equalsIgnoreCase(items.get(1))){
+			return n -> Column.signed(n);
 		}
 		
-		Class<?> enumType = this.enumTypes.stream()
+		Class<?> clazz = this.enumTypes.stream()
 			.filter(t -> t.isEnum())
+			.filter(t -> t.getEnumConstants().length == items.size())
 			.filter(t -> {
-				Object[] enumConsts = t.getEnumConstants();
-				if(items.size() != enumConsts.length) {
-					return false;
-				}
-				
-				for(int i = 0; i < enumConsts.length; i++){
-					if(!enumConsts[i].toString().equals(items.get(i))){
+				Object[] enumVals = t.getEnumConstants();
+				for(int i = 0; i < enumVals.length; i++){
+					if(!items.get(i).equalsIgnoreCase(enumVals[i].toString())){
+						System.out.println(items.get(i) + " <> " + enumVals[i]);
 						return false;
 					}
 				}
@@ -93,23 +151,46 @@ public class JacobiDataDef {
 			})
 			.findAny()
 			.orElse(String.class);
+		System.out.println("Type = " + clazz);
 		
-		return enumType == String.class
+		return clazz == String.class
 			? n -> new Column<>(n, items, v -> (int) v)
-			: n -> Column.of(n, enumType);
+			: n -> Column.of(n, clazz);
 	}
 	
 	protected String getString(Cell cell) {
+		if(cell == null){
+			return "";
+		}
 		
-		return cell != null
-			&& (cell.getCellType() == Cell.CELL_TYPE_STRING 
-			||  (cell.getCellType() == Cell.CELL_TYPE_FORMULA 
-			  && cell.getCachedFormulaResultType() == Cell.CELL_TYPE_STRING))
-			? cell.getStringCellValue()
-			: "";
+		return this.getString(cell, 
+			cell.getCellType() == Cell.CELL_TYPE_FORMULA
+			? cell.getCachedFormulaResultType()
+			: cell.getCellType() 
+		);
+	}
+	
+	protected String getString(Cell cell, int cellType) {
+		switch(cellType){
+			case Cell.CELL_TYPE_BLANK :
+			case Cell.CELL_TYPE_ERROR :
+				return "";
+				
+			case Cell.CELL_TYPE_BOOLEAN :
+				return Boolean.toString(cell.getBooleanCellValue());
+				
+			case Cell.CELL_TYPE_NUMERIC :
+				return Double.toString(cell.getNumericCellValue());				
+			
+			case Cell.CELL_TYPE_STRING :
+				return cell.getStringCellValue();
+				
+			default :
+				break;
+		}
+		throw new UnsupportedOperationException("Type " + cellType + " not supported");
 	}
 	
 	private Workbook workbook;
 	private List<Class<?>> enumTypes;
 }
-
