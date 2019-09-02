@@ -1,17 +1,24 @@
 package jacobi.test.util;
 
+import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.BiFunction;
 import java.util.function.IntFunction;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
+import jacobi.api.Matrix;
 import jacobi.api.classifier.Column;
+import jacobi.api.classifier.DataTable;
+import jacobi.core.classifier.DefinedMatrix;
 
 public class JacobiDataDef {
 	
@@ -20,7 +27,47 @@ public class JacobiDataDef {
 		this.enumTypes = enumTypes;
 	}
 	
-	public Map<Integer, Column<?>> getColumnDefs(String sheetName) {
+	public <T> BiFunction<Matrix, Matrix, DataTable<T>> loadDef(String sheetName, Class<T> clazz) {
+		Map<Integer, Column<?>> colDefs = this.getColumnDefs(sheetName);
+		Column<?> outcomeCol = colDefs.entrySet()
+			.stream()
+			.filter(e -> e.getKey() < 0)
+			.map(e -> e.getValue())
+			.reduce((a, b) -> {
+				throw new IllegalArgumentException("Multiple defintion of outcome");
+			})
+			.orElseThrow(() -> new IllegalArgumentException("No outcome defintion: " + colDefs.keySet()));
+		
+		if(outcomeCol.getItems().stream().anyMatch(i -> !clazz.isInstance(i))) {
+			throw new IllegalArgumentException("Expected " 
+				+ clazz + ", found items " 
+				+ outcomeCol.getItems()
+			);
+		}
+				
+		return (in, out) -> {
+			List<Column<?>> cols = IntStream.range(0, in.getColCount())
+				.mapToObj(i -> colDefs.containsKey(i) ? colDefs.get(i) : Column.numeric(i))
+				.collect(Collectors.toList());
+			
+			return DefinedMatrix.of(in, new AbstractList<T>() {
+
+				@SuppressWarnings("unchecked")
+				@Override
+				public T get(int index) {
+					return (T) outcomeCol.valueOf( out.get(index, 0) );
+				}
+
+				@Override
+				public int size() {
+					return out.getRowCount();
+				}
+				
+			}).apply(cols);
+		};
+	}
+	
+	protected Map<Integer, Column<?>> getColumnDefs(String sheetName) {
 		Sheet sheet = this.workbook.getSheet(sheetName);
 		if(sheet == null){
 			throw new IllegalArgumentException("Sheet " + sheetName + " not found.");
@@ -34,7 +81,7 @@ public class JacobiDataDef {
 			Map<String, IntFunction<Column<?>>> typedefs) {
 		
 		Map<Integer, Column<?>> columnDefs = new TreeMap<>();
-		for(int i = sheet.getFirstRowNum(); i < sheet.getLastRowNum(); i++) {
+		for(int i = sheet.getFirstRowNum(); i <= sheet.getLastRowNum(); i++) {
 			Row row = sheet.getRow(i);
 			if(row == null 
 			|| row.getFirstCellNum() < 0
