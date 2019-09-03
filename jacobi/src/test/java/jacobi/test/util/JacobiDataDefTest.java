@@ -60,12 +60,11 @@ public class JacobiDataDefTest {
 			Assert.assertEquals(val, col.valueOf(val.ordinal()));
 		}
 		
-		col = colDef.get(2);
+		col = colDef.get(3);
 		Assert.assertNotNull(col);
-		Assert.assertEquals(Outlook.class.getEnumConstants().length, col.cardinality());
-		for(Outlook val : Outlook.values()) {
-			Assert.assertEquals(val, col.valueOf(val.ordinal()));
-		}
+		Assert.assertEquals(2, col.cardinality());
+		Assert.assertEquals(Boolean.FALSE, col.valueOf(0));
+		Assert.assertEquals(Boolean.TRUE, col.valueOf(1));
 		
 	}
 	

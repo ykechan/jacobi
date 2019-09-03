@@ -101,6 +101,7 @@ public class JacobiDataDef {
 					throw new IllegalArgumentException("Type " + typeName + " not found.");
 				}
 				
+				System.out.println("#" + index + " -> " + typeName);
 				columnDefs.put(index, typedefs.get(typeName).apply(index));
 			}catch(NumberFormatException ex){
 				throw new IllegalArgumentException("Invalid column index at row #"
