@@ -13,7 +13,7 @@ import jacobi.api.Matrix;
 import jacobi.api.classifier.Column;
 import jacobi.api.classifier.DataTable;
 import jacobi.api.classifier.Instance;
-import jacobi.core.classifier.cart.Sequence;
+import jacobi.core.classifier.cart.ArraySequence;
 import jacobi.core.classifier.cart.measure.Impurity;
 import jacobi.core.classifier.cart.measure.RankedBinaryPartition;
 import jacobi.core.impl.ColumnVector;
@@ -47,7 +47,7 @@ public class RankedBinaryPartitionTest {
 					Arrays.asList(Boolean.TRUE, Boolean.FALSE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE)
 				), 
 				Column.numeric(0), 
-				new Sequence(new int[] {1, 4, 2, 3, 0}, 0, 5)
+				new ArraySequence(new int[] {1, 4, 2, 3, 0}, 0, 5)
 			);
 		
 		Assert.assertEquals(0.0, split.weight, 1e-12);
@@ -64,7 +64,7 @@ public class RankedBinaryPartitionTest {
 						Arrays.asList(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE)
 					), 
 					Column.numeric(0), 
-					new Sequence(new int[] {1, 4, 2, 3, 0}, 0, 5)
+					new ArraySequence(new int[] {1, 4, 2, 3, 0}, 0, 5)
 				);
 			
 		Assert.assertTrue(Double.isNaN(split.weight));
@@ -135,8 +135,8 @@ public class RankedBinaryPartitionTest {
 		};
 	}
 	
-	protected Sequence defaultSeq(int len) {
-		return new Sequence(IntStream.range(0, len).toArray(), 0, len);
+	protected ArraySequence defaultSeq(int len) {
+		return new ArraySequence(IntStream.range(0, len).toArray(), 0, len);
 	}
 
 }

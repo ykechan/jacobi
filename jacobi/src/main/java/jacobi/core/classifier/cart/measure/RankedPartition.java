@@ -45,28 +45,38 @@ public class RankedPartition implements Partition {
      * @return  This instance with ranked sequences updated
      */
     public RankedPartition groupBy(Sequence seq, IntUnaryOperator grouper) {
+    	
         Map<Tuple, Sequence> targets = new TreeMap<>(this.ranks.subMap(
-        	Tuple.floor(seq.start()), 
-        	Tuple.ceiling(seq.start())
+        	Tuple.floor(seq.position()), 
+        	Tuple.ceiling(seq.position())
         ));
         
-        for(Map.Entry<Tuple, Sequence> entry : targets.entrySet()) {
+        for(Map.Entry<Tuple, Sequence> entry : targets.entrySet()) {        	
+        	if(entry.getValue().length() > seq.length()) {
+        		throw new IllegalArgumentException("Inconsistent partition length.");
+        	}
+        	
+        	if(entry.getValue().length() < seq.length()) {
+        		continue;
+        	}
+        	
         	this.ranks.putAll(
         		entry.getValue().groupBy(grouper)
         			.stream()
         			.collect(Collectors.toMap(
-        				s -> new Tuple(s.start(), entry.getKey().lower), 
+        				s -> new Tuple(s.position(), entry.getKey().lower), 
         				s -> s
         			))
         	);
+        	
         	this.ranks.remove(entry.getKey());
-        }
+        }        
         return this;
     }
 
     @Override
     public Weighted<double[]> measure(DataTable<?> table, Column<?> target, Sequence seq) {
-        Sequence rank = this.ranks.get(new Tuple(seq.start(), target.getIndex()));
+        Sequence rank = this.ranks.get(new Tuple(seq.position(), target.getIndex()));
         
         if(rank != null && rank.length() != seq.length()) {
             throw new IllegalArgumentException("Partition overlapped");
@@ -82,7 +92,7 @@ public class RankedPartition implements Partition {
      */
     private SortedMap<Tuple, Sequence> toSortedMap(Map<Column<?>, Sequence> ranks) {
         return ranks.entrySet().stream().collect(Collectors.toMap(
-            e -> new Tuple(e.getValue().start(), e.getKey().getIndex()),
+            e -> new Tuple(e.getValue().position(), e.getKey().getIndex()),
             e -> e.getValue(),
             (a, b) -> {
                 throw new UnsupportedOperationException(

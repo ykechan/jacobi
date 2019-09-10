@@ -6,13 +6,13 @@ import java.util.stream.IntStream;
 import org.junit.Assert;
 import org.junit.Test;
 
-import jacobi.core.classifier.cart.Sequence;
+import jacobi.core.classifier.cart.ArraySequence;
 
-public class SequenceTest {
+public class ArraySequenceTest {
     
     @Test
     public void shouldBeAbleToGroupByEvenAndOdd() {
-        Sequence seq = new Sequence(new int[] {0, 1, 2, 3, 4}, 0, 5);
+        ArraySequence seq = new ArraySequence(new int[] {0, 1, 2, 3, 4}, 0, 5);
         List<Sequence> groups = seq.groupBy(i -> i % 2);
         
         Assert.assertEquals(2, groups.size());

@@ -1,15 +1,19 @@
 package jacobi.core.classifier.cart.rule;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.function.IntUnaryOperator;
+import java.util.stream.Collectors;
 
 import jacobi.api.Matrix;
 import jacobi.api.classifier.Column;
 import jacobi.api.classifier.DataTable;
 import jacobi.api.classifier.cart.DecisionNode;
+import jacobi.core.classifier.cart.ArraySequence;
 import jacobi.core.classifier.cart.Sequence;
 import jacobi.core.classifier.cart.measure.Partition;
 import jacobi.core.classifier.cart.measure.RankedPartition;
@@ -34,10 +38,9 @@ public class C45 implements Rule {
 	 * @return  Implementation of C4.5
 	 */
 	public static C45 of(Partition partition) {
-		return new C45(partition, (p, f) -> new Id3(
-			new ZeroR(),
-			new OneR(Id3.NO_RULE, p),
-			f
+		return new C45(partition, p -> new Id3(
+			ZeroR.getInstance(),
+			new OneR(ZeroR.getInstance(), p)
 		));
 	}
 	
@@ -46,7 +49,7 @@ public class C45 implements Rule {
 	 * @param partition  Partition function
 	 * @param ruleFact  Rule factory
 	 */
-	protected C45(Partition partition, RuleFactory ruleFact) {
+	public C45(Partition partition, Function<Partition, Rule> ruleFact) {
 		this.partition = partition;
 		this.ruleFact = ruleFact;
 	}
@@ -60,16 +63,13 @@ public class C45 implements Rule {
 		
 		if(sortSeq.isEmpty()) {
 			// no numeric feature
-			return this.ruleFact
-				.create(this.partition, (s, g) -> {})
-				.make(dataTab, features, seq);
+			return this.ruleFact.apply(this.partition).make(dataTab, features, seq);
 		}
 		
 		RankedPartition rankPart = new RankedPartition(this.partition, sortSeq);
-		
 		return this.ruleFact
-			.create(rankPart, rankPart::groupBy)
-			.make(dataTab, features, seq);
+			.apply(rankPart)
+			.make(dataTab, features, this.listenGroupBy(seq, rankPart::groupBy));
 	}
 	
 	/**
@@ -94,33 +94,42 @@ public class C45 implements Rule {
 				seq[i] = defaultSeq.indexAt(seq[i]);
 			}
 			
-			map.put(col, new Sequence(seq, 0, seq.length));
+			map.put(col, new ArraySequence(seq, 0, seq.length));
 		}
 		
 		return map;
 	}
 	
-	private Partition partition;
-	private RuleFactory ruleFact;
-	
-	/**
-	 * Function for creating a rule implementation
-	 * @author Y.K. Chan
-	 *
-	 */
-	@FunctionalInterface
-	public interface RuleFactory {
-		
-		/**
-		 * Create a rule implementation
-		 * @param partition  Partition function
-		 * @param beforeSplit  Listener when splitting
-		 * @return  Rule implementation
-		 */
-		public Rule create(
-			Partition partition, 
-			BiConsumer<Sequence, IntUnaryOperator> beforeSplit
-		);
-		
+	protected Sequence listenGroupBy(Sequence seq, BiConsumer<Sequence, IntUnaryOperator> before) {
+		return new Sequence() {
+
+			@Override
+			public int position() {
+				return seq.position();
+			}
+
+			@Override
+			public int length() {
+				return seq.length();
+			}
+
+			@Override
+			public int indexAt(int rank) {
+				return seq.indexAt(rank);
+			}
+
+			@Override
+			public List<Sequence> groupBy(IntUnaryOperator groupFn) {
+				before.accept(seq, groupFn);
+				return seq.groupBy(groupFn)
+					.stream()
+					.map(s -> listenGroupBy(s, before))
+					.collect(Collectors.toList());
+			}
+			
+		};
 	}
+	
+	private Partition partition;
+	private Function<Partition, Rule> ruleFact;
 }

@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import jacobi.api.classifier.DataTable;
 import jacobi.api.classifier.cart.DecisionNode;
-import jacobi.core.classifier.cart.Sequence;
+import jacobi.core.classifier.cart.ArraySequence;
 import jacobi.core.classifier.cart.util.JacobiDefCsvReader;
 import jacobi.core.classifier.cart.util.JacobiEnums.Outlook;
 import jacobi.core.classifier.cart.util.JacobiEnums.YesOrNo;
@@ -79,8 +79,8 @@ public class ZeroRTest {
 		}
 	}
 	
-	protected Sequence defaultSeq(int len) {
-		return new Sequence(IntStream.range(0, len).toArray(), 0, len);
+	protected ArraySequence defaultSeq(int len) {
+		return new ArraySequence(IntStream.range(0, len).toArray(), 0, len);
 	}
 
 }

@@ -16,11 +16,11 @@ public class DecisionNodeSerializer {
 	@Test
 	public void shouldBeAbleToSerializeOneROnGolfSplitByOutlook() {
 		Assert.assertEquals("{\"#0 = SUNNY\": \"NO\",\"#0 = OVERCAST\": \"YES\",\"#0 = RAIN\": \"YES\"}", 
-			new NominalSplit<>(Column.of(0, Outlook.class), null, Arrays.asList(
+			toJson(new NominalSplit<>(Column.of(0, Outlook.class), null, Arrays.asList(
 				new Decision<>(YesOrNo.NO),
 				new Decision<>(YesOrNo.YES),
 				new Decision<>(YesOrNo.YES)
-			)));
+			))));
 	}
 	
 	public String toJson(DecisionNode<?> node) {

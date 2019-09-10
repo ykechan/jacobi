@@ -97,12 +97,12 @@ public class DecisionTreeLearner<T> implements ClassifierLearner<T, DecisionNode
 	 * @param len  Length of data set
 	 * @return  Default sequence
 	 */
-	protected Sequence allIndices(int len) {
-		return new Sequence(IntStream.range(0, len).toArray(), 0, len);
-	}
+	protected ArraySequence allIndices(int len) {
+		return new ArraySequence(IntStream.range(0, len).toArray(), 0, len);
+	}	
 	
 	/**
 	 * Common instance for 0-R implementation
 	 */
-	protected static final Rule ZERO_R = new ZeroR();
+	protected static final Rule ZERO_R = new ZeroR();		
 }

@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiConsumer;
-import java.util.function.IntUnaryOperator;
 import java.util.stream.IntStream;
 
 import org.junit.Assert;
@@ -17,6 +15,7 @@ import jacobi.api.Matrix;
 import jacobi.api.classifier.Column;
 import jacobi.api.classifier.DataTable;
 import jacobi.api.classifier.cart.DecisionNode;
+import jacobi.core.classifier.cart.ArraySequence;
 import jacobi.core.classifier.cart.Sequence;
 import jacobi.core.classifier.cart.measure.Impurity;
 import jacobi.core.classifier.cart.measure.Partition;
@@ -117,7 +116,7 @@ public class C45Test {
 		return buf.append('}').toString();
 	}
 	
-	protected Rule mock(Partition part, BiConsumer<Sequence, IntUnaryOperator> listener) {
+	protected Rule mock(Partition part) {
 		return new Rule() {
 
 			@Override
@@ -133,8 +132,8 @@ public class C45Test {
 		};
 	}
 	
-	protected Sequence defaultSeq(int len) {
-        return new Sequence(IntStream.range(0, len).toArray(), 0, len);
+	protected ArraySequence defaultSeq(int len) {
+        return new ArraySequence(IntStream.range(0, len).toArray(), 0, len);
     }
     
     protected Set<Column<?>> columnSet(Column<?>... cols) {
