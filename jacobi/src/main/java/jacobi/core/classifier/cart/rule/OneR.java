@@ -23,7 +23,6 @@
  */
 package jacobi.core.classifier.cart.rule;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -36,7 +35,6 @@ import jacobi.api.classifier.Column;
 import jacobi.api.classifier.DataTable;
 import jacobi.api.classifier.Instance;
 import jacobi.api.classifier.cart.DecisionNode;
-import jacobi.core.classifier.cart.ArraySequence;
 import jacobi.core.classifier.cart.Sequence;
 import jacobi.core.classifier.cart.measure.Partition;
 import jacobi.core.classifier.cart.node.BinaryNumericSplit;

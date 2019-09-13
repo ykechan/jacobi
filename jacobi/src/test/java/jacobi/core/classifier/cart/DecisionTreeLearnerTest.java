@@ -18,6 +18,7 @@ import jacobi.api.classifier.DataTable;
 import jacobi.api.classifier.cart.DecisionNode;
 import jacobi.api.classifier.cart.DecisionTreeParams;
 import jacobi.core.classifier.cart.measure.Impurity;
+import jacobi.core.classifier.cart.node.BinaryNumericSplit;
 import jacobi.core.classifier.cart.node.DecisionNodeSerializer;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
@@ -105,7 +106,21 @@ public class DecisionTreeLearnerTest {
 			.apply(this.input, this.outcome);
 		
 		DecisionNode<String> root = new DecisionTreeLearner<String>()
-			.learn(dataTab, new DecisionTreeParams(Impurity.ERROR, 1));
+			.learn(dataTab, new DecisionTreeParams(Impurity.ENTROPY, 1));
+		
+		Assert.assertTrue(root instanceof BinaryNumericSplit);
+		
+	}
+	
+	@Test
+	@JacobiImport("iris")
+	public void shouldBeAbleToTrain2ROnIrisData() {
+		DataTable<String> dataTab = new JacobiDataDef(this.workbook, Collections.emptyList())
+			.loadDef("iris", String.class)
+			.apply(this.input, this.outcome);
+		
+		DecisionNode<String> root = new DecisionTreeLearner<String>()
+			.learn(dataTab, new DecisionTreeParams(Impurity.ERROR, 2));
 		
 		System.out.println(new DecisionNodeSerializer().toJson(root));
 	}

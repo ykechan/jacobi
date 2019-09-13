@@ -20,7 +20,8 @@ public class DecisionNodeSerializer {
 				new Decision<>(YesOrNo.NO),
 				new Decision<>(YesOrNo.YES),
 				new Decision<>(YesOrNo.YES)
-			))));
+			)))
+		);
 	}
 	
 	public String toJson(DecisionNode<?> node) {
@@ -59,11 +60,11 @@ public class DecisionNodeSerializer {
 	protected String toJson(BinaryNumericSplit<?> node) {
 		Column<?> column = node.split();
 		
-		return "\"#" + column.getIndex() + " < " + node.getThreshold() 
+		return "{\"#" + column.getIndex() + " < " + node.getThreshold() 
 				+ "\": " + this.toJson(node.getLeft())
 			+ ","
 			+ "\"#" + column.getIndex() + " > " + node.getThreshold() 
-				+ "\": " + this.toJson(node.getRight());
+				+ "\": " + this.toJson(node.getRight()) + "}";
 	}
 
 }

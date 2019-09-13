@@ -100,8 +100,7 @@ public class JacobiDataDef {
 				if(!typedefs.containsKey(typeName)){
 					throw new IllegalArgumentException("Type " + typeName + " not found.");
 				}
-				
-				System.out.println("#" + index + " -> " + typeName);
+								
 				columnDefs.put(index, typedefs.get(typeName).apply(index));
 			}catch(NumberFormatException ex){
 				throw new IllegalArgumentException("Invalid column index at row #"
@@ -176,8 +175,7 @@ public class JacobiDataDef {
 		return Arrays.asList(map.values().toArray(new String[0]));
 	}
 	
-	protected IntFunction<Column<?>> columnOf(List<String> items) {
-		System.out.println("items = " + items);
+	protected IntFunction<Column<?>> columnOf(List<String> items) {		
 		if(items.size() == 2
 		&& Boolean.FALSE.toString().equalsIgnoreCase(items.get(0))
 		&& Boolean.TRUE.toString().equalsIgnoreCase(items.get(1))){
@@ -191,7 +189,6 @@ public class JacobiDataDef {
 				Object[] enumVals = t.getEnumConstants();
 				for(int i = 0; i < enumVals.length; i++){
 					if(!items.get(i).equalsIgnoreCase(enumVals[i].toString())){
-						System.out.println(items.get(i) + " <> " + enumVals[i]);
 						return false;
 					}
 				}
@@ -199,7 +196,6 @@ public class JacobiDataDef {
 			})
 			.findAny()
 			.orElse(String.class);
-		System.out.println("Type = " + clazz);
 		
 		return clazz == String.class
 			? n -> new Column<>(n, items, v -> (int) v)

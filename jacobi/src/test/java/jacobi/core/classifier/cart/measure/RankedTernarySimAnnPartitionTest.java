@@ -92,8 +92,6 @@ public class RankedTernarySimAnnPartitionTest {
 		Assert.assertEquals(1, clusters.get(3).feature);
 		Assert.assertEquals(2, clusters.get(3).outcome);
 		Assert.assertEquals(1.2, clusters.get(3).weight, 1e-12);
-		
-		System.out.println(Math.ceil(-0.5));
 	}
 
 }

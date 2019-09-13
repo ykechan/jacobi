@@ -110,8 +110,6 @@ public class CooleyTukeyRadixN implements CooleyTukeyMerger {
                 double re = nkRe * this.radix.real[twiddle] - nkIm * this.radix.imag[twiddle];
                 double im = nkRe * this.radix.imag[twiddle] + nkIm * this.radix.real[twiddle];
 
-                System.out.println("p=" + p + ", n=" + n + ", z=" + re + "+i" + im);
-
                 int target = slice.offset + mod + n * width;
                 out.real[p] += re * slice.vector.real[target] - im * slice.vector.imag[target];
                 out.imag[p] += re * slice.vector.imag[target] + im * slice.vector.real[target];

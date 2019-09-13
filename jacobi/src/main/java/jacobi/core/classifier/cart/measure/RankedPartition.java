@@ -63,6 +63,7 @@ public class RankedPartition implements Partition {
         	this.ranks.putAll(
         		entry.getValue().groupBy(grouper)
         			.stream()
+        			.filter(s -> s.length() > 0)
         			.collect(Collectors.toMap(
         				s -> new Tuple(s.position(), entry.getKey().lower), 
         				s -> s

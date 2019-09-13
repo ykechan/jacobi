@@ -27,6 +27,7 @@ import java.util.TreeSet;
 import java.util.stream.IntStream;
 
 import jacobi.api.classifier.ClassifierLearner;
+import jacobi.api.classifier.Column;
 import jacobi.api.classifier.DataTable;
 import jacobi.api.classifier.cart.DecisionNode;
 import jacobi.api.classifier.cart.DecisionTreeParams;
@@ -62,15 +63,29 @@ public class DecisionTreeLearner<T> implements ClassifierLearner<T, DecisionNode
 	 * @return  Rule maker
 	 */
 	protected Rule createRule(DataTable<?> dataTab, DecisionTreeParams params) {	
-		Partition partFunc = this.createPartition(params, false);
+		boolean nomOnly = dataTab.getColumns().stream().noneMatch(Column::isNumeric);
+		
+		Partition partFunc = this.createPartition(params, nomOnly);
 		
 		if(params.maxHeight >= dataTab.getColumns().size()){
 			// no limit
 			return C45.of(partFunc);
 		}
-		
-		Rule rule = ZERO_R;
-		for(int i = 0; i < params.maxHeight; i++) {
+				
+		return nomOnly 
+			? this.chainRule(partFunc, params.maxHeight)
+			: new C45(partFunc, p -> this.chainRule(p, params.maxHeight));
+	}
+	
+	/**
+	 * Construct a finite depth rule
+	 * @param partFunc  Partition function
+	 * @param depth  Maximum depth of the tree
+	 * @return  Rule implementation
+	 */
+	protected Rule chainRule(Partition partFunc, int depth) {
+		Rule rule = ZeroR.getInstance();
+		for(int i = 0; i < depth; i++) {
 			rule = new OneR(rule, partFunc);
 		}
 		return rule;
@@ -90,7 +105,7 @@ public class DecisionTreeLearner<T> implements ClassifierLearner<T, DecisionNode
 		
 		Partition num = new RankedBinaryPartition(params.impurityMeasure);
 		return (tab, col, seq) -> (col.isNumeric() ? num : nom).measure(tab, col, seq);
-	}
+	}		
 	
 	/**
 	 * Get the default sequence for all instances
@@ -100,9 +115,5 @@ public class DecisionTreeLearner<T> implements ClassifierLearner<T, DecisionNode
 	protected ArraySequence allIndices(int len) {
 		return new ArraySequence(IntStream.range(0, len).toArray(), 0, len);
 	}	
-	
-	/**
-	 * Common instance for 0-R implementation
-	 */
-	protected static final Rule ZERO_R = new ZeroR();		
+			
 }
