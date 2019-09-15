@@ -44,6 +44,19 @@ import jacobi.core.classifier.cart.node.Decision;
  *
  */
 public class ZeroR implements Rule {
+	
+	/**
+	 * Common instance of Zero-R.
+	 */
+	public static final ZeroR DEFAULT_INSTANCE = new ZeroR();
+	
+	/**
+	 * Get an instance of Zero-R.
+	 * @return  Instance of Zero-R
+	 */
+	public static final ZeroR getInstance() {
+		return DEFAULT_INSTANCE;
+	}
 
 	@Override
 	public <T> DecisionNode<T> make(

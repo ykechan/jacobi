@@ -16,7 +16,7 @@ import jacobi.api.classifier.Column;
 import jacobi.api.classifier.DataTable;
 import jacobi.api.classifier.Instance;
 import jacobi.api.classifier.cart.DecisionNode;
-import jacobi.core.classifier.cart.Sequence;
+import jacobi.core.classifier.cart.ArraySequence;
 import jacobi.core.classifier.cart.measure.Impurity;
 import jacobi.core.classifier.cart.measure.NominalPartition;
 import jacobi.core.classifier.cart.util.JacobiDefCsvReader;
@@ -102,7 +102,7 @@ public class NominalPartitionTest {
 					.read(input, YesOrNo.class);
 			
 			Weighted<double[]> split = new NominalPartition(Impurity.ENTROPY).measure(
-				dataTab, dataTab.getColumns().get(0), new Sequence(
+				dataTab, dataTab.getColumns().get(0), new ArraySequence(
 					IntStream.range(0, dataTab.size()).toArray(), 0, dataTab.size()
 				) 
 			);
@@ -127,7 +127,7 @@ public class NominalPartitionTest {
 					.read(input, YesOrNo.class);
 			
 			Weighted<double[]> split = new NominalPartition(Impurity.ENTROPY).measure(
-				dataTab, dataTab.getColumns().get(3), new Sequence(
+				dataTab, dataTab.getColumns().get(3), new ArraySequence(
 					IntStream.range(0, dataTab.size()).toArray(), 0, dataTab.size()
 				) 
 			);

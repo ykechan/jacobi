@@ -40,13 +40,14 @@ public interface Impurity {
         double sum = 0.0;
         double rand = 0.0;
         for(int i = 0; i < dist.length; i++) {
-            if(dist[i] == 0.0) {
+            if(dist[i] <= 0.0) {
                 continue;
             }
+            
             rand += dist[i] * Math.log(dist[i]);
             sum += dist[i];
         }
-        return sum == 0.0 ? 0.0 : Math.log(sum) - rand / sum;
+        return sum <= 0.0 ? 0.0 : Math.log(sum) - rand / sum;
     };
     
     /**
@@ -61,7 +62,7 @@ public interface Impurity {
                 max = dist[i];
             }
         }
-        return sum - max;
+        return (sum - max) / sum;
     };
     
     /**

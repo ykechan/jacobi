@@ -2,12 +2,9 @@ package jacobi.core.classifier.cart.rule;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiConsumer;
-import java.util.function.IntUnaryOperator;
 import java.util.stream.IntStream;
 
 import org.junit.Assert;
@@ -17,12 +14,14 @@ import jacobi.api.Matrix;
 import jacobi.api.classifier.Column;
 import jacobi.api.classifier.DataTable;
 import jacobi.api.classifier.cart.DecisionNode;
+import jacobi.core.classifier.cart.ArraySequence;
 import jacobi.core.classifier.cart.Sequence;
 import jacobi.core.classifier.cart.measure.Impurity;
 import jacobi.core.classifier.cart.measure.Partition;
 import jacobi.core.classifier.cart.measure.RankedBinaryPartition;
 import jacobi.core.classifier.cart.node.BinaryNumericSplit;
-import jacobi.core.classifier.cart.node.NominalSplit;
+import jacobi.core.classifier.cart.node.Decision;
+import jacobi.core.classifier.cart.node.DecisionNodeSerializer;
 import jacobi.core.classifier.cart.util.JacobiDefCsvReader;
 import jacobi.core.classifier.cart.util.JacobiEnums.Iris;
 import jacobi.core.classifier.cart.util.JacobiEnums.YesOrNo;
@@ -76,48 +75,18 @@ public class C45Test {
 				this.defaultSeq(dataTab.size())
 			);
 			
-			System.out.println(this.toJson(root));
+			Assert.assertTrue(root instanceof BinaryNumericSplit);
+			Assert.assertTrue(2.0 < ((BinaryNumericSplit<?>) root).getThreshold());
+			Assert.assertTrue(4.7 > ((BinaryNumericSplit<?>) root).getThreshold());
+			
+			Assert.assertTrue(((BinaryNumericSplit<?>) root).getLeft() instanceof Decision);
+			Assert.assertEquals(Iris.SETOSA, ((BinaryNumericSplit<?>) root).getLeft().decide());
+			
+			System.out.println(new DecisionNodeSerializer().toJson(root));
 		}
-	}
+	}	
 	
-	@SuppressWarnings("unchecked")
-	protected String toJson(DecisionNode<?> node) {
-		if(node.split() == null){
-			return "\"" + node.decide() + "\"";
-		}
-		
-		StringBuilder buf = new StringBuilder().append('{');
-		if(node instanceof NominalSplit){			
-			List<DecisionNode<?>> children = ((NominalSplit) node).getChildren();
-			for(int i = 0; i < node.split().cardinality(); i++) {
-				if(i > 0) {
-					buf.append(',');
-				}
-				buf.append('\"').append('#').append(node.split().getIndex()).append('=')				
-					.append(node.split().valueOf(i))
-					.append('\"')
-					.append(':')
-					.append(this.toJson(children.get(i)));				
-			}
-		}
-		
-		if(node instanceof BinaryNumericSplit) {
-			BinaryNumericSplit<?> split = (BinaryNumericSplit<?>) node;
-			buf.append('\"')
-				.append('#').append(split.split().getIndex())
-					.append(" < ").append(split.getThreshold())
-				.append('\"').append(':').append(this.toJson(split.getLeft()))
-				.append(',')
-				.append('\"')
-				.append('#').append(split.split().getIndex())
-					.append(" > ").append(split.getThreshold())
-				.append('\"').append(':').append(this.toJson(split.getRight()));
-		}
-		
-		return buf.append('}').toString();
-	}
-	
-	protected Rule mock(Partition part, BiConsumer<Sequence, IntUnaryOperator> listener) {
+	protected Rule mock(Partition part) {
 		return new Rule() {
 
 			@Override
@@ -134,7 +103,7 @@ public class C45Test {
 	}
 	
 	protected Sequence defaultSeq(int len) {
-        return new Sequence(IntStream.range(0, len).toArray(), 0, len);
+        return new ArraySequence(IntStream.range(0, len).toArray(), 0, len);
     }
     
     protected Set<Column<?>> columnSet(Column<?>... cols) {

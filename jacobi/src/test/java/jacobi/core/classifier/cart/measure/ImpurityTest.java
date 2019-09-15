@@ -29,7 +29,8 @@ public class ImpurityTest {
     
     @Test 
     public void shouldEntropyBeMaxWhenEveryGroupsHaveEqualNumberOfItem() {
-        Random rand = new Random(Double.doubleToLongBits(Math.PI));        
-    }
+        //Random rand = new Random(Double.doubleToLongBits(Math.PI));
+        System.out.println(Impurity.ENTROPY.of(new double[] {0.0, 50.0, 50.0}));
+    }        
 
 }

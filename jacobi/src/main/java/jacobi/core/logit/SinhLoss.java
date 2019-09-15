@@ -1,4 +1,4 @@
-/* 
+/*
  * The MIT License
  *
  * Copyright 2019 Y.K. Chan
@@ -21,29 +21,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jacobi.api.classifier;
+package jacobi.core.logit;
 
-import jacobi.api.annotations.Facade;
-import jacobi.api.annotations.Implementation;
-import jacobi.api.classifier.cart.DecisionNode;
-import jacobi.api.classifier.cart.DecisionTreeParams;
-import jacobi.core.classifier.cart.DecisionTreeLearner;
+import java.util.Arrays;
+
+import jacobi.api.Matrix;
+import jacobi.core.solver.nonlin.SumLinearArgFunc;
 
 /**
- * Proxy interface for supervised learning on classifiers with feature type defined.
+ * Sinh as Sigmoid function in Logistic Regression.
  * 
+ * <p>Consider sinh(x) = (e<sup>x</sup> + e<sup>-x</sup>) / 2</p>
+ * 
+ * <p>sinh'(x) = (e<sup>x</sup> - e<sup>-x</sup>) / 2</p>
+ * 
+ * <p>sinh''(x) = sinh(x)</p>
+ *  
  * @author Y.K. Chan
- * @param <T>  Type of outcome
+ *
  */
-@Facade(value = DataTable.class)
-public interface DefinedSupervised<T> {
-	
-	/**
-	 * Learn a single decision tree.
-	 * @param param   Parameters for learning a decision tree
-	 * @return   
-	 */
-	@Implementation(DecisionTreeLearner.class)
-	public DecisionNode<T> learnTree(DecisionTreeParams param);
+public class SinhLoss extends SumLinearArgFunc<double[]> {
 
+	public SinhLoss(Matrix consts, double[] weights) {
+		super(consts);
+		this.weights = weights;
+	}
+
+	@Override
+	protected double valueAt(double[] inter, int index, double x) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	protected double slopeAt(double[] inter, int index, double x) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	protected double convexityAt(double[] inter, int index, double x) {
+		return 0;
+	}
+
+	@Override
+	protected double[] prepare(double[] pos, double[] args) {
+		return Arrays.stream(args)
+			.map(Math::exp)
+			.toArray();
+	}
+
+	private double[] weights;
 }

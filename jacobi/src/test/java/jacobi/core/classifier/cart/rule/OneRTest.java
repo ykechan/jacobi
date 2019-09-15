@@ -12,7 +12,7 @@ import org.junit.Test;
 import jacobi.api.classifier.Column;
 import jacobi.api.classifier.DataTable;
 import jacobi.api.classifier.cart.DecisionNode;
-import jacobi.core.classifier.cart.Sequence;
+import jacobi.core.classifier.cart.ArraySequence;
 import jacobi.core.classifier.cart.measure.Impurity;
 import jacobi.core.classifier.cart.measure.NominalPartition;
 import jacobi.core.classifier.cart.node.Decision;
@@ -115,7 +115,7 @@ public class OneRTest {
                     this.columnSet(
                         dataTab.getColumns().get(3)
                     ), 
-                    new Sequence(new int[] {
+                    new ArraySequence(new int[] {
                     	0, 2, 3, 4, 6, 1, 5, 7
                     }, 1, 5)
                 );            
@@ -140,7 +140,7 @@ public class OneRTest {
                     this.columnSet(
                         dataTab.getColumns().get(3)
                     ), 
-                    new Sequence(new int[] {
+                    new ArraySequence(new int[] {
                     	0, 2, 3, 4, 6, 1, 5, 7
                     }, 1, 1)
                 );            
@@ -152,8 +152,8 @@ public class OneRTest {
         }
     }
     
-    protected Sequence defaultSeq(int len) {
-        return new Sequence(IntStream.range(0, len).toArray(), 0, len);
+    protected ArraySequence defaultSeq(int len) {
+        return new ArraySequence(IntStream.range(0, len).toArray(), 0, len);
     }
     
     protected Set<Column<?>> columnSet(Column<?>... cols) {

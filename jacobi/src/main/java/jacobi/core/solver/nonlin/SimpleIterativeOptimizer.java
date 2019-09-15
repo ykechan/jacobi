@@ -24,7 +24,6 @@
 package jacobi.core.solver.nonlin;
 
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 import jacobi.core.impl.ColumnVector;
@@ -51,7 +50,7 @@ public class SimpleIterativeOptimizer implements IterativeOptimizer {
     }
 
     @Override
-    public Optional<ColumnVector> optimize(VectorFunction func, 
+    public Weighted<ColumnVector> optimize(VectorFunction func, 
             Supplier<double[]> init, 
             long limit, double epsilon) {
         IterativeOptimizerStep step = this.stepFactory.get();
@@ -59,16 +58,25 @@ public class SimpleIterativeOptimizer implements IterativeOptimizer {
         double[] start = init.get();
         double[] curr = Arrays.copyOf(start, start.length);
         
+        double error = 1.0;
+        
         for(long iter = 0; iter < limit; iter++) {
             curr = this.move(curr, step.delta(func, curr));
-            if(this.norm(func.grad(curr).getVector()) < epsilon) {
-                return Optional.of(new ColumnVector(curr));
+            error = this.norm(func.grad(curr).getVector());
+            if(error < epsilon) {
+            	break;
             }
         }
         
-        return Optional.empty();
+        return new Weighted<>(new ColumnVector(curr), error);
     }
     
+    /**
+     * Move the position vector by a delta vector
+     * @param position  Position vector
+     * @param dx  Delta vector
+     * @return  Instance of position vector with values updated
+     */
     protected double[] move(double[] position, double[] dx) {
         for(int i = 0; i < position.length; i++) {
             position[i] += dx[i];
@@ -76,6 +84,11 @@ public class SimpleIterativeOptimizer implements IterativeOptimizer {
         return position;
     }
     
+    /**
+     * Find the L-1 Norm of a vector
+     * @param vector  Input vector
+     * @return  Value of the L-1 Norm
+     */
     protected double norm(double[] vector) {
         double max = Math.abs(vector[0]);
         for(int i = 1; i < vector.length; i++) {

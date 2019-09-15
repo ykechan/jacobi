@@ -145,7 +145,7 @@ public class FunctorTest {
     	
     	Object result = func.invoke("", new Object[] {Collections.singletonList(target)});
     	Assert.assertTrue(result instanceof Optional);
-    	((Optional<Date>) result).get();
+    	Date date = ((Optional<Date>) result).get();    	
     }
     
     @Facade(String.class)

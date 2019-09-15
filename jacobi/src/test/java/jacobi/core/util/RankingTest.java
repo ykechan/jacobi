@@ -353,7 +353,10 @@ public class RankingTest {
 		  : 60.7;
 			
 		int[] seq = Ranking.of(20).init(fn).sort();
-		System.out.println(Arrays.toString(seq));
+		int[] ans = {3, 2, 1, 4, 0};
+		for(int i = 0; i < seq.length; i++){
+			Assert.assertEquals("i = " + i, ans[i / 4], seq[i] % 5);
+		}
 	}
 	
 	@Test
@@ -380,12 +383,11 @@ public class RankingTest {
 		for(int i = 0; i < 5; i++) {
 			int base = 100 * i;
 			for(int j = 0; j < 100; j++) {
-				System.out.println(this.input.get(seq[base + j], 2));
-				/*
+				
 				Assert.assertEquals(
 					this.input.get(seq[base], 2), 
 					this.input.get(seq[base + j], 2), 1e-12);
-					*/
+					
 			}
 		}
 	}

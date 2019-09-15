@@ -139,7 +139,6 @@ public class JacobiDataSource {
         return Matrices.zeros((int) numRows, (int) numCols);
     }        
     
-    @SuppressWarnings("MismatchedReadAndWriteOfArray")
     private int readMatrixElements(Sheet sheet, int begin, Matrix matrix) {
         int k = begin;
         for(int i = 0; i < matrix.getRowCount(); i++){

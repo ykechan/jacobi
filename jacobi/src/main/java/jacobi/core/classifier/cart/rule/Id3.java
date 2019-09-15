@@ -26,8 +26,6 @@ package jacobi.core.classifier.cart.rule;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.IntUnaryOperator;
 import java.util.stream.Collectors;
 
 import jacobi.api.classifier.Column;
@@ -58,9 +56,8 @@ public class Id3 implements Rule {
 	 */
 	public static Id3 of(Impurity impurity) {
 		return new Id3(
-			new ZeroR(), 
-			new OneR(NO_RULE, new NominalPartition(impurity)),
-			(s, g) -> {}
+			ZeroR.getInstance(), 
+			new OneR(NO_RULE, new NominalPartition(impurity))
 		);
 	}
 	
@@ -70,10 +67,9 @@ public class Id3 implements Rule {
 	 * @param oneR  Implementation of 1-R
 	 * @param beforeSplit  Listener on splitting the data set
 	 */
-	public Id3(Rule zeroR, OneR oneR, BiConsumer<Sequence, IntUnaryOperator> beforeSplit) {
+	public Id3(Rule zeroR, OneR oneR) {
 		this.zeroR = zeroR;
 		this.oneR = oneR;
-		this.beforeSplit = beforeSplit;
 	}
 
 	@Override
@@ -94,12 +90,10 @@ public class Id3 implements Rule {
 				.filter(f -> !f.equals(result.split()))
 				.collect(Collectors.toSet());
 		
-		List<Sequence> subseqs = this.split(dataTab, seq, result);
+		List<? extends Sequence> subseqs = this.split(dataTab, seq, result);
 		List<DecisionNode<T>> subNodes = this.make(dataTab, subfeat, subseqs);
 		
-		return this.oneR
-				.mergeFunc(result)
-				.apply(subNodes);
+		return this.oneR.mergeFunc(result).apply(subNodes);
 	}
 	
 	/**
@@ -111,7 +105,7 @@ public class Id3 implements Rule {
 	 */
 	protected <T> List<DecisionNode<T>> make(DataTable<T> dataTab, 
 			Set<Column<?>> feats, 
-			List<Sequence> seqs) {
+			List<? extends Sequence> seqs) {
 		List<DecisionNode<T>> nodes = new ArrayList<>(seqs.size());
 		
 		for(Sequence seq : seqs) {
@@ -128,18 +122,15 @@ public class Id3 implements Rule {
 	 * @param node  Decision node
 	 * @return  Split list of subset
 	 */
-	protected <T> List<Sequence> split(DataTable<T> dataTab,
+	protected <T> List<? extends Sequence> split(DataTable<T> dataTab,
 			Sequence subseq,
 			DecisionNode<T> node) {
-		IntUnaryOperator splitFn = this.oneR.splitFunc(dataTab, node);
-		this.beforeSplit.accept(subseq, splitFn);
 		
-		return subseq.groupBy(splitFn);
+		return subseq.groupBy(this.oneR.splitFunc(dataTab, node));
 	}
 	
 	private Rule zeroR;
 	private OneR oneR;
-	private BiConsumer<Sequence, IntUnaryOperator> beforeSplit;	
 	
 	/**
 	 * Rule that returns null as decision.

@@ -13,7 +13,7 @@ import org.junit.Test;
 import jacobi.api.classifier.Column;
 import jacobi.api.classifier.DataTable;
 import jacobi.api.classifier.cart.DecisionNode;
-import jacobi.core.classifier.cart.Sequence;
+import jacobi.core.classifier.cart.ArraySequence;
 import jacobi.core.classifier.cart.measure.Impurity;
 import jacobi.core.classifier.cart.measure.NominalPartition;
 import jacobi.core.classifier.cart.node.Decision;
@@ -49,8 +49,7 @@ public class Id3Test {
 					.read(input, YesOrNo.class);
 			
 			DecisionNode<YesOrNo> ans = new Id3(new ZeroR(), 
-					new OneR(new ZeroR(), new NominalPartition(Impurity.ENTROPY)), 
-					(seq, fn) -> {})
+					new OneR(new ZeroR(), new NominalPartition(Impurity.ENTROPY)))
 				.make(dataTab, 
 					this.columnSet(
 						dataTab.getColumns().get(0),
@@ -97,8 +96,7 @@ public class Id3Test {
 					.read(input, Lens.class);
 			
 			DecisionNode<Lens> ans = new Id3(new ZeroR(), 
-					new OneR(new ZeroR(), new NominalPartition(Impurity.ENTROPY)), 
-					(seq, fn) -> {})
+					new OneR(new ZeroR(), new NominalPartition(Impurity.ENTROPY)))
 				.make(dataTab, 
 					new TreeSet<>(dataTab.getColumns()), 
 					this.defaultSeq(dataTab.size()));
@@ -277,8 +275,8 @@ public class Id3Test {
 		return buf.append('}').toString();
 	}
 	
-	protected Sequence defaultSeq(int len) {
-        return new Sequence(IntStream.range(0, len).toArray(), 0, len);
+	protected ArraySequence defaultSeq(int len) {
+        return new ArraySequence(IntStream.range(0, len).toArray(), 0, len);
     }
     
     protected Set<Column<?>> columnSet(Column<?>... cols) {

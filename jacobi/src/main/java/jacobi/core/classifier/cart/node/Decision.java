@@ -57,6 +57,6 @@ public class Decision<T> implements DecisionNode<T> {
     public Optional<DecisionNode<T>> decide(double value) {
         return Optional.empty();
     }
-
+    
     private T decision;
 }

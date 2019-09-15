@@ -89,7 +89,7 @@ class Buffer extends AbstractList<Double> {
         for(int i : cols){
             this.swapper[k++] = this.get(i);
         }
-        System.out.println(Arrays.toString(this.array));
+        
         this.offset = this.start;
         this.length = cols.length;
         

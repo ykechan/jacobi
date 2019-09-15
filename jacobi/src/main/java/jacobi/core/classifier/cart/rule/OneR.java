@@ -96,7 +96,7 @@ public class OneR implements Rule {
 		Set<Column<?>> subfeats = new TreeSet<>(features);
 		subfeats.remove(target);
 		
-		List<Sequence> subseq = seq.groupBy(this.splitFunc(dataTable, target, min.item));
+		List<? extends Sequence> subseq = seq.groupBy(this.splitFunc(dataTable, target, min.item));
 		List<DecisionNode<T>> nodes = subseq.stream()
 				.map(s -> this.zeroR.make(dataTable, subfeats, s))
 				.collect(Collectors.toList());

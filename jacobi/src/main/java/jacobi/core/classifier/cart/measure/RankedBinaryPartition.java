@@ -23,6 +23,7 @@
  */
 package jacobi.core.classifier.cart.measure;
 
+import java.util.Arrays;
 import java.util.List;
 
 import jacobi.api.Matrix;
@@ -71,15 +72,27 @@ public class RankedBinaryPartition implements Partition {
         double min = Double.MAX_VALUE;
         int at = -1;
         
-        for(int i = 0; i < instances.size(); i++) {
+        System.out.println("Column #" + target.getIndex());
+        Matrix numMat = table.getMatrix();
+        
+        double prevVal = Double.NaN;
+        for(int i = 0; i < instances.size(); i++) { 
             Instance inst = instances.get(i);
+            double numVal = numMat.get(inst.feature, target.getIndex());
             if(prev < 0){
                 prev = inst.outcome;
-            }                       
+            } 
             
-            if(prev != inst.outcome) {
+            if(prev != inst.outcome && numVal > prevVal) {
             	double imp = left * this.impurity.of(leftDist)
                         + right * this.impurity.of(rightDist);
+            	
+            	System.out.println(
+            		"$" + i + ":" 
+            		+ Arrays.toString(leftDist) + "(" + this.impurity.of(leftDist) + ")" 
+            		+ ":" 
+            		+ Arrays.toString(rightDist) + "(" + this.impurity.of(rightDist) + ")"
+            		+ ":" + imp);
              
 	             if(imp < min) {
 	                 min = imp;
@@ -93,7 +106,9 @@ public class RankedBinaryPartition implements Partition {
             leftDist[inst.outcome] += inst.weight;
             
             right -= inst.weight;
-            rightDist[inst.outcome] -= inst.weight;            
+            rightDist[inst.outcome] -= inst.weight;     
+            
+            prevVal = numVal;
         }
         
         return at < 0

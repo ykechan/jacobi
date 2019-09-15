@@ -82,8 +82,6 @@ public class CooleyTukeyRadix2Test {
     public void testComplex6UsingPivot3() {
         ComplexVector vec = ComplexVector.of(this.input.getRow(0), this.input.getRow(1));        
         new CooleyTukeyRadix2(true).merge(vec, 0, vec.length());
-        Arrays.stream(vec.real).forEach(System.out::println);
-        Arrays.stream(vec.imag).forEach(System.out::println);
         this.output = Matrices.of(new double[][]{vec.real, vec.imag});
     }
     
