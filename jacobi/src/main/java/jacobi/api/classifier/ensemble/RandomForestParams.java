@@ -21,19 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jacobi.api.classifier;
+package jacobi.api.classifier.ensemble;
 
-import java.util.function.Function;
+import jacobi.api.classifier.cart.DecisionTreeParams;
 
-/**
- * Common interface of a classifier.
- * 
- * <p>In this context, a classifier is simply a function that maps an input feature vector
- * to an item in a set.</p>
- * 
- * @author Y.K. Chan
- * @param <T>  Type of item of classification
- */
-public interface Classifier<T> extends Function<double[], T> {
-	
+public class RandomForestParams extends BaggingParams<DecisionTreeParams> {
+
 }

@@ -2,6 +2,7 @@ package jacobi.core.logit;
 
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -54,6 +55,18 @@ public class LogisticRegressionTest {
 			.init(this.input, () -> 1.0)
 			.get();
 		System.out.println(Arrays.toString(pos));
+	}
+	
+	@Test
+	@JacobiImport("test example 10x3")
+	public void shouldBeAbleToFitLogisticCurveOnPerfectSeparableData() {
+		double[] ans = new LogisticRegression(
+				LogisticRegression.DEFAULT_OPTIMIZER, 
+				LnLikeLogistic::new)
+			.compute(this.input, IntStream.range(0, this.outcome.getRowCount())
+					.mapToDouble(i -> this.outcome.get(i, 0))
+					.toArray());
+		System.out.println(Arrays.toString(ans));
 	}
 
 }

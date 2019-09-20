@@ -56,6 +56,38 @@ public class LnLikeLogisticTest {
         this.hessian = func.hess(this.position.getRow(0));
     }
     
+    @Test
+    @JacobiImport("test bias + 2 vars using if")
+    @JacobiEquals(expected = 100, actual = 100)
+    @JacobiEquals(expected = 101, actual = 101)
+    @JacobiEquals(expected = 102, actual = 102)
+    public void testBiasAnd2VarsUsingIf() {
+        VectorFunction func = new LnLikeLogistic(this.data, 
+                IntStream.range(0, this.outcome.getRowCount())
+                    .mapToDouble(i -> this.outcome.get(i, 0))
+                    .toArray());
+        
+        this.value = Matrices.scalar(func.at(this.position.getRow(0)));
+        this.gradient = func.grad(this.position.getRow(0));
+        this.hessian = func.hess(this.position.getRow(0));
+    }
+    
+    @Test
+    @JacobiImport("test 4 vars with rand outcomes")
+    @JacobiEquals(expected = 100, actual = 100)
+    @JacobiEquals(expected = 101, actual = 101)
+    @JacobiEquals(expected = 102, actual = 102)
+    public void test4VarsWithRandOutcomes() {
+        VectorFunction func = new LnLikeLogistic(this.data, 
+                IntStream.range(0, this.outcome.getRowCount())
+                    .mapToDouble(i -> this.outcome.get(i, 0))
+                    .toArray());
+        
+        this.value = Matrices.scalar(func.at(this.position.getRow(0)));
+        this.gradient = func.grad(this.position.getRow(0));
+        this.hessian = func.hess(this.position.getRow(0));
+    }
+    
     protected boolean[] toBools(Matrix column) {
         boolean[] isPos = new boolean[column.getRowCount()];
         for(int i = 0; i < isPos.length; i++) {

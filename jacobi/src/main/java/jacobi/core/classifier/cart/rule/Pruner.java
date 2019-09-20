@@ -1,4 +1,4 @@
-/*
+/* 
  * The MIT License
  *
  * Copyright 2019 Y.K. Chan
@@ -21,55 +21,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jacobi.core.logit;
+package jacobi.core.classifier.cart.rule;
 
-import java.util.Arrays;
-
-import jacobi.api.Matrix;
-import jacobi.core.solver.nonlin.SumLinearArgFunc;
+import jacobi.api.classifier.DataTable;
+import jacobi.api.classifier.cart.DecisionNode;
+import jacobi.core.classifier.cart.Sequence;
 
 /**
- * Sinh as Sigmoid function in Logistic Regression.
+ * Common interface for pruning a branch of a decision tree.
  * 
- * <p>Consider sinh(x) = (e<sup>x</sup> + e<sup>-x</sup>) / 2</p>
- * 
- * <p>sinh'(x) = (e<sup>x</sup> - e<sup>-x</sup>) / 2</p>
- * 
- * <p>sinh''(x) = sinh(x)</p>
- *  
  * @author Y.K. Chan
  *
  */
-public class SinhLoss extends SumLinearArgFunc<double[]> {
+public interface Pruner {
+	
+	/**
+	 * Prune the decision node given testing data, or retain the original node.
+	 * @param node  Decision node
+	 * @param dataTab  Data table
+	 * @param seq  Sequence of data interested
+	 * @return  Pruned node, or the original node if pruning not favourable
+	 */
+	public <T> DecisionNode<T> prune(DecisionNode<T> node, DataTable<T> dataTab, Sequence seq);
 
-	public SinhLoss(Matrix consts, double[] weights) {
-		super(consts);
-		this.weights = weights;
-	}
-
-	@Override
-	protected double valueAt(double[] inter, int index, double x) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	protected double slopeAt(double[] inter, int index, double x) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	protected double convexityAt(double[] inter, int index, double x) {
-		return 0;
-	}
-
-	@Override
-	protected double[] prepare(double[] pos, double[] args) {
-		return Arrays.stream(args)
-			.map(Math::exp)
-			.toArray();
-	}
-
-	private double[] weights;
 }

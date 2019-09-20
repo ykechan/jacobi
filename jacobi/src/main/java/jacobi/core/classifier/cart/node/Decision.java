@@ -23,6 +23,7 @@
  */
 package jacobi.core.classifier.cart.node;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import jacobi.api.classifier.Column;
@@ -58,5 +59,25 @@ public class Decision<T> implements DecisionNode<T> {
         return Optional.empty();
     }
     
-    private T decision;
+    @Override
+	public int hashCode() {
+		return Objects.hashCode(this.decision);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if(this == obj){
+			return true;
+		}
+		
+		if(obj instanceof Decision) {
+			Decision<?> other = (Decision<?>) obj;
+			return this.split().equals(obj)
+				&& Objects.equals(this.decision, other.decide());
+		}
+		
+		return false;
+	}
+
+	private T decision;
 }

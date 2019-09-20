@@ -29,7 +29,11 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import jacobi.api.Matrix;
+import jacobi.core.solver.nonlin.GradientDescentStep;
 import jacobi.core.solver.nonlin.IterativeOptimizer;
+import jacobi.core.solver.nonlin.NewtonRaphsonMinStep;
+import jacobi.core.solver.nonlin.QueuedOptimizer;
+import jacobi.core.solver.nonlin.SimpleIterativeOptimizer;
 import jacobi.core.solver.nonlin.VectorFunction;
 import jacobi.core.stats.RowReduce;
 import jacobi.core.stats.Variance;
@@ -55,6 +59,7 @@ public class LogisticRegression {
 			BiFunction<Matrix, double[], VectorFunction> sigmoidFactory) {
 		this.optimizer = optimizer;
 		this.sigmoidFactory = sigmoidFactory;
+		this.iterMult = DEFAULT_ITER_MULTIPLIER;
 	}
 	
 	/**
@@ -138,5 +143,12 @@ public class LogisticRegression {
 	private BiFunction<Matrix, double[], VectorFunction> sigmoidFactory;
 	private int iterMult;
 	
-	protected static final long DEFAULT_ITER_MULT = 128L;
+	protected static final int DEFAULT_ITER_MULTIPLIER = 32;
+	
+	protected static final double DEFAULT_LEARNING_RATE = 0.001;
+	
+	protected static final IterativeOptimizer DEFAULT_OPTIMIZER = new QueuedOptimizer(Arrays.asList(
+		new SimpleIterativeOptimizer(() -> new NewtonRaphsonMinStep( (f, p) -> new double[p.length] )),
+		new SimpleIterativeOptimizer(() -> new GradientDescentStep(DEFAULT_LEARNING_RATE))
+	));
 }

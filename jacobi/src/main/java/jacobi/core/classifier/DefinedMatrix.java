@@ -44,7 +44,7 @@ import jacobi.core.util.Throw;
  * @author Y.K. Chan
  * @param <T>  Type of outcome
  */
-public class DefinedMatrix<T> implements DataTable<T> {
+public class DefinedMatrix<T> implements DataTable<T>, Reweightable<T> {
 	
 	/**
 	 * Get the factory function on a given matrix and associated outcomes.
@@ -150,6 +150,11 @@ public class DefinedMatrix<T> implements DataTable<T> {
 		return nomVals == null
 			? this.getNumerics(outVals, weights)
 			: this.getNominals(nomVals, outVals, weights);
+	}
+	
+	@Override
+	public DataTable<T> reweight(double[] weights) {
+		return new DefinedMatrix<>(this.colDefs, this.colData, weights);
 	}
 	
 	/**
@@ -387,6 +392,6 @@ public class DefinedMatrix<T> implements DataTable<T> {
 			this.values = values;
 		}
 				
-	}
+	}	
 	
 }

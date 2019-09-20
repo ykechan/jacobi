@@ -70,7 +70,7 @@ public class LnLikeLogistic extends SumLinearArgFunc<double[]> {
      * @param consts  Constant coefficients for arguments
      * @param weights  Signed weights with signs representing outcomes
      */
-    protected LnLikeLogistic(Matrix consts, double[] weights) {
+    public LnLikeLogistic(Matrix consts, double[] weights) {
         super(consts);
         this.weights = weights;
     }
@@ -85,7 +85,7 @@ public class LnLikeLogistic extends SumLinearArgFunc<double[]> {
     @Override
     protected double slopeAt(double[] inter, int index, double x) {
         return this.weights[index] < 0.0 
-                ? -this.weights[index] * inter[index]
+                ?  -this.weights[index] * inter[index]
                 :  this.weights[index] * (inter[index] - 1.0);
     }
 

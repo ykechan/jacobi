@@ -23,7 +23,6 @@
  */
 package jacobi.core.solver.nonlin;
 
-import java.util.Optional;
 import java.util.function.Supplier;
 
 import jacobi.core.impl.ColumnVector;
@@ -50,7 +49,7 @@ public interface IterativeOptimizer {
      * @param init  Factory method for starting position
      * @param limit  Maximum number of iteration
      * @param epsilon  Error tolerance
-     * @return  The position of optima if found, empty if iteration exhaused
+     * @return  The position of optima found with its error value
      */
     public Weighted<ColumnVector> optimize(
         VectorFunction func, 

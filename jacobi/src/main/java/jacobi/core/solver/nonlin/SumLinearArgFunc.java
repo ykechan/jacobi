@@ -50,7 +50,7 @@ import jacobi.core.util.Throw;
  * grad(f) = [df/dX<sup>(i)</sup>] = [Sum{A<sub>k</sub><sup>(i)</sup> g'<sub>k</sub>}]<br>
  * 
  * hess(f) = [d<sup>2</sup>f/dX<sup>(i)</sup>dX<sup>(j)</sup>]
- *         = [ Sum{A<sub>k</sub><sup>(i)</sup> A<sub>k</sub><sup>(j)</sup> g''<sub>k</sub>} ]
+ *         = [ Sum{A<sub>k</sub><sup>(i)</sup> A<sub>k</sub><sup>(j)</sup> g''<sub>k</sub>} ] *         
  * </p>
  * 
  * 

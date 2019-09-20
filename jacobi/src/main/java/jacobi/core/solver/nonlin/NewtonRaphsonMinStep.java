@@ -97,12 +97,12 @@ public class NewtonRaphsonMinStep implements IterativeOptimizerStep {
     @Override
     public double[] delta(VectorFunction func, double[] pos) {
         ColumnVector gradient = func.grad(pos);
-        Matrix hessian = func.hess(pos);        
+        Matrix hessian = func.hess(pos); 
         return this.chol.compute(hessian)
-                .map(this::symmetrize)
-                .map(l -> this.doubleSub(l, gradient))
-                .map(g -> this.negate(g))
-                .orElseGet(() -> this.base.delta(func, pos));
+            .map(this::symmetrize)
+            .map(l -> this.doubleSub(l, gradient))
+            .map(g -> this.negate(g))
+            .orElseGet(() -> this.base.delta(func, pos));
     }        
     
     /**
