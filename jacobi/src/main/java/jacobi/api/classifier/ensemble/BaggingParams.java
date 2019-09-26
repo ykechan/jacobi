@@ -4,10 +4,12 @@ public class BaggingParams<P> {
 	
 	public double samplingRate;
 	
-	public double subspaceRate;
+	public double dimSpan;
 	
-	public int numOfModels;
+	public int stoppingLimit;
+	
+	public double stoppingDelta;
 	
 	public P subParams;
-		
+	
 }

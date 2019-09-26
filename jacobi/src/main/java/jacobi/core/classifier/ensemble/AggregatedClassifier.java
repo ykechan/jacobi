@@ -74,7 +74,7 @@ public class AggregatedClassifier<T, C extends Classifier<T>> implements Classif
 	 * @param featureVector  Input feature vector
 	 * @return  Map of answers and associated importance
 	 */
-	protected Map<T, Double> classify(double[] featureVector) {
+	public Map<T, Double> classify(double[] featureVector) {
 		Map<T, Double> conf = new HashMap<>();
 		for(Weighted<C> classifier : classifiers) {
 			T ans = classifier.item.apply(featureVector);
