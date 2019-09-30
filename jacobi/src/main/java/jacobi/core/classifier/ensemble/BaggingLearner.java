@@ -45,7 +45,7 @@ import jacobi.core.impl.ImmutableMatrix;
 import jacobi.core.util.Weighted;
 
 /**
- * Learn a classifer by combining multiple classifiers and select the majority of result.
+ * Learn a classifier by combining multiple classifiers and select the majority of result.
  * 
  * @author Y.K. Chan
  *
@@ -70,11 +70,11 @@ public class BaggingLearner<T, C extends Classifier<T>, P>
 	public AggregatedClassifier<T, C> learn(DataTable<T> dataTab, BaggingParams<P> params) {
 		
 		List<C> models = new ArrayList<>();		
-		int size = (int) Math.ceil(params.samplingRate * dataTab.size());
+		int size = (int) Math.ceil(params.rate.data * dataTab.size());
 		
-		for(int i = 0; i < params.stoppingLimit; i++) {
+		for(int i = 0; i < params.stop.limit; i++) {
 			DataTable<T> subData = this.subset(dataTab, 
-				this.subspace(dataTab.getColumns(), params.dimSpan), 
+				this.subspace(dataTab.getColumns(), params.rate.dim), 
 				this.randomSample(n -> (int) (n * this.rand.getAsDouble()), size)
 			);
 			
@@ -89,26 +89,64 @@ public class BaggingLearner<T, C extends Classifier<T>, P>
 		);
 	}
 	
+	/**
+	 * Measure the difference the last n classifiers make
+	 * @param dataTab  Input data table
+	 * @param classifiers  List of classifiers
+	 * @param lag  Value of n
+	 * @return  The difference that the last n classifiers make, between 0 and 1
+	 */
 	protected double delta(DataTable<T> dataTab, List<C> classifiers, int lag) {
 		Matrix matrix = dataTab.getMatrix();
 		
 		double change = 0.0;
 		for(int i = 0; i < matrix.getRowCount(); i++){
 			Map<T, Integer> before = new HashMap<>();
-			Map<T, Integer> after = null;
+			Map<T, Integer> after = new HashMap<>();
 			
 			double[] features = matrix.getRow(i);			
 			for(int j = 0; j < classifiers.size(); j++){				
 				T ans = classifiers.get(j).apply(features);
-				before.put(ans, before.getOrDefault(ans, 0) + 1);
-				
-				if(j + lag > classifiers.size()){
-					after.put(ans, after.getOrDefault(ans, 0) + 1);
-				}
+				Map<T, Integer> target = (j + lag < classifiers.size()) ? before : after;
+				target.put(ans, target.getOrDefault(ans, 0));
 			}
+			
+			change += this.cosine(before, after);
 		}
-		return change;
+		
+		return 1.0 - (change / classifiers.size());
 	}	
+	
+	/**
+	 * Compute the cosine between two voting vectors.
+	 * @param before  Voting vector before a cut-off point in the classifier list
+	 * @param after  Voting vector before a cut-off point in the classifier list
+	 * @return  Cosine between the two voting vectors.
+	 */
+	protected double cosine(Map<T, Integer> before, Map<T, Integer> after) {
+		long normBefore = 0;
+		long normAfter = 0;
+		long dot = 0;
+		
+		for(Map.Entry<T, Integer> entry : before.entrySet()) {
+			int left = entry.getValue();
+			int right = left + after.getOrDefault(entry.getKey(), 0);
+			
+			normBefore += left * left;
+			normAfter += right * right;
+			
+			dot += entry.getValue() * right;
+		}
+		
+		for(Map.Entry<T, Integer> entry : after.entrySet()) {
+			if(before.containsKey(entry.getKey())){
+				continue;
+			}
+			
+			normAfter += entry.getValue() * entry.getValue();
+		}
+		return dot / Math.sqrt(normBefore * normAfter);
+	}
 	
 	/**
 	 * Create a view of the subset of data given a set of data.
