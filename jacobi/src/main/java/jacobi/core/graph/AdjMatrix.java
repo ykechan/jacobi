@@ -25,10 +25,13 @@ package jacobi.core.graph;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.IntFunction;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import jacobi.api.Matrix;
+import jacobi.api.graph.AdjList;
+import jacobi.api.graph.Edge;
 
 /**
  * Implementation of adjacency list by an adjacency matrix.
@@ -38,59 +41,80 @@ import jacobi.api.Matrix;
  * 
  * @author Y.K. Chan
  */
-public class AdjMatrix implements AdjList {
-	
-	public static AdjMatrix of(Matrix matrix) {
-		int[] temp = new int[matrix.getColCount()];
-		int[][] index = new int[matrix.getRowCount()][];
-		for(int i = 0; i < index.length; i++){
-			index[i] = AdjMatrix.nonzeros(matrix.getRow(i), temp, 0);
-		}
-		
-		return null;
-	}
-	
-	protected AdjMatrix(List<int[]> index, Matrix matrix) {
-		this.index = index;
-		this.matrix = matrix;
-	}
+public class AdjMatrix implements AdjList {	
 
 	@Override
 	public int order() {
-		return this.matrix.getRowCount();
+		return this.index.size();
 	}
-	
+
 	@Override
 	public Stream<Edge> edges(int from) {
 		int[] map = this.index.get(from);
 		double[] weights = this.matrix.getRow(from);
+		IntFunction<Edge> func = i -> new Edge(from, i, weights[i]);
 		
-		return map == null
-			? IntStream
-				.range(0, weights.length)
+		if(map == null) {
+			return IntStream.range(0, weights.length)
 				.filter(i -> weights[i] != 0.0)
-				.mapToObj(i -> new Edge(from, i, weights[i]))
-			: Arrays.stream(map).mapToObj(i -> new Edge(from, i, weights[i]));
+				.mapToObj(func);
+		}
+		
+		if(map.length == 0){
+			return Stream.empty();
+		}
+		
+		if(map[0] < 0){
+			return this.ranges(weights, map).mapToObj(func);
+		}
+		return Arrays.stream(map).mapToObj(func);
 	}
 	
-	protected static int[] nonzeros(double[] row, int[] temp, int limit) {
-		int k = 0;
-		for(int i = 0; i < row.length; i++) {
-			if(row[i] == 0) {
-				continue;
-			}
-			
-			temp[k++] = i;
-			
-			if(k > limit) {
-				return null;
-			}
+	protected IntStream ranges(double[] weights, int[] map) {
+		if(map.length < 4){
+			return IntStream.range(map[1], map[2]);
 		}
-		return Arrays.copyOfRange(temp, 0, k);
-	} 
+		
+		return IntStream.range(0, map.length / 2)
+			.flatMap(i -> IntStream.range(map[1 + 2 * i], map[2 + 2 * i]));
+	}
 	
 	private List<int[]> index;
 	private Matrix matrix;
 	
-	protected static final double DEFAULT_SPARSE_LIMIT = 0.6;
+	protected static int[] scatters(double[] weights, int[] temp) {
+		int k = 0;
+		for(int i = 0; i < weights.length; i++){
+			if(weights[i] != 0.0){
+				temp[k++] = i; 
+			}
+		}
+		return Arrays.copyOfRange(temp, 0, k);
+	}
+
+	protected static int[] clumps(double[] weights, int[] temp) {
+		int k = weights[0] == 0.0 ? 0 : 1;
+		temp[0] = 0;
+		temp[k] = k;
+		for(int i = 1; i < weights.length; i++){
+			if(weights[i] == 0.0 ^ weights[i - 1] == 0.0){
+				temp[++k] = 0;
+			}
+			temp[k]++;
+		}
+		int end = k + (k % 2); // ignore trailing zeros
+		int[] regions = new int[1 + end];
+		regions[0] = -1;
+		
+		int pointer = 0;
+		for(int i = 1; i < end; i += 2) {
+			pointer += temp[i - 1];
+			regions[i] = pointer;
+			pointer += temp[i];
+			regions[i + 1] = pointer;
+		}
+		
+		return regions;
+	}
+		
 }

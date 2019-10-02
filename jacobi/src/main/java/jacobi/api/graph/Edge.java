@@ -21,35 +21,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jacobi.core.graph;
-
-import java.util.stream.Stream;
+package jacobi.api.graph;
 
 /**
- * Common interface for a graph represented as an adjacency list.
- * 
- * <p>A graph is a collection of vertex V and a set of edges E &isin; {(u, v, w) | u, v &isin; V, w &isin; R },
- * which is a pair of vertices with a weight associated with it. An adjacency list is a representation
- * of a Graph which supports the operation of querying all edges where u is given.</p>
- * 
- * <p>In this context vertices are denoted by it's index, and for a graph with N vertices, they
- * are denoted by 0, 1, ... N - 1.</p>
+ * Data class representing an edge in a graph.
  * 
  * @author Y.K. Chan
  */
-public interface AdjList {
-
-	/**
-	 * Get the order of the graph, i.e. the number of vertices
-	 * @return  Number of vertice
-	 */
-	public int order();
+public class Edge {
 	
 	/**
-	 * Get the edges of the graph from a particular vertex
-	 * @param from  Index of the vertex
-	 * @return  List of edges from a particular vertex
+	 * Vertex of the beginning and end of this edge.
 	 */
-	public Stream<Edge> edges(int from);	
+	public final int from, to;
+	
+	/**
+	 * Weight of this edge
+	 */
+	public final double weight;
+
+	/**
+	 * Constructor.
+	 * @param from  Beginning of this edge
+	 * @param to  End of this edge
+	 * @param weight  weight of this edge
+	 */
+	public Edge(int from, int to, double weight) {
+		this.from = from;
+		this.to = to;
+		this.weight = weight;
+	}
 	
 }
