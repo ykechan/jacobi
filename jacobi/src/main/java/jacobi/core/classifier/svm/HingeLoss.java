@@ -1,4 +1,4 @@
-/* 
+/*
  * The MIT License
  *
  * Copyright 2019 Y.K. Chan
@@ -21,27 +21,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jacobi.core.classifier.cart.rule;
+package jacobi.core.classifier.svm;
 
-import jacobi.api.classifier.DataTable;
-import jacobi.api.classifier.cart.DecisionNode;
-import jacobi.core.classifier.cart.Sequence;
+import jacobi.api.Matrix;
+import jacobi.core.solver.nonlin.SumLinearArgFunc;
 
 /**
- * Common interface for pruning a branch of a decision tree.
+ * Hinge loss function used for maximum-margin classification.
+ * 
+ * <p>Given &lt;X<sub>k</sub>, y<sub>k</sub>&gt;, y<sub>k</sub> &isin; {-1, 1} </p>
  * 
  * @author Y.K. Chan
  *
  */
-public interface Pruner {
-	
-	/**
-	 * Prune the decision node given testing data, or retain the original node.
-	 * @param node  Decision node
-	 * @param dataTab  Data table
-	 * @param seq  Sequence of data interested
-	 * @return  Pruned node, or the original node if pruning not favourable
-	 */
-	public <T> DecisionNode<T> prune(DecisionNode<T> node, DataTable<T> dataTab, Sequence seq);
+public class HingeLoss extends SumLinearArgFunc<Void> {
 
+	public HingeLoss(Matrix consts, double[] weights) {
+		super(consts);
+		this.weights = weights;
+	}
+
+	@Override
+	protected double valueAt(Void inter, int index, double x) {
+		
+		return x > 1.0 ? 0.0 : 1.0 - x;
+	}
+
+	@Override
+	protected double slopeAt(Void inter, int index, double x) {
+		return 0;
+	}
+
+	@Override
+	protected double convexityAt(Void inter, int index, double x) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	protected Void prepare(double[] pos, double[] args) {
+		return null;
+	}
+
+	private double[] weights;
 }

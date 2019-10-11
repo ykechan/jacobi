@@ -25,7 +25,6 @@
 package jacobi.core.util;
 
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntConsumer;
 import java.util.function.Supplier;
@@ -131,22 +130,22 @@ public class ParallelSupplier<T> implements Supplier<List<T>> {
     @Override
     public List<T> get() {
         List<Thread> threads = this.suppliers.stream()
-                .sequential()
-                .skip(1)
-                .map((t) -> new Thread(t))
+                .sequential().skip(1).map(Thread::new)
                 .collect(Collectors.toList());
         Task<T> first = this.suppliers.iterator().next();
-        threads.forEach((t) -> t.start());
+        threads.forEach(Thread::start);
         first.run();
-        threads.forEach((t) -> {
+        threads.forEach(t -> {
             try { 
                 t.join(DEFAULT_TIMEOUT); 
             } catch (InterruptedException ex) { 
+            	
+            	Thread.currentThread().interrupt();
                 throw new IllegalStateException(ex);
             } 
         }); 
         return this.suppliers.stream()
-                .map((t) -> t.get())
+                .map(t -> t.get())
                 .collect(Collectors.toList());        
     }    
 
@@ -158,7 +157,7 @@ public class ParallelSupplier<T> implements Supplier<List<T>> {
      * Supplier and Runnable with cached return result.
      * @param <T>  Individual return result
      */
-    protected class Task<T> implements Supplier<T>, Runnable {
+    protected static class Task<T> implements Supplier<T>, Runnable {
 
         /**
          * Constructor.

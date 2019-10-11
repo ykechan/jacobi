@@ -23,6 +23,8 @@
  */
 package jacobi.api.graph;
 
+import java.util.Objects;
+
 /**
  * Data class representing an edge in a graph.
  * 
@@ -51,5 +53,26 @@ public class Edge {
 		this.to = to;
 		this.weight = weight;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		
+		if(obj instanceof Edge){
+			Edge that = (Edge) obj;
+			return this.from == that.from
+				&& this.to == that.to
+				&& this.weight == that.weight;
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.from, this.to, this.weight);
+	}
 	
+	@Override
+	public String toString() {
+		return this.from + " -> " + this.to + " (" + this.weight + ")";
+	}
 }

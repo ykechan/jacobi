@@ -23,7 +23,6 @@
  */
 package jacobi.demo;
 
-import jacobi.api.ext.Data;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,7 +41,6 @@ public final class Main {
     
     public static void main(String[] args) {
         new Main().run(System.out);
-        return;
     }
     
     private void run(PrintStream out) {

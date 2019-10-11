@@ -32,7 +32,7 @@ import java.util.Arrays;
  * <p>
  * This class is to compensate the lack of a primitive support for stack of integers in which usage is very common.
  * With Java Collection programmer has to use Deque, which is a mixed implementation of Stack and Queue, and have to 
- * use boxed integers, which would took a hit in performance and memory if there is large amount of integers.
+ * use boxed integers, which would took a hit in performance and memory if there is a large amount of integers.
  * </p>
  * 
  * @author Y.K. Chan

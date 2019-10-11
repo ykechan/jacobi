@@ -148,7 +148,6 @@ class PaddingPlan {
          * @param cols  Column indices
          * @return  This object.
          */
-        @SuppressWarnings("null")
         public Builder select(int... cols) {
             Throw.when()
                 .isTrue(

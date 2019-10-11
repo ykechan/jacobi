@@ -24,6 +24,7 @@
 package jacobi.core.graph;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.IntFunction;
 import java.util.stream.IntStream;
@@ -32,6 +33,7 @@ import java.util.stream.Stream;
 import jacobi.api.Matrix;
 import jacobi.api.graph.AdjList;
 import jacobi.api.graph.Edge;
+import jacobi.core.util.Throw;
 
 /**
  * Implementation of adjacency list by an adjacency matrix.
@@ -42,6 +44,41 @@ import jacobi.api.graph.Edge;
  * @author Y.K. Chan
  */
 public class AdjMatrix implements AdjList {	
+	
+	/**
+	 * Factory method.
+	 * @param matrix  Matrix of edge weights
+	 * @return  Adjacency matrix
+	 */
+	public static AdjMatrix of(Matrix matrix) {
+		Throw.when()
+			.isNull(() -> matrix, () -> "No edge weight matrix.")
+			.isTrue(
+				() -> matrix.getRowCount() != matrix.getColCount(), 
+				() -> "Adjacency matrix must be a square matrix."
+			);
+		
+		int[] temp = new int[matrix.getColCount()];
+		int[][] index = new int[matrix.getRowCount()][];
+		for(int i = 0; i < index.length; i++) {
+			index[i] = AdjMatrix.scatters(matrix.getRow(i), temp);
+		}
+		
+		return new AdjMatrix(
+			Collections.unmodifiableList(Arrays.asList(index)), 
+			matrix
+		);
+	}
+
+	/**
+	 * Constructor
+	 * @param index  Index array for non-zero entries
+	 * @param matrix  Adjacency matrix
+	 */
+	protected AdjMatrix(List<int[]> index, Matrix matrix) {
+		this.index = index;
+		this.matrix = matrix;
+	}
 
 	@Override
 	public int order() {
@@ -65,12 +102,12 @@ public class AdjMatrix implements AdjList {
 		}
 		
 		if(map[0] < 0){
-			return this.ranges(weights, map).mapToObj(func);
+			return this.ranges(map).mapToObj(func);
 		}
 		return Arrays.stream(map).mapToObj(func);
 	}
 	
-	protected IntStream ranges(double[] weights, int[] map) {
+	protected IntStream ranges(int[] map) {
 		if(map.length < 4){
 			return IntStream.range(map[1], map[2]);
 		}
@@ -90,31 +127,9 @@ public class AdjMatrix implements AdjList {
 			}
 		}
 		return Arrays.copyOfRange(temp, 0, k);
-	}
-
-	protected static int[] clumps(double[] weights, int[] temp) {
-		int k = weights[0] == 0.0 ? 0 : 1;
-		temp[0] = 0;
-		temp[k] = k;
-		for(int i = 1; i < weights.length; i++){
-			if(weights[i] == 0.0 ^ weights[i - 1] == 0.0){
-				temp[++k] = 0;
-			}
-			temp[k]++;
-		}
-		int end = k + (k % 2); // ignore trailing zeros
-		int[] regions = new int[1 + end];
-		regions[0] = -1;
+	}		
 		
-		int pointer = 0;
-		for(int i = 1; i < end; i += 2) {
-			pointer += temp[i - 1];
-			regions[i] = pointer;
-			pointer += temp[i];
-			regions[i + 1] = pointer;
-		}
-		
-		return regions;
-	}
-		
+	protected static final double DEFAULT_SPARSE_RATIO = 0.6;
+	
+	protected static final double DEFAULT_DENSE_RATIO = 0.8;
 }
