@@ -60,5 +60,17 @@ public class MinHeapTest {
 		Assert.assertEquals(3, entry.item.intValue());
 		Assert.assertEquals(9.0, entry.weight, 1e-12);
 	}
+	
+	@Test
+	public void test() {
+		double a = Double.POSITIVE_INFINITY;
+		double b = Double.POSITIVE_INFINITY;
+		
+		System.out.println(a);
+		System.out.println(a + b);
+		System.out.println(2 * b);
+		System.out.println(-2 * b);
+		System.out.println(Math.min(3.0, b));
+	}
 
 }

@@ -53,6 +53,7 @@ public class MinHeap implements Enque<Weighted<Integer>> {
 		this.length = 0;
 		this.expand = expand;
 		this.array = new double[2 * initCap];
+		this.lag = Lag.NONE;
 	}
 
 	@Override
@@ -65,6 +66,12 @@ public class MinHeap implements Enque<Weighted<Integer>> {
 		return this.push(item.item, item.weight);
 	}
 	
+	/**
+	 * Push an item in this heap
+	 * @param item  Integer item
+	 * @param weight  Associated weight
+	 * @return  This
+	 */
 	public Enque<Weighted<Integer>> push(int item, double weight) {		
 		
 		this.array = this.ensureCapacity(this.array, this.length + 1);
@@ -91,6 +98,25 @@ public class MinHeap implements Enque<Weighted<Integer>> {
 		if(this.isEmpty()) {
 			throw new NoSuchElementException();
 		}
+		switch(this.lag) {
+			case NONE:
+				return this.get(this.array, 0);
+				
+			case TOP:
+				return this.get(this.array, this.array[2 * 1] < this.array[2 * 2] ? 1 : 2);
+				
+			case LEFT:
+				return this.get(this.array, 2);
+							
+			case RIGHT:
+				return this.get(this.array, 1);
+				
+			case ALL:
+				break;
+				
+			default:
+				throw new IllegalStateException("Unknown lagging state " + this.lag);
+		}		
 		
 		return this.get(this.array, 0);
 	}
@@ -114,6 +140,10 @@ public class MinHeap implements Enque<Weighted<Integer>> {
 			(int) Double.doubleToRawLongBits(this.array[2 * index + 1]), 
 			this.array[2 * index]
 		);
+	}
+	
+	protected int minIndex(double[] array, int length, Lag lag) {
+		return 0;
 	}
 	
 	/**
@@ -201,13 +231,27 @@ public class MinHeap implements Enque<Weighted<Integer>> {
 			: array;
 	}
 	
+	private Lag lag;
 	private int length, expand;
 	private double[] array;
 	
+	protected enum Lag {
+		NONE, TOP, LEFT, RIGHT, ALL
+	}
+	
+	/**
+	 * Default increment of expand size
+	 */
 	protected static final int DEFAULT_INCREMENT = 2;
 	
+	/**
+	 * Default initial element capacity
+	 */
 	protected static final int DEFAULT_INIT_SIZE = 16;
 	
+	/**
+	 * Default initial expand size
+	 */
 	protected static final int DEFAULT_INIT_EXPAND = 9;
 	
 }
