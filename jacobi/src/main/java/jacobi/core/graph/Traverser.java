@@ -23,12 +23,14 @@
  */
 package jacobi.core.graph;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -61,7 +63,7 @@ import jacobi.core.util.Enque;
  * @author Y.K. Chan
  *
  */
-public class Traverser {
+public class Traverser implements PathFinder {
 	
 	/**
 	 * Constructor.
@@ -69,6 +71,18 @@ public class Traverser {
 	 */
 	public Traverser(Supplier<Enque<Edge>> enqueFactory) {
 		this.enqueFactory = enqueFactory;
+	}
+	
+	@Override
+	public Optional<List<Edge>> find(AdjList adjList, int start, int dest) {
+		Enque<Edge> stack = Enque.stackOf(new ArrayDeque<>());
+		for(Edge edge : this.search(adjList, start, c -> true)){
+			if(edge.from < 0) {
+				continue;
+			}
+			// ...
+		}
+		return null;
 	}
 	
 	/**
@@ -268,4 +282,5 @@ public class Traverser {
 	 * Marker value of finished vertex
 	 */
 	protected static final byte PERM = '?';
+	
 }
