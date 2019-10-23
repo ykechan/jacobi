@@ -1,5 +1,6 @@
 package jacobi.core.graph;
 
+import java.math.BigInteger;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.List;
@@ -85,7 +86,8 @@ public class DijkstraTest {
 		};
 	}
 	
-	protected AdjList grid(List<String> floor) {
+	protected AdjList grid(List<String> floor) {		
+		
 		int width = floor.stream().mapToInt(s -> s.length()).reduce((a, b) -> {
 			if(a != b) {
 				throw new IllegalArgumentException();

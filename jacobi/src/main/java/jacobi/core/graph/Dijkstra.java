@@ -26,8 +26,6 @@ package jacobi.core.graph;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.function.Supplier;
 
 import jacobi.api.graph.AdjList;
@@ -98,7 +96,7 @@ public class Dijkstra implements PathFinder {
 	 * @param src  Source
 	 * @param dest  Destination, or negative if paths to all vertices are required
 	 * @param routes  Route information
-	 * @return  Route information, or null if negative cycle found
+	 * @return  Route information, or null if negative edge found
 	 */
 	protected Routes compute(AdjList adjList, int src, int dest, Routes routes) {
 		Enque<Weighted<Integer>> enque = this.enqueFactory.get();
@@ -114,50 +112,25 @@ public class Dijkstra implements PathFinder {
 				return routes;
 			}
 			
-			int worse = adjList.edges(reach.item)
+			double min = adjList.edges(reach.item)
 				.filter(e -> via[e.to] < 0 || reach.weight + e.weight < dist[e.to])
 				.map(e -> {
-					double prevDist = dist[e.to];
-					
 					via[e.to] = e.from;
 					dist[e.to] = reach.weight + e.weight;
 					enque.push(new Weighted<>(e.to, reach.weight + e.weight));
 					
-					return prevDist < 0.0 && dist[e.to] < 0.0 ? e.to : -1;
+					return e.weight;
 				})
-				.filter(v -> v >= 0).reduce(Math::min).orElse(-1);
-
-			if(worse >= 0 && this.isCyclic(via, worse)){
+				.reduce(Math::min).orElse(0.0);
+			
+			if(min < 0.0) {
+				// negative edge found
 				return null;
 			}
+
 		}
 		
 		return routes;
-	}
-	
-	/**
-	 * Check if the current route map contains a cycle
-	 * @param via  Routes
-	 * @param dest  A vertex within the cycle
-	 * @return  True if the route map contains a cycle containing the vertex, false otherwise
-	 */
-	protected boolean isCyclic(int[] via, int dest) {
-		Set<Integer> set = new TreeSet<>();
-		set.add(dest);
-		
-		int to = dest;
-		for(int i = 0; i < via.length; i++){
-			if(set.contains(via[to])) {
-				return true;
-			}
-			
-			if(via[to] == to) {
-				break;
-			}
-			
-			to = via[to];
-		}
-		throw new IllegalStateException();
 	}
 	
 	private Supplier<Enque<Weighted<Integer>>> enqueFactory;
