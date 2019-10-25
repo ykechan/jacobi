@@ -105,6 +105,9 @@ public class Dijkstra implements PathFinder {
 		double[] dist = routes.dist;
 		int[] via = routes.via;
 		
+		byte[] markers = new byte[adjList.order()];	
+		Arrays.fill(markers, NEW);
+		
 		while(!enque.isEmpty()){
 			Weighted<Integer> reach = enque.pop();
 			
@@ -112,14 +115,23 @@ public class Dijkstra implements PathFinder {
 				return routes;
 			}
 			
-			double min = adjList.edges(reach.item)
-				.filter(e -> via[e.to] < 0 || reach.weight + e.weight < dist[e.to])
-				.map(e -> {
+			markers[reach.item] = DONE;
+			
+			double min = adjList.edges(reach.item).map(e -> {
+					if(e.weight < 0.0) {
+						return e.weight;
+					}
+					
+					if(markers[e.to] == DONE 
+					||(via[e.to] >= 0 && dist[e.to] < reach.weight + e.weight)) {
+						return 0.0;
+					}
+					
 					via[e.to] = e.from;
 					dist[e.to] = reach.weight + e.weight;
 					enque.push(new Weighted<>(e.to, reach.weight + e.weight));
 					
-					return e.weight;
+					return 0.0;
 				})
 				.reduce(Math::min).orElse(0.0);
 			
@@ -134,6 +146,11 @@ public class Dijkstra implements PathFinder {
 	}
 	
 	private Supplier<Enque<Weighted<Integer>>> enqueFactory;
+	
+	protected static final byte NEW = '\0';
+	
+	protected static final byte DONE = '.';
+	
 	
 	/**
 	 * Data class for Route information.

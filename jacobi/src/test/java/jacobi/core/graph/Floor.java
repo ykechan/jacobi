@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -85,6 +84,15 @@ public class Floor implements AdjList {
 				default :
 					throw new IllegalStateException("Invalid degree " + edges.length
 							+ " on vertex " + i + " (" + (i % 9) + "," + (i / 9) + ")");
+			}
+			
+			for(Edge e : edges) {
+				Assert.assertTrue(
+				   e.to - e.from ==  1
+				|| e.to - e.from == -1
+				|| e.to - e.from ==  9
+				|| e.to - e.from == -9
+				);
 			}
 		}
 	}

@@ -1,10 +1,10 @@
 package jacobi.core.graph;
 
-import java.math.BigInteger;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.junit.Assert;
@@ -66,6 +66,83 @@ public class DijkstraTest {
 		Assert.assertEquals(7.0, routeMap.edges(1).mapToDouble(e -> e.weight).sum(), 1e-12);		
 	}
 	
+	@Test
+	public void shouldBeAbleToFindRouteInCorridor() throws IOException {
+		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/FloorTest.txt")){
+			AdjList adjList = Floor.readAll(input).get("walled-corridors");
+			RouteMap routeMap = new Dijkstra(() -> Enque.stackOf(new ArrayDeque<>()))
+					.compute(adjList, 0)
+					.orElseThrow(() -> new IllegalStateException(""));
+			
+			List<Edge> path = routeMap.trace(adjList.order() - 1);
+			
+			for(int i = 0; i < 4; i++) {
+				Assert.assertEquals(9, path.get(i).to - path.get(i).from);
+			}
+			
+			for(int i = 0; i < 2; i++) {
+				Assert.assertEquals(1, path.get(4 + i).to - path.get(4 + i).from);
+			}
+			
+			for(int i = 0; i < 4; i++) {
+				Assert.assertEquals(-9, path.get(6 + i).to - path.get(6 + i).from);
+			}
+			
+			for(int i = 0; i < 2; i++) {
+				Assert.assertEquals(1, path.get(10 + i).to - path.get(10 + i).from);
+			}
+			
+			for(int i = 0; i < 4; i++) {
+				Assert.assertEquals(9, path.get(12 + i).to - path.get(12 + i).from);
+			}
+			
+			for(int i = 0; i < 2; i++) {
+				Assert.assertEquals(1, path.get(16 + i).to - path.get(16 + i).from);
+			}
+			
+			for(int i = 0; i < 4; i++) {
+				Assert.assertEquals(-9, path.get(18 + i).to - path.get(18 + i).from);
+			}
+			
+			for(int i = 0; i < 2; i++) {
+				Assert.assertEquals(1, path.get(22 + i).to - path.get(22 + i).from);
+			}
+			
+			for(int i = 0; i < 4; i++) {
+				Assert.assertEquals(9, path.get(24 + i).to - path.get(24 + i).from);
+			}
+		}
+	}
+	
+	@Test
+	public void shouldBeAbleToFindRouteAroundObstacles() throws IOException {
+		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/FloorTest.txt")){
+			AdjList adjList = Floor.readAll(input).get("obstacle");
+			RouteMap routeMap = new Dijkstra(() -> Enque.stackOf(new ArrayDeque<>()))
+					.compute(adjList, 0)
+					.orElseThrow(() -> new IllegalStateException(""));
+						
+			Assert.assertEquals(9 + Math.sqrt(2.0), routeMap.edges(adjList.order() - 1)
+					.reduce((a, b) -> {
+						throw new IllegalStateException();
+					})
+					.map(e -> e.weight)
+					.get(), 1e-12);
+		}
+	}
+	
+	@Test
+	public void shouldReturnEmptyWhenNegativeEdgesDetected() {
+		Assert.assertFalse(new Dijkstra(() -> Enque.queueOf(new ArrayDeque<>())).compute(
+			this.adjList(Arrays.asList(
+				new Edge(0, 1, 2.0),
+				new Edge(0, 2, 10.0),
+				new Edge(1, 3, 5.0),
+				new Edge(2, 3, -9.0)
+			)), 0).isPresent()
+		);
+	}
+	
 	protected AdjList adjList(List<Edge> edges) {
 		int n = edges.stream()
 				.mapToInt(e -> Math.max(e.from, e.to))
@@ -84,60 +161,6 @@ public class DijkstraTest {
 			}
 			
 		};
-	}
-	
-	protected AdjList grid(List<String> floor) {		
-		
-		int width = floor.stream().mapToInt(s -> s.length()).reduce((a, b) -> {
-			if(a != b) {
-				throw new IllegalArgumentException();
-			}
-			return a;
-		}).orElse(0);
-		
-		int height = floor.size();
-		
-		double sqrt2 = Math.sqrt(2.0);
-		return new AdjList() {
-
-			@Override
-			public int order() {
-				return width * height;
-			}
-
-			@Override
-			public Stream<Edge> edges(int from) {
-				int x = from % width;
-				int y = from / width;
-								
-				String curr = floor.get(y);
-				if(curr.charAt(x) == '#') {
-					return Stream.empty();
-				}
-				
-				String prev = y == 0 ? "" : floor.get(y - 1);
-				String next = y + 1 < height ? floor.get(y + 1) : "";
-				
-				return IntStream.range(0, 8)
-					.map(i -> i + 1)
-					.filter(i -> i != 4)
-					.filter(i -> x > 0 || i % 3 > 0)
-					.filter(i -> x + 1 < width || i % 2 < 2)
-					.filter(i -> prev.isEmpty() || i > 2)
-					.filter(i -> next.isEmpty() || i < 6)
-					.mapToObj(i -> {
-						int dx = (i % 3) - 1;
-						int dy = (i / 3) - 1;
-						
-						if(floor.get(y + dy).charAt(x + dx) == '#'){
-							return null;
-						}
-						return new Edge(from, i, dx == 0 || dy == 0 ? 1.0 : sqrt2);
-					})
-					.filter(e -> e != null);
-			}
-			
-		};
-	}
+	}	
 
 }

@@ -25,6 +25,8 @@ package jacobi.api.graph;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -92,12 +94,16 @@ public class RouteMap implements AdjList {
 	/**
 	 * Trace a route to a destination
 	 * @param dest  Input destination
-	 * @return  List of edges to follow
+	 * @return  List of edges to follow, or an empty list if destination is un-reachable
 	 */
 	public List<Edge> trace(int dest) {
 		List<Edge> path = new ArrayList<>();
 		
-		Edge edge = this.via.get(dest);		
+		Edge edge = this.via.get(dest);	
+		if(edge == null) {
+			return Collections.emptyList();
+		}
+		
 		while(edge.from != edge.to) {
 			path.add(edge);
 			edge = this.via.get(edge.to);
