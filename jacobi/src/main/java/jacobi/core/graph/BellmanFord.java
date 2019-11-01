@@ -25,62 +25,134 @@ package jacobi.core.graph;
 
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.IntFunction;
-import java.util.stream.IntStream;
+import java.util.function.IntConsumer;
 
 import jacobi.api.graph.AdjList;
 import jacobi.api.graph.RouteMap;
+import jacobi.core.graph.util.Routes;
 
 /**
  * Implementation of the Bellman-Ford algorithm.
  * 
  * <p>Any path from a starting vertex to a destination vertex can at most passing through 
  * |V| vertices without containing any cycle. Thus the shortest path can be found by
- * relaxing all edges at most for |V| times.</p>
+ * relaxing all edges for |V| times at most.</p>
+ * 
+ * <p>The standard Bellman-Ford examines all edges at each iteration.</p>
  * 
  * @author Y.K. Chan
  *
  */
 public class BellmanFord {
-	
+
 	public Optional<RouteMap> compute(AdjList adjList, int src) {
-		double[] dist = new double[adjList.order()];
-		int[] via = new int[adjList.order()];
-		Arrays.fill(via, -1);
+		Routes routes = Routes.init(adjList.order());
+		routes.via[src] = src;
 		
-		via[src] = src;
-		
-		return this.compute(adjList, dist, via);
+		return this.compute(adjList, routes);
 	}
 	
-	protected Optional<RouteMap> compute(AdjList adjList, double[] dist, int[] via) {
-		int num = adjList.order() + 1;
+	public Optional<RouteMap> compute(AdjList adjList, Routes routes) {
+		int limit = adjList.order();
+		return Optional.empty();
+	}
+	
+	protected Optional<Routes> compute(AdjList adjList, Routes routes, IntContainer intArray) {
+		int limit = adjList.order() + 1;
 		
-		for(int i = 0; i < num; i++) {
-			if(this.relax(adjList, dist, via, IntStream.range(0, adjList.order())) == 0){
-				return Optional.of(RouteMap.wrap(dist, via));
+		for(int i = 0; i < limit; i++){
+			if(this.relax(adjList, intArray.iterator(), routes, intArray::add) == 0){
+				return Optional.of(routes);
 			}
 		}
 		
 		return Optional.empty();
 	}
 	
-	protected int relax(AdjList adjList, double[] dist, int[] via, IntStream boundaries) {
+	protected int relax(AdjList adjList, IntIterator iter, Routes routes, IntConsumer discover) {
+		int done = 0;
 		
-		return boundaries.filter(i -> via[i] >= 0).boxed().flatMap(adjList::edges).sequential()
-			.mapToInt(e -> {			
-				
-				if(via[e.to] < 0 || dist[e.from] + e.weight < dist[e.to]){
-					via[e.to] = e.from;
-					dist[e.to] = dist[e.from] + e.weight;
-					return 1;
+		while(iter.hasNext()){
+			int v = iter.next();
+			if(routes.via[v] < 0){
+				continue;
+			}
+			
+			double prevDist = routes.dist[v];
+			
+			done += (int) adjList.edges(v)
+				.filter(e -> routes.via[e.to] < 0 || prevDist + e.weight < routes.dist[e.to])
+				.filter(e -> {
+					if(routes.via[e.to] < 0) {
+						discover.accept(e.to);
+					}
+					
+					routes.via[e.to] = v;
+					routes.dist[e.to] = prevDist + e.weight;
+					return true;
+				})
+				.count();
+		}
+		return done;
+	}
+	
+	protected static class IntArray implements IntContainer {
+
+		@Override
+		public void add(int elem) {
+			this.array = this.ensureCapacity(this.array, this.numElem + 1);
+			this.array[this.numElem++] = elem;
+		}
+
+		@Override
+		public IntIterator iterator() {
+			int limit = this.numElem;
+			return new IntIterator() {
+
+				@Override
+				public boolean hasNext() {
+					
+					return curr + 1 < limit;
+				}
+
+				@Override
+				public int next() {
+					
+					return array[++this.curr];
 				}
 				
-				return 0;
-		}).sum();
+				private int curr = -1;
+			};
+		}
+		
+		protected int[] ensureCapacity(int[] array, int target) {
+			int len = array.length;
+			while(len < target) {
+				len += this.step;
+				this.step += 2;
+			}
+			
+			return len > array.length ? Arrays.copyOf(array, len) : array;
+		}
+		
+		private int numElem, step;
+		private int[] array;
 	}
-
-	private IntFunction<Set<Integer>> setFactory;
-	private int limit;
+	
+	protected interface IntContainer {
+		
+		public void add(int elem);
+		
+		public IntIterator iterator();
+		
+	}
+	
+	protected interface IntIterator {
+		
+		public boolean hasNext();
+		
+		public int next();
+		
+	}
+		
 }

@@ -132,7 +132,7 @@ public class DijkstraTest {
 	}
 	
 	@Test
-	public void shouldReturnEmptyWhenNegativeEdgesDetected() {
+	public void shouldReturnEmptyWhenNegativeEdgeIsDetected() {
 		Assert.assertFalse(new Dijkstra(() -> Enque.queueOf(new ArrayDeque<>())).compute(
 			this.adjList(Arrays.asList(
 				new Edge(0, 1, 2.0),
@@ -141,6 +141,23 @@ public class DijkstraTest {
 				new Edge(2, 3, -9.0)
 			)), 0).isPresent()
 		);
+	}
+	
+	@Test
+	public void shouldReturnRouteMapWhenNegativeEdgesAreOutOfReach() {
+		RouteMap map = new Dijkstra(() -> Enque.queueOf(new ArrayDeque<>())).compute(
+				this.adjList(Arrays.asList(
+					new Edge(0, 1, 2.0),
+					new Edge(0, 2, 10.0),
+					new Edge(1, 3, 5.0),
+					new Edge(2, 3, 9.0),
+					new Edge(4, 0, -9.0)
+				)), 0).get();
+		Assert.assertArrayEquals(new Edge[] {
+				new Edge(0, 1, 2.0),
+				new Edge(1, 3, 5.0)
+			}, 
+			map.trace(3).toArray(new Edge[0]));
 	}
 	
 	protected AdjList adjList(List<Edge> edges) {

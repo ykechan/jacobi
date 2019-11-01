@@ -31,6 +31,7 @@ import java.util.function.Supplier;
 import jacobi.api.graph.AdjList;
 import jacobi.api.graph.Edge;
 import jacobi.api.graph.RouteMap;
+import jacobi.core.graph.util.Routes;
 import jacobi.core.util.Enque;
 import jacobi.core.util.Weighted;
 
@@ -81,8 +82,7 @@ public class Dijkstra implements PathFinder {
 	 */
 	public Optional<RouteMap> compute(AdjList adjList, int src) {
 		
-		Routes routes = new Routes(new double[adjList.order()], new int[adjList.order()]);
-		Arrays.fill(routes.via, -1);
+		Routes routes = Routes.init(adjList.order());
 		routes.via[src] = src;
 		
 		return Optional
@@ -150,36 +150,5 @@ public class Dijkstra implements PathFinder {
 	protected static final byte NEW = '\0';
 	
 	protected static final byte DONE = '.';
-	
-	
-	/**
-	 * Data class for Route information.
-	 * 
-	 * @author Y.K. Chan
-	 *
-	 */
-	protected static class Routes {
-		
-		/**
-		 * Path distances to each vertices
-		 */
-		public final double[] dist;
-		
-		/**
-		 * Path element to each vertices
-		 */
-		public final int[] via;
-
-		/**
-		 * Constructor.
-		 * @param dist  Path distances to each vertices
-		 * @param via  Path element to each vertices
-		 */
-		public Routes(double[] dist, int[] via) {
-			this.dist = dist;
-			this.via = via;
-		}
-		
-	}
 	
 }
