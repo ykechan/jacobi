@@ -83,10 +83,18 @@ public class FloydWarshall {
 			double[] nextRow = next.getRow(i);
 			double[] prevRow = prev.getRow(i);
 			
+			int[] viaRow = via == null || via.isEmpty() ? null : via.get(i);
+			
 			for(int j = 0; j < next.getColCount(); j++) {
 				double viaK = prevRow[k] + prev.get(k, j);
 				nextRow[j] = Math.min(prevRow[j], viaK);
+				
+				if(viaK < prevRow[j]){
+				    viaRow[j] = k;
+				}
 			}
+			
+			next.setRow(i, nextRow);
 		}
 		return next;
 	}
