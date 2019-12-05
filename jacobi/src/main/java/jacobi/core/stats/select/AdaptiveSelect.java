@@ -25,6 +25,7 @@ package jacobi.core.stats.select;
 
 import java.util.Comparator;
 import java.util.PriorityQueue;
+import java.util.function.Function;
 import java.util.function.IntFunction;
 
 import jacobi.core.util.Enque;
@@ -47,37 +48,59 @@ import jacobi.core.util.Enque;
  * 
  * @author Y.K. Chan
  */
-public class AdaptiveSelect implements Select {
+public class AdaptiveSelect implements Select {	
+
+	public AdaptiveSelect(Select pivoting, int limit) {
+		this(new ExtremaSelect(), s -> new DualPivotQuickSelect(s, pivoting, pivoting), limit);
+	}
+	
+	protected AdaptiveSelect(Select extrema, 
+			Function<Select, Select> dualQuickFactory, int limit) {
+		this.extrema = extrema;
+		this.dualQuick = dualQuickFactory.apply(this);
+		this.limit = limit;
+	}
 
 	@Override
 	public int select(double[] items, int begin, int end, int target) {
-		
-		return 0;
-	}
-	
-	protected int heapSelect(double[] items, int begin, int end, int target) {
-		double sign = target - begin < end - 1 - target ? 1 : -1;
-		Enque<Double> heap = this.enque(begin, end, target);
-		
-		heap.push(items[begin]);
-		int ans = begin;				
-		for(int i = begin + 1; i < end; i++) {
-			if(sign * (items[i] - heap.peek()) < 0.0) {
-				heap.push(items[i]);
-				ans = i;
-			}			
-			
+		int rank = Math.min(target - begin, end - 1 - target);
+		if(rank < 4) {
+			return this.extrema.select(items, begin, end, target);
 		}
-		return ans;
+		
+		if(rank < this.limit){
+			return this.heapSelect(items, begin, end, target);
+		}
+		
+		return this.dualQuick.select(items, begin, end, target);
 	}
 	
-	protected Enque<Double> enque(int begin, int end, int target) {
-		int limit = 1 + Math.min(target - begin, end - 1 - target);
+	protected int heapSelect(double[] items, int begin, int end, int target) {		
+		int limit = 1 + Math.min(target - begin, end - 1 - target);		
+		double sign = target - begin < end - 1 - target ? 1 : -1;
 		
-		PriorityQueue<Double> queue = target - begin < end - 1 - target
-				? new PriorityQueue<>(Comparator.<Double>naturalOrder().reversed())
-				: new PriorityQueue<>();
-		return new Enque<Double>() {
+		Enque<Entry> heap = this.enque(limit, sign > 0);
+		heap.push(new Entry(begin, items[begin]));
+		for(int i = begin + 1; i < end; i++) {				
+			
+			if(heap.size() >= limit
+			&& sign * (items[i] - heap.peek().value) > 0) {
+				continue;
+			}
+			
+			heap.push(new Entry(i, items[i]));
+		}
+		
+		return heap.peek().index;		
+	}
+	
+	protected Enque<Entry> enque(int limit, boolean isMin) {
+		//int limit = 1 + Math.min(target - begin, end - 1 - target);
+		
+		Comparator<Entry> cmp = Comparator.comparingDouble(v -> v.value);
+		
+		PriorityQueue<Entry> queue = new PriorityQueue<>(isMin ? cmp.reversed() : cmp);
+		return new Enque<Entry>() {
 
 			@Override
 			public int size() {
@@ -86,7 +109,7 @@ public class AdaptiveSelect implements Select {
 			}
 
 			@Override
-			public Enque<Double> push(Double item) {
+			public Enque<Entry> push(Entry item) {
 				queue.offer(item);
 				while(queue.size() > limit) {
 					queue.remove();
@@ -95,25 +118,40 @@ public class AdaptiveSelect implements Select {
 			}
 
 			@Override
-			public Double pop() {
+			public Entry pop() {
 				
 				return queue.remove();
 			}
 
 			@Override
-			public Double peek() {
+			public Entry peek() {
 				
 				return queue.peek();
 			}
 
 			@Override
-			public Double[] toArray(IntFunction<Double[]> factory) {
+			public Entry[] toArray(IntFunction<Entry[]> factory) {
 				
 				throw new UnsupportedOperationException();
 			}
 			
+			
 		};
 	}
 
-	private Select extrema, dualQuick;		
+	private int limit;
+	private Select extrema, dualQuick;
+	
+	protected static class Entry {
+		
+		public final int index;
+		
+		public final double value;
+
+		public Entry(int index, double value) {
+			this.index = index;
+			this.value = value;
+		}
+		
+	}
 }
