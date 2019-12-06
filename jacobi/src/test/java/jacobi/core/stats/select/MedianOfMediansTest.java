@@ -1,5 +1,7 @@
 package jacobi.core.stats.select;
 
+import java.util.Arrays;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -10,6 +12,7 @@ import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.annotations.JacobiResult;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
+import junit.framework.Assert;
 
 @JacobiImport("/jacobi/test/data/MedianOfMediansTest.xlsx")
 @RunWith(JacobiJUnit4ClassRunner.class)
@@ -54,8 +57,20 @@ public class MedianOfMediansTest {
 	}
 	
 	@Test
+	@JacobiImport("test median of groups in 18")	
+	@JacobiEquals(expected = 1, actual = 1)
 	public void shouldBeAbleToGroupAllMediansIntoFirstGroup() {
+		MedianOfMedians selector = new MedianOfMedians(new ExtremaSelect());
+		for(int i = 0; i < input.getRowCount(); i++) {
+			input.getApplySet(i, r -> { selector.select(r, 0, r.length, 0); return r; });
+		}
 		
+		this.output = Matrices.wrap(new double[][] {
+			Arrays.copyOf(input.getRow(0), 4),
+			Arrays.copyOf(input.getRow(1), 4),
+			Arrays.copyOf(input.getRow(2), 4),
+			Arrays.copyOf(input.getRow(3), 4)
+		});
 	}
 	
 	protected Select getInstance() {

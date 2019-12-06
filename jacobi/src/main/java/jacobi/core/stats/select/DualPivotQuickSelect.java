@@ -23,6 +23,8 @@
  */
 package jacobi.core.stats.select;
 
+import java.util.Arrays;
+
 /**
  * Implementation of QuickSelect using two pivots.
  * 
@@ -45,14 +47,24 @@ public class DualPivotQuickSelect implements Select {
 	 * @param selector0  Selector for 1st pivot
 	 * @param selector1  Selector for 2nd pivot
 	 */
-	public DualPivotQuickSelect(Select base, Select selector0, Select selector1) {
-		this.base = base == null ? this : base;
+	public DualPivotQuickSelect(Select selector0, Select selector1) {
 		this.selector0 = selector0;
 		this.selector1 = selector1;
 	}
-
+	
 	@Override
 	public int select(double[] items, int begin, int end, int target) {
+		
+		return this.select(items, begin, end, target, 0);
+	}
+
+	public int select(double[] items, int begin, int end, int target, int depth) {
+		if(depth > items.length) {
+			throw new IllegalStateException(
+				"Depth " + depth + " is greater that number of items " + items.length
+			);
+		}
+		
 		int lower = this.selector0.select(items, begin, end, target);
 		int upper = this.selector1.select(items, begin, end, target);
 		
@@ -62,12 +74,18 @@ public class DualPivotQuickSelect implements Select {
 		
 		if(lower == upper || items[lower] == items[upper]){
 			int pivot = this.partition(items, begin, end, lower);
+			if(pivot == begin
+			&& Arrays.stream(items, begin + 1, end).noneMatch(v -> v > items[begin])) {
+				// all items are the same
+				return target;
+			}
+			
 			return pivot == target 
 				? pivot 
-				: this.base.select(items, 
+				: this.select(items, 
 					pivot < target ? pivot + 1 : begin, 
 					pivot > target ? pivot : end, 
-					target);
+					target, depth + 1);
 		}
 		
 		this.swap(items, lower, begin);
@@ -98,11 +116,11 @@ public class DualPivotQuickSelect implements Select {
 		
 		return j == target || k == target
 			? target
-			: this.base.select(
+			: this.select(
 				items, 
 				k < target ? k + 1 : j < target ? j + 1 : begin, 
 				j > target ? j : k > target ? k : end, 
-				target);
+				target, depth + 1);
 	}
 	
 	/**
@@ -115,7 +133,7 @@ public class DualPivotQuickSelect implements Select {
 	 * @return  The rank of the pivot index
 	 */
 	protected int partition(double[] items, int begin, int end, int pivot) {
-		this.swap(items, pivot, begin);			
+		this.swap(items, pivot, begin);	
 		double value = items[begin];
 		
 		int j = begin + 1;
@@ -128,5 +146,5 @@ public class DualPivotQuickSelect implements Select {
 		return j;
 	}
 
-	private Select base, selector0, selector1;
+	private Select selector0, selector1;
 }

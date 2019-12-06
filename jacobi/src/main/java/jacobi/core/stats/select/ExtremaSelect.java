@@ -36,6 +36,14 @@ package jacobi.core.stats.select;
  *
  */
 public class ExtremaSelect implements Select {
+	
+	/**
+	 * Get the common default instance
+	 * @return  Default instance
+	 */
+	public static ExtremaSelect getInstance() {
+		return INSTANCE;
+	}
 
 	@Override
 	public int select(double[] items, int begin, int end, int target) {
@@ -114,4 +122,5 @@ public class ExtremaSelect implements Select {
 		return max;
 	}
 
+	private static final ExtremaSelect INSTANCE = new ExtremaSelect();
 }
