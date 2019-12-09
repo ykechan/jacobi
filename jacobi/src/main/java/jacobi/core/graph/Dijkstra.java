@@ -121,9 +121,8 @@ public class Dijkstra implements PathFinder {
 					if(e.weight < 0.0) {
 						return e.weight;
 					}
-					
-					if(markers[e.to] == DONE 
-					||(via[e.to] >= 0 && dist[e.to] < reach.weight + e.weight)) {
+
+					if(via[e.to] >= 0 && dist[e.to] < reach.weight + e.weight) {
 						return 0.0;
 					}
 					
