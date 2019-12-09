@@ -89,7 +89,7 @@ public class FloydWarshall {
 				double viaK = prevRow[k] + prev.get(k, j);
 				nextRow[j] = Math.min(prevRow[j], viaK);
 				
-				if(viaK < prevRow[j]){
+				if(viaRow != null && viaK < prevRow[j]){
 				    viaRow[j] = k;
 				}
 			}
