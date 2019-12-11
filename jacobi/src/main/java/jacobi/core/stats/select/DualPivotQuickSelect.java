@@ -23,8 +23,6 @@
  */
 package jacobi.core.stats.select;
 
-import java.util.Arrays;
-
 /**
  * Implementation of QuickSelect using two pivots.
  * 
@@ -58,6 +56,15 @@ public class DualPivotQuickSelect implements Select {
 		return this.select(items, begin, end, target, 0);
 	}
 
+	/**
+	 * Select the target order element
+	 * @param items  Input sequence
+	 * @param begin  Begin index of interest
+	 * @param end  End index of interest
+	 * @param target  Target order
+	 * @param depth  Depth of call stack
+	 * @return  The index of the element of the target order
+	 */
 	public int select(double[] items, int begin, int end, int target, int depth) {
 		if(depth > items.length) {
 			throw new IllegalStateException(
@@ -74,14 +81,12 @@ public class DualPivotQuickSelect implements Select {
 		
 		if(lower == upper || items[lower] == items[upper]){
 			int pivot = this.partition(items, begin, end, lower);
-			if(pivot == begin
-			&& Arrays.stream(items, begin + 1, end).noneMatch(v -> v > items[begin])) {
-				// all items are the same
+			if(target <= -pivot) {
 				return target;
 			}
 			
-			return pivot == target 
-				? pivot 
+			pivot = Math.abs(pivot);
+			return pivot == target ? pivot  
 				: this.select(items, 
 					pivot < target ? pivot + 1 : begin, 
 					pivot > target ? pivot : end, 
@@ -130,20 +135,33 @@ public class DualPivotQuickSelect implements Select {
 	 * @param begin  Begin index of interest
 	 * @param end  End index of interest
 	 * @param pivot  Pivot index
-	 * @return  The rank of the pivot index
+	 * @return  The rank of the pivot index, or -k if all first k - begin elements are the same
 	 */
 	protected int partition(double[] items, int begin, int end, int pivot) {
 		this.swap(items, pivot, begin);	
 		double value = items[begin];
 		
 		int j = begin + 1;
-		for(int i = begin + 1; i < end; i++) {
+		for(int i = begin + 1; i < end; i++){
 			if(items[i] < value){
 				this.swap(items, i, j++);
 			}
 		}
-		this.swap(items, begin, --j);
-		return j;
+		if(--j > begin) {
+			this.swap(items, begin, j);
+			return j;
+		}
+		
+		// the minimum element is picked, inspect those larger than this
+		j = end - 1;
+		for(int i = begin + 1; i < j;){
+			if(items[i] > value){
+				this.swap(items, i, j--);				
+			}else{
+				i++;
+			}
+		}
+		return j == begin ? begin : -j;
 	}
 
 	private Select selector0, selector1;

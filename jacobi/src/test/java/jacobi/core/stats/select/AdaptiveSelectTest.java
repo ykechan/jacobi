@@ -3,6 +3,7 @@ package jacobi.core.stats.select;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -63,6 +64,29 @@ public class AdaptiveSelectTest {
 		Arrays.sort(temp);
 		Assert.assertEquals(temp[6], seq[ans], 1e-12);
 		Assert.assertEquals(2, count.get());
+	}
+	
+	@Test
+	public void shouldBeAbleToUseMedianOfMedianRecursively() {
+		double[] seq = new Random(Double.doubleToRawLongBits(Math.PI))
+				.doubles()
+				.limit(2 * 65536)
+				.map(v -> 1000.0 * v)
+				.toArray();
+		Select select = AdaptiveSelect.of(Integer.MAX_VALUE, 0.0);
+		
+	}
+	
+	protected int findMin(double[] a, int i, int j, int t) {
+		return IntStream.range(i, j)
+			.reduce( (u, v) -> a[u] < a[v] ? u : v )
+			.orElseThrow(() -> new IllegalArgumentException());
+	}
+	
+	protected int findMax(double[] a, int i, int j, int t) {
+		return IntStream.range(i, j)
+			.reduce( (u, v) -> a[u] > a[v] ? u : v )
+			.orElseThrow(() -> new IllegalArgumentException());
 	}
 
 }

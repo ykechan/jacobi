@@ -38,18 +38,23 @@ import jacobi.core.util.Enque;
  * 
  * <p>When the target is an extrema, ExtremaSelect is used to directly find the element.</p>
  * 
- * <p>When the target is close to an extrema (but not an extrema), a PriorityQueue is used
- * to directly find the element.</p>
+ * <p>When the target is close to an extrema (but not an extrema), and the range is longer
+ * than the distance for a certain ratio, a PriorityQueue is used to directly find the element.</p>
  * 
  * <p>When the sequence is very long, DualPivotQuickSelect with a randomized pivoting selection
  * is used. The probability of keep hitting the extrema is fairly slim. However if things go
  * wrong and the recursive call is nested too depth, a median-of-medians together with another
  * random pivot is used to guarantee time complexity.</p>
  * 
+ * <p>When median-of-medians pivoting is used, and the target is close to an extrema,
+ * a PriorityQueue is used regardless of the range.</p>
+ * 
  * @author Y.K. Chan
  *
  */
 public class AdaptiveSelect implements Select {
+	
+	public static final int DEFAULT_USEHEAP_RATIO = 3;
 	
 	/**
 	 * Factory method
@@ -84,17 +89,19 @@ public class AdaptiveSelect implements Select {
 	}
 
 	@Override
-	public int select(double[] items, int begin, int end, int target) {
-		int rank = Math.min(target - begin, end - 1 - target);
+	public int select(double[] items, int begin, int end, int target) {				
+		int length = end - begin;
+		
+		int rank = Math.min(target - begin, end - 1 - target);		
 		if(rank < 3) {
 			return extremaSelect.select(items, begin, end, target);
 		}
 		
-		if(rank < this.lowerLimit) {	
+		if(rank < this.lowerLimit && length > DEFAULT_USEHEAP_RATIO * rank) {	
 			return heapSelect(items, begin, end, target);
 		}
 		
-		int limit = (int) Math.ceil(this.constFactor * Math.log(end - begin));
+		int limit = (int) Math.ceil(this.constFactor * Math.log(length));
 		return new RandomDualPivotSelect(limit,
 			this.newRandomSelect(),
 			this.newRandomSelect()
@@ -288,8 +295,7 @@ public class AdaptiveSelect implements Select {
 				return extremaSelect.select(items, begin, end, target);
 			}
 			
-			if(rank < lowerLimit) {
-				
+			if(rank < lowerLimit) {				
 				return heapSelect(items, begin, end, target);
 			}
 			return this.quickSelect.select(items, begin, end, target);

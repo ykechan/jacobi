@@ -47,6 +47,22 @@ public class ExtremaSelect implements Select {
 
 	@Override
 	public int select(double[] items, int begin, int end, int target) {
+		switch(end - begin) {
+			case 0 :
+				throw new IllegalArgumentException("Invalid range [" + begin + "," + end + ").");
+				
+			case 1 :
+				return begin;
+				
+			case 2 :
+				return target == begin
+					? items[begin] < items[begin + 1] ? begin : begin + 1
+					: items[begin] > items[begin + 1] ? begin : begin + 1;
+				
+			default :
+				break;
+		}
+		
 		int minRank = target - begin;
 		int maxRank = end - 1 - target;
 		
@@ -76,23 +92,23 @@ public class ExtremaSelect implements Select {
 	 * @return  3 elements with minimum values sorted ascendingly
 	 */
 	protected int[] minima(double[] items, int begin, int end) {
-		int[] min = {-1, -1, -1};
+		int min0 = -1, min1 = -1, min2 = -1;
 		for(int i = begin; i < end; i++) {
-			if(min[0] < 0 || items[i] < items[min[0]]) {
-				min[2] = min[1]; min[1] = min[0]; min[0] = i;
+			if(min0 < 0 || items[i] < items[min0]) {
+				min2 = min1; min1 = min0; min0 = i;
 				continue;
 			}
 			
-			if(min[1] < 0 || items[i] < items[min[1]]) {
-				min[2] = min[1]; min[1] = i;
+			if(min1 < 0 || items[i] < items[min1]) {
+				min2 = min1; min1 = i;
 				continue;
 			}
 			
-			if(min[2] < 0 || items[i] < items[min[2]]) {
-				min[2] = i;
+			if(min2 < 0 || items[i] < items[min2]) {
+				min2 = i;
 			}
 		}
-		return min;
+		return new int[] {min0, min1, min2};
 	}
 	
 	/**
@@ -103,23 +119,23 @@ public class ExtremaSelect implements Select {
 	 * @return  3 elements with maximum values sorted descendingly
 	 */
 	protected int[] maxima(double[] items, int begin, int end) {
-		int[] max = {-1, -1, -1};
+		int max0 = -1, max1 = -1, max2 = -1;
 		for(int i = begin; i < end; i++) {
-			if(max[0] < 0 || items[i] > items[max[0]]) {
-				max[2] = max[1]; max[1] = max[0]; max[0] = i;
+			if(max0 < 0 || items[i] > items[max0]) {
+				max2 = max1; max1 = max0; max0 = i;
 				continue;
 			}
 			
-			if(max[1] < 0 || items[i] > items[max[1]]) {
-				max[2] = max[1]; max[1] = i;
+			if(max1 < 0 || items[i] > items[max1]) {
+				max2 = max1; max1 = i;
 				continue;
 			}
 			
-			if(max[2] < 0 || items[i] > items[max[2]]) {
-				max[2] = i;
+			if(max2 < 0 || items[i] > items[max2]) {
+				max2 = i;
 			}
 		}
-		return max;
+		return new int[] {max0, max1, max2};
 	}
 
 	private static final ExtremaSelect INSTANCE = new ExtremaSelect();
