@@ -38,23 +38,18 @@ import jacobi.core.util.Enque;
  * 
  * <p>When the target is an extrema, ExtremaSelect is used to directly find the element.</p>
  * 
- * <p>When the target is close to an extrema (but not an extrema), and the range is longer
- * than the distance for a certain ratio, a PriorityQueue is used to directly find the element.</p>
- * 
  * <p>When the sequence is very long, DualPivotQuickSelect with a randomized pivoting selection
  * is used. The probability of keep hitting the extrema is fairly slim. However if things go
  * wrong and the recursive call is nested too depth, a median-of-medians together with another
  * random pivot is used to guarantee time complexity.</p>
  * 
- * <p>When median-of-medians pivoting is used, and the target is close to an extrema,
- * a PriorityQueue is used regardless of the range.</p>
+ * <p>When median-of-medians pivoting is used, and the target is close to an extrema (but not an extrema),
+ * a PriorityQueue is used to directly find the element.</p>
  * 
  * @author Y.K. Chan
  *
  */
 public class AdaptiveSelect implements Select {
-	
-	public static final int DEFAULT_USEHEAP_RATIO = 3;
 	
 	/**
 	 * Factory method
@@ -64,10 +59,14 @@ public class AdaptiveSelect implements Select {
 	 * @return Instance of AdaptiveSelect
 	 */
 	public static AdaptiveSelect of(int lowerLimit, double constFactor) {
-		
+				
 		return new AdaptiveSelect(lowerLimit, constFactor, 
 			ExtremaSelect.getInstance(),
-			ThreadLocalRandom.current()::nextInt
+			n -> {
+				int v = ThreadLocalRandom.current().nextInt(n);
+				System.out.println(v);
+				return v;
+			}
 		);
 	}
 	
@@ -84,8 +83,9 @@ public class AdaptiveSelect implements Select {
 			IntUnaryOperator randFn) {
 		this.lowerLimit = lowerLimit;
 		this.constFactor = constFactor;
-		this.extremaSelect = extremaSelect;
-		this.base = new MedianOfMediansSelect(new RandomSelect(randFn));
+		this.extremaSelect = extremaSelect;		
+		this.randFn = randFn;
+		this.base = new MedianOfMediansSelect(this::random);
 	}
 
 	@Override
@@ -97,15 +97,9 @@ public class AdaptiveSelect implements Select {
 			return extremaSelect.select(items, begin, end, target);
 		}
 		
-		if(rank < this.lowerLimit && length > DEFAULT_USEHEAP_RATIO * rank) {	
-			return heapSelect(items, begin, end, target);
-		}
-		
 		int limit = (int) Math.ceil(this.constFactor * Math.log(length));
-		return new RandomDualPivotSelect(limit,
-			this.newRandomSelect(),
-			this.newRandomSelect()
-		).select(items, begin, end, target);
+		return new RandomDualPivotSelect(limit,	this::random, this::random)
+				.select(items, begin, end, target);
 	}	
 	
 	/**
@@ -116,7 +110,7 @@ public class AdaptiveSelect implements Select {
 	 * @param target  Target index, i.e. n
 	 * @return  The index of the n-th smallest item
 	 */
-	protected int heapSelect(double[] items, int begin, int end, int target) {		
+	protected int selectByHeap(double[] items, int begin, int end, int target) {		
 		int limit = 1 + Math.min(target - begin, end - 1 - target);		
 		double sign = target - begin < end - 1 - target ? 1 : -1;
 		
@@ -185,51 +179,46 @@ public class AdaptiveSelect implements Select {
 	}
 	
 	/**
-	 * Create a new selector that picks randomly
-	 * @return  Selector that returns randomly
+	 * Select function that picks using random function
+	 * @param items  Input sequence
+	 * @param begin  Begin index of interest
+	 * @param end  End index of interest
+	 * @param target  Target order
+	 * @return  A selection by random function
 	 */
-	protected Select newRandomSelect() {
+	protected int random(double[] items, int begin, int end, int target) {
 		
-		return RandomSelect.ofDefault();
+		return begin + this.randFn.applyAsInt(end - begin);
+	}
+	
+	/**
+	 * Select the target order directly when there are only a few items, or
+	 * the target is an extrema, and return negative if unable to do so.
+	 * @param items  Input sequence
+	 * @param begin  Begin index of interest
+	 * @param end  End index of interest
+	 * @param target  Target order
+	 * @return  Index of target, or -1 if unsupported
+	 */
+	protected int direct(double[] items, int begin, int end, int target) {		
+		int rank = Math.min(target - begin, end - 1 - target);
+		if(rank < 0){
+			throw new IllegalArgumentException(
+				"Invalid target " + target + " in [" + begin + "," + end + ")."
+			);
+		}
+		
+		if(rank < 3){
+			return this.extremaSelect.select(items, begin, end, target);
+		}
+		
+		return -1;
 	}
 	
 	private int lowerLimit;
 	private double constFactor;
 	private Select extremaSelect, base;
-	
-	/**
-	 * Random Select, i.e. a wrapper of a random function to the Select interface
-	 * 
-	 * @author Y.K. Chan
-	 *
-	 */
-	protected static class RandomSelect implements Select {
-		
-		/**
-		 * Factory method using ThreadLocalRandom as random function
-		 * @return Instance of RandomSelect
-		 */
-		public static RandomSelect ofDefault() {
-			
-			return new RandomSelect(ThreadLocalRandom.current()::nextInt);
-		}
-		
-		/**
-		 * Constructor.
-		 * @param rand  Random function
-		 */
-		public RandomSelect(IntUnaryOperator rand) {
-			this.rand = rand;
-		}
-
-		@Override
-		public int select(double[] items, int begin, int end, int target) {
-			
-			return begin + this.rand.applyAsInt(end - begin);
-		}
-		
-		private IntUnaryOperator rand;
-	}
+	private IntUnaryOperator randFn;
 	
 	/**
 	 * Randomized dual pivot quick select.
@@ -263,10 +252,6 @@ public class AdaptiveSelect implements Select {
 				return extremaSelect.select(items, begin, end, target);
 			}
 			
-			if(rank < lowerLimit) {
-				
-				return heapSelect(items, begin, end, target);
-			}
 			return super.select(items, begin, end, target, depth);
 		}
 		
@@ -295,8 +280,8 @@ public class AdaptiveSelect implements Select {
 				return extremaSelect.select(items, begin, end, target);
 			}
 			
-			if(rank < lowerLimit) {				
-				return heapSelect(items, begin, end, target);
+			if(rank < lowerLimit) {	
+				return selectByHeap(items, begin, end, target);
 			}
 			return this.quickSelect.select(items, begin, end, target);
 		}
@@ -304,12 +289,28 @@ public class AdaptiveSelect implements Select {
 		private Select quickSelect;
 	}
 	
+	/**
+	 * Data object for heap data structure
+	 * @author Y.K. Chan
+	 *
+	 */
 	protected static class Entry {
 		
+		/**
+		 * Index of sequence item
+		 */
 		public final int index;
 		
+		/**
+		 * Value of sequence item
+		 */
 		public final double value;
 
+		/**
+		 * Constructor.
+		 * @param index  Index of sequence item
+		 * @param value  Value of sequence item
+		 */
 		public Entry(int index, double value) {
 			this.index = index;
 			this.value = value;
