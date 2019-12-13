@@ -62,11 +62,7 @@ public class AdaptiveSelect implements Select {
 				
 		return new AdaptiveSelect(lowerLimit, constFactor, 
 			ExtremaSelect.getInstance(),
-			n -> {
-				int v = ThreadLocalRandom.current().nextInt(n);
-				System.out.println(v);
-				return v;
-			}
+			ThreadLocalRandom.current()::nextInt
 		);
 	}
 	
@@ -191,30 +187,6 @@ public class AdaptiveSelect implements Select {
 		return begin + this.randFn.applyAsInt(end - begin);
 	}
 	
-	/**
-	 * Select the target order directly when there are only a few items, or
-	 * the target is an extrema, and return negative if unable to do so.
-	 * @param items  Input sequence
-	 * @param begin  Begin index of interest
-	 * @param end  End index of interest
-	 * @param target  Target order
-	 * @return  Index of target, or -1 if unsupported
-	 */
-	protected int direct(double[] items, int begin, int end, int target) {		
-		int rank = Math.min(target - begin, end - 1 - target);
-		if(rank < 0){
-			throw new IllegalArgumentException(
-				"Invalid target " + target + " in [" + begin + "," + end + ")."
-			);
-		}
-		
-		if(rank < 3){
-			return this.extremaSelect.select(items, begin, end, target);
-		}
-		
-		return -1;
-	}
-	
 	private int lowerLimit;
 	private double constFactor;
 	private Select extremaSelect, base;
@@ -274,7 +246,6 @@ public class AdaptiveSelect implements Select {
 
 		@Override
 		public int select(double[] items, int begin, int end, int target) {
-			
 			int rank = Math.min(target - begin, end - 1 - target);
 			if(rank < 3) {
 				return extremaSelect.select(items, begin, end, target);

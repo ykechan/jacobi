@@ -68,65 +68,23 @@ public class AdaptiveSelectTest {
 	}
 	
 	@Test
-	@Ignore
-	public void shouldBeAbleToUseMedianOfMedianRecursively() {
-		/*
-		for(int i = 0; i < 1000; i++) {
-			int length = 128;
-			double[] seq = new Random(Double.doubleToRawLongBits(Math.PI))
-					.doubles()
-					.limit(length)
-					.map(v -> 1000.0 * v)
-					.toArray();
-					
-			double[] temp = Arrays.copyOf(seq, seq.length);
-			Select selector = AdaptiveSelect.of(Integer.MAX_VALUE, 3.0);
-			
-			long t0 = System.nanoTime();
-			int ans = selector.select(temp, 0, temp.length, length / 2);
-			
-			System.out.println("Select " + (System.nanoTime() - t0) / 1000.0 / 1000.0 + " ms");
-			
-			t0 = System.nanoTime();
-			Arrays.sort(seq);
-			
-			System.out.println("Sort " + (System.nanoTime() - t0) / 1000.0 / 1000.0 + " ms");
-			if(Math.abs(seq[length / 2] - temp[ans]) > 1e-12) {
-				System.out.println(Arrays.toString(temp));
-				System.out.println(Arrays.toString(seq));
-			}
-			Assert.assertEquals(seq[length / 2], temp[ans], 1e-12);
-		}
-		*/
-		int[] rand = {116,126,35,4,0,16,7,6,1,0};
-		AtomicInteger count = new AtomicInteger(0);		
+	public void shouldBeAbleToSelectTheSameElementAsSorted() {
+		double[] seq = new Random(Double.doubleToLongBits(999 * Math.E))
+				.doubles().map(v -> 1000.0 * v).limit(2 * 65536).toArray();
 		
-		int length = 128;
-		double[] seq = new Random(Double.doubleToRawLongBits(Math.PI))
-				.doubles()
-				.limit(length)
-				.map(v -> 1000.0 * v)
-				.toArray();
+		double[] oracle = Arrays.copyOf(seq, seq.length);
+		Arrays.sort(oracle);
+		
+		Select selector = AdaptiveSelect.of(32, 2.0);
+		
+		new Random(Double.doubleToLongBits(Math.PI))
+			.ints().limit(128).map(i -> Math.abs(i)).map(i -> i % oracle.length)
+			.forEach(i -> {
+				double[] temp = Arrays.copyOf(seq, seq.length);
+				int ans = selector.select(temp, 0, temp.length, i);
 				
-		double[] temp = Arrays.copyOf(seq, seq.length);
-		Select selector = new AdaptiveSelect(Integer.MAX_VALUE, 3.0, ExtremaSelect.getInstance(), n ->
-			rand[count.getAndIncrement()] % n
-		);
-		
-		long t0 = System.nanoTime();
-		int ans = selector.select(temp, 0, temp.length, length / 2);
-		
-		System.out.println("Select " + (System.nanoTime() - t0) / 1000.0 / 1000.0 + " ms");
-		
-		t0 = System.nanoTime();
-		Arrays.sort(seq);
-		
-		System.out.println("Sort " + (System.nanoTime() - t0) / 1000.0 / 1000.0 + " ms");
-		if(Math.abs(seq[length / 2] - temp[ans]) > 1e-12) {
-			System.out.println(Arrays.toString(temp));
-			System.out.println(Arrays.toString(seq));
-		}
-		Assert.assertEquals(seq[length / 2], temp[ans], 1e-12);
+				Assert.assertEquals(oracle[i], temp[ans], 1e-12);
+			});
 	}
 	
 	protected int findMin(double[] a, int i, int j, int t) {

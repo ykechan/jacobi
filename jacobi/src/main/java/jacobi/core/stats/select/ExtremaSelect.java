@@ -44,9 +44,25 @@ public class ExtremaSelect implements Select {
 	public static ExtremaSelect getInstance() {
 		return INSTANCE;
 	}
+	
+	/**
+	 * Constructor.
+	 */
+	public ExtremaSelect() {
+		this(false);
+	}
+
+	/**
+	 * Constructor.
+	 * @param stable  True for stable elements, false otherwise
+	 */
+	public ExtremaSelect(boolean stable) {
+		this.stable = stable;
+	}
 
 	@Override
 	public int select(double[] items, int begin, int end, int target) {
+		
 		switch(end - begin) {
 			case 0 :
 				throw new IllegalArgumentException("Invalid range [" + begin + "," + end + ").");
@@ -55,6 +71,9 @@ public class ExtremaSelect implements Select {
 				return begin;
 				
 			case 2 :
+				if(this.stable && items[begin] > items[begin + 1]){
+					this.swap(items, begin, begin + 1);
+				}
 				return target == begin
 					? items[begin] < items[begin + 1] ? begin : begin + 1
 					: items[begin] > items[begin + 1] ? begin : begin + 1;
@@ -108,6 +127,12 @@ public class ExtremaSelect implements Select {
 				min2 = i;
 			}
 		}
+		
+		if(this.stable){
+			this.swap(items, begin, min0);
+			this.swap(items, begin + 1, min1 < 0 ? begin + 1 : min1);
+			this.swap(items, begin + 2, min2 < 0 ? begin + 2 : min2);
+		}
 		return new int[] {min0, min1, min2};
 	}
 	
@@ -135,8 +160,16 @@ public class ExtremaSelect implements Select {
 				max2 = i;
 			}
 		}
+		
+		if(this.stable){
+			this.swap(items, begin, max0);
+			this.swap(items, begin + 1, max1 < 0 ? begin + 1 : max1);
+			this.swap(items, begin + 2, max2 < 0 ? begin + 2 : max2);
+		}
 		return new int[] {max0, max1, max2};
 	}
+	
+	private boolean stable;
 
-	private static final ExtremaSelect INSTANCE = new ExtremaSelect();
+	private static final ExtremaSelect INSTANCE = new ExtremaSelect(false);
 }

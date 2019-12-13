@@ -23,8 +23,6 @@
  */
 package jacobi.core.stats.select;
 
-import java.util.Arrays;
-
 /**
  * Implementation of QuickSelect using two pivots.
  * 
@@ -75,17 +73,15 @@ public class DualPivotQuickSelect implements Select {
 		}
 		
 		int lower = this.selector0.select(items, begin, end, target);
-		int upper = this.selector1.select(items, begin, end, target);		
+		int upper = this.selector1.select(items, begin, end, target);
 		
 		if(lower == upper || items[lower] == items[upper]){
 			int pivot = this.partition(items, begin, end, lower);
-			if(target <= -pivot) {
+			if(target <= -pivot || target == pivot) {
+				this.done(items, begin, end, target);
 				return target;
 			}
-			
-			pivot = Math.abs(pivot);
-			return pivot == target ? pivot  
-				: this.select(items, 
+			return this.select(items, 
 					pivot < target ? pivot + 1 : begin, 
 					pivot > target ? pivot : end, 
 					target, depth + 1);
@@ -121,11 +117,12 @@ public class DualPivotQuickSelect implements Select {
 		this.swap(items, begin, j);
 		this.swap(items, end - 1, k);
 		
-		System.out.println("j = " + j + ", k = " + k + ", " + Arrays.toString(items));
+		if(j == target || k == target) {
+			this.done(items, begin, end, target);
+			return target;
+		}
 		
-		return j == target || k == target
-			? target
-			: this.select(
+		return this.select(
 				items, 
 				k < target ? k + 1 : j < target ? j + 1 : begin, 
 				j > target ? j : k > target ? k : end, 
@@ -165,8 +162,19 @@ public class DualPivotQuickSelect implements Select {
 			}else{
 				i++;
 			}
-		}		
-		return j == begin ? begin : -j;
+		}
+		return j == begin + 1 ? begin : -j;
+	}
+	
+	/**
+	 * Invoked when the target is found in the final partition
+	 * @param items  Input sequence
+	 * @param begin  Begin index of interest
+	 * @param end  End index of interest
+	 * @param target  Target
+	 */
+	protected void done(double[] items, int begin, int end, int target) {
+		
 	}
 
 	private Select selector0, selector1;
