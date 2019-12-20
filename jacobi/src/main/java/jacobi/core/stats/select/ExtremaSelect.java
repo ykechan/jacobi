@@ -54,10 +54,10 @@ public class ExtremaSelect implements Select {
 
 	/**
 	 * Constructor.
-	 * @param stable  True for stable elements, false otherwise
+	 * @param fix  True for fixing the extrema elements, false otherwise
 	 */
-	public ExtremaSelect(boolean stable) {
-		this.stable = stable;
+	public ExtremaSelect(boolean fix) {
+		this.fix = fix;
 	}
 
 	@Override
@@ -71,8 +71,9 @@ public class ExtremaSelect implements Select {
 				return begin;
 				
 			case 2 :
-				if(this.stable && items[begin] > items[begin + 1]){
+				if(this.fix && items[begin] > items[begin + 1]){
 					this.swap(items, begin, begin + 1);
+					return target;
 				}
 				return target == begin
 					? items[begin] < items[begin + 1] ? begin : begin + 1
@@ -98,17 +99,21 @@ public class ExtremaSelect implements Select {
 			);
 		}
 		
-		return (minRank < maxRank 
-			? this.minima(items, begin, end) 
-			: this.maxima(items, begin, end))[rank];
+		int[] extrema = minRank < maxRank 
+				? this.minima(items, begin, end) 
+				: this.maxima(items, begin, end);
+		return extrema == null 
+			? minRank < maxRank ? begin + rank : end - 1 - rank
+			: extrema[rank];
 	}
 	
 	/**
-	 * Finding the minimum 3 elements in order in a sequence
+	 * Finding the minimum 3 elements in order in a sequence, and put the 3 elements 
+	 * at the beginning of the sequence if fix is set to true
 	 * @param items  Sequence
 	 * @param begin  Begin index of interest
 	 * @param end  End index of interest
-	 * @return  3 elements with minimum values sorted ascendingly
+	 * @return  3 elements with minimum values sorted ascendingly, or null if fixed
 	 */
 	protected int[] minima(double[] items, int begin, int end) {
 		int min0 = -1, min1 = -1, min2 = -1;
@@ -128,20 +133,30 @@ public class ExtremaSelect implements Select {
 			}
 		}
 		
-		if(this.stable){
-			this.swap(items, begin, min0);
-			this.swap(items, begin + 1, min1 < 0 ? begin + 1 : min1);
-			this.swap(items, begin + 2, min2 < 0 ? begin + 2 : min2);
+		if(!this.fix) {
+			return new int[] {min0, min1, min2};
 		}
-		return new int[] {min0, min1, min2};
+		
+		this.swap(items, begin, min0);
+		if(min1 >= 0) {
+			this.swap(items, begin + 1, min1 == begin ? min0 : min1);
+		}
+		if(min2 >= 0){
+			this.swap(items, 
+				begin + 2, 
+				min2 == begin ? min0 : min2 == begin + 1 ? min1 : min2
+			);
+		}
+		return null;
 	}
 	
 	/**
-	 * Finding the maximum 3 elements in order in a sequence
+	 * Finding the maximum 3 elements in order in a sequence, and put the 3 elements 
+	 * at the end of the sequence if fix is set to true
 	 * @param items  Sequence
 	 * @param begin  Begin index of interest
 	 * @param end  End index of interest
-	 * @return  3 elements with maximum values sorted descendingly
+	 * @return  3 elements with maximum values sorted descendingly, or null if fixed
 	 */
 	protected int[] maxima(double[] items, int begin, int end) {
 		int max0 = -1, max1 = -1, max2 = -1;
@@ -161,15 +176,22 @@ public class ExtremaSelect implements Select {
 			}
 		}
 		
-		if(this.stable){
-			this.swap(items, begin, max0);
-			this.swap(items, begin + 1, max1 < 0 ? begin + 1 : max1);
-			this.swap(items, begin + 2, max2 < 0 ? begin + 2 : max2);
+		if(!this.fix) {
+			return new int[] {max0, max1, max2};
 		}
-		return new int[] {max0, max1, max2};
+		
+		this.swap(items, end - 1, max0);
+		if(max1 >= 0) {
+			this.swap(items, end - 2, max1 == end - 1 ? max0 : max1);
+		}
+		if(max2 >= 0) {
+			this.swap(items, end - 3, max2 == end - 1 ? max0 : max2 == end - 2 ? max1 : max2);
+		}
+		
+		return null;
 	}
 	
-	private boolean stable;
+	private boolean fix;
 
 	private static final ExtremaSelect INSTANCE = new ExtremaSelect(false);
 }

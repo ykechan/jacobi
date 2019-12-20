@@ -1,5 +1,7 @@
 package jacobi.core.stats.select;
 
+import java.util.Arrays;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -128,6 +130,16 @@ public class ExtremaSelectTest {
 		Assert.assertEquals(4, selector
 				.select(new double[] {77.0, 89, -111, 3, 567.23, 76.666, Math.PI}, 4, 5, 4));
 	}
+	
+	@Test
+	public void shouldFixTheMinimaIfFixIsSetToTrue() {
+		double[] array = new double[] {77.0, 89, -111, 3, 567.23, 76.666, Math.PI};
+		Assert.assertEquals(1, new ExtremaSelect(true).select(array, 0, array.length, 1));
+		Assert.assertEquals(-111, array[0], 1e-12);
+		Assert.assertEquals(3, array[1], 1e-12);
+		Assert.assertEquals(Math.PI, array[2], 1e-12);
+	}
+		
 	
 	@Test(expected = IllegalArgumentException.class)
 	public void shouldFailIfTargetBeforeRangeBegin() {

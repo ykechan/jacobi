@@ -78,8 +78,7 @@ public class DualPivotQuickSelect implements Select {
 		if(lower == upper || items[lower] == items[upper]){
 			int pivot = this.partition(items, begin, end, lower);
 			if(target <= -pivot || target == pivot) {
-				this.done(items, begin, end, target);
-				return target;
+				return this.done(items, begin, end, target);
 			}
 			return this.select(items, 
 					pivot < target ? pivot + 1 : begin, 
@@ -118,15 +117,13 @@ public class DualPivotQuickSelect implements Select {
 		this.swap(items, end - 1, k);
 		
 		if(j == target || k == target) {
-			this.done(items, begin, end, target);
-			return target;
+			return this.done(items, begin, end, target);
 		}
 		
-		return this.select(
-				items, 
-				k < target ? k + 1 : j < target ? j + 1 : begin, 
-				j > target ? j : k > target ? k : end, 
-				target, depth + 1);
+		return this.select(items, 
+			k < target ? k + 1 : j < target ? j + 1 : begin, 
+			j > target ? j : k > target ? k : end, 
+			target, depth + 1);
 	}
 	
 	/**
@@ -172,9 +169,11 @@ public class DualPivotQuickSelect implements Select {
 	 * @param begin  Begin index of interest
 	 * @param end  End index of interest
 	 * @param target  Target
+	 * @return  Target value
 	 */
-	protected void done(double[] items, int begin, int end, int target) {
+	protected int done(double[] items, int begin, int end, int target) {
 		
+		return target;
 	}
 
 	private Select selector0, selector1;
