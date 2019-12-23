@@ -23,16 +23,29 @@
  */
 package jacobi.core.prop;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.api.annotations.Pure;
 import jacobi.core.impl.ColumnVector;
+import jacobi.core.impl.Empty;
 import jacobi.core.util.Throw;
 
 /**
  * Create the transpose of the input matrix.
  * 
  * <p>The transpose matrix A^t of matrix A can be obtained by reflect A over its diagonal.</p>
+ * 
+ * <p>Since matrices are assumed to be stored row-wise in memory, column-wise access
+ * is costly for it causes a lot of cache miss. This implementation alleviates this
+ * by reading a few column elements when fetching a row before moving on to the next
+ * row.</p>
  * 
  * @author Y.K. Chan
  */
@@ -45,40 +58,69 @@ public class Transpose {
      * @return  Transpose matrix A^T
      */
     public Matrix compute(Matrix matrix) {
-        Throw.when().isNull(() -> matrix, () -> "No matrix to transpose.");
-        if(matrix.getRowCount() == 1){
-            return new ColumnVector(matrix.getRow(0));
-        }        
-        Matrix trans = Matrices.zeros(matrix.getColCount(), matrix.getRowCount());
-        double[][] temp = new double[FETCH_SIZE][];
-        for(int i = 0; i < matrix.getRowCount(); i += temp.length){
-            int n = this.fetch(matrix, i, temp);
-            
-            for(int j = 0; j < trans.getRowCount(); j++){
-                double[] row = trans.getRow(j);
-                for(int k = 0; k < n; k++){
-                    row[i + k] = temp[k][j];
-                }
-                trans.setRow(j, row);
-            }
-        }
-        return trans;
+    	Throw.when().isNull(() -> matrix, () -> "No matrix to transpose.");
+    	
+    	return matrix.getRowCount() == 0 
+    		? Empty.getInstance()
+    		: Matrices.wrap(
+    			this.compute(matrix, Function.identity()).toArray(new double[0][])
+    		);
     }
     
     /**
-     * Fetch rows from input matrix into temp buffer.
-     * @param matrix  Input matrix A
-     * @param from  Index to start fetching rows
-     * @param temp  Temp buffer
-     * @return  Number of rows fetched
+     * Compute on each column of the input matrix and get the results
+     * @param matrix  Input matrix
+     * @param mapper  Mapping function from column vector to result
+     * @return  Lists of results
      */
-    protected int fetch(Matrix matrix, int from, double[][] temp) {
-        int n = Math.min(matrix.getRowCount() - from, temp.length);
-        for(int i = 0; i < n; i++){
-            temp[i] = matrix.getRow(from + i);
-        }
-        return n;
+    public <T> List<T> compute(Matrix matrix, Function<double[], T> mapper) {   
+    	
+    	if(matrix instanceof ColumnVector){
+    		double[] vector = ((ColumnVector) matrix).getVector();
+    		return Collections.singletonList(
+    			mapper.apply(Arrays.copyOf(vector, vector.length))
+    		);
+    	}
+    	
+    	if(matrix.getRowCount() == 1) {
+    		return Arrays.stream(matrix.getRow(0))
+    			.mapToObj(v -> mapper.apply(new double[] {v}))
+    			.collect(Collectors.toList());
+    	}
+    	
+    	List<T> results = new ArrayList<>(matrix.getColCount());
+    	double[][] buffer = new double[FETCH_SIZE][];
+    	
+    	for(int j = 0; j < matrix.getColCount(); j += buffer.length) {
+    		int span = Math.min(matrix.getColCount() - j, buffer.length);
+    		
+    		for(int k = 0; k < span; k++) {
+    			if(buffer[k] == null) {
+    				buffer[k] = new double[matrix.getRowCount()];
+    			}
+    		}
+    		
+    		for(int i = 0; i < matrix.getRowCount(); i++) {
+    			double[] row = matrix.getRow(i);
+    			for(int k = 0; k < span; k++) {
+    				buffer[k][i] = row[j + k];
+    			}
+    		}
+    		
+    		for(int k = 0; k < span; k++){
+    			T yield = mapper.apply(buffer[k]);
+    			results.add(yield);
+    			
+    			if(yield == buffer[k]){
+    				buffer[k] = null;
+    			}
+    		}
+    	}
+    	return results;
     }
     
-    private static final int FETCH_SIZE = 8;
+    /**
+     * Fetch size
+     */
+    protected static final int FETCH_SIZE = 8;
 }

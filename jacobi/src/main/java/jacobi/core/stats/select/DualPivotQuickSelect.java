@@ -101,7 +101,7 @@ public class DualPivotQuickSelect implements Select {
 		
 		int i = begin + 1;
 		while(i < k) {
-			if(items[i] > high){
+			if(items[i] >= high){
 				this.swap(items, i, --k);
 				continue;
 			}
@@ -123,7 +123,7 @@ public class DualPivotQuickSelect implements Select {
 		return this.select(items, 
 			k < target ? k + 1 : j < target ? j + 1 : begin, 
 			j > target ? j : k > target ? k : end, 
-			target, depth + 1);
+			target, depth - 1);
 	}
 	
 	/**

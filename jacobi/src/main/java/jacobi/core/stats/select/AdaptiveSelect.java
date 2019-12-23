@@ -215,7 +215,7 @@ public class AdaptiveSelect implements Select {
 
 		@Override
 		public int select(double[] items, int begin, int end, int target, int depth) {
-			if(depth > this.max){
+			if(-depth > this.max){
 				return base.select(items, begin, end, target);
 			}
 			

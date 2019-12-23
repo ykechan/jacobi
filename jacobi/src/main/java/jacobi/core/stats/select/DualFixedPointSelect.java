@@ -23,6 +23,9 @@
  */
 package jacobi.core.stats.select;
 
+import java.util.Arrays;
+import java.util.concurrent.ThreadLocalRandom;
+
 /**
  * Linear selection using dual pivot quick select with 2 fixed points after selection.
  * 
@@ -33,26 +36,48 @@ package jacobi.core.stats.select;
  * @author Y.K. Chan
  *
  */
-public class DualFixedPointSelect extends DualPivotQuickSelect {
+public class DualFixedPointSelect extends DualPivotQuickSelect {		
+	
+	/**
+	 * Multiplier of log(n) for detecting failure to converge in linear time
+	 */
+	public static final double DEFAULT_DEPTH_MULTIPLIER = 1.25;
+	
+	/**
+	 * Get the default instance 
+	 * @return  Default instance
+	 */
+	public static DualFixedPointSelect getInstance() {
+		return INSTANCE;
+	}
 
 	/**
 	 * Constructor
 	 * @param selector0  First pivot selection
 	 * @param selector1  Second pivot selection
 	 * @param extrema  Extrema selection, must select fixed point
+	 * @param base Implementation to fall back to 
 	 */
-	public DualFixedPointSelect(Select selector0, 
-			Select selector1, 
-			Select extrema) {
+	public DualFixedPointSelect(Select selector0, Select selector1, 
+			Select extrema, Select base) {
 		super(selector0, selector1);
 		this.extrema = extrema;
+		this.base = base;
 	}
 	
+	@Override
+	public int select(double[] items, int begin, int end, int target) {
+		int limit = (int) Math.ceil(DEFAULT_DEPTH_MULTIPLIER * Math.log(end - begin));
+		return this.select(items, begin, end, target, Math.max(limit, 1));
+	}
+
 	@Override
 	public int select(double[] items, int begin, int end, int target, int depth) {
 		int dist = Math.min(target - begin, end - 1 - target);
 		if(dist > 2) {
-			return super.select(items, begin, end, target, depth);
+			return depth < 0
+				? this.base.select(items, begin, end, target)
+				: super.select(items, begin, end, target, depth);
 		}
 		
 		if(this.extrema.select(items, begin, end, target) != target) {
@@ -84,5 +109,14 @@ public class DualFixedPointSelect extends DualPivotQuickSelect {
 		return min;
 	}
 
-	private Select extrema;
+	private Select extrema, base;
+	
+	private static final Select RAND = (a, i, j, t) -> i + ThreadLocalRandom.current().nextInt(j - i);
+	
+	private static final DualFixedPointSelect INSTANCE = new DualFixedPointSelect(
+		RAND, RAND, new ExtremaSelect(true), (a, i, j, t) -> {
+			Arrays.sort(a, i, j);
+			return t;
+		}
+	);
 }
