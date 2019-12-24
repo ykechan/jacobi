@@ -92,6 +92,14 @@ public class DualFixedPointSelect extends DualPivotQuickSelect {
 		return target;
 	}
 	
+	@Override
+	protected int done(double[] items, int begin, int end, int target) {
+		if(target + 1 < end){
+			this.swap(items, target + 1, this.minimum(items, target + 1, end));
+		}
+		return super.done(items, begin, end, target);
+	}
+
 	/**
 	 * Find the index of the minimum item with specified range 
 	 * @param items  Input sequence of items

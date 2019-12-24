@@ -139,7 +139,16 @@ public class ExtremaSelectTest {
 		Assert.assertEquals(3, array[1], 1e-12);
 		Assert.assertEquals(Math.PI, array[2], 1e-12);
 	}
-		
+	
+	@Test
+	public void shouldFixTheMaximaIfFixIsSetToTrue() {
+		double[] array = new double[] {77.0, 89, -111, 3, 567.23, 76.666, Math.PI};
+		Assert.assertEquals(array.length - 2, 
+			new ExtremaSelect(true).select(array, 0, array.length, array.length - 2));
+		Assert.assertEquals( 567.23, array[array.length - 1], 1e-12);
+		Assert.assertEquals(     89, array[array.length - 2], 1e-12);
+		Assert.assertEquals(   77.0, array[array.length - 3], 1e-12);
+	}	
 	
 	@Test(expected = IllegalArgumentException.class)
 	public void shouldFailIfTargetBeforeRangeBegin() {
