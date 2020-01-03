@@ -35,7 +35,8 @@ import java.util.function.IntFunction;
  * <p>The function would accept the visiting order of the current region, and
  * returns the visiting order of the partitions for (lower, lower), (lower, upper),
  * (upper, lower) and (upper, upper) in this order. The visiting order is encoded 
- * as a base-4 number with the first quadrant to visit as the least significant coefficent.</p>
+ * as a base-4 number with the visiting order 0, 1, 2 or 3 as coefficient of (lower, lower), 
+ * (lower, upper), (upper, lower) and (upper, upper), least significant coefficient first. </p>
  * 
  * <p>For z-curve, the visiting order is (lower, upper) -&gt; (upper, upper) -&gt; (lower, lower)
  * -&gt; (upper, lower) regardless. Thus the function is a constant function
@@ -78,6 +79,9 @@ import java.util.function.IntFunction;
  *
  */
 public enum Fractal2D implements IntFunction<int[]> {
+	/**
+	 * Z-curve
+	 */
 	Z_CURVE {
 		
 		@Override
@@ -91,6 +95,9 @@ public enum Fractal2D implements IntFunction<int[]> {
 		
 	},
 	
+	/**
+	 * Hilbert curve
+	 */
 	HILBERT {
 
 		@Override
@@ -130,27 +137,27 @@ public enum Fractal2D implements IntFunction<int[]> {
 		
 	};
 	
-	protected static final int LL = 0;
+	protected static final int LL = 1;
 	
-	protected static final int LU = 1;
+	protected static final int LU = 4;
 	
-	protected static final int UL = 2;
+	protected static final int UL = 16;
 	
-	protected static final int UU = 3;
-
-	protected static final int Z_ORDER = LL + UL * 4 + LU * 16 + UU * 64;
+	protected static final int UU = 64;
+	
+	protected static final int Z_ORDER = 0 * LL + 2 * LU + 1 * UL + 3 * UU;
 	
 	/*
 	 *   A = 1---2  B = 3---2  C = 3   0  D = 1---0
      *       |   |          |      |   |      |
      *       0   3      0---1      2---1      2---3
 	 */
+		
+	protected static final int HILBERT_A = 1 * LL + 0 * LU + 2 * UL + 3 * UU;
 	
-	protected static final int HILBERT_A = LU + LL * 4 + UL * 16 + UU * 64;
+	protected static final int HILBERT_B = 3 * LL + 0 * LU + 2 * UL + 1 * UU;
 	
-	protected static final int HILBERT_B = LU + UU * 4 + UL * 16 + LL * 64;
+	protected static final int HILBERT_C = 3 * LL + 2 * LU + 0 * UL + 1 * UU;
 	
-	protected static final int HILBERT_C = UL + UU * 4 + LU * 16 + LL * 64;
-	
-	protected static final int HILBERT_D = UL + LL * 4 + LU * 16 + UU * 64;
+	protected static final int HILBERT_D = 1 * LL + 2 * LU + 0 * UL + 3 * UU;
 }
