@@ -14,8 +14,7 @@ public class FractalSort2DTest {
 		int[] org = Arrays.copyOf(items, items.length);
 		
 		int[] len = new FractalSort2D(0, 1, v -> new int[0]).group(
-			new FractalSort2D.Buffer(items, new int[items.length]), 
-			0, items.length, 
+			new FractalSort2D.Buffer(items, new int[items.length], 0, items.length), 			
 			v -> v % 4
 		);
 		
@@ -35,6 +34,19 @@ public class FractalSort2DTest {
 			.skip(len[0] + len[1] + len[2])
 			.limit(len[3])
 			.allMatch(v -> v % 4 == 3));
+	}
+	
+	@Test
+	public void shouldBeAbleToGroupItemsWithNoItemInFirstCat() {
+		double value = 1.0;
+		int k = 0;
+		while(value > 1e-12) {
+			System.out.println("k = " + (k++) + ", " + (value /= 2.0));
+		}
+		System.out.println(0x10);
+		
+		int parity = Fractal2D.HILBERT_A;
+		System.out.println((parity >> 4) % 4);
 	}
 
 }

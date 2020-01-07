@@ -23,9 +23,8 @@
  */
 package jacobi.core.spatial.rtree;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.function.UnaryOperator;
+import java.util.function.Function;
 
 /**
  * Common interface of sorting a list of spatial objects.
@@ -37,11 +36,11 @@ import java.util.function.UnaryOperator;
  * @author Y.K. Chan
  *
  */
-public interface SpatialSort extends UnaryOperator<List<double[]>> {
+public interface SpatialSort extends Function<List<double[]>, int[]> {
 	
 	@Override
-	public default List<double[]> apply(List<double[]> vectors) {
-		return Arrays.asList(this.apply(vectors.toArray(new double[0][]), 0, vectors.size()));
+	public default int[] apply(List<double[]> vectors) {
+		return this.apply(vectors.toArray(new double[0][]), 0, vectors.size());
 	}
 
 	/**
@@ -52,6 +51,6 @@ public interface SpatialSort extends UnaryOperator<List<double[]>> {
 	 * @param end  End index of interest
 	 * @return  An sorted array of spatial objects.
 	 */
-	public double[][] apply(double[][] vectors, int begin, int end);
+	public int[] apply(double[][] vectors, int begin, int end);
 
 }
