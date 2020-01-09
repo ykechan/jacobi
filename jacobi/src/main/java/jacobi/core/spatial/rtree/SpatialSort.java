@@ -25,6 +25,7 @@ package jacobi.core.spatial.rtree;
 
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 
 /**
  * Common interface of sorting a list of spatial objects.
@@ -40,7 +41,11 @@ public interface SpatialSort extends Function<List<double[]>, int[]> {
 	
 	@Override
 	public default int[] apply(List<double[]> vectors) {
-		return this.apply(vectors.toArray(new double[0][]), 0, vectors.size());
+		return this.apply(
+			vectors.toArray(new double[0][]), 
+			0, vectors.size(),
+			IntStream.range(0, vectors.size()).toArray()
+		);
 	}
 
 	/**
@@ -49,8 +54,9 @@ public interface SpatialSort extends Function<List<double[]>, int[]> {
 	 * @param vectors  Input array
 	 * @param begin  Begin index of interest
 	 * @param end  End index of interest
+	 * @param result Instance of result array
 	 * @return  An sorted array of spatial objects.
 	 */
-	public int[] apply(double[][] vectors, int begin, int end);
+	public int[] apply(double[][] vectors, int begin, int end, int[] result);
 
 }

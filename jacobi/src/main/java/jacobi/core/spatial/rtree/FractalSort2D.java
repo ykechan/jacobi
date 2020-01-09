@@ -23,10 +23,10 @@
  */
 package jacobi.core.spatial.rtree;
 
+import java.util.ArrayDeque;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.function.IntFunction;
-import java.util.function.IntUnaryOperator;
-import java.util.stream.IntStream;
 
 /**
  * Sorting spatial objects by a 2-D space filing fractal.
@@ -38,12 +38,11 @@ import java.util.stream.IntStream;
  * <p>This implementation groups the spatial objects of the 4 quadrants and rank
  * them in the current scale, and further sort within each group in a finer scale.</p>
  * 
+ * 
  * @author Y.K. Chan
  *
  */
 public class FractalSort2D implements SpatialSort {
-	
-	public static final double EPSILON = 1e-5;
 	
 	/**
 	 * Constructor.
@@ -58,66 +57,143 @@ public class FractalSort2D implements SpatialSort {
 	}
 	
 	@Override
-	public int[] apply(double[][] vectors, int begin, int end) {
-		if(begin > 0) {
-			return this.apply(Arrays.copyOfRange(vectors, begin, end), 0, end - begin);
-		}
+	public int[] apply(double[][] vectors, int begin, int end, int[] result) {
 		
-		Aabb2 mbr = this.mbrOf(vectors, begin, end);		
-		return this.sort(vectors, 
-			mbr, 
-			Buffer.init(end - begin), 
-			Math.max(mbr.xMax - mbr.xMin, mbr.yMax - mbr.yMin) * EPSILON
-		).array;
-	}
-	
-	protected Buffer sort(double[][] vectors, Aabb2 aabb, Buffer buffer, double epsilon) {
-		if(aabb.area() < epsilon){
-			// ignore negligible / de-generate regions
-			return buffer;
-		}
+		System.out.println(Arrays.toString(result));
+		int[] buffer = new int[result.length];
 		
-		double xMid = aabb.xMid();
-		double yMid = aabb.yMid();
+		Deque<Arguments> queue = new ArrayDeque<>();
+		queue.addLast(new Arguments(this.mbrOf(vectors, begin, end), begin, end, 0));
 		
-		int[] counts = this.group(buffer, i -> {
-			double[] pos = vectors[i];
-			int xUpper = pos[xIdx] > xMid ? 4 : 0;
-			int yUpper = pos[yIdx] > yMid ? 2 : 0;
-			return (aabb.parity << (xUpper + yUpper) ) % 4;
-		});
-		
-		Aabb2[] quadrants = this.partition(aabb);
-		if(counts.length != quadrants.length) {
-			throw new UnsupportedOperationException(
-				"Partition count " + quadrants.length + " mismatch with group count " + counts.length 
-			);
-		}
-		
-		int begin = buffer.begin;
-		for(int i = 0; i < counts.length; i++){
-			if(counts[i] > 1) {
-				this.sort(vectors, 
-					quadrants[i], 
-					buffer.rangeOf(begin, begin + counts[i]), 
-					epsilon
-				);
+		while(!queue.isEmpty()){
+			Arguments args = queue.removeLast();
+			if(args.end - args.begin < 2) {
+				continue;
 			}
-			begin += counts[i];
+			
+			int[] quadrants = this.groupQuadrants(vectors, args, result, buffer);
+			Arguments[] argList = this.split(args, quadrants);
+			for(Arguments arg : argList) {
+				if(arg != null) {
+					System.out.println("add " + arg.begin + "," + arg.end + ", ["
+						+ arg.aabb.xMin + "," + arg.aabb.yMin
+						+ " x "
+						+ arg.aabb.xMax + "," + arg.aabb.yMax + "]");
+					queue.addLast(arg);
+				}
+			}
 		}
-		return buffer;
+		return result;
 	}
 	
+	protected Arguments[] split(Arguments args, int[] parts) {
+		int parity = args.aabb.parity;
+		int[] mapping = new int[4];
+		mapping[(parity / Fractal2D.LL) % 4] = 0;
+		mapping[(parity / Fractal2D.LU) % 4] = 1;
+		mapping[(parity / Fractal2D.UL) % 4] = 2;
+		mapping[(parity / Fractal2D.UU) % 4] = 3;
+		
+		Aabb2[] aabbs = this.partition(args.aabb);
+		if(aabbs.length != mapping.length || parts.length != mapping.length){
+			throw new UnsupportedOperationException();
+		}				
+		
+		int k = args.begin;
+		Arguments[] argList = new Arguments[parts.length];
+		for(int i = 0; i < argList.length; i++){
+			argList[i] = parts[i] < 2
+					? null : new Arguments(aabbs[mapping[i]], k, k + parts[i], args.depth + 1);
+			k += parts[i];
+		}
+		
+		if(k != args.end){
+			throw new UnsupportedOperationException("Number of elements mismatch. "
+				+ "Expected [" + args.begin + "," + args.end +"), "
+				+ "found [" + args.begin + "," + k + ".");
+		}
+		return argList;
+	}
+	
+	/**
+	 * Group the result array according to the order of the 4 quadrants, given by the encoded
+	 * parity as the order
+	 * @param vectors  Input spatial vectors
+	 * @param args  Arguments of the current region
+	 * @param result  Array to be grouped
+	 * @param buffer  Array as temp buffer
+	 * @return
+	 */
+	protected int[] groupQuadrants(double[][] vectors, Arguments args, int[] result, int[] buffer) {
+		System.out.println("Group [" + args.begin + "," + args.end + " depth = " +args.depth);
+		double xMid = args.aabb.xMid();
+		double yMid = args.aabb.yMid();
+
+		int begin = args.begin;
+		int end = args.end;
+		
+		int head = begin; 
+		int tail = end;
+		int low = begin;
+		int high = end;
+		
+		int i = begin;
+		while(i < tail){
+			double[] pos = vectors[result[i]];	
+			int xUpper = pos[xIdx] > xMid ? 16 : 1;
+			int yUpper = pos[yIdx] > yMid ? 4 : 1;			
+			switch((args.aabb.parity / xUpper / yUpper) % 4) {
+				case 0 :
+					result[head++] = result[i++];
+					break;
+					
+				case 1 :
+					buffer[low++] = result[i++];
+					break;
+					
+				case 2 :
+					buffer[--high] = result[i++];
+					break;
+					
+				case 3 : {
+					tail = tail - 1;
+					int tmp = result[tail]; 
+					result[tail] = result[i]; 
+					result[i] = tmp; 
+					}
+					break;
+					
+				default :
+					throw new UnsupportedOperationException();
+			}			
+		}
+		
+		if(low > begin) {
+			System.arraycopy(buffer, begin, result, head, low - begin);
+		}
+		
+		if(high < end){			
+			System.arraycopy(buffer, high, result, tail - (end - high), end - high);
+		}
+		return new int[] { head - begin, low - begin, end - high, end - tail };
+	}
+	
+	/**
+	 * Partition a region defined by an aabb into 4 quadrants
+	 * @param aabb  Input region
+	 * @return  Array of aabbs for the 4 quadrants in the order of 
+	 *          (lower, lower), (lower, upper), (upper, lower) and (upper, upper). 
+	 */
 	protected Aabb2[] partition(Aabb2 aabb) {
 		double xMid = aabb.xMid();
 		double yMid = aabb.yMid();
 		
 		int[] curve = this.fnFrac.apply(aabb.parity);
 		return new Aabb2[] {
-			new Aabb2(aabb.xMin, xMid, aabb.yMin, yMid, curve[0]), // LL
-			new Aabb2(aabb.xMin, xMid, yMid, aabb.yMax, curve[1]), // LU
-			new Aabb2(xMid, aabb.xMax, aabb.yMin, yMid, curve[2]), // UL
-			new Aabb2(xMid, aabb.xMax, yMid, aabb.yMax, curve[3])  // UU
+			new Aabb2(aabb.xMin, aabb.yMin, xMid, yMid, curve[0]), // LL
+			new Aabb2(aabb.xMin, yMid, xMid, aabb.yMax, curve[1]), // LU
+			new Aabb2(xMid, aabb.yMin, aabb.xMax, yMid, curve[2]), // UL
+			new Aabb2(xMid, yMid, aabb.xMax, aabb.yMax, curve[3])  // UU
 		};
 	}
 	
@@ -153,63 +229,44 @@ public class FractalSort2D implements SpatialSort {
 			}
 		}
 		return new Aabb2(xMin, yMin, xMax, yMax, this.fnFrac.apply(0)[0]);
-	}
-	
-	/**
-	 * Group items in buffer into 4 categories in ascending order.
-	 * @param buffer  Input buffer
-	 * @param gFn  Grouping function for item, returns an integer [0, 4) to denote the category
-	 * @return  Number of items for each categories
-	 */
-	protected int[] group(Buffer buffer, IntUnaryOperator gFn) {
-		int begin = buffer.begin;
-		int end = buffer.end;
-		
-		int head = begin, tail = end;
-		int low = begin, high = end;
-		
-		int i = begin;
-		while(i < tail){
-			int gNum = gFn.applyAsInt(buffer.array[i]);
-			switch(gNum) {
-				case 0 :
-					buffer.array[head++] = buffer.array[i++];
-					break;
-					
-				case 1 :
-					buffer.temp[low++] = buffer.array[i++];
-					break;
-					
-				case 2 :
-					buffer.temp[--high] = buffer.array[i++];
-					break;
-					
-				case 3 : { 
-					int tmp = buffer.array[--tail]; 
-					buffer.array[tail] = buffer.array[i]; 
-					buffer.array[i] = tmp; 
-					}
-					break;
-					
-				default :
-					throw new UnsupportedOperationException("Support grouping into [0-4) only, found " + gNum);
-			}
-		}
-		
-		if(low > begin) {
-			System.arraycopy(buffer.temp, begin, buffer.array, head, low - begin);
-		}
-		
-		if(high < end){			
-			System.arraycopy(buffer.temp, 
-				high, 
-				buffer.array, tail - (end - high), end - high);
-		}
-		return new int[] { head - begin, low - begin, end - high, end - tail };
-	}
+	}	
 	
 	private int xIdx, yIdx;
 	private IntFunction<int[]> fnFrac;
+	private Params params;
+	
+	public static class Params {
+		
+		public double epsilon;
+		
+		public double maxDepth;
+		
+		public double minEntropy;
+
+		public Params(double epsilon, double maxDepth, double minEntropy) {
+			this.epsilon = epsilon;
+			this.maxDepth = maxDepth;
+			this.minEntropy = minEntropy;
+		}
+		
+	}
+	
+	protected static class Arguments {
+		
+		public Aabb2 aabb;
+		
+		public int begin, end;
+		
+		public int depth;
+
+		public Arguments(Aabb2 aabb, int begin, int end, int depth) {
+			this.aabb = aabb;
+			this.begin = begin;
+			this.end = end;
+			this.depth = depth;
+		}
+		
+	}
 	
 	protected static class Aabb2 {
 		
@@ -237,33 +294,6 @@ public class FractalSort2D implements SpatialSort {
 			return (this.xMax - this.xMin) * (this.yMax - this.xMin);
 		}
 		
-	}
-	
-	protected static class Buffer {
-		
-		public static Buffer init(int length) {
-			return new Buffer(
-				IntStream.range(0, length).toArray(), 
-				new int[length], 
-				0, length
-			);
-		}
-		
-		public final int[] array, temp;
-		
-		public final int begin, end;
+	}	
 
-		public Buffer(int[] array, int[] temp, int begin, int end) {
-			this.array = array;
-			this.temp = temp;
-			this.begin = begin;
-			this.end = end;
-		}
-		
-		public Buffer rangeOf(int start, int finish) {
-			
-			return new Buffer(this.array, this.temp, start, finish);
-		}
-		
-	}
 }

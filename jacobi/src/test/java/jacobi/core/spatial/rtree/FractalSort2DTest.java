@@ -1,52 +1,96 @@
 package jacobi.core.spatial.rtree;
 
 import java.util.Arrays;
-import java.util.function.IntUnaryOperator;
+import java.util.stream.IntStream;
 
 import org.junit.Assert;
 import org.junit.Test;
 
+import jacobi.core.spatial.rtree.FractalSort2D.Aabb2;
+import jacobi.core.spatial.rtree.FractalSort2D.Arguments;
+
 public class FractalSort2DTest {
 	
 	@Test
-	public void shouldBeAbleToGroupItemsInto4GroupsByMod4() {
-		int[] items = {7, 13, 0, 2, 6, 7, 8, 11, 17, 9};
-		int[] org = Arrays.copyOf(items, items.length);
+	public void shouldBeAbleToSortA4x4GridInZOrder( ) {
+		double[][] gridPts = this.grid(4);
+		int[] result = new FractalSort2D(0, 1, Fractal2D.Z_CURVE).apply(Arrays.asList(gridPts));
 		
-		int[] len = new FractalSort2D(0, 1, v -> new int[0]).group(
-			new FractalSort2D.Buffer(items, new int[items.length], 0, items.length), 			
-			v -> v % 4
-		);
-		
-		Assert.assertEquals(len[0], (int) Arrays.stream(org).filter(v -> v % 4 == 0).count());
-		Assert.assertEquals(len[1], (int) Arrays.stream(org).filter(v -> v % 4 == 1).count());
-		Assert.assertEquals(len[2], (int) Arrays.stream(org).filter(v -> v % 4 == 2).count());
-		Assert.assertEquals(len[3], (int) Arrays.stream(org).filter(v -> v % 4 == 3).count());
-		
-		Assert.assertTrue(Arrays.stream(items).limit(len[0]).allMatch(v -> v % 4 == 0));
-		Assert.assertTrue(Arrays.stream(items)
-			.skip(len[0])
-			.limit(len[1]).allMatch(v -> v % 4 == 1));
-		Assert.assertTrue(Arrays.stream(items)
-			.skip(len[0] + len[1])
-			.limit(len[2]).allMatch(v -> v % 4 == 2));
-		Assert.assertTrue(Arrays.stream(items)
-			.skip(len[0] + len[1] + len[2])
-			.limit(len[3])
-			.allMatch(v -> v % 4 == 3));
+		for(int r : result) {
+			System.out.println(Arrays.toString(gridPts[r]));
+		}
 	}
 	
 	@Test
-	public void shouldBeAbleToGroupItemsWithNoItemInFirstCat() {
-		double value = 1.0;
-		int k = 0;
-		while(value > 1e-12) {
-			System.out.println("k = " + (k++) + ", " + (value /= 2.0));
-		}
-		System.out.println(0x10);
+	public void shouldBeAbleToGroup4CornersInDescendingCodeOrder() {
+		double[][] vertices = new double[][] {
+			{-1, -1}, {-1, 1}, {1, -1}, {1, 1}
+		};
 		
-		int parity = Fractal2D.HILBERT_A;
-		System.out.println((parity >> 4) % 4);
+		int order = 3 * Fractal2D.LL + 2 * Fractal2D.LU + 1 * Fractal2D.UL + 0 * Fractal2D.UU;
+		int[] result = IntStream.range(0, vertices.length).toArray();
+		
+		int[] quad = new FractalSort2D(0, 1, v -> new int[0]).groupQuadrants(
+			vertices, 
+			new Arguments(new Aabb2(-1, -1, 1, 1, order), 0, vertices.length, 1), 
+			result, new int[vertices.length]
+		);
+		
+		Assert.assertArrayEquals(new int[]{3, 2, 1, 0}, result);
+		Assert.assertArrayEquals(new int[]{1, 1, 1, 1}, quad);
+	}
+	
+	@Test
+	public void shouldBeAbleToSort4CornersInAnyPermutation() {
+		double[][] vertices = new double[][] {
+			{-1, -1}, {-1, 1}, {1, -1}, {1, 1}
+		};
+		
+		int[] base = new int[] {
+			Fractal2D.LL, Fractal2D.LU, Fractal2D.UL, Fractal2D.UU
+		};
+		for(int i = 0; i < 4; i++) {
+			for(int j = 0; j < 4; j++) {
+				if(i == j) {
+					continue;
+				}
+				
+				for(int k = 0; k < 4; k++) {
+					if(i == k || j == k) {
+						continue;
+					}
+					
+					int n = 0;
+					for(;n < 3; n++) {
+						if(n != i && n != j && n != k) {
+							break;
+						}
+					}
+					int order = 0 * base[i] + 1 * base[j] + 2 * base[k] + 3 * base[n];
+					
+					int[] buffer = IntStream.range(0, vertices.length).toArray();
+					int[] quad = new FractalSort2D(0, 1, v -> new int[0]).groupQuadrants(
+						vertices,
+						new Arguments(new Aabb2(-1, -1, 1, 1, order), 0, vertices.length, 0),
+						buffer, new int[4]);
+					
+					Assert.assertArrayEquals(new int[] {i, j, k, n}, buffer);
+					Assert.assertArrayEquals(new int[] {1, 1, 1, 1}, quad);					
+				}
+			}
+		}
+	}
+	
+	protected double[][] grid(int n) {
+		double[][] pts = new double[n * n][];
+		int k = 0;
+		for(int i = 0; i < n; i++){
+			for(int j = 0; j < n; j++){
+				System.out.println("i = " + i + ", j = " + j + ", k = " + k);
+				pts[k++] = new double[] {i, j};
+			}
+		}
+		return pts;
 	}
 
 }
