@@ -59,7 +59,6 @@ public class FractalSort2D implements SpatialSort {
 	@Override
 	public int[] apply(double[][] vectors, int begin, int end, int[] result) {
 		
-		System.out.println(Arrays.toString(result));
 		int[] buffer = new int[result.length];
 		
 		Deque<Arguments> queue = new ArrayDeque<>();
@@ -75,10 +74,6 @@ public class FractalSort2D implements SpatialSort {
 			Arguments[] argList = this.split(args, quadrants);
 			for(Arguments arg : argList) {
 				if(arg != null) {
-					System.out.println("add " + arg.begin + "," + arg.end + ", ["
-						+ arg.aabb.xMin + "," + arg.aabb.yMin
-						+ " x "
-						+ arg.aabb.xMax + "," + arg.aabb.yMax + "]");
 					queue.addLast(arg);
 				}
 			}
@@ -125,7 +120,6 @@ public class FractalSort2D implements SpatialSort {
 	 * @return
 	 */
 	protected int[] groupQuadrants(double[][] vectors, Arguments args, int[] result, int[] buffer) {
-		System.out.println("Group [" + args.begin + "," + args.end + " depth = " +args.depth);
 		double xMid = args.aabb.xMid();
 		double yMid = args.aabb.yMid();
 
@@ -251,14 +245,35 @@ public class FractalSort2D implements SpatialSort {
 		
 	}
 	
+	/**
+	 * Data class for arguments in an iteration
+	 * @author Y.K. Chan
+	 *
+	 */
 	protected static class Arguments {
 		
-		public Aabb2 aabb;
+		/**
+		 * Aabb to define region of interest
+		 */
+		public final Aabb2 aabb;
 		
-		public int begin, end;
+		/**
+		 * Begin and end index of interest
+		 */
+		public final int begin, end;
 		
-		public int depth;
+		/**
+		 * Depth of current iteration
+		 */
+		public final int depth;
 
+		/**
+		 * Constructor.
+		 * @param aabb  Region defined by an aabb.
+		 * @param begin  Begin index of interest
+		 * @param end  End index of interest
+		 * @param depth  Depth of current iteration
+		 */
 		public Arguments(Aabb2 aabb, int begin, int end, int depth) {
 			this.aabb = aabb;
 			this.begin = begin;
@@ -268,10 +283,22 @@ public class FractalSort2D implements SpatialSort {
 		
 	}
 	
+	/**
+	 * An axis-aligned bounding box in 2-D space
+	 * 
+	 * @author Y.K. Chan
+	 *
+	 */
 	protected static class Aabb2 {
 		
+		/**
+		 * Minimum and maximum bound in x and y dimensions
+		 */
 		public final double xMin, yMin, xMax, yMax;
 		
+		/**
+		 * Parity information of the fractal in current region
+		 */
 		public final int parity;
 
 		public Aabb2(double xMin, double yMin, double xMax, double yMax, int parity) {
@@ -282,14 +309,25 @@ public class FractalSort2D implements SpatialSort {
 			this.parity = parity;
 		}
 		
+		/**
+		 * Mid value in x-dimension
+		 * @return  Mid value in x-dimension
+		 */
 		public double xMid() {
 			return (this.xMin + this.xMax) / 2.0;
 		}
 		
+		/**
+		 * Mid value in y-dimension
+		 * @return  Mid value in y-dimension
+		 */
 		public double yMid() {
 			return (this.yMin + this.yMax) / 2.0;
 		}
 		
+		/**
+		 * Get the area of the aabb.
+		 */
 		public double area() {
 			return (this.xMax - this.xMin) * (this.yMax - this.xMin);
 		}

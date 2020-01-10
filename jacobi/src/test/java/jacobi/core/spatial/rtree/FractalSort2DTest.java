@@ -16,9 +16,12 @@ public class FractalSort2DTest {
 		double[][] gridPts = this.grid(4);
 		int[] result = new FractalSort2D(0, 1, Fractal2D.Z_CURVE).apply(Arrays.asList(gridPts));
 		
-		for(int r : result) {
-			System.out.println(Arrays.toString(gridPts[r]));
-		}
+		Assert.assertArrayEquals(new int[] {
+			0, 1, 4, 5,
+			2, 3, 6, 7,
+			8, 9, 12, 13,
+			10, 11, 14, 15
+		}, result);
 	}
 	
 	@Test
@@ -87,7 +90,7 @@ public class FractalSort2DTest {
 		for(int i = 0; i < n; i++){
 			for(int j = 0; j < n; j++){
 				System.out.println("i = " + i + ", j = " + j + ", k = " + k);
-				pts[k++] = new double[] {i, j};
+				pts[k++] = new double[] {j, i};
 			}
 		}
 		return pts;

@@ -45,47 +45,49 @@ public class Aabb {
 	 */
 	public static Aabb wrap(double[] p) {
 		return new Aabb(p, p);
-	}
+	}	
 	
 	/**
-	 * Bound a list of point clouds
-	 * @param points
-	 * @return
+	 * Constructor
+	 * @param minBd  minimum bound
+	 * @param maxBd  maximum bound
 	 */
-	public static Aabb of(List<double[]> points) {
-		double[] first = points.get(0);
-		return Aabb.wrap(first).join(new AbstractList<Aabb>() {
-
-			@Override
-			public Aabb get(int index) {
-				return Aabb.wrap(points.get(1 + index));
-			}
-
-			@Override
-			public int size() {
-				return points.size() - 1;
-			}
-			
-		});
-	}
-	
 	protected Aabb(double[] minBd, double[] maxBd) {
 		this.minBd = minBd;
 		this.maxBd = maxBd;
 	}
 	
+	/**
+	 * Get the number of dimension
+	 * @return  Number of dimension
+	 */
 	public int dim() {
 		return this.minBd.length;
 	}
 
+	/**
+	 * Get the minimum bound at a given dimension
+	 * @param xDim  Index of dimension
+	 * @return  Minimum bound at a given dimension
+	 */
 	public double min(int xDim) {
 		return this.minBd[xDim];
 	}
 	
+	/**
+	 * Get the maximum bound at a given dimension
+	 * @param xDim  Index of dimension
+	 * @return  Maximum bound at a given dimension
+	 */
 	public double max(int xDim) {
 		return this.maxBd[xDim];
 	}
 	
+	/**
+	 * Construct a new aabb by merging this with a list of aabbs
+	 * @param boxes  List of aabbs
+	 * @return  A new aabb that tightly bounds all aabbs
+	 */
 	public Aabb join(List<Aabb> boxes) {
 		double[] newMin = Arrays.copyOf(this.minBd, this.dim());
 		double[] newMax = Arrays.copyOf(this.maxBd, this.dim());
