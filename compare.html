@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html>
+<head></head>
+<body>
+<script>
+
+let modules = {};
+
+(function(exports){
+	const tostr = (v) => '' + v + ' (' + (typeof v) + ')';
+	
+	const cmpch = function(a, b){
+		if(a === '\0' && b === '\0'){
+			throw 'Unable to compare null to null';
+		}
+		/*
+		var aEmpty = a.trim() === a;
+		var bEmpty = b.trim() === b;
+		
+		if(aEmpty || bEmpty){
+			return aEmpty && bEmpty ? 0.1 : -0.3
+		}				
+		
+		var aVow = 'aeiou'.indexOf(a) >= 0;
+		var bVow = 'aeiou'.indexOf(b) >= 0;
+		
+		if(aVow || bVow){
+			return (aVow && bVow ? 0.5 : 0.8) * (a === b ? 1 : -1);
+		}
+		*/
+		return a === b ? 1 : -1;
+	}		
+
+	const cmpstr = function(s, t) {
+		if(typeof s !== 'string' || typeof t !== 'string'){
+			throw 'Comparing ' + tostr(s) + ' and ' + tostr(t) + ' is not supported.';
+		}
+		
+		if(!s || !t){
+			return s.length || t.length || 0;
+		}
+		
+		var prev = new Array(t.length);
+		for(var i = 0; i < t.length; i++){
+			prev[i] = (i === 0 ? 0 : prev[i - 1]) + cmpch(t.charAt(0), '\0');
+		}
+		
+		var table = new Array(s.length);
+		var track = new Array(s.length);
+		var head = 0;
+		var tail = 0;
+		for(var j = 0; j < s.length; j++){
+			const a = s.charAt(j);
+			const row = new Array(t.length);
+			head += cmpch(a, '\0')
+			
+			var mat = tail + cmpch(a, t.charAt(0));
+			var ins = head + cmpch(t.charAt(0), '\0');
+			var rmv = prev[0] + cmpch(a, '\0');
+			
+			row[0] = Math.max(mat, ins, rmv);
+			var steps = row[0] === mat ? (a === t.charAt(0) ? 'm' : 'u') : row[0] === ins ? 'i' : 'r';
+			for(var i = 1; i < t.length; i++){				
+				const b = t.charAt(i);
+				mat = prev[i - 1] + cmpch(a, b);
+				ins = row[i - 1] + cmpch('\0', b);
+				rmv = prev[i] + cmpch(a, '\0');
+				
+				row[i] = Math.max(mat, ins, rmv);
+				steps += ( row[i] === mat ? (a === b ? 'm' : 'u') : row[i] === ins ? 'i' : 'r' );
+			}
+			tail = head; prev = row;
+			table[j] = row; track[j] = steps;
+		}		
+		return {'similarity': prev[t.length - 1], 'table': table, 'track': track};
+	};
+	
+	const backtrack = function(track){
+		if(!track || !track.length){
+			throw 'No track to backtrack';
+		}
+		
+		var i = track.length - 1;
+		var j = track[0].length - 1;
+		
+		var path = '';
+		
+		while(i >= 0 && j >= 0){
+			var step = track[i].charAt(j);
+			path = step + path;
+			
+			if(step === 'm' || step === 'u'){
+				i--; j--;
+				continue;
+			}
+			
+			if(step === 'r'){
+				i--;
+				continue;
+			}
+			
+			if(step === 'i'){
+				j--;
+				continue;
+			}
+			
+			throw 'Unknown step ' + step;
+		}
+		
+		while(i >= 0){
+			path = 'r' + path;
+			i--;
+		}
+		
+		while(j >= 0){
+			path = 'i' + path;
+			j--;
+		}
+		
+		return path;
+	};
+	
+	const cmpArray = function(u, v, min){
+		if(typeof u !== typeof v){
+			throw 'Comparing ' + tostr(u) + ' and ' + tostr(v) + ' is not supported.';
+		}
+
+		var cmp = [];
+		var limit = min || 0;
+		for(var i = 0; i < u.length; i++){			
+			for(var j = 0; j < v.length; j++){
+				if(u[i] == v[j]){
+					cmp.push({'similarity': u[i].length, 'left': i, 'right': j});
+					continue;
+				}
+			
+				var dist = cmpstr(u[i], v[j]);
+				if(dist.similarity > limit){
+					cmp.push(Object.assign(dist, {'left': i, 'right': j}));
+				}				
+			}
+		}
+		
+		cmp.sort((a, b) => b.similarity - a.similarity);
+		
+		var done = {'left': {}, 'right': {}};
+		var match = [];
+		
+		cmp.forEach(v => {
+			if(done.left[v.left] || done.right[v.right]){
+				return;
+			}
+			
+			match.push({
+				'left': v.left, 
+				'right': v.right, 
+				'track': v.track ? backtrack(v.track) : ''
+			});
+			done.left[v.left] = true;
+			done.right[v.right] = true;
+		})
+		
+		return match.sort((a, b) => a.left - b.left);
+	};
+	
+	const compare = function(a, b){
+		if(a instanceof Array){
+			return cmpArray(a, b);
+		}
+		
+		if(typeof a === 'string'){
+			return cmpstr(a, b);
+		}
+		
+		throw 'Comparing ' + tostr(u) + ' and ' + tostr(v) + ' is not supported.';
+	};
+	
+	return Object.assign(exports, {'compare': compare});
+
+})(modules['diff'] = {});
+
+(function(exports){
+
+	const wrap = function(elem) {
+		if(typeof elem.add === 'function' && typeof elem.prop === 'function' && typeof elem.get === 'function'){
+			return elem;
+		}
+	
+		return Object.freeze({
+			'add': function(arg){
+				if(arguments.length > 1){
+					for(var i = 0; i < arguments.length; i++){
+						this.add(arguments[i]);
+					}
+					return this;
+				}
+			
+				if(arg === null){
+					return this;
+				}
+				
+				if(arg instanceof Array){
+					arg.forEach(i => this.add(i));
+					return this;
+				}
+				
+				if(typeof arg === 'string' || typeof arg === 'number' || typeof arg === 'boolean'){
+					elem.appendChild(document.createTextNode(arg));
+					return this;
+				}
+				
+				if(typeof arg.get === 'function'){
+					elem.appendChild(arg.get());
+					return this;
+				}
+				
+				elem.appendChild(arg);
+				return this;
+			},
+			
+			'prop': function(key, val){
+				if(typeof val === 'undefined' && typeof key === 'string'){
+					return elem[key];
+				}
+				
+				if(typeof key instanceof Array){
+					return this;
+				}
+				
+				if(typeof key instanceof Object){
+					Object.assign(elem, key);
+					return this;
+				}
+				
+				elem[key] = val;
+				return this;
+			},
+			
+			'clear': function(){
+				elem.innerHTML = '';
+				return this;
+			},
+			
+			'get': function() {
+				return elem;
+			}
+			
+		});
+	};
+	
+	const make = function(tag) {
+		return wrap(document.createElement(tag));
+	};
+	
+	return Object.assign(exports, {'wrap': wrap, 'make': make});
+
+})(modules['page'] = {});
+
+(function(exports){	
+
+	const page = modules['page'];	
+	
+	const diff = modules['diff'];
+	
+	const defaultText = [
+		'I have existed from the morning of the world and I shall exist until the last star falls from the night.',
+		'Although I have taken the form of Gaius Caligula, I am all men as I am no man and therefore I am a God.',
+		'Conan! What\'s best in life!',
+		'To crush your enemy, see them driven before you, and hear the lamentation of their women.'
+	];
+	
+	const analysis = function(saved, current) {
+		const tokenize = s => s.replace('\r', '').split('\n').filter(s => s.trim().length > 0);
+
+		const before = tokenize(saved);
+		const after = tokenize(current);
+		
+		const cmp = diff.compare(before, after);
+		
+		const table = page.make('table');
+		
+		const styles = {
+				'r': 'background-color: #ffb3b3; text-decoration: line-through',
+				'i': 'background-color: #9acd32;'
+			};
+		
+		const delta = (s, t, track) => {			
+		
+			if(s === t){
+				return page.make('div').add(t);
+			}
+			
+			if(t === null){
+				return page.make('div').add(page.make('span').prop('style', styles['r']).add(s));
+			}
+			
+			const div = page.make('div');
+			var sOffset = 0;
+			var tOffset = 0;	
+			
+			for(var i = 0; i < track.length; i++){
+				const act = track.charAt(i);
+				
+				if(act === 'm'){
+					div.add(s.substring(sOffset, sOffset + 1));
+					sOffset++; tOffset++;
+					continue;
+				}
+				
+				if(act === 'r'){
+					div.add(page.make('span')
+						.prop('style', styles['r'])
+						.add(s.substring(sOffset, sOffset + 1)));
+					sOffset++;
+					continue;
+				}
+				
+				if(act === 'i'){
+					div.add(page.make('span')
+						.prop('style', styles['i'])
+						.add(t.substring(tOffset, tOffset + 1)));
+					tOffset++;
+					continue;
+				}
+				
+				if(act === 'u'){
+					div.add(page.make('span')
+						.prop('style', styles['r'])
+						.add(s.substring(sOffset, sOffset + 1)));
+					div.add(page.make('span')
+						.prop('style', styles['i'])
+						.add(t.substring(tOffset, tOffset + 1)));
+					sOffset++; tOffset++;
+					continue;
+				}
+			}
+			return div;
+		};
+		
+		var matched = {};
+		var k = 0;
+		for(var i = 0; i < before.length; i++){
+			var match = i === (cmp[k] || {}).left ? cmp[k] : null;
+			if(match){
+				matched[match.right] = true;
+				k++;
+			}
+			
+			if(!match){
+				table.add(page.make('tr')
+					.add(page.make('td').add(page.make('span').prop('style', styles['r']).add(before[i])))
+					.add(page.make('td'))
+				);
+				continue;
+			}
+			
+			const target = after[match.right];
+			table.add(page.make('tr')
+				.add(page.make('td').add(before[i]))
+				.add(page.make('td').add(delta(before[i], target, match.track) ))
+			);			
+		}
+		for(var i = 0; i < after.length; i++){
+			if(matched[i]){
+				continue;
+			}
+			
+			table.add(page.make('tr')
+				.add(page.make('td').add(''))
+				.add(page.make('td').prop('style', 'background-color: #9acd32').add(after[i]))
+			);
+		}
+		return page.make('div').add(table);
+	};
+	
+	const history = function(fnText){
+		var tags = 0;	
+
+		const div = page.make('div');
+		
+		const vers = [];
+		
+		return {
+			'save': function(text){
+				const cmpPanel = page.make('div');
+			
+				vers.push({'tag': ++tags, 'value': text});
+				div.clear().add( 
+					vers.map(v => page.make('button')
+							.add('Compare with vers ')
+							.add(v.tag)
+							.prop('onclick', evt => {
+								cmpPanel.clear().add(analysis(v.value, fnText()));
+							}))
+						.map(b => page.make('div').add(b))
+				)
+				.add(cmpPanel);
+				
+				
+				return this;
+			},
+		
+			'get': () => div
+			
+		};
+	};
+
+	const render = function(){			
+		
+		const text = page.make('textarea').prop('rows', 16).prop('cols', 120)
+			.add(defaultText.map(s => s + '\r\n'));
+			
+		const hist = history(() => text.prop('value'));
+		
+		const btnSave = page.make('button').add('Save').prop('onclick', evt => {
+			hist.save(text.prop('value'));
+		});
+		
+		const panel = page.make('div').add([
+			page.make('label').add('Items'), text, btnSave
+		].map(i => page.make('div').add(i)));				
+	
+		return page.make('div').add([
+			panel,
+			hist.get()
+		]);
+	};
+
+	return Object.assign(exports, {'render': render});
+
+})(modules['itemPanel'] = {});
+
+(function(exports){
+
+	const page = modules['page'];
+	const itemPanel = modules['itemPanel'];
+	
+	const main = function(elem) {
+		page.wrap(elem).add(page.make('div').add([	
+			itemPanel.render()
+		]));
+	};
+	
+	return Object.assign(exports, {'main': main});
+
+})(modules['app'] = {});
+
+(function(elem){
+
+	modules['app'].main(elem);
+	
+})(document.body);
+
+</script>
+</body>
+</html>
