@@ -137,21 +137,25 @@ public class DualPivotQuickSelectTest {
 	@Test
 	public void shouldDegenerateToQuadraticTimeWhenBadPivotsAreConstantlyUsed() {
 		double[] temp = IntStream.range(0, 100).mapToDouble(i -> 1000.0 - Math.PI * i).toArray();
+		
+		double[] tmp = Arrays.copyOf(temp, temp.length);
+		Arrays.sort(tmp);
+		
 		AtomicInteger max = new AtomicInteger(0);
 		int ans = new DualPivotQuickSelect(this::findMin, this::findMax) {
 			
 			@Override
 			public int select(double[] items, int begin, int end, int target, int depth) {
-				if(depth > max.get()) {
+				if(depth < max.get()) {
 					max.set(depth);
 				}
 				
 				return super.select(items, begin, end, target, depth);
 			}
 			
-		}.select(temp, 0, temp.length, 50);
-		Assert.assertEquals(1000.0 - Math.PI * 50.0, temp[ans], 1e-12);
-		Assert.assertEquals(49, max.get());
+		}.select(temp, 0, temp.length, 50);		
+		Assert.assertEquals(tmp[50], temp[ans], 1e-12);
+		Assert.assertEquals(-49, max.get());
 	}
 	
 	protected Select random(long seed) {
