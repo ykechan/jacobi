@@ -65,10 +65,10 @@ public class Column<T> implements Comparable<Column<?>> {
      * @return  A boolean column
      */
     public static Column<Boolean> signed(int index) {
-    	return new Column<>(index, 
-    		Arrays.asList(Boolean.FALSE, Boolean.TRUE),
-    		v -> v > 0.0 ? 1 : 0
-    	);
+        return new Column<>(index, 
+            Arrays.asList(Boolean.FALSE, Boolean.TRUE),
+            v -> v > 0.0 ? 1 : 0
+        );
     }
     
     /**
@@ -105,17 +105,17 @@ public class Column<T> implements Comparable<Column<?>> {
      * @throws  IllegalArgumentException if number of items is negative or zero.
      */
     public static <T> Column<T> of(int index, Collection<T> items) {
-    	if(items == null || items.isEmpty()) {
-    		throw new IllegalArgumentException("Unable to create nominal column with no items.");
-    	}
-    	
-    	return new Column<>(index,
-        	Collections.unmodifiableList(
-        		items instanceof Set
-        		? items.stream().collect(Collectors.toList())
-        		: items.stream().distinct().collect(Collectors.toList())
-        	),
-        	v -> (int) v
+        if(items == null || items.isEmpty()) {
+            throw new IllegalArgumentException("Unable to create nominal column with no items.");
+        }
+        
+        return new Column<>(index,
+            Collections.unmodifiableList(
+                items instanceof Set
+                ? items.stream().collect(Collectors.toList())
+                : items.stream().distinct().collect(Collectors.toList())
+            ),
+            v -> (int) v
         );
     }
     
@@ -129,25 +129,25 @@ public class Column<T> implements Comparable<Column<?>> {
      * @throws  IllegalArgumentException when type class is not supported.
      */
     @SuppressWarnings("unchecked")
-	public static <T> Column<T> of(int index, Class<T> type) {
-    	if(type == double.class || type == Double.class) {
-    		return (Column<T>) Column.numeric(index);
-    	}
-    	
-    	if(type == boolean.class || type == Boolean.class) {
-    		return (Column<T>) Column.signed(index);
-    	}
-    	
-    	if(type.isEnum()) {
-    		return new Column<>(index, 
-    			Collections.unmodifiableList(Arrays.asList( 
-    				type.getEnumConstants() 
-    			)), 
-    			v -> (int) v
-    		);
-    	}    	
-    	
-    	throw new IllegalArgumentException("Un-recogized type " + type);
+    public static <T> Column<T> of(int index, Class<T> type) {
+        if(type == double.class || type == Double.class) {
+            return (Column<T>) Column.numeric(index);
+        }
+        
+        if(type == boolean.class || type == Boolean.class) {
+            return (Column<T>) Column.signed(index);
+        }
+        
+        if(type.isEnum()) {
+            return new Column<>(index, 
+                Collections.unmodifiableList(Arrays.asList( 
+                    type.getEnumConstants() 
+                )), 
+                v -> (int) v
+            );
+        }        
+        
+        throw new IllegalArgumentException("Un-recogized type " + type);
     }
     
     /**
@@ -223,42 +223,42 @@ public class Column<T> implements Comparable<Column<?>> {
     }
     
     @Override
-	public int hashCode() {
-		return Objects.hash(this.index, this.items);
-	}
+    public int hashCode() {
+        return Objects.hash(this.index, this.items);
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if(obj instanceof Column){
-			return this.compareTo((Column<?>) obj) == 0;
-		}
-		return false;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof Column){
+            return this.compareTo((Column<?>) obj) == 0;
+        }
+        return false;
+    }
 
-	@Override
-	public int compareTo(Column<?> col) {
-    	if(this == col){
-    		return 0;
-    	}
-    	
-    	if(this.getIndex() != col.getIndex()){
-    		return this.getIndex() < col.getIndex() ? -1 : 1;
-    	}
-    	
-    	if(this.cardinality() != col.cardinality()){
-    		throw new IllegalArgumentException("Unable to compare conflicting columns "
-    			+ "#" + this.getIndex() + this.items
-    			+ " and #" + col.getIndex() + col.items 
-    		);
-    	}
-    	
-    	for(int i = 0; i < this.cardinality(); i++) {
-    		if(!Objects.equals(this.valueOf(i), col.valueOf(i))) {
-    			throw new IllegalArgumentException();
-    		}
-    	}
-		return 0;
-	}
+    @Override
+    public int compareTo(Column<?> col) {
+        if(this == col){
+            return 0;
+        }
+        
+        if(this.getIndex() != col.getIndex()){
+            return this.getIndex() < col.getIndex() ? -1 : 1;
+        }
+        
+        if(this.cardinality() != col.cardinality()){
+            throw new IllegalArgumentException("Unable to compare conflicting columns "
+                + "#" + this.getIndex() + this.items
+                + " and #" + col.getIndex() + col.items 
+            );
+        }
+        
+        for(int i = 0; i < this.cardinality(); i++) {
+            if(!Objects.equals(this.valueOf(i), col.valueOf(i))) {
+                throw new IllegalArgumentException();
+            }
+        }
+        return 0;
+    }
     
 
     private int index;
