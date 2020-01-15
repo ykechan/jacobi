@@ -1,6 +1,7 @@
 package jacobi.api.classifier;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Random;
 import java.util.Set;
@@ -104,8 +105,54 @@ public class ColumnTest {
     
     @Test
     public void shouldSupportCreationBySet() {
-    	Set<Level> set = EnumSet.noneOf(Level.class);
+    	Column<Level> col = Column.of(3, EnumSet.allOf(Level.class));
+    	Assert.assertFalse(col.isNumeric());
+    	Assert.assertEquals(5, col.cardinality());
     	
+    	Assert.assertEquals(Level.NONE, col.valueOf(0));
+    	Assert.assertEquals(Level.LOW, col.valueOf(1));
+    	Assert.assertEquals(Level.MEDIUM, col.valueOf(2));
+    	Assert.assertEquals(Level.HIGH, col.valueOf(3));
+    	Assert.assertEquals(Level.CRITICAL, col.valueOf(4));
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldFailWhenNumOfItemsIsZero() {
+    	Column.nominal(2, 0, v -> (int) v);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldFailWhenCollectionOfItemsIsEmpty() {
+    	Column.of(2, Collections.emptySet());
+    }
+    
+    @Test
+    public void shouldAutoEncodeForItemsWithNoLabel() {
+    	Column<?> cols = Column.nominal(0, 3, v -> (int) v);
+    	for(int i = 0; i < cols.cardinality(); i++) {
+    		Assert.assertEquals(i, cols.getItems().get(i));
+    	}
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldFailWhenTypeIsNotDoubleOrBooleanOrEnum() {
+    	Column.of(0, String.class);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldFailWhenComparingColumnWithSameIndexButDifferentCardinality() {
+    	Column.nominal(0, 4, v -> (int) v).compareTo(Column.nominal(0, 10, v -> (int) v));
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldFailWhenComparingColumnWithSameIndexButDiffItems() {
+    	Column.nominal(0, 4, v -> (int) v)
+    		.compareTo(Column.of(0, Arrays.asList("A", "B", "C", "D")));
+    }
+    
+    @Test
+    public void shouldColumnNotEqualsToOtherObjects() {
+    	Assert.assertFalse(Column.of(0, Boolean.class).equals("ABC"));
     }
     
     public enum Level {
