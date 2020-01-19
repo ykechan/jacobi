@@ -2,10 +2,9 @@ package jacobi.test.util;
 
 import java.awt.Color;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.xml.parsers.SAXParserFactory;
@@ -19,18 +18,18 @@ import org.xml.sax.helpers.DefaultHandler;
 public class JacobiSvgTest {
 	
 	@Test
-	public void shouldBeAbleToGenerateEmptySvg() {
-		this.assertValidXML(this.export(new JacobiSvg()), null);
+	public void shouldBeAbleToGenerateEmptySvg() throws IOException {
+		this.assertValidXML(new JacobiSvg().exportTo(null), null);
 	}
 	
 	@Test
-	public void shouldBeAbleToGenerateDots() {
+	public void shouldBeAbleToGenerateDots() throws IOException {
 		AtomicInteger count = new AtomicInteger(0);
-		this.assertValidXML(this.export(new JacobiSvg()
+		this.assertValidXML(new JacobiSvg()
 				.dot(1.0, 1.0, Color.RED)
 				.dot(2.0, 2.0, Color.RED)
 				.dot(3.0, 3.0, Color.RED)
-			)
+				.exportTo(null)
 			, new DefaultHandler() {
 
 				@Override
@@ -49,13 +48,13 @@ public class JacobiSvgTest {
 	}
 	
 	@Test
-	public void shouldBeAbleToGenerateRect() {
+	public void shouldBeAbleToGenerateRect() throws IOException {
 		AtomicInteger count = new AtomicInteger(0);
 		AtomicInteger verify = new AtomicInteger(0);
-		this.assertValidXML(this.export(new JacobiSvg()
+		this.assertValidXML(new JacobiSvg()
 				.rect(0.0, 0.0, 1.0, 1.0, Color.BLUE)
 				.rect(0.0, 1.0, 1.0, 1.0, Color.BLUE)
-			)
+				.exportTo(null)
 			, new DefaultHandler() {
 
 				@Override
@@ -89,31 +88,25 @@ public class JacobiSvgTest {
 	}
 	
 	@Test
-	public void shouldBeAbleToGenerateLineAndText() {
-		this.assertValidXML(this.export(new JacobiSvg()
+	public void shouldBeAbleToGenerateLineAndText() throws IOException {
+		this.assertValidXML(new JacobiSvg()
 			.rect(-1.0, -1.0, 11.0, 11.0, Color.LIGHT_GRAY)
 			.line(0.0, 0.0, 10.0, 0.0, Color.BLACK)
-			.text("This should stay on top", 0.0, -0.3, Color.GRAY)
-		), null);
-	}
+			.text("This should stay on top", 0.0, 0.0, Color.GRAY)
+			.exportTo(null), null);
+	}	
 	
-	protected File export(JacobiSvg svg){
-		try {
-			File tempFile = File.createTempFile("tmp", ".svg");
-			try(OutputStream output = new FileOutputStream(tempFile)){
-				svg.toSVG(output);
-			}
-			
-			Exception ex = new Exception();
-			
-			System.out.println(ex.getStackTrace()[1].getClassName()
-				+ "::" 
-				+ ex.getStackTrace()[1].getMethodName()
-				+ " created " + tempFile.getAbsolutePath());
-			return tempFile;
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+	@Test
+	public void shouldBeAbleToGenerateScatteredPointsWithLabels() throws IOException {
+	    JacobiSvg svg = new JacobiSvg();
+	    Random rand = new Random(Double.doubleToLongBits(Math.PI));
+	    for(int i = 0; i < 100; i++) {
+	        double x = rand.nextDouble() * 100.0;
+	        double y = rand.nextDouble() * 100.0;
+	        
+	        svg.dot(x, y, Color.RED).text(String.format("%.2f, %.2f", x, y), x, y, Color.GRAY);
+	    }
+	    this.assertValidXML(svg.exportTo(null), null);
 	}
 	
 	protected void assertValidXML(File inFile, DefaultHandler handler) {

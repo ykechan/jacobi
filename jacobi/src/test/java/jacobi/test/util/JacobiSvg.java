@@ -24,6 +24,9 @@
 package jacobi.test.util;
 
 import java.awt.Color;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -96,7 +99,7 @@ public class JacobiSvg {
 		return this.touch(x, y).push(new StringBuilder()
 			.append("<text")
 			.append(" x=").append(this.quote(x))
-			.append(" y=").append(this.quote(y))
+			.append(" y=").append("{^").append(String.valueOf(y)).append('}')
 			.append(" fill=").append(this.quote(color))
 			.append(" font-size=?")
 			.append('>')
@@ -104,7 +107,7 @@ public class JacobiSvg {
 			.append("</text>")
 			.toString()
 		);
-	}
+	}	
 	
 	public JacobiSvg toSVG(OutputStream output) {
 		double width = this.min == null ? 100.0 : this.max.x - this.min.x;
@@ -131,13 +134,39 @@ public class JacobiSvg {
 			.stream()
 			.map(s -> s.replace("?", this.quote(fontSize)))
 			.map(s -> {
+				int pos = s.indexOf("{^");
+				if(pos < 0) {
+				    return s;
+				}
 				
-				return s;
+				int end = s.indexOf("}", pos);
+				double y = Double.parseDouble(s.substring(pos + 2, end));
+				return s.substring(0, pos) 
+				     + this.quote(String.valueOf(y - 1.2 * stroke)) 
+				     + s.substring(end + 1);
 			})
 			.map(s -> "    " + s).forEach(out::println);
 		
 		out.println("</svg>");
 		return this;
+	}
+	
+	public File exportTo(File outFile) throws IOException {
+	    if(outFile == null) {
+	        File tempFile = File.createTempFile("tmp", ".svg");
+	        try {
+	            return this.exportTo(tempFile);
+	        } finally {
+	            StackTraceElement caller = new Exception().getStackTrace()[1];
+	            System.out.println(caller.getClassName() + "::" + caller.getMethodName()
+	                + " export " + tempFile.getAbsolutePath());
+	        }
+	    }
+	    
+	    try(OutputStream output = new FileOutputStream(outFile)){
+	        this.toSVG(output);
+	    }
+	    return outFile;
 	}
 	
 	protected JacobiSvg defaultStyle(PrintStream out, double thickness) {
