@@ -24,7 +24,6 @@
 package jacobi.core.spatial.rtree;
 
 import java.util.ArrayDeque;
-import java.util.Arrays;
 import java.util.Deque;
 import java.util.function.IntFunction;
 
@@ -105,7 +104,7 @@ public class FractalSort2D implements SpatialSort {
 		if(k != args.end){
 			throw new UnsupportedOperationException("Number of elements mismatch. "
 				+ "Expected [" + args.begin + "," + args.end +"), "
-				+ "found [" + args.begin + "," + k + ".");
+				+ "found [" + args.begin + "," + k + ").");
 		}
 		return argList;
 	}

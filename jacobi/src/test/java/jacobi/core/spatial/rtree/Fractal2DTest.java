@@ -116,6 +116,11 @@ public class Fractal2DTest {
 		);
 	}
 	
+	@Test(expected = IllegalArgumentException.class)
+	public void shouldFailIfInputUnknownCurveInHilbert() {
+		Fractal2D.HILBERT.apply(1234);
+	}
+	
 	protected int[][] expand(int[][] grid, IntFunction<int[]> fractal) {
 		if(grid.length == 0) {
 			return new int[][] {{ fractal.apply(0)[0] }};

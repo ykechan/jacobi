@@ -72,8 +72,7 @@ public class Decision<T> implements DecisionNode<T> {
 		
 		if(obj instanceof Decision) {
 			Decision<?> other = (Decision<?>) obj;
-			return this.split().equals(obj)
-				&& Objects.equals(this.decision, other.decide());
+			return Objects.equals(this.decision, other.decide());
 		}
 		
 		return false;

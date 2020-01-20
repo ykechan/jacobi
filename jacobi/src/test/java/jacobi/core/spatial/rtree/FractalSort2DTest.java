@@ -1,5 +1,11 @@
 package jacobi.core.spatial.rtree;
 
+import java.awt.Color;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
@@ -8,6 +14,7 @@ import org.junit.Test;
 
 import jacobi.core.spatial.rtree.FractalSort2D.Aabb2;
 import jacobi.core.spatial.rtree.FractalSort2D.Arguments;
+import jacobi.test.util.JacobiSvg;
 
 public class FractalSort2DTest {
 	
@@ -84,12 +91,52 @@ public class FractalSort2DTest {
 		}
 	}
 	
+	@Test
+	public void shouldBeAbleToSort16x16GridInHilbertOrder() throws IOException {
+		double[][] vertices = this.grid(16);
+		int[] ord = new FractalSort2D(0, 1, Fractal2D.HILBERT).apply(Arrays.asList(vertices));
+
+		this.render(vertices, ord).exportTo(null);
+	}
+	
+	@Test
+	public void shouldBeAbleToSort32x32GridInHilbertOrder() throws IOException {
+		double[][] vertices = this.grid(32);
+		int[] ord = new FractalSort2D(0, 1, Fractal2D.HILBERT).apply(Arrays.asList(vertices));
+		
+		this.render(vertices, ord).exportTo(null);
+	}
+	
+	@Test
+	public void shouldBeAbleToSort16x16GridInZOrder() throws IOException {
+		double[][] vertices = this.grid(16);
+		int[] ord = new FractalSort2D(0, 1, Fractal2D.Z_CURVE).apply(Arrays.asList(vertices));
+		
+		this.render(vertices, ord).exportTo(null);
+	}
+	
+	protected JacobiSvg render(double[][] vertices, int[] ord) {
+		JacobiSvg svg = new JacobiSvg();
+		for(int i = 1; i < ord.length; i++){
+			double[] from = vertices[ord[i - 1]];
+			double[] to = vertices[ord[i]];
+			
+			svg.line(from[0], from[1], to[0], to[1], Color.BLACK);
+		}
+		
+		for(double[] v : vertices){
+			svg.dot(v[0], v[1], Color.RED);
+		}
+		
+		return svg;
+	}
+	
 	protected double[][] grid(int n) {
 		double[][] pts = new double[n * n][];
 		int k = 0;
 		for(int i = 0; i < n; i++){
 			for(int j = 0; j < n; j++){
-				System.out.println("i = " + i + ", j = " + j + ", k = " + k);
+				//System.out.println("i = " + i + ", j = " + j + ", k = " + k);
 				pts[k++] = new double[] {j, i};
 			}
 		}
