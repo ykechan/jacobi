@@ -116,19 +116,42 @@ public class DijkstraTest {
 	}
 	
 	@Test
-	@Ignore
+	public void shouldBeAbleToFindRouteToAParticularPointInCorridor() throws IOException {
+		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/FloorTest.txt")){
+			AdjList adjList = Floor.readAll(input).get("walled-corridors");
+			List<Edge> route = new Dijkstra(() -> Enque.stackOf(new ArrayDeque<>()))
+					.find(adjList, 0, 2)
+					.orElseThrow(() -> new IllegalStateException(""));
+			
+			Assert.assertEquals(10.0, route.stream().mapToDouble(e -> e.weight).sum(), 1e-12);
+			Assert.assertEquals(10, route.size());
+			Assert.assertEquals(9, route.get(0).to);
+			Assert.assertEquals(18, route.get(1).to);
+			Assert.assertEquals(27, route.get(2).to);
+			Assert.assertEquals(36, route.get(3).to);
+			
+			Assert.assertEquals(37, route.get(4).to);
+			Assert.assertEquals(38, route.get(5).to);
+			Assert.assertEquals(29, route.get(6).to);
+			Assert.assertEquals(20, route.get(7).to);
+			Assert.assertEquals(11, route.get(8).to);
+			Assert.assertEquals(2, route.get(9).to);
+		}
+	}
+	
+	@Test
 	public void shouldBeAbleToFindRouteAroundObstacles() throws IOException {
 		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/FloorTest.txt")){
 			AdjList adjList = Floor.readAll(input).get("obstacle");
 			RouteMap routeMap = new Dijkstra(() -> Enque.stackOf(new ArrayDeque<>()))
 					.compute(adjList, 0)
 					.orElseThrow(() -> new IllegalStateException(""));
-			
-			for(Edge e : routeMap.trace(adjList.order() - 3)) {
+			/*
+			for(Edge e : routeMap.trace(adjList.order() - 1)) {
 				System.out.println(e);
 			}
-			
-			Assert.assertEquals(9 + Math.sqrt(2.0), routeMap.edges(adjList.order() - 1)
+			*/
+			Assert.assertEquals(7 + 2 * Math.sqrt(2.0), routeMap.edges(adjList.order() - 1)
 					.reduce((a, b) -> {
 						throw new IllegalStateException();
 					})

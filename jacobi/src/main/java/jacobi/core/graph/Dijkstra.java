@@ -64,8 +64,8 @@ public class Dijkstra implements PathFinder {
 	
 	@Override
 	public Optional<List<Edge>> find(AdjList adjList, int start, int dest) {
-		Routes routes = new Routes(new double[adjList.order()], new int[adjList.order()]);
-		Arrays.fill(routes.via, -1);
+		Routes routes = Routes.init(adjList.order());
+		routes.via[start] = start;
 		
 		Routes shortestPaths = this.compute(adjList, start, dest, routes);
 		return Optional.of(shortestPaths)
@@ -103,7 +103,7 @@ public class Dijkstra implements PathFinder {
 		enque.push(new Weighted<>(src, 0.0));
 		
 		double[] dist = routes.dist;
-		int[] via = routes.via;
+		int[] via = routes.via;				
 		
 		byte[] markers = new byte[adjList.order()];	
 		Arrays.fill(markers, NEW);
