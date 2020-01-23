@@ -86,13 +86,15 @@ public class JacobiSvg {
 	}
 	
 	public JacobiSvg line(double x0, double y0, double x1, double y1, Color color) {
-		return this.touch(x0, y0).touch(x1, y1).push(new StringBuilder()
-			.append("<line")
-			.append(" x1=").append(this.quote(x0)).append(" y1=").append(this.quote(y0))
-			.append(" x2=").append(this.quote(x1)).append(" y2=").append(this.quote(y1))
-			.append(" stroke=").append(this.quote(color))
-			.append(" />")
-			.toString());
+		return this.touch(x0, y0).touch(x1, y1)
+			.push(this.elementLine(x0, y0, x1, y1, color));
+	}
+	
+	public JacobiSvg arrow(double x0, double y0, double x1, double y1, Color color) {
+		return this.touch(x0, y0).touch(x1, y1)
+			.push(this.elementLine(x0, y0, x1, y1, color)
+				.replace(" />", " marker-end="+this.quote("url(#arrow)") + "/>")
+			);
 	}
 	
 	public JacobiSvg text(String message, double x, double y, Color color) {		
@@ -130,7 +132,7 @@ public class JacobiSvg {
 		double stroke = Math.max(width, height) / 160.0;
 		double fontSize = 3 * stroke;
 				
-		this.defaultStyle(out, stroke).elements
+		this.defaultSection(out, stroke).elements
 			.stream()
 			.map(s -> s.replace("?", this.quote(fontSize)))
 			.map(s -> {
@@ -169,7 +171,31 @@ public class JacobiSvg {
 	    return outFile;
 	}
 	
-	protected JacobiSvg defaultStyle(PrintStream out, double thickness) {
+	protected String elementLine(double x0, double y0, double x1, double y1, Color color) {
+		return new StringBuilder()
+			.append("<line")
+			.append(" x1=").append(this.quote(x0)).append(" y1=").append(this.quote(y0))
+			.append(" x2=").append(this.quote(x1)).append(" y2=").append(this.quote(y1))
+			.append(" stroke=").append(this.quote(color))
+			.append(" />").toString();
+	}
+	
+	protected JacobiSvg defaultSection(PrintStream out, double thickness) {
+		out.println("<defs>");
+		out.println(new StringBuilder("<marker")
+			.append(" id=").append(this.quote("arrow"))
+			.append(" viewBox=").append(this.quote("0 0 10 10"))
+			.append(" refX=").append(this.quote("5"))
+			.append(" refY=").append(this.quote("5"))
+			.append(" markerWidth=").append(this.quote("3"))
+			.append(" markerHeight=").append(this.quote("3"))
+			.append(" orient=").append(this.quote("auto-start-reverse"))
+			.append('>')
+		);
+		out.println("    <path d=" + this.quote("M 0 0 L 10 5 L 0 10 z") + " />");
+		out.println("</marker>");
+		out.println("</defs>");
+		
 		out.println("<style>");
 		out.println(" circle { r: " + String.valueOf(thickness) +  " } ");
 		out.println(" rect { fill: none; stroke-width: " + String.valueOf(thickness) +  " } ");
@@ -215,4 +241,5 @@ public class JacobiSvg {
 	}
 	
 	private static final String XMLNS = "http://www.w3.org/2000/svg";
+	
 }
