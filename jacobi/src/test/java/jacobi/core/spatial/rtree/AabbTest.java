@@ -84,7 +84,7 @@ public class AabbTest {
 		Assert.assertEquals(aabb.dim(), min.length);
 		for(int i = 0; i < min.length; i++){
 			Assert.assertEquals(min[i], aabb.min(i), 1e-12);
-			Assert.assertEquals(min[i], aabb.max(i), 1e-12);
+			Assert.assertEquals(max[i], aabb.max(i), 1e-12);
 		}
 	}
 
