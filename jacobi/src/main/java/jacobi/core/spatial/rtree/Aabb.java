@@ -23,7 +23,6 @@
  */
 package jacobi.core.spatial.rtree;
 
-import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -103,11 +102,12 @@ public class Aabb {
 					newMin[i] = box.min(i);
 				}
 				
-				if(box.max(i) < newMax[i]){
+				if(box.max(i) > newMax[i]){
 					newMax[i] = box.max(i);
 				}
 			}
 		}
+		
 		return new Aabb(newMin, newMax);
 	}
 

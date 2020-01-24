@@ -2,6 +2,7 @@ package jacobi.core.classifier.cart.rule;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.IntStream;
@@ -13,12 +14,12 @@ import jacobi.api.classifier.Column;
 import jacobi.api.classifier.DataTable;
 import jacobi.api.classifier.cart.DecisionNode;
 import jacobi.core.classifier.cart.ArraySequence;
+import jacobi.core.classifier.cart.Sequence;
 import jacobi.core.classifier.cart.measure.Impurity;
 import jacobi.core.classifier.cart.measure.NominalPartition;
+import jacobi.core.classifier.cart.measure.Partition;
 import jacobi.core.classifier.cart.node.Decision;
 import jacobi.core.classifier.cart.node.NominalSplit;
-import jacobi.core.classifier.cart.rule.OneR;
-import jacobi.core.classifier.cart.rule.ZeroR;
 import jacobi.core.classifier.cart.util.JacobiDefCsvReader;
 import jacobi.core.classifier.cart.util.JacobiEnums.YesOrNo;
 import jacobi.core.util.Weighted;
@@ -127,6 +128,94 @@ public class OneRTest {
         }
     }
     
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldFailWhenGivenBoundariesForNominalColumn() throws IOException {
+        try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.def.csv")){
+            DataTable<YesOrNo> dataTab = new JacobiDefCsvReader()
+                    .read(input, YesOrNo.class);
+            
+            DecisionNode<YesOrNo> ans = new OneR(
+                    new ZeroR(), 
+                    new Partition() {
+
+						@Override
+						public Weighted<double[]> measure(DataTable<?> table, 
+								Column<?> target, 
+								Sequence seq) {
+							return new Weighted<>(IntStream.range(0, seq.length())
+									.mapToDouble(i -> i)
+									.toArray(), 0.001);
+						}
+                    	
+                    }
+                ).make(dataTab, 
+                    this.columnSet(
+                        dataTab.getColumns().get(0),
+                        dataTab.getColumns().get(3)
+                    ), 
+                    this.defaultSeq(dataTab.size())
+                );
+        }
+    }
+        
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldFailWhenGivenNoBoundaryForNumericColumn() throws IOException {
+        try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.def.csv")){
+            DataTable<YesOrNo> dataTab = new JacobiDefCsvReader()
+                    .read(input, YesOrNo.class);
+            
+            DecisionNode<YesOrNo> ans = new OneR(
+                    new ZeroR(), 
+                    new Partition() {
+
+						@Override
+						public Weighted<double[]> measure(DataTable<?> table, 
+								Column<?> target, 
+								Sequence seq) {
+							return new Weighted<>(new double[0], 0.001);
+						}
+                    	
+                    }
+                ).make(dataTab, 
+                    this.columnSet(
+                        dataTab.getColumns().get(1),
+                        dataTab.getColumns().get(3)
+                    ), 
+                    this.defaultSeq(dataTab.size())
+                );
+        }
+    }
+    
+    @Test(expected = UnsupportedOperationException.class)
+    public void shouldFailWhenGivenMoreBoundariesThenSupportedForNumericColumn() throws IOException {
+        try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.def.csv")){
+            DataTable<YesOrNo> dataTab = new JacobiDefCsvReader()
+                    .read(input, YesOrNo.class);
+            
+            DecisionNode<YesOrNo> ans = new OneR(
+                    new ZeroR(), 
+                    new Partition() {
+
+						@Override
+						public Weighted<double[]> measure(DataTable<?> table, 
+								Column<?> target, 
+								Sequence seq) {
+							return new Weighted<>(new double[seq.length()], 
+								0.001);
+						}
+                    	
+                    }
+                ).make(dataTab, 
+                    this.columnSet(
+                        dataTab.getColumns().get(1),
+                        dataTab.getColumns().get(3)
+                    ), 
+                    this.defaultSeq(dataTab.size())
+                );
+        }
+    }
+    
     @Test
     public void shouldBeAbleToMakeDecisionOnNullSet() throws IOException {
     	try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.def.csv")){
@@ -151,6 +240,60 @@ public class OneRTest {
             
         }
     }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldFailWhenTryToMergeLeafNode() {
+    	new OneR(null, null).mergeFunc(new Decision<>("You can't change my mind."));
+    }
+    
+    @Test(expected = UnsupportedOperationException.class)
+    public void shouldFailWhenTryToMergeMoreBoundariesThenSupported() {
+    	new OneR(null, null).mergeFunc(Column.numeric(1), new double[] {1.0, 2.0, 3.0});
+    }
+    
+    @Test(expected = UnsupportedOperationException.class)
+    public void shouldFailWhenTryToMergeUnknownNode() {
+    	new OneR(null, null).mergeFunc(new DecisionNode<String>() {
+
+			@Override
+			public Column<?> split() {
+				return Column.numeric(3);
+			}
+
+			@Override
+			public String decide() {
+				return null;
+			}
+
+			@Override
+			public Optional<DecisionNode<String>> decide(double value) {
+				return Optional.empty();
+			}
+    		
+    	});
+    }
+    
+    @Test(expected = UnsupportedOperationException.class)
+    public void shouldFailWhenTryToSplitUnknownNode() {
+    	new OneR(null, null).splitFunc(null, new DecisionNode<String>() {
+
+			@Override
+			public Column<?> split() {
+				return Column.numeric(3);
+			}
+
+			@Override
+			public String decide() {
+				return null;
+			}
+
+			@Override
+			public Optional<DecisionNode<String>> decide(double value) {
+				return Optional.empty();
+			}
+    		
+    	});
+    }    
     
     protected ArraySequence defaultSeq(int len) {
         return new ArraySequence(IntStream.range(0, len).toArray(), 0, len);

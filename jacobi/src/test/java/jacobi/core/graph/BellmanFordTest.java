@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +12,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntConsumer;
@@ -28,6 +30,7 @@ import jacobi.api.graph.RouteMap;
 import jacobi.core.graph.BellmanFord.IntContainer;
 import jacobi.core.graph.BellmanFord.IntIterator;
 import jacobi.core.graph.util.Routes;
+import jacobi.core.util.Real;
 import jacobi.test.util.JacobiGraphSvg;
 import jacobi.test.util.JacobiSvg;
 
@@ -98,6 +101,47 @@ public class BellmanFordTest {
 	}
 	
 	@Test
+	public void shouldBeAbleToFindRouteInRandomClose64() throws IOException {
+		try(InputStream input = new FileInputStream(new File(this.tempDir, "random-close-64.svg"))){
+			JacobiGraphSvg graphSvg = JacobiGraphSvg.readFrom(input);
+			AdjList adjList = graphSvg.getGraph();
+			
+			RouteMap routeMap = new BellmanFord().compute(adjList, 17)
+					.orElseThrow(() -> new UnsupportedOperationException("Fail to find routes"));
+			
+			List<Edge> route = routeMap.trace(43);
+			JacobiSvg svg = graphSvg.render(); 
+			for(Edge e : route) {
+				double[] u = graphSvg.getPlacement().getRow(e.from);
+				double[] v = graphSvg.getPlacement().getRow(e.to);
+				
+				svg.arrow(u[0], u[1], v[0], v[1], Color.GREEN);
+			}
+			
+			RouteMap revMap = new BellmanFord().compute(adjList, 43)
+					.orElseThrow(() -> new UnsupportedOperationException("Fail to find routes"));
+			
+			Assert.assertTrue(Real.isNegl(
+				routeMap.edges(43).findAny().get().weight
+			  - revMap.edges(17).findAny().get().weight
+			));
+			
+			List<Edge> backward = revMap.trace(17);
+			
+			Assert.assertEquals(route.size(), backward.size());
+			for(int i = 0; i < route.size(); i++){
+				Edge a = route.get(i);
+				Edge b = backward.get(backward.size() - 1 - i);
+				
+				Assert.assertEquals(a.from, b.to);
+				Assert.assertEquals(a.to, b.from);
+				Assert.assertTrue(Real.isNegl(a.weight - b.weight));
+			}
+			svg.exportTo(null);
+		}
+	}		
+	
+	@Test
 	public void shouldBeAbleToFindRouteWithNegativeWeights() {
 		AdjList adjList = this.adjList(Arrays.asList(
 			new Edge(0, 1, 1.0),
@@ -157,6 +201,40 @@ public class BellmanFordTest {
 	}
 	
 	@Test
+	public void shouldBeAbleToDetectNegativeCycle() throws IOException {
+		try(InputStream input = new FileInputStream(new File(this.tempDir, "contains-negative-cycle.svg"))){
+			JacobiGraphSvg graphSvg = JacobiGraphSvg.readFrom(input);
+			AdjList adjList = graphSvg.getGraph();
+			
+			Assert.assertFalse(new BellmanFord().compute(adjList, 0)
+				.isPresent());
+		}
+	}
+	
+	@Test
+	public void shouldBeAbleToFindPathInALongRing() {
+		int length = 4096;
+		AdjList adjList = new AdjList() {
+
+			@Override
+			public int order() {
+				return length;
+			}
+
+			@Override
+			public Stream<Edge> edges(int from) {
+				return Collections
+					.singletonList(new Edge(from, (from + 1) % length, 1.0))
+					.stream();
+			}
+			
+		};
+		
+		RouteMap routeMap = new BellmanFord().compute(adjList, 0).get();
+		Assert.assertEquals(4095, routeMap.edges(4095).findAny().get().weight, 1e-6);
+	}
+	
+	@Test
 	public void shouldBeAbleToStoreIntInIntArray() {
 		IntContainer intCont = new BellmanFord.IntArray(new int[4], 5);
 		intCont.add(10);
@@ -195,7 +273,7 @@ public class BellmanFordTest {
 				Assert.assertEquals(100 + k - 5, item);
 			}
 		}
-	}	
+	}
 
 	protected AdjList adjList(List<Edge> edges) {
 		int n = edges.stream()

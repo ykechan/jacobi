@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Random;
 import java.util.stream.IntStream;
 
 import org.junit.Assert;
@@ -110,6 +111,51 @@ public class JacobiGraphSvgTest {
 	}
 	
 	@Test
+	public void shouldBeAbleToDrawAndReadFromNegativeCycle() throws IOException {
+		File tempFile = JacobiGraphSvg.builder()
+				.add(100.0, 1000.0 - 250.0)
+				.add(200.0, 1000.0 - 250.0)
+				.add(350.0, 1000.0 - 100.0)
+				.add(350.0, 1000.0 - 400.0)
+				.add(500.0, 1000.0 - 250.0)
+				.add(600.0, 1000.0 - 250.0)
+				.connect(0, 1, 10.0)
+				.connect(1, 2, -1.0)
+				.connect(2, 4, -3.0)
+				.connect(4, 3, -10.0)
+				.connect(3, 1, -4.0)
+				.connect(4, 5, 22.0)
+				.get().render().exportTo(null);
+		
+		try(InputStream input = new FileInputStream(tempFile)){
+			AdjList graph = JacobiGraphSvg.readFrom(input).getGraph();
+			
+			Assert.assertEquals(6, graph.order());
+			
+			Assert.assertArrayEquals(new Edge[] {
+				new Edge(0, 1, 10.0)   
+			}, graph.edges(0).sorted((a, b) -> a.to - b.to).toArray(n -> new Edge[n]));
+			
+			Assert.assertArrayEquals(new Edge[] {
+				new Edge(1, 2, -1.0)   
+			}, graph.edges(1).sorted((a, b) -> a.to - b.to).toArray(n -> new Edge[n]));
+			
+			Assert.assertArrayEquals(new Edge[] {
+				new Edge(2, 4, -3.0)   
+			}, graph.edges(2).sorted((a, b) -> a.to - b.to).toArray(n -> new Edge[n]));
+			
+			Assert.assertArrayEquals(new Edge[] {
+				new Edge(3, 1, -4.0)   
+			}, graph.edges(3).sorted((a, b) -> a.to - b.to).toArray(n -> new Edge[n]));
+			
+			Assert.assertArrayEquals(new Edge[] {
+				new Edge(4, 3, -10.0),
+				new Edge(4, 5,  22.0)
+			}, graph.edges(4).sorted((a, b) -> a.to - b.to).toArray(n -> new Edge[n]));
+		}
+	}
+	
+	@Test
 	public void shouldBeAbleToDrawAndReadFromACompleteGraphFitInAPentagon() throws IOException {
 		JacobiGraphSvg.Builder builder = JacobiGraphSvg.builder().fitUnitCircle(5);
 		for(int i = 0; i < 5; i++) {
@@ -153,6 +199,42 @@ public class JacobiGraphSvgTest {
 				);
 			}
 		}
+	}
+	
+	@Test
+	public void shouldBeAbleToGenerateRandomGraphWithEdgeIffCloseInEuclideanDist() throws IOException {
+		Random rand = new Random(Double.doubleToLongBits(Math.E));
+		//JacobiGraphSvg.Builder builder = JacobiGraphSvg.builder();
+		double[][] data = new double[64][];
+		double limit = 15.0;
+		for(int i = 0; i < data.length; i++) {
+			data[i] = new double[] {
+				Math.round(rand.nextDouble() * 10000.0) / 100.0,
+				Math.round(rand.nextDouble() * 10000.0) / 100.0
+			};
+		}
+		JacobiGraphSvg.Builder builder = JacobiGraphSvg.builder();
+		for(double[] p : data) {
+			builder.add(p[0], p[1]);
+		}
+		
+		for(int i = 0; i < data.length; i++) {
+			for(int j = 0; j < data.length; j++) {
+				if(i == j) {
+					continue;
+				}
+				
+				double dx = data[i][0] - data[j][0];
+				double dy = data[i][1] - data[j][1];
+				double dist = Math.sqrt(dx * dx + dy * dy);
+				
+				if(dist < limit) {
+					builder.connect(i, j, dist);
+				}
+			}
+		}
+		
+		builder.get().render().exportTo(null);
 	}
 	
 }

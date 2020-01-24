@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.Arrays;
+import java.util.Random;
 import java.util.stream.IntStream;
 
 import org.junit.Assert;
@@ -115,13 +116,28 @@ public class FractalSort2DTest {
 		this.render(vertices, ord).exportTo(null);
 	}
 	
+	@Test
+	public void shouldBeAbleToSortRandomScatteredPointsInHilbertOrder() throws IOException {
+		Random rand = new Random(Double.doubleToLongBits(Math.E));
+		double[][] vertices = new double[128][];
+		for(int i = 0; i < vertices.length; i++) {
+			vertices[i] = new double[] {
+				rand.nextDouble() * 10.0,
+				rand.nextDouble() * 10.0
+			};
+		}
+		
+		int[] ord = new FractalSort2D(0, 1, Fractal2D.HILBERT).apply(Arrays.asList(vertices));
+		this.render(vertices, ord).exportTo(null);
+	}
+	
 	protected JacobiSvg render(double[][] vertices, int[] ord) {
 		JacobiSvg svg = new JacobiSvg();
 		for(int i = 1; i < ord.length; i++){
 			double[] from = vertices[ord[i - 1]];
 			double[] to = vertices[ord[i]];
 			
-			svg.line(from[0], from[1], to[0], to[1], Color.BLACK);
+			svg.arrow(from[0], from[1], to[0], to[1], Color.BLACK);
 		}
 		
 		for(double[] v : vertices){
