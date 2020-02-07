@@ -23,12 +23,11 @@
  */
 package jacobi.core.spatial.rtree;
 
-import java.awt.Color;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.DoubleSupplier;
 
-import jacobi.core.spatial.rtree.RPacker.Mbb;
+import jacobi.api.Matrix;
 import jacobi.core.util.IntStack;
 
 /**
@@ -40,6 +39,32 @@ import jacobi.core.util.IntStack;
  *
  */
 public class RPacker {
+	
+	protected List<RNode<Integer>> pack(Matrix data, int[] ordering) {
+		return null;
+	}
+	
+	protected double perimeter(List<double[]> points, int[] groups) {
+		double total = 0.0;
+		int done = 0;
+		for(int i = 0; i < groups.length; i++){
+			int len = groups[i];
+			if(len < 1) {
+				throw new IllegalArgumentException("Empty group not allowed.");
+			}
+			
+			Mbb mbb = this.degenerate(points.get(done));
+			for(int k = 1; k < len; k++){
+				this.updateMbb(mbb, points.get(done + k));
+			}
+			
+			for(int j = 0; j < mbb.length(); j++){
+				total += Math.abs(mbb.max[j] - mbb.min[j]);
+			}
+			done += len;
+		}
+		return total;
+	}
 	
 	/**
 	 * Pack a list of points into groups preserving the order
@@ -84,16 +109,13 @@ public class RPacker {
 		Mbb mbb = this.degenerate(points.get(0));
 		for(int i = 1; i < points.size(); i++){
 			double[] p = points.get(i);
-			System.out.println("before = " + mbb);
 			double dv = this.updateMbb(mbb, p);
-			System.out.println("after = " + mbb + ", dv = " + dv);
 			
 			if(i < min) {
 				continue;
 			}
 			
-			double prob = rand.getAsDouble() * this.rejectProb(i - min, max - min);
-			System.out.println("p(" + (i - min) + ", "+ (max - min) + ") = " + prob);
+			double prob = rand.getAsDouble() * this.rejectProb(i - min, max - min);			
 			if(dv < prob) {
 				// reject
 				return i;
