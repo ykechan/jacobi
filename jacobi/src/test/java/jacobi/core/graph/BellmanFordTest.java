@@ -20,6 +20,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -37,7 +38,7 @@ public class BellmanFordTest {
 	
 	private File tempDir;
 	
-	@BeforeClass
+	@Before
 	public void init() throws IOException {
 		Path dir = Files.createTempDirectory("tmp");
 		
