@@ -23,9 +23,13 @@
  */
 package jacobi.core.spatial.rtree;
 
+import java.awt.Color;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.DoubleSupplier;
+
+import jacobi.core.spatial.rtree.RPacker.Mbb;
+import jacobi.core.util.IntStack;
 
 /**
  * Implementation of packing a list of spatial objects into a R-Tree.
@@ -37,66 +41,159 @@ import java.util.function.DoubleSupplier;
  */
 public class RPacker {
 	
-	protected int accept(List<double[]> points, int min, int max, DoubleSupplier rand) {
-		if(min == max || points.size() < min){
-			return Math.min(points.size(), min);		
+	/**
+	 * Pack a list of points into groups preserving the order
+	 * @param points  List of points
+	 * @param min  Minimum number of points within a group
+	 * @param max  Maximum number of points within a group
+	 * @param rand  Random function
+	 * @return  Number of points for each group
+	 */
+	protected int[] pack(List<double[]> points, int min, int max, DoubleSupplier rand) {
+		if(min >= max) {
+			int[] groups = new int[points.size() / min];
+			//Arrays.fill(groups, );
+			return groups;
+		}
+		IntStack stack = new IntStack(points.size() / min);
+		
+		int done = 0;
+		while(done < points.size()){
+			int num = this.packFront(points.subList(done, 
+					Math.min(points.size(), done + max + 1)), min, rand);
+			stack.push(num);
+			done += num;
 		}
 		
-		double[] first = points.get(0);
-		double[] minBd = Arrays.copyOf(first, first.length);
-		double[] maxBd = Arrays.copyOf(first, first.length);
+		return stack.toArray();
+	}
+	
+	/**
+	 * Group the first n points, determined by size range, rate of change of volume, and a stochastic function
+	 * @param points  List of points
+	 * @param min  Minimum number of points to be included
+	 * @param rand  Random function
+	 * @return  Value of n, i.e. the number of points to pack
+	 */
+	protected int packFront(List<double[]> points, int min, DoubleSupplier rand){
+		if(points.size() < min){
+			return Math.min(min, points.size());
+		}
 		
-		for(int i = 1; i < max + 1; i++){
-			double dx = this.updateDelta(minBd, maxBd, points.get(i));
-			if(i <= min || dx == 0.0) {
+		int max = points.size();
+		Mbb mbb = this.degenerate(points.get(0));
+		for(int i = 1; i < points.size(); i++){
+			double[] p = points.get(i);
+			System.out.println("before = " + mbb);
+			double dv = this.updateMbb(mbb, p);
+			System.out.println("after = " + mbb + ", dv = " + dv);
+			
+			if(i < min) {
 				continue;
 			}
-									
-			double limit = rand.getAsDouble() * this.acceptProb(min, max, i);
-			if(1.0 - dx > limit) {
+			
+			double prob = rand.getAsDouble() * this.rejectProb(i - min, max - min);
+			System.out.println("p(" + (i - min) + ", "+ (max - min) + ") = " + prob);
+			if(dv < prob) {
+				// reject
 				return i;
 			}
 		}
 		return max;
-	}	
-	
-	/**
-	 * Update the aabb represented by min and max bounds to include a point p, and return
-	 * the measure of volume increase due to the update. The measure is the arithmetic mean
-	 * of the change in span in each dimension.
-	 * @param minBd  Minimum bounds
-	 * @param maxBd  Maximum bounds
-	 * @param p  Point to be included
-	 * @return  Measure of volume increase due to the update
-	 */
-	protected double updateDelta(double[] minBd, double[] maxBd, double[] p) {
-		double dx = 0.0;
-		for(int i = 0; i < p.length; i++){
-			double span = maxBd[i] - minBd[i];
-			if(p[i] < minBd[i]){
-				dx += span / (maxBd[i] - p[i]);
-				minBd[i] = p[i];
-			}
-			
-			if(p[i] > maxBd[i]){
-				dx += span / (p[i] - minBd[i]);
-				maxBd[i] = p[i];
-			}
-		}
-		return dx / p.length;
 	}
 	
 	/**
-	 * Compute the acceptance probability based on number of points included.
-	 * @param min  Minimum size
-	 * @param max  Maximum size
-	 * @param at  Number of points included
-	 * @return  An acceptance probability that is descending[]
+	 * Update the mbb to include a given point p, and compute the measure of change in volume.
+	 * @param mbb  Mbb to be updated
+	 * @param p  Input point p
+	 * @return  Measure of change in volume
 	 */
-	protected double acceptProb(int min, int max, int at) {
-		int x = at - (min + max) / 2;
-		double y = 6.0 * x / (max - min);
-		return 1.0 / (1 + Math.exp(y));
+	protected double updateMbb(Mbb mbb, double[] p) {
+		if(p.length != mbb.length()) {
+			
+			throw new IllegalArgumentException("Dimension mismatch.");
+		}
+		
+		double rate = 0.0;
+		for(int i = 0; i < p.length; i++){
+			double span = mbb.max[i] - mbb.min[i];						
+			
+			if(mbb.min[i] > p[i]) {
+				
+				rate += span / (mbb.max[i] - p[i]);
+				mbb.min[i] = p[i];
+			} else if(mbb.max[i] < p[i]) {
+				
+				rate += span / (p[i] - mbb.min[i]);
+				mbb.max[i] = p[i];
+			} else {
+				
+				rate += 1.0;
+			}
+		}
+		return rate / p.length;
+	}
+	
+	/**
+	 * Create a degenerate mbb on a given point which has 0 volume
+	 * @param p  Input point
+	 * @return  A degenerate mbb
+	 */
+	protected Mbb degenerate(double[] p) {
+		
+		return new Mbb(Arrays.copyOf(p, p.length), Arrays.copyOf(p, p.length));
+	}
+	
+	/**
+	 * Compute the rejection probability according to the logistic function.
+	 * @param at  Index of elements to be included
+	 * @param range  Range of the number of elements allowed
+	 * @return  Rejection probability
+	 */
+	protected double rejectProb(int at, int range) {
+		double x = at - 1;
+		double z = (6 * x) / range;
+		return 1.0 / (1.0 + Math.exp(-z));
+	}
+	
+	/**
+	 * A mutable minimum bounding box.
+	 * 
+	 * @author Y.K. Chan
+	 *
+	 */
+	protected static class Mbb {				
+		
+		/**
+		 * Minimum and maximum bounds
+		 */
+		public final double[] min, max;
+
+		/**
+		 * Constructor.
+		 * @param min  Minimum bounds
+		 * @param max  Maximum bounds
+		 */
+		public Mbb(double[] min, double[] max) {
+			this.min = min;
+			this.max = max;
+		}
+		
+		/**
+		 * Number of dimensions of this mbb
+		 * @return  Number of dimensions
+		 */
+		public int length() {
+			return this.min.length;
+		}
+		
+		@Override
+		public String toString() {
+			return Arrays.toString(this.min) 
+				+ " x " 
+				+ Arrays.toString(this.max);
+		}
+		
 	}
 	
 }
