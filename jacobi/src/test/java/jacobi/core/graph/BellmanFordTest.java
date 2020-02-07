@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,7 +20,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import jacobi.api.graph.AdjList;
@@ -38,7 +37,7 @@ public class BellmanFordTest {
 	
 	private File tempDir;
 	
-	@Before
+	@BeforeClass
 	public void init() throws IOException {
 		Path dir = Files.createTempDirectory("tmp");
 		
@@ -47,7 +46,6 @@ public class BellmanFordTest {
 			
 			ZipEntry entry = null;
 			while((entry = zipIn.getNextEntry()) != null) {
-				System.out.println(entry.getName());
 				if(entry.isDirectory()) {
 					Files.createDirectory(dir.resolve(entry.getName()));
 					continue;
@@ -68,7 +66,6 @@ public class BellmanFordTest {
 		}
 		
 		this.tempDir = dir.toFile();
-		System.out.println(tempDir.getAbsolutePath());
 	}
 	
 	@Test

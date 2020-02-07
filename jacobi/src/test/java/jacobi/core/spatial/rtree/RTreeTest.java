@@ -69,6 +69,36 @@ public class RTreeTest {
 		}, ans.stream().sorted().toArray(n -> new String[n]));
 	}
 	
+	@Test
+	public void shouldCheckAllPointDistWhenQueryIsInsideMBB() {
+		RNode<String> node = RNode.of(Arrays.asList(
+			this.leaf(new double[] {-100.0, -100.0}, "LL"),
+			this.leaf(new double[] {-100.0,  100.0}, "LU"),
+			this.leaf(new double[] { 100.0, -100.0}, "UL"),
+			this.leaf(new double[] { 100.0,  100.0}, "UU")
+		));
+		
+		AtomicInteger verify = new AtomicInteger(0);
+		RTree<String> tree = new RTree<>(node, (b, p) -> 0.0, (q, p) -> verify.incrementAndGet());
+		List<String> ans = tree.queryRange(new double[2], 0.1);
+		
+		Assert.assertTrue(ans.isEmpty());
+		Assert.assertEquals(4, verify.get());
+	}
+	
+	@Test(expected = UnsupportedOperationException.class)
+	public void shouldFailWhenCollapseANonDegenerateAabb() {
+		RNode<String> node = RNode.of(Arrays.asList(
+			this.leaf(new double[] {-100.0, -100.0}, "LL"),
+			this.leaf(new double[] {-100.0,  100.0}, "LU"),
+			this.leaf(new double[] { 100.0, -100.0}, "UL"),
+			this.leaf(new double[] { 100.0,  100.0}, "UU")
+		));
+			
+		RTree<String> tree = new RTree<>(node, (b, p) -> 0.0, (q, p) -> 1.0);
+		tree.toArray(node.minBoundBox());
+	}
+	
 	protected <T> RObject<T> leaf(double[] point, T item) {
 		double[] q = Arrays.copyOf(point, point.length);
 		return new RObject<T>() {
