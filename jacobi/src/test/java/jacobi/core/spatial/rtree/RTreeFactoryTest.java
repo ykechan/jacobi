@@ -2,24 +2,12 @@ package jacobi.core.spatial.rtree;
 
 import java.awt.Color;
 import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayDeque;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Deque;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
-import java.util.TreeMap;
-import java.util.stream.IntStream;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
@@ -28,6 +16,7 @@ import jacobi.test.util.JacobiSvg;
 
 @JacobiImport("/jacobi/test/data/RTreeFactoryTest.xlsx")
 @RunWith(JacobiJUnit4ClassRunner.class)
+@Ignore
 public class RTreeFactoryTest {
 	
 	@JacobiInject(0)
