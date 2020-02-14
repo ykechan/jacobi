@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jacobi.core.spatial.rtree;
+package jacobi.core.spatial.sort;
 
 import java.util.function.IntFunction;
 

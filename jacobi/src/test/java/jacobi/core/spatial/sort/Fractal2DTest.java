@@ -1,4 +1,4 @@
-package jacobi.core.spatial.rtree;
+package jacobi.core.spatial.sort;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -11,6 +11,8 @@ import java.util.stream.IntStream;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import jacobi.core.spatial.sort.Fractal2D;
 
 public class Fractal2DTest {
 	

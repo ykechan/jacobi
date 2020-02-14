@@ -1,7 +1,7 @@
 /* 
  * The MIT License
  *
- * Copyright 2019 Y.K. Chan
+ * Copyright 2020 Y.K. Chan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,42 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jacobi.core.spatial.rtree;
+package jacobi.core.spatial.sort;
 
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.IntStream;
 
 /**
- * Common interface of sorting a list of spatial objects.
+ * Common interface for sorting a list of spatial vectors.
  * 
- * <p>A spatial object here is a point in high-dimensional space.</p>
- * 
- * <p>The ordering of the objects depends on the algorithm.</p>
+ * <p>The ordering depends on the algorithm.</p>
  * 
  * @author Y.K. Chan
  *
  */
-public interface SpatialSort extends Function<List<double[]>, int[]> {
+public interface SpatialSort {
 	
-	@Override
-	public default int[] apply(List<double[]> vectors) {
-		return this.apply(
-			vectors.toArray(new double[0][]), 
-			0, vectors.size(),
-			IntStream.range(0, vectors.size()).toArray()
-		);
-	}
-
 	/**
-	 * Apply sorting to an array of spatial objects. 
-	 * The ordering of the input array maybe mutated.
-	 * @param vectors  Input array
-	 * @param begin  Begin index of interest
-	 * @param end  End index of interest
-	 * @param result Instance of result array
-	 * @return  An sorted array of spatial objects.
+	 * Sort the input spatial vectors
+	 * @param vectors  Input spatial vectors
+	 * @return  Array of index in sorted order
 	 */
-	public int[] apply(double[][] vectors, int begin, int end, int[] result);
+	public int[] sort(List<double[]> vectors);
 
 }

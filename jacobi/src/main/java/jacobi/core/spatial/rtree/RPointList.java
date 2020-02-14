@@ -55,7 +55,7 @@ public class RPointList extends AbstractList<RObject<Integer>> {
 
 	@Override
 	public RObject<Integer> get(int index) {
-		int idx = this.keys[index - this.begin];
+		int idx = this.keys[this.begin + index];
 		double[] point = this.mapper.apply(idx);
 		Aabb aabb = Aabb.wrap(point);
 		return new RObject<Integer>() {
