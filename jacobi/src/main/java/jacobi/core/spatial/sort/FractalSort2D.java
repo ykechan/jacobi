@@ -89,6 +89,12 @@ public class FractalSort2D implements SpatialSort {
 					+ counts.length + ".");
 			}
 			
+			int[] mapping = new int[4];
+			mapping[(quad.parity / Fractal2D.LL) % 4] = enhance[0];
+			mapping[(quad.parity / Fractal2D.LU) % 4] = enhance[1];
+			mapping[(quad.parity / Fractal2D.UL) % 4] = enhance[2];
+			mapping[(quad.parity / Fractal2D.UU) % 4] = enhance[3];
+			
 			int k = quad.begin;
 			for(int i = 0; i < enhance.length; i++) {
 				if(counts[i] == quad.end - quad.begin){
@@ -98,7 +104,7 @@ public class FractalSort2D implements SpatialSort {
 				
 				if(counts[i] > 0) {
 					stack.push(new Quadrant(
-						k, k + counts[i], enhance[i], quad.depth + 1
+						k, k + counts[i], mapping[i], quad.depth + 1
 					));
 					k += counts[i];
 				}				

@@ -231,7 +231,7 @@ public class FractalSort2DTest {
 	public void shouldBeAbleToSort16x16GridByHilbertCurve() throws IOException {
 		List<double[]> points = this.grid(16);
 		int[] order = new FractalSort2D(0, 1, Fractal2D.HILBERT).sort(points);
-		/*
+		
 		for(int i = 1; i < order.length; i++) {
 			double[] a = points.get(order[i - 1]);
 			double[] b = points.get(order[i]);
@@ -244,7 +244,7 @@ public class FractalSort2DTest {
 				(a[0] - b[0]) * (a[0] - b[0]) 
 			  + (a[1] - b[1]) * (a[1] - b[1]) < 3.0);
 		}
-		*/
+		
 		this.render(this.orderBy(points, order), 0, 1).exportTo(null);
 	}
 	
