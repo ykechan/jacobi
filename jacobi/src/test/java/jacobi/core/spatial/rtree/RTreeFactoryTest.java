@@ -2,9 +2,10 @@ package jacobi.core.spatial.rtree;
 
 import java.awt.Color;
 import java.io.IOException;
+import java.util.Comparator;
+import java.util.stream.IntStream;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -16,7 +17,6 @@ import jacobi.test.util.JacobiSvg;
 
 @JacobiImport("/jacobi/test/data/RTreeFactoryTest.xlsx")
 @RunWith(JacobiJUnit4ClassRunner.class)
-@Ignore
 public class RTreeFactoryTest {
 	
 	@JacobiInject(0)
@@ -26,8 +26,8 @@ public class RTreeFactoryTest {
 	@JacobiImport("Random Scatters")
 	public void shouldBeAbleToBuildXAlignTreeOnRandomScatters() throws IOException {
 		RNode<Integer> root = this.sortBy(0).createNode(this.input);
-		this.verify(null, root);
-		JacobiSvg svg = this.render(new JacobiSvg(), root, 0, 0);
+		int depth = this.verify(null, root);
+		JacobiSvg svg = this.render(new JacobiSvg(), root, 0, 0, depth - 2);
 		this.render(svg, this.input, 0, 1).exportTo(null);
 	}
 	
@@ -35,32 +35,46 @@ public class RTreeFactoryTest {
 	@JacobiImport("Random Scatters")
 	public void shouldBeAbleToBuildYAlignTreeOnRandomScatters() throws IOException {
 		RNode<Integer> root = this.sortBy(1).createNode(this.input);
-		this.verify(null, root);
-		JacobiSvg svg = this.render(new JacobiSvg(), root, 0, 0);
+		int depth = this.verify(null, root);
+		JacobiSvg svg = this.render(new JacobiSvg(), root, 0, 0, depth - 1);
 		this.render(svg, this.input, 0, 1).exportTo(null);
 	}
 	
+	
+	
 	protected RTreeFactory sortBy(int x){
 		return new RTreeFactory(
+			(ls) -> IntStream.range(0, ls.size())
+				.boxed()
+				.sorted(Comparator.comparingDouble(i -> ls.get(i)[x]))
+				.mapToInt(Integer::intValue)
+				.toArray()
+			,
 			(ls, min) -> Math.min(min, ls.size())
 		);
 	}
 	
 	protected JacobiSvg render(JacobiSvg svg, RObject<?> node, int depth, int index) {
+		return this.render(svg, node, depth, index, -1);
+	}
+	
+	protected JacobiSvg render(JacobiSvg svg, RObject<?> node, int depth, int index, int target) {
 		String tab = "";
 		for(int i = 0; i < depth; i++) {
 			tab += "    ";
 		}
 		
 		Aabb aabb = node.minBoundBox();
-		svg.rect(aabb.min(0), aabb.min(1), 
-			aabb.max(0) - aabb.min(0), 
-			aabb.max(1) - aabb.min(1),
-			Color.GREEN).text(tab + "#" + depth + "," + index, aabb.min(0), aabb.min(1), Color.GRAY);
+		if(target < 0 || depth == target) {
+			svg.rect(aabb.min(0), aabb.min(1), 
+				aabb.max(0) - aabb.min(0), 
+				aabb.max(1) - aabb.min(1),
+				Color.GREEN).text(tab + "#" + depth + "," + index, aabb.min(0), aabb.min(1), Color.GRAY);
+		}
 		
 		int k = 0;
 		for(RObject<?> n : node.nodes()) {
-			this.render(svg, n, depth + 1, k++);
+			this.render(svg, n, depth + 1, k++, target);
 		}
 		return svg;
 	}
@@ -74,7 +88,7 @@ public class RTreeFactoryTest {
 		return svg;
 	}
 	
-	protected void verify(RObject<Integer> parent, RObject<Integer> node) {
+	protected int verify(RObject<Integer> parent, RObject<Integer> node) {
 		Aabb mbb = node.minBoundBox();
 		for(int i = 0; i < mbb.dim(); i++) {
 			// mbb must be valid
@@ -102,12 +116,17 @@ public class RTreeFactoryTest {
 				}
 			}
 			
-			return;
+			return 0;
 		}
-		
+			
+		RObject<Integer> prev = null;
+		int depth = 0;
 		for(RObject<Integer> n : node.nodes()) {
-			this.verify(node, n);
+			Assert.assertTrue(prev == null || prev.nodes().isEmpty() == n.nodes().isEmpty());
+			depth = Math.max(this.verify(node, n), depth);
+			prev = n;
 		}
+		return depth + 1;
 	}
 
 }

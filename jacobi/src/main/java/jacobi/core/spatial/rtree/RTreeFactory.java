@@ -31,6 +31,7 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 
 import jacobi.api.Matrix;
+import jacobi.core.spatial.sort.SpatialSort;
 
 /**
  * Factory for creating a static R-Tree.
@@ -40,13 +41,14 @@ import jacobi.api.Matrix;
  */
 public class RTreeFactory {
 
-	public RTreeFactory(RPacker packer) {
+	public RTreeFactory(SpatialSort sorter, RPacker packer) {
+		this.sorter = sorter;
 		this.packer = packer;
 	}
 		
 	protected RNode<Integer> createNode(Matrix data) {
 		List<double[]> list = this.toList(data);
-		int[] order = IntStream.range(0, list.size()).toArray();
+		int[] order = this.sorter.sort(list);
 		
 		List<RNode<Integer>> nodes = this.bottom(list, order, 3, 12);
 		while(nodes.size() > 1){
@@ -150,5 +152,6 @@ public class RTreeFactory {
 		};
 	}
 	
+	private SpatialSort sorter;
 	private RPacker packer;
 }
