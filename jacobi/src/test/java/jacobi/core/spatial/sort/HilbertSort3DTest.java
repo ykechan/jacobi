@@ -72,7 +72,7 @@ public class HilbertSort3DTest {
 			// elevate across
 			basis[2 * start + 1] = this.duplex(elevate, true);
 			
-			int demote = this.rotate(prime + (4 + (4 << 3) + (4 << 6) + (4 << 9)), i);
+			int demote = this.rotate(prime + ELEVATE, i);
 			start = demote % 8;
 			// demote stay
 			basis[2 * start] = this.duplex(demote, false);
@@ -80,13 +80,16 @@ public class HilbertSort3DTest {
 			basis[2 * start + 1] = this.duplex(demote, true);
 		}
 		
-		System.out.println(Arrays.toString(basis));
+		for(int i = 0; i < basis.length; i++) {
+			String octal = Integer.toOctalString(basis[i]);
+			Assert.assertTrue(octal.endsWith(String.valueOf(i / 2)));
+		}
 	}
 	
 	protected int duplex(int floor, boolean diag) {
 		int dir = floor % 8 < 4 ? 1 : -1;
 		int next = diag ? this.rotate(floor, 3) : this.reverse(floor);
-		return floor + (next + dir * (4 + 4 << 3 + 4 << 6 + 4 << 9) ) << 12;
+		return floor + ((next + dir * ELEVATE ) << 12);
 	}
 	
 	protected int reverse(int code) {
@@ -109,4 +112,6 @@ public class HilbertSort3DTest {
 	protected int curve() {
 		return 1 + (0 << 3) + (2 << 6) + (3 << 9);
 	}
+	
+	protected static final int ELEVATE = 4 + (4 << 3) + (4 << 6) + (4 << 9);
 }
