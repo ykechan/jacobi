@@ -1,7 +1,5 @@
 package jacobi.core.spatial.sort;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-
 import java.util.Arrays;
 import java.util.function.IntFunction;
 import java.util.stream.Collectors;
@@ -59,12 +57,114 @@ public class HilbertSort3DTest {
 	}
 	
 	@Test
-	public void shouldBeAbleToGenerateAllBasisCurves() {		
+	public void shouldAllBasisCurveBeValid() {		
+		final int[] basis = this.generateBasis();
+		
+		String[] octals = Arrays.stream(basis)
+			.mapToObj(Integer::toOctalString)
+			.map(s -> s.length() < 8 ? "0" + s : s)
+			.map(s -> new StringBuilder(s).reverse().toString())
+			.toArray(n -> new String[n]);		
+		
+		for(String oct : octals) {			
+			for(int i = 0; i < 4; i++) {
+				Assert.assertEquals(oct.charAt(0) - '0' < 4, oct.charAt(i) - '0' < 4);
+			}
+			
+			for(int i = 4; i < 8; i++) {
+				Assert.assertEquals(oct.charAt(4) - '0' < 4, oct.charAt(i) - '0' < 4);
+			}
+			
+			for(int i = 0; i < 8; i++) {
+				Assert.assertTrue("012345678".indexOf(oct.charAt(i)) >= 0);
+			}
+			
+			boolean[] marked = new boolean[8];
+			Arrays.fill(marked, false);
+			for(int i = 0; i < 8; i++) {
+				Assert.assertFalse(marked[oct.charAt(i) - '0']);
+				marked[oct.charAt(i) - '0'] = true;
+			}
+		}
+	}
+	
+	@Test
+	public void shouldEvenBasisCurvesEndInTheSamePositionButAlteratePlane() {		
+		final int[] basis = this.generateBasis();
+		
+		String[] octals = Arrays.stream(basis)
+			.mapToObj(Integer::toOctalString)
+			.map(s -> s.length() < 8 ? "0" + s : s)
+			.map(s -> new StringBuilder(s).reverse().toString())
+			.toArray(n -> new String[n]);		
+		
+		for(int i = 0; i < octals.length; i += 2) {
+			String oct = octals[i];
+			int start = oct.charAt(0) - '0';
+			int finish = oct.charAt(7) - '0';			
+			Assert.assertEquals(oct, 4, Math.abs(start - finish));
+		}
+	}
+	
+	@Test
+	public void shouldOddBasisCurvesEndInTheDiagPositionButAlteratePlane() {		
+		final int[] basis = this.generateBasis();
+		
+		String[] octals = Arrays.stream(basis)
+			.mapToObj(Integer::toOctalString)
+			.map(s -> s.length() < 8 ? "0" + s : s)
+			.map(s -> new StringBuilder(s).reverse().toString())
+			.toArray(n -> new String[n]);
+		
+		int[] diag = {7, 6, 5, 4, 3, 2, 1, 0};
+		
+		for(int i = 1; i < octals.length; i += 2) {
+			String oct = octals[i];
+			int start = oct.charAt(0) - '0';
+			int finish = oct.charAt(7) - '0';
+			Assert.assertEquals(oct, diag[start], finish);
+		}
+	}
+	
+	@Test
+	public void shouldAllBasisCurvesVisitsItsImmediateNeighbor() {
+		final int[] basis = this.generateBasis();		
+		for(int curve : basis){
+			for(int i = 0; i < 7; i++){
+				int next = (curve >> 3 * i) % 8;
+				int curr = (curve >> 3 * (i + 1)) % 8;
+				
+				int delta = Math.abs(next - curr);
+				
+				String errMsg = "curve " + Integer.toOctalString(curve)
+					+ ", next = " + next
+					+ ", curr = " + curr;
+				if(next < 4 ^ curr < 4) {
+					Assert.assertEquals(errMsg, 4, delta);
+				}else {
+					Assert.assertTrue(errMsg, delta > 0);
+					Assert.assertTrue(errMsg, delta < 3);
+				}
+			}
+		}
+		System.out.println(Arrays.toString(basis));
+	}
+		
+	
+	protected int[] generateEnhance(int curve) {
+		int[] enhance = new int[8];
+		for(int i = 1; i < enhance.length; i++) {
+			
+		}
+		return enhance;
+	}
+	
+	protected int[] generateBasis() {
 		final int prime = this.curve();
 		
 		final int[] basis = new int[16];
 		
-		for(int i = 0; i < 4; i++){			
+		for(int i = 0; i < 4; i++){	
 			int elevate = this.rotate(prime, i);
 			int start = elevate % 8;
 			// elevate stay
@@ -79,11 +179,7 @@ public class HilbertSort3DTest {
 			// demote across
 			basis[2 * start + 1] = this.duplex(demote, true);
 		}
-		
-		for(int i = 0; i < basis.length; i++) {
-			String octal = Integer.toOctalString(basis[i]);
-			Assert.assertTrue(octal.endsWith(String.valueOf(i / 2)));
-		}
+		return basis;
 	}
 	
 	protected int duplex(int floor, boolean diag) {
