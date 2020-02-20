@@ -49,7 +49,6 @@ public class RAdaptivePacker implements RPacker {
 		int k = 0;
 		for(RObject<?> rObj : rObjs){
 			double delta = this.updateMbb(mbb, rObj.minBoundBox());
-			System.out.println("Delta = " + delta);
 			int i = k++;
 			if(i < minItems){
 				continue;
@@ -59,7 +58,6 @@ public class RAdaptivePacker implements RPacker {
 					i - minItems, 
 					rObjs.size() - minItems);
 			
-			System.out.println("reject = " + reject);
 			if(delta < reject){
 				return i;
 			}

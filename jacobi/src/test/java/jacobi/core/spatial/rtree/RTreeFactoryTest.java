@@ -10,6 +10,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import jacobi.api.Matrix;
+import jacobi.core.spatial.sort.Fractal2D;
+import jacobi.core.spatial.sort.FractalSort2D;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
@@ -40,7 +42,19 @@ public class RTreeFactoryTest {
 		this.render(svg, this.input, 0, 1).exportTo(null);
 	}
 	
-	
+	@Test
+	@JacobiImport("Random Scatters")
+	public void shouldBeAbleToBuildHilbertSortTreeOnRandomScatters() throws IOException {
+		RNode<Integer> root = new RTreeFactory(
+				new FractalSort2D(0, 1, Fractal2D.HILBERT),
+				new RAdaptivePacker(() -> 1.0),
+				2, 3
+			)
+			.createNode(this.input);
+		int depth = this.verify(null, root);
+		JacobiSvg svg = this.render(new JacobiSvg(), root, 0, 0, depth - 1);
+		this.render(svg, this.input, 0, 1).exportTo(null);
+	}
 	
 	protected RTreeFactory sortBy(int x){
 		return new RTreeFactory(
@@ -50,7 +64,8 @@ public class RTreeFactoryTest {
 				.mapToInt(Integer::intValue)
 				.toArray()
 			,
-			(ls, min) -> Math.min(min, ls.size())
+			(ls, min) -> Math.min(min, ls.size()),
+			3, 12
 		);
 	}
 	

@@ -149,12 +149,40 @@ public class HilbertSort3DTest {
 		}
 		System.out.println(Arrays.toString(basis));
 	}
+	
+	@Test
+	public void shouldBeAbleToEnhanceResolution() {
+		int[] basis = this.generateBasis();
+		long[] enhance = Arrays.stream(basis)
+				.mapToLong(i -> this.generateEnhance(basis, i))
+				.toArray();
+		
+		System.out.println(Arrays.toString(enhance));
+	}
 		
 	
-	protected int[] generateEnhance(int curve) {
-		int[] enhance = new int[8];
-		for(int i = 1; i < enhance.length; i++) {
+	protected long generateEnhance(int[] basis, int parity) {
+		int[] diags = {3, 2, 1, 0, 7, 6, 5, 4};
+		
+		long enhance = 0;
+		boolean desc = parity % 8 < 4; 
+		for(int i = 0; i < 8; i++) {
+			if(i == 4){
+				desc = !desc;
+			}
 			
+			int oct = (parity >> 3 * i) % 8;
+			int start = (i == 0 || i == 4) ? oct : diags[oct];
+			if(desc && start < 4) {
+				start += 4;
+			}
+			if(!desc && start >= 4) {
+				start -= 4;
+			}
+			
+			enhance += 2 * start + (((i + 3) / 2) % 2);
+			enhance *= 16;
+			desc = !desc;
 		}
 		return enhance;
 	}

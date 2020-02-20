@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.IntStream;
 
 import jacobi.api.Matrix;
 import jacobi.core.spatial.sort.SpatialSort;
@@ -40,19 +39,28 @@ import jacobi.core.spatial.sort.SpatialSort;
  *
  */
 public class RTreeFactory {
-
-	public RTreeFactory(SpatialSort sorter, RPacker packer) {
+	
+	/**
+	 * Constructor.
+	 * @param sorter  Implementation of spatial sort
+	 * @param packer  Implementation of packing spatial objects
+	 * @param degree  Minimum number of children an internal node can have
+	 * @param degLeaf  Minimum number of spatial objects a leaf node can have
+	 */
+	public RTreeFactory(SpatialSort sorter, RPacker packer, int degree, int degLeaf) {
 		this.sorter = sorter;
 		this.packer = packer;
+		this.degree = degree;
+		this.degLeaf = degLeaf;
 	}
-		
+
 	protected RNode<Integer> createNode(Matrix data) {
 		List<double[]> list = this.toList(data);
 		int[] order = this.sorter.sort(list);
 		
-		List<RNode<Integer>> nodes = this.bottom(list, order, 3, 12);
+		List<RNode<Integer>> nodes = this.bottom(list, order, this.degLeaf, 2 * this.degLeaf);
 		while(nodes.size() > 1){
-			nodes = this.collapse(nodes, 3, 4);
+			nodes = this.collapse(nodes, this.degree, 1 + this.degree);
 		}
 		return nodes.get(0);
 	}
@@ -72,6 +80,14 @@ public class RTreeFactory {
 		return parents;
 	}
 	
+	/**
+	 * Pack spatial objects to be indexed into a list of leaf nodes
+	 * @param list  List of spatial objects
+	 * @param order  Ordering of the spatial objects
+	 * @param minItems  Minimum number of spatial objects a leaf can have
+	 * @param maxItems  Maximum number of spatial objects a leaf can have
+	 * @return  List of leaf nodes
+	 */
 	protected List<RNode<Integer>> bottom(List<double[]> list, int[] order, int minItems, int maxItems) {
 		int[] groups = this.packer.pack(this.orderBy(this.toLeaves(list), order), 
 				minItems, maxItems);
@@ -87,6 +103,11 @@ public class RTreeFactory {
 		return nodes;
 	}
 	
+	/**
+	 * Wrap a list of spatial objects to list of R-Objects
+	 * @param list  List of spatial objects
+	 * @return  List of R-Objects
+	 */
 	protected List<RObject<?>> toLeaves(List<double[]> list) {
 		return new AbstractList<RObject<?>>() {
 
@@ -120,6 +141,11 @@ public class RTreeFactory {
 		};
 	}
 	
+	/**
+	 * Wrap a matrix into an immutable list
+	 * @param data  Input matrix
+	 * @return  Immutable List of rows of the matrix
+	 */
 	protected List<double[]> toList(Matrix data) {
 		return new AbstractList<double[]>() {
 
@@ -136,6 +162,12 @@ public class RTreeFactory {
 		};
 	}
 	
+	/**
+	 * Wrap a list in re-arranged order
+	 * @param list  Input list
+	 * @param order  Target order
+	 * @return  List of the items in re-arranged order
+	 */
 	protected <T> List<T> orderBy(List<T> list, int[] order) {
 		return new AbstractList<T>() {
 
@@ -154,4 +186,5 @@ public class RTreeFactory {
 	
 	private SpatialSort sorter;
 	private RPacker packer;
+	private int degree, degLeaf;
 }
