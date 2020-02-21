@@ -1,6 +1,7 @@
 package jacobi.core.spatial.sort;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -10,6 +11,53 @@ import org.junit.Test;
 
 
 /**
+ * This is unit tests to HilbertSort3D and also code generator for Hilbert curve in 3-D.
+ * 
+ * There are multiple way to generalize Hilbert curve into 3-D and this implementation uses
+ * the following construction.
+ * 
+ * A basic 3-D Hilbert curve can be constructed by joining two 2-D Hilbert curve end-to-front:
+ * 
+ * 
+ *       4--------6
+ *        \        \
+ *         5        7
+ *                  |
+ *       0-------2  |
+ *        \       \ |
+ *         \       \|
+ *          1       3
+ *          
+ * The numbers are the code for each octrants. This curve is joined by two 2-D Hilbert curve
+ * goes in opposite direction in different plane in the z-dimension, and ends up in the starting
+ * quadrant but in different plane in the z-dimension. Another curve is constructed if the curve
+ * goes in the other direction, and would ends up in the diagonal quadrant but in different plane.
+ * 
+ * Depending on the starting and ending position, there are 16 curves, refers to as basis in this
+ * text. (Always starts and ends in different plane).
+ * 
+ * To enhance the resolution, consider enhancing the curve in a plane:
+ *  +---+
+ *  |   |
+ *  +   +
+ *  
+ *  The 4 octrants are crafted up into 8 octrants, which can be traversed by the basis like the following
+ *  
+ *    +--+ +--+
+ *    |  | |  |
+ *    +--* *--+
+ *       x o
+ *      /   \
+ *     /     \
+ *    o       x
+ *    
+ *  A o--x represents the basis curve which goes diagonally, and * curve represents the basis curve the
+ *  stays transcended. The curve in another plane can be constructed similarly.
+ *  
+ *  Consider a basis curve that is ascending in z-dimension, to join the two halves 
+ *  the first halve of the curve should end up in the upper half on the enhanced 
+ *  resolution. Since each basis curve transends in z-dimension, and given 4 curves,
+ *  the curve should start in the upper half on the enhanced resolution as well.
  * 
  * @author Y.K. Chan
  *
@@ -151,15 +199,177 @@ public class HilbertSort3DTest {
 	}
 	
 	@Test
-	public void shouldBeAbleToEnhanceResolution() {
-		int[] basis = this.generateBasis();
-		long[] enhance = Arrays.stream(basis)
-				.mapToLong(i -> this.generateEnhance(basis, i))
-				.toArray();
+	public void shouldBeAbleToEnhancedResolutionReferenceTheBasisCurveOnly() {
+		long[] enhance = this.generateEnhance();
+	}
+	
+	@Test
+	public void shouldTheBasisCurveUsedInImplSameAsGenerated() {
+		Assert.assertArrayEquals(this.generateBasis(), HilbertSort3D.BASIS);
+	}
+	
+	@Test
+	public void shouldBeAbleToSortABasicCube() {
+		int n = 2 * 2 * 2;
+		double[][] grid = new double[n][];
 		
-		System.out.println(Arrays.toString(enhance));
+		for(int i = 0; i < n; i++) {
+			grid[i] = new double[] {i % 2, (i / 2) % 2, (i / 2 / 2) % 2};
+		}
+		
+		HilbertSort3D sort3 = new HilbertSort3D(0, 1, 2);
+		double[] comps = sort3.init(Arrays.asList(grid));
+		
+		int[] order = IntStream.range(0, grid.length).toArray();
+		
+		int[] counts = new HilbertSort3D(0, 1, 2).sort(comps, 
+			new Category(0, grid.length, HilbertSort3D.BASIS[0], 0), 
+			order
+		);		
+		Assert.assertEquals(8, order.length);
+		Assert.assertEquals(8, counts.length);
+		
+		Assert.assertArrayEquals(new int[] {1, 1, 1, 1, 1, 1, 1, 1},  counts);
+		
+		Assert.assertArrayEquals(new double[] {0.0, 0.0, 0.0}, grid[order[0]], 1e-12);
+		Assert.assertArrayEquals(new double[] {1.0, 0.0, 0.0}, grid[order[1]], 1e-12);
+		Assert.assertArrayEquals(new double[] {1.0, 1.0, 0.0}, grid[order[2]], 1e-12);
+		Assert.assertArrayEquals(new double[] {0.0, 1.0, 0.0}, grid[order[3]], 1e-12);
+		
+		Assert.assertArrayEquals(new double[] {0.0, 1.0, 1.0}, grid[order[4]], 1e-12);
+		Assert.assertArrayEquals(new double[] {1.0, 1.0, 1.0}, grid[order[5]], 1e-12);
+		Assert.assertArrayEquals(new double[] {1.0, 0.0, 1.0}, grid[order[6]], 1e-12);
+		Assert.assertArrayEquals(new double[] {0.0, 0.0, 1.0}, grid[order[7]], 1e-12);
+		
+		Assert.assertArrayEquals(this.generateBasis(), HilbertSort3D.BASIS);
+	}
+	
+	@Test
+	public void shouldBeAbleToGroupACubeIntoOctrantsInLowerZ() {
+		int n = 4 * 4 * 4;
+		double[][] grid = new double[n][];
+		
+		for(int i = 0; i < n; i++) {
+			grid[i] = new double[] {i % 4, (i / 4) % 4, (i / 4 / 4) % 4};
+		}
+		
+		HilbertSort3D sort3 = new HilbertSort3D(0, 1, 2);
+		double[] comps = sort3.init(Arrays.asList(grid));
+		
+		int[] order = IntStream.range(0, grid.length).toArray();
+		
+		int[] counts = new HilbertSort3D(0, 1, 2).sort(comps, 
+			new Category(0, grid.length, HilbertSort3D.BASIS[0], 0), 
+			order
+		);		
+		
+		
+		Assert.assertArrayEquals(new int[] {8, 8, 8, 8, 8, 8, 8, 8}, counts);
+		// lower before upper in z-dimension
+		for(int i = 0; i < order.length; i++) {
+			int k = order[i];
+			Assert.assertTrue(i < n / 2 ^ grid[k][2] > 1.5);
+		}
+		
+		List<double[]> octrant = Arrays.stream(order)
+				.skip(0).limit(8)
+				.mapToObj(i -> grid[i]).collect(Collectors.toList());
+		Assert.assertFalse(octrant.stream().map(Arrays::toString).collect(Collectors.joining(";")),
+				octrant.stream()
+			.filter(v -> v[0] > 1.5 || v[1] > 1.5)
+			.findAny().isPresent());
+		
+		octrant = Arrays.stream(order)
+				.skip(8).limit(8)
+				.mapToObj(i -> grid[i]).collect(Collectors.toList());
+		Assert.assertFalse(octrant.stream().map(Arrays::toString).collect(Collectors.joining(";")),
+				octrant.stream()
+			.filter(v -> v[0] < 1.5 || v[1] > 1.5)
+			.findAny().isPresent());
+		
+		octrant = Arrays.stream(order)
+				.skip(16).limit(8)
+				.mapToObj(i -> grid[i]).collect(Collectors.toList());
+		Assert.assertFalse(octrant.stream().map(Arrays::toString).collect(Collectors.joining(";")),
+				octrant.stream()
+			.filter(v -> v[0] < 1.5 || v[1] < 1.5)
+			.findAny().isPresent());
+		
+		octrant = Arrays.stream(order)
+				.skip(24).limit(8)
+				.mapToObj(i -> grid[i]).collect(Collectors.toList());
+		Assert.assertFalse(octrant.stream().map(Arrays::toString).collect(Collectors.joining(";")),
+				octrant.stream()
+			.filter(v -> v[0] > 1.5 || v[1] < 1.5)
+			.findAny().isPresent());
+	}
+	
+	@Test
+	public void shouldBeAbleToGroupACubeIntoOctrantsInUpperZ() {
+		int n = 4 * 4 * 4;
+		double[][] grid = new double[n][];
+		
+		for(int i = 0; i < n; i++) {
+			grid[i] = new double[] {i % 4, (i / 4) % 4, (i / 4 / 4) % 4};
+		}
+		
+		HilbertSort3D sort3 = new HilbertSort3D(0, 1, 2);
+		double[] comps = sort3.init(Arrays.asList(grid));
+		
+		int[] order = IntStream.range(0, grid.length).toArray();
+		
+		int[] counts = new HilbertSort3D(0, 1, 2).sort(comps, 
+			new Category(0, grid.length, HilbertSort3D.BASIS[0], 0), 
+			order
+		);		
+		
+		
+		Assert.assertArrayEquals(new int[] {8, 8, 8, 8, 8, 8, 8, 8}, counts);
+		// lower before upper in z-dimension
+		for(int i = 0; i < order.length; i++) {
+			int k = order[i];
+			Assert.assertTrue(i < n / 2 ^ grid[k][2] > 1.5);
+		}
+		
+		List<double[]> octrant = Arrays.stream(order)
+				.skip(56).limit(8)
+				.mapToObj(i -> grid[i]).collect(Collectors.toList());
+		Assert.assertFalse(octrant.stream().map(Arrays::toString).collect(Collectors.joining(";")),
+				octrant.stream()
+			.filter(v -> v[0] > 1.5 || v[1] > 1.5)
+			.findAny().isPresent());
+		
+		octrant = Arrays.stream(order)
+				.skip(48).limit(8)
+				.mapToObj(i -> grid[i]).collect(Collectors.toList());
+		Assert.assertFalse(octrant.stream().map(Arrays::toString).collect(Collectors.joining(";")),
+				octrant.stream()
+			.filter(v -> v[0] < 1.5 || v[1] > 1.5)
+			.findAny().isPresent());
+		
+		octrant = Arrays.stream(order)
+				.skip(40).limit(8)
+				.mapToObj(i -> grid[i]).collect(Collectors.toList());
+		Assert.assertFalse(octrant.stream().map(Arrays::toString).collect(Collectors.joining(";")),
+				octrant.stream()
+			.filter(v -> v[0] < 1.5 || v[1] < 1.5)
+			.findAny().isPresent());
+		
+		octrant = Arrays.stream(order)
+				.skip(32).limit(8)
+				.mapToObj(i -> grid[i]).collect(Collectors.toList());
+		Assert.assertFalse(octrant.stream().map(Arrays::toString).collect(Collectors.joining(";")),
+				octrant.stream()
+			.filter(v -> v[0] > 1.5 || v[1] < 1.5)
+			.findAny().isPresent());
 	}
 		
+	protected long[] generateEnhance() {
+		int[] basis = this.generateBasis();
+		return Arrays.stream(basis)
+			.mapToLong(p -> this.generateEnhance(basis, p))
+			.toArray();
+	}
 	
 	protected long generateEnhance(int[] basis, int parity) {
 		int[] diags = {3, 2, 1, 0, 7, 6, 5, 4};

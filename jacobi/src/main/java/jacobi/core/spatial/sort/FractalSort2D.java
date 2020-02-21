@@ -24,7 +24,6 @@
 package jacobi.core.spatial.sort;
 
 import java.util.ArrayDeque;
-import java.util.Arrays;
 import java.util.Deque;
 import java.util.List;
 import java.util.function.IntFunction;
@@ -72,11 +71,11 @@ public class FractalSort2D implements SpatialSort {
 	protected int[] sort(double[] values, int[] indices, int limit) {
 		int[] temp = new int[indices.length];
 		
-		Deque<Quadrant> stack = new ArrayDeque<>();
-		stack.push(new Quadrant(0, indices.length, this.fractalFn.apply(0)[0], 0));
+		Deque<Category> stack = new ArrayDeque<>();
+		stack.push(new Category(0, indices.length, this.fractalFn.apply(0)[0], 0));
 		
 		while(!stack.isEmpty()){			
-			Quadrant quad = stack.pop();
+			Category quad = stack.pop();
 			if(quad.end - quad.begin < 2 || quad.depth > limit){
 				continue;
 			}
@@ -103,7 +102,7 @@ public class FractalSort2D implements SpatialSort {
 				}
 				
 				if(counts[i] > 0) {
-					stack.push(new Quadrant(
+					stack.push(new Category(
 						k, k + counts[i], mapping[i], quad.depth + 1
 					));
 					k += counts[i];
@@ -121,7 +120,7 @@ public class FractalSort2D implements SpatialSort {
 	 * @param temp  Temp buffer
 	 * @return  The number of items in each quadrants after grouping
 	 */
-	protected int[] groupQuad(double[] values, Quadrant quadrant, int[] indices, int[] temp) {
+	protected int[] groupQuad(double[] values, Category quadrant, int[] indices, int[] temp) {
 		int head = quadrant.begin;
 		int tail = quadrant.end;
 		
@@ -223,38 +222,5 @@ public class FractalSort2D implements SpatialSort {
 	private int xIdx, yIdx;
 	private IntFunction<int[]> fractalFn;
 	
-	/**
-	 * Data object for indicating the area currently computing
-	 * 
-	 * @author Y.K. Chan
-	 *
-	 */
-	protected static class Quadrant {
-		
-		/**
-		 * Begin and end index of interest
-		 */
-		public final int begin, end;
-		
-		/**
-		 * Parity and depth of current area
-		 */
-		public final int parity, depth;
-
-		/**
-		 * Constructor.
-		 * @param begin  Begin index of interest
-		 * @param end  End index of interest
-		 * @param parity  Parity of current area
-		 * @param depth  Depth of current area
-		 */
-		public Quadrant(int begin, int end, int parity, int depth) {
-			this.begin = begin;
-			this.end = end;
-			this.parity = parity;
-			this.depth = depth;
-		}
-		
-	}	
 }
 

@@ -10,7 +10,6 @@ import java.util.stream.IntStream;
 import org.junit.Assert;
 import org.junit.Test;
 
-import jacobi.core.spatial.sort.FractalSort2D.Quadrant;
 import jacobi.test.util.JacobiSvg;
 
 public class FractalSort2DTest {
@@ -81,7 +80,7 @@ public class FractalSort2DTest {
 		
 		Assert.assertArrayEquals(new int[] {1, 1, 1, 1}, 
 			new FractalSort2D(0, 1, i -> new int[0]).groupQuad(comps, 
-				new Quadrant(0, 4, Fractal2D.Z_ORDER, 0), 
+				new Category(0, 4, Fractal2D.Z_ORDER, 0), 
 				indices, 
 				new int[comps.length / 2])
 		);
@@ -99,7 +98,7 @@ public class FractalSort2DTest {
 		
 		double[] comps = fsort.init(vectors);
 		int[] counts = fsort.groupQuad(comps, 
-			new Quadrant(0, indices.length, Fractal2D.Z_ORDER, 0), 
+			new Category(0, indices.length, Fractal2D.Z_ORDER, 0), 
 			indices, 
 			new int[indices.length]
 		);
@@ -148,7 +147,7 @@ public class FractalSort2DTest {
 		double[] comps = fsort.init(Arrays.asList(vectors));
 		Assert.assertArrayEquals(new int[] {8, 0, 0, 8}, 
 			fsort.groupQuad(comps, 
-				new Quadrant(0, vectors.length, Fractal2D.Z_ORDER, 0), 
+				new Category(0, vectors.length, Fractal2D.Z_ORDER, 0), 
 				indices, 
 				new int[indices.length]
 		));
@@ -179,7 +178,7 @@ public class FractalSort2DTest {
 		double[] comps = fsort.init(Arrays.asList(vectors));
 		Assert.assertArrayEquals(new int[] {0, 8, 8, 0}, 
 			fsort.groupQuad(comps, 
-				new Quadrant(0, vectors.length, Fractal2D.Z_ORDER, 0), 
+				new Category(0, vectors.length, Fractal2D.Z_ORDER, 0), 
 				indices, 
 				new int[indices.length]
 		));

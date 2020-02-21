@@ -96,6 +96,17 @@ public class IntStack {
     }
     
     /**
+     * Copy all elements to an array
+     * @param target  Target array to write
+     * @param at  Start index of target array to write
+     * @return  Target array
+     */
+    public int[] toArray(int[] target, int at) {
+    	System.arraycopy(this.array, 0, target, at, this.count);
+    	return target;
+    }
+    
+    /**
      * Get the capacity of current storage.
      * @return  The length of the current storage.
      */
