@@ -1,12 +1,17 @@
 package jacobi.core.spatial.sort;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntFunction;
+import java.util.function.Predicate;
+import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 
@@ -195,13 +200,8 @@ public class HilbertSort3DTest {
 				}
 			}
 		}
-		System.out.println(Arrays.toString(basis));
-	}
-	
-	@Test
-	public void shouldBeAbleToEnhancedResolutionReferenceTheBasisCurveOnly() {
-		long[] enhance = this.generateEnhance();
-	}
+		//System.out.println(Arrays.toString(basis));
+	}	
 	
 	@Test
 	public void shouldTheBasisCurveUsedInImplSameAsGenerated() {
@@ -271,37 +271,14 @@ public class HilbertSort3DTest {
 			Assert.assertTrue(i < n / 2 ^ grid[k][2] > 1.5);
 		}
 		
-		List<double[]> octrant = Arrays.stream(order)
-				.skip(0).limit(8)
-				.mapToObj(i -> grid[i]).collect(Collectors.toList());
-		Assert.assertFalse(octrant.stream().map(Arrays::toString).collect(Collectors.joining(";")),
-				octrant.stream()
-			.filter(v -> v[0] > 1.5 || v[1] > 1.5)
-			.findAny().isPresent());
-		
-		octrant = Arrays.stream(order)
-				.skip(8).limit(8)
-				.mapToObj(i -> grid[i]).collect(Collectors.toList());
-		Assert.assertFalse(octrant.stream().map(Arrays::toString).collect(Collectors.joining(";")),
-				octrant.stream()
-			.filter(v -> v[0] < 1.5 || v[1] > 1.5)
-			.findAny().isPresent());
-		
-		octrant = Arrays.stream(order)
-				.skip(16).limit(8)
-				.mapToObj(i -> grid[i]).collect(Collectors.toList());
-		Assert.assertFalse(octrant.stream().map(Arrays::toString).collect(Collectors.joining(";")),
-				octrant.stream()
-			.filter(v -> v[0] < 1.5 || v[1] < 1.5)
-			.findAny().isPresent());
-		
-		octrant = Arrays.stream(order)
-				.skip(24).limit(8)
-				.mapToObj(i -> grid[i]).collect(Collectors.toList());
-		Assert.assertFalse(octrant.stream().map(Arrays::toString).collect(Collectors.joining(";")),
-				octrant.stream()
-			.filter(v -> v[0] > 1.5 || v[1] < 1.5)
-			.findAny().isPresent());
+		this.assertAllMatch(Arrays.asList(grid), 0, 8, order, 
+				v -> v[0] < 1.5 || v[1] < 1.5);
+		this.assertAllMatch(Arrays.asList(grid), 8, 8, order, 
+				v -> v[0] > 1.5 || v[1] < 1.5);
+		this.assertAllMatch(Arrays.asList(grid), 16, 8, order, 
+				v -> v[0] > 1.5 || v[1] > 1.5);
+		this.assertAllMatch(Arrays.asList(grid), 24, 8, order, 
+				v -> v[0] < 1.5 || v[1] > 1.5);
 	}
 	
 	@Test
@@ -330,38 +307,119 @@ public class HilbertSort3DTest {
 			int k = order[i];
 			Assert.assertTrue(i < n / 2 ^ grid[k][2] > 1.5);
 		}
+		this.assertAllMatch(Arrays.asList(grid), 56, 8, order, 
+				v -> v[0] < 1.5 || v[1] < 1.5);
+		this.assertAllMatch(Arrays.asList(grid), 48, 8, order, 
+				v -> v[0] > 1.5 || v[1] < 1.5);
+		this.assertAllMatch(Arrays.asList(grid), 40, 8, order, 
+				v -> v[0] > 1.5 || v[1] > 1.5);
+		this.assertAllMatch(Arrays.asList(grid), 32, 8, order, 
+				v -> v[0] < 1.5 || v[1] > 1.5);
+	}
+	
+	@Test
+	public void shouldBeAbleToEnhancedResolutionReferenceTheBasisCurveOnly() {
+		int[] basis = this.generateBasis();
+		long[] enhance = this.generateEnhance();
 		
-		List<double[]> octrant = Arrays.stream(order)
-				.skip(56).limit(8)
-				.mapToObj(i -> grid[i]).collect(Collectors.toList());
-		Assert.assertFalse(octrant.stream().map(Arrays::toString).collect(Collectors.joining(";")),
-				octrant.stream()
-			.filter(v -> v[0] > 1.5 || v[1] > 1.5)
-			.findAny().isPresent());
+		Assert.assertEquals(basis.length, enhance.length);
+		for(long transit : enhance) {
+			// at most 32-bit
+			Assert.assertTrue(transit <= 2L * Integer.MAX_VALUE);
+		}
+	}
+	
+	@Test
+	public void shouldEnhanceFollowModularity() {
+		long[] enhance = this.generateEnhance();
 		
-		octrant = Arrays.stream(order)
-				.skip(48).limit(8)
-				.mapToObj(i -> grid[i]).collect(Collectors.toList());
-		Assert.assertFalse(octrant.stream().map(Arrays::toString).collect(Collectors.joining(";")),
-				octrant.stream()
-			.filter(v -> v[0] < 1.5 || v[1] > 1.5)
-			.findAny().isPresent());
+		for(long transit : enhance) {
+			Assert.assertEquals(1, (transit     ) % 2);
+			Assert.assertEquals(0, (transit >> 4) % 2);
+			Assert.assertEquals(0, (transit >> 8) % 2);
+			Assert.assertEquals(1, (transit >> 12) % 2);
+			
+			Assert.assertEquals(1, (transit >> 16) % 2);
+			Assert.assertEquals(0, (transit >> 20) % 2);
+			Assert.assertEquals(0, (transit >> 24) % 2);
+			Assert.assertEquals(1, (transit >> 28) % 2);
+		}
+	}
+	
+	@Test
+	public void shouldBeAbleToGenerateEnhance() {
+		long[] enhance = this.generateEnhance();
+		Assert.assertArrayEquals(HilbertSort3D.ENHANCE, enhance);
+	}
+	
+	@Test
+	public void shouldBeAbleToSortA4x4x4CubeInOctrantLLL() {
+		int n = 4 * 4 * 4;
+		double[][] grid = new double[n][];
 		
-		octrant = Arrays.stream(order)
-				.skip(40).limit(8)
-				.mapToObj(i -> grid[i]).collect(Collectors.toList());
-		Assert.assertFalse(octrant.stream().map(Arrays::toString).collect(Collectors.joining(";")),
-				octrant.stream()
-			.filter(v -> v[0] < 1.5 || v[1] < 1.5)
-			.findAny().isPresent());
+		for(int i = 0; i < n; i++) {
+			grid[i] = new double[] {i % 4, (i / 4) % 4, (i / 4 / 4) % 4};
+		}
 		
-		octrant = Arrays.stream(order)
-				.skip(32).limit(8)
-				.mapToObj(i -> grid[i]).collect(Collectors.toList());
-		Assert.assertFalse(octrant.stream().map(Arrays::toString).collect(Collectors.joining(";")),
-				octrant.stream()
-			.filter(v -> v[0] > 1.5 || v[1] < 1.5)
-			.findAny().isPresent());
+		HilbertSort3D sort3 = new HilbertSort3D(0, 1, 2);
+		int[] order = sort3.sort(Arrays.asList(grid));
+		
+		List<double[]> points = new ArrayList<>();
+		for(int i = 0; i < 8; i++) {
+			points.add(grid[order[i]]);
+		}
+		
+		Assert.assertArrayEquals(new double[] {0.0, 0.0, 1.0}, points.get(0), 1e-12);
+		Assert.assertArrayEquals(new double[] {1.0, 0.0, 1.0}, points.get(1), 1e-12);
+		Assert.assertArrayEquals(new double[] {1.0, 1.0, 1.0}, points.get(2), 1e-12);
+		Assert.assertArrayEquals(new double[] {0.0, 1.0, 1.0}, points.get(3), 1e-12);
+		
+		Assert.assertArrayEquals(new double[] {0.0, 1.0, 0.0}, points.get(4), 1e-12);
+		Assert.assertArrayEquals(new double[] {0.0, 0.0, 0.0}, points.get(5), 1e-12);
+		Assert.assertArrayEquals(new double[] {1.0, 0.0, 0.0}, points.get(6), 1e-12);
+		Assert.assertArrayEquals(new double[] {1.0, 1.0, 0.0}, points.get(7), 1e-12);
+	}
+	
+	@Test
+	@Ignore
+	public void shouldBeAbleToSortA4x4x4CubeInOctrantULU() {
+		int n = 4 * 4 * 4;
+		double[][] grid = new double[n][];
+		
+		for(int i = 0; i < n; i++) {
+			grid[i] = new double[] {i % 4, (i / 4) % 4, (i / 4 / 4) % 4};
+		}
+		
+		HilbertSort3D sort3 = new HilbertSort3D(0, 1, 2);
+		int[] order = sort3.sort(Arrays.asList(grid));
+		
+		List<double[]> points = new ArrayList<>();
+		for(int i = 0; i < 8; i++) {
+			points.add(grid[order[6 * 8 + i]]);
+		}
+		
+		Assert.assertArrayEquals(new double[] {2.0, 1.0, 2.0}, points.get(0), 1e-12);
+		Assert.assertArrayEquals(new double[] {3.0, 1.0, 2.0}, points.get(1), 1e-12);
+		Assert.assertArrayEquals(new double[] {3.0, 0.0, 2.0}, points.get(2), 1e-12);
+		Assert.assertArrayEquals(new double[] {2.0, 0.0, 2.0}, points.get(3), 1e-12);
+		
+		Assert.assertArrayEquals(new double[] {2.0, 0.0, 3.0}, points.get(4), 1e-12);
+		Assert.assertArrayEquals(new double[] {3.0, 0.0, 3.0}, points.get(5), 1e-12);
+		Assert.assertArrayEquals(new double[] {3.0, 1.0, 3.0}, points.get(6), 1e-12);
+		Assert.assertArrayEquals(new double[] {2.0, 1.0, 3.0}, points.get(7), 1e-12);
+	}
+	
+	protected void assertAllMatch(List<double[]> list, int begin, int length, int[] order,
+			Predicate<double[]> fn) {
+		int count = 0;
+		for(int i = begin; i < begin + length; i++) {
+			int k = order[i];
+			double[] v = list.get(k);
+			
+			Assert.assertTrue(Arrays.toString(v), fn.test(v));
+			count++;
+		}
+		Assert.assertEquals(length, count);
 	}
 		
 	protected long[] generateEnhance() {
@@ -377,12 +435,13 @@ public class HilbertSort3DTest {
 		long enhance = 0;
 		boolean desc = parity % 8 < 4; 
 		for(int i = 0; i < 8; i++) {
+			
 			if(i == 4){
 				desc = !desc;
 			}
 			
-			int oct = (parity >> 3 * i) % 8;
-			int start = (i == 0 || i == 4) ? oct : diags[oct];
+			int oct = (parity >> (3 * i)) % 8;
+			int start = (i == 3 || i == 7) ? diags[oct] : oct;
 			if(desc && start < 4) {
 				start += 4;
 			}
@@ -390,11 +449,13 @@ public class HilbertSort3DTest {
 				start -= 4;
 			}
 			
-			enhance += 2 * start + (((i + 3) / 2) % 2);
-			enhance *= 16;
+			int mod = ((i + 3) / 2) % 2;			
+			long base = 1 << 4 * i;
+			
+			enhance += base * (2 * start + mod);			
 			desc = !desc;
 		}
-		return enhance;
+		return enhance;		
 	}
 	
 	protected int[] generateBasis() {

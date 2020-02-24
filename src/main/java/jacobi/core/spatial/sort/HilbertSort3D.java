@@ -24,6 +24,7 @@
 package jacobi.core.spatial.sort;
 
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.Deque;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -79,6 +80,13 @@ public class HilbertSort3D implements SpatialSort {
 			}
 			
 			int[] counts = this.sort(comps, cat, order);
+			System.out.println("begin=" + cat.begin + ", end = " + cat.end 
+					+ ", depth = " + cat.depth);
+			System.out.println("Groups: " + Arrays.toString(counts));
+			for(int i = cat.begin; i < cat.end; i++) {
+				int k = order[i];
+				System.out.println(Arrays.toString(vectors.get(k)));
+			}
 			int start = cat.begin;
 			
 			long enhance = this.enhanceResolution(cat.parity);
@@ -108,7 +116,6 @@ public class HilbertSort3D implements SpatialSort {
 		
 		int start = octrant.begin;
 		for(int i = 0; i < octs.length; i++){
-			System.out.println((octrant.parity >> 3 * i) % octs.length);
 			IntStack oct = octs[(octrant.parity >> 3 * i) % octs.length];
 			if(oct == null){
 				continue;
@@ -174,11 +181,11 @@ public class HilbertSort3D implements SpatialSort {
 		int startOct = parity % 8;
 		
 		if(parity == BASIS[2*startOct]) {
-			return TRANSIT[2*startOct];
+			return ENHANCE[2*startOct];
 		}
 		
 		if(parity == BASIS[2*startOct + 1]) {
-			return TRANSIT[2*startOct + 1];
+			return ENHANCE[2*startOct + 1];
 		}
 		
 		throw new IllegalArgumentException("Parity " + parity + " is not a basis.");
@@ -197,14 +204,14 @@ public class HilbertSort3D implements SpatialSort {
 		6565167, 372015
 	};
 	
-	protected static final long[] TRANSIT = {
-		39331267312L, 39331291792L, 
-		49024575184L, 49024583344L, 
-		56043356336L, 56043348176L, 
-		65736664208L, 65736639728L, 
-		 6993676912L,  6993701392L, 
-		16686984784L, 16686992944L, 
-		23705765936L, 23705757776L, 
-		33399073808L, 33399049328L
+	protected static final long[] ENHANCE = {
+		4108541513L, 2491637321L, 
+		3502709771L, 2963741707L, 
+		3064035949L, 3603004013L, 
+		2458204207L, 4075108399L, 
+		2087442113L, 470537921L, 
+		1481610371L, 942642307L, 
+		1042936549L, 1581904613L, 
+		437104807L, 2054008999L
 	};
 }
