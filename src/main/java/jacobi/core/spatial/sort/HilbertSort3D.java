@@ -63,15 +63,20 @@ public class HilbertSort3D implements SpatialSort {
 		this.yIdx = yIdx;
 		this.zIdx = zIdx;
 	}
-
+	
 	@Override
 	public int[] sort(List<double[]> vectors) {
-		double[] comps = this.init(vectors);
 		
-		int[] order = IntStream.range(0, vectors.size()).toArray();
-		
+		return this.sort(
+			this.init(vectors), 
+			BASIS[0], 
+			IntStream.range(0, vectors.size()).toArray()
+		);
+	}
+
+	protected int[] sort(double[] comps, int basis, int[] order) {
 		Deque<Category> stack = new ArrayDeque<>();
-		stack.push(new Category(0, vectors.size(), BASIS[0], 0));
+		stack.push(new Category(0, order.length, basis, 0));
 		
 		while(!stack.isEmpty()){
 			Category cat = stack.pop();
@@ -80,16 +85,20 @@ public class HilbertSort3D implements SpatialSort {
 			}
 			
 			int[] counts = this.sort(comps, cat, order);
+			long enhance = this.enhanceResolution(cat.parity);
+			
 			System.out.println("begin=" + cat.begin + ", end = " + cat.end 
-					+ ", depth = " + cat.depth);
+					+ ", depth = " + cat.depth
+					+ ", parity = " + cat.parity
+					+ ", enhance = " + enhance);
 			System.out.println("Groups: " + Arrays.toString(counts));
 			for(int i = cat.begin; i < cat.end; i++) {
 				int k = order[i];
-				System.out.println(Arrays.toString(vectors.get(k)));
+				System.out.println(comps[3*k] + ", " + comps[3*k + 1] + ", " + comps[3*k + 2]);
 			}
-			int start = cat.begin;
 			
-			long enhance = this.enhanceResolution(cat.parity);
+			int start = cat.begin;
+						
 			for(int count : counts){
 				if(count == cat.end - cat.begin){
 					// all are degenerated
@@ -205,13 +214,13 @@ public class HilbertSort3D implements SpatialSort {
 	};
 	
 	protected static final long[] ENHANCE = {
-		4108541513L, 2491637321L, 
-		3502709771L, 2963741707L, 
-		3064035949L, 3603004013L, 
-		2458204207L, 4075108399L, 
-		2087442113L, 470537921L, 
-		1481610371L, 942642307L, 
-		1042936549L, 1581904613L, 
-		437104807L, 2054008999L
+		4068694057L, 2464372777L, 
+		3601275499L, 3066501739L, 
+		2965470221L, 3500243981L, 
+		2498051663L, 4102372943L, 
+		2047594657L, 443273377L, 
+		1580176099L, 1045402339L, 
+		944370821L, 1479144581L, 
+		476952263L, 2081273543L
 	};
 }
