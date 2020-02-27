@@ -1,12 +1,16 @@
 package jacobi.core.spatial.sort;
 
 import java.util.Arrays;
+import java.util.function.IntBinaryOperator;
+import java.util.function.ToIntBiFunction;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import jacobi.core.spatial.sort.HilbertSort3D.BasisType;
 
 /**
  * This class contains code generation for Hilbert Sort 3-D.
@@ -79,6 +83,20 @@ import org.junit.Test;
  *
  */
 public class HilbertCurve3DTest {
+	
+	@Test
+	public void shouldBeAbleToGenerateAllBasisCurve() {
+		Octant[] octants = Octant.all();
+		int[] basis = new int[octants.length * BasisType.values().length];
+		for(Octant start : octants) {
+			int index = start.toInt() * BasisType.values().length;
+			for(BasisType type : BasisType.values()) {
+				basis[index + type.ordinal()] = this.encode(this.basisOf(type, start));
+			}
+		}
+		
+		Assert.assertArrayEquals(HilbertSort3D.BASIS, basis);
+	}
 	
 	@Test
 	public void shouldBeAbleToGenerateStayCurveWithHilbertProperties() {
@@ -192,6 +210,31 @@ public class HilbertCurve3DTest {
 		}
 	}
 	
+	protected long enhance(BasisType type, Octant start) {
+		Octant[] curve = this.basisOf(type, start);
+		return 0L;
+	}
+	
+	protected Octant[] basisOf(BasisType type, Octant start) {
+		switch(type) {
+			case STAY:
+				return this.stayAt(start);
+				
+			case DIAG:
+				return this.diagOf(start);
+				
+			case RIGHT:
+				return this.rightOf(start);
+				
+			case FORWARD:
+				return this.forwardOf(start);
+				
+			default:
+				break;
+		}
+		throw new IllegalArgumentException("Unknown basis type " + type);
+	}
+	
 	protected Octant[] stayAt(Octant start) {
 		Octant[] xy = this.xyCurve(start);
 		Octant[] curve = Arrays.copyOf(xy, 2 * xy.length);
@@ -275,20 +318,7 @@ public class HilbertCurve3DTest {
 		}
 		return octs;
 	}
-	
-	protected String enhance(Octant[] curve) {
-		Octant start = curve[0];
-		Octant finish = curve[curve.length - 1];
 		
-		StringBuilder buf = new StringBuilder();
-		if(start.asc().equals(finish)) {
-			// diag -> stay -> stay -> adj -> adj -> stay -> stay -> diag
-			return buf.toString();
-		}
-		
-		throw new IllegalArgumentException("No basis curve starts at "
-			+ start + " and finishes at " + finish);		
-	}
 	
 	protected static class Octant {
 		
@@ -320,6 +350,10 @@ public class HilbertCurve3DTest {
 		
 		public Octant asc() {
 			return new Octant(this.x, this.y, !this.z);
+		}
+		
+		public Octant across() {
+			return new Octant(!this.x, !this.y, !this.z);
 		}
 		
 		public int delta(Octant oct) {
