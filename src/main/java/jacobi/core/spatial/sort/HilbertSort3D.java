@@ -103,7 +103,7 @@ public class HilbertSort3D implements SpatialSort {
 					));
 				}
 				start += count;
-				enhance >>= 4;
+				enhance /= BASIS.length;
 			}
 		}
 		return order;

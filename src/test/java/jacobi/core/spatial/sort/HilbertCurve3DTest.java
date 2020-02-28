@@ -109,6 +109,11 @@ public class HilbertCurve3DTest {
 			long indices = this.enhance(BasisType.STAY, start);
 			this.assertExitCloseToEntrance(lowRes, indices);
 		}
+		
+		long enhanceStay = this.enhance(BasisType.STAY, octants[0]);
+		
+		System.out.println(enhanceStay);
+		System.out.println(enhanceStay % 32);
 	}
 	
 	@Test
@@ -380,7 +385,7 @@ public class HilbertCurve3DTest {
 					
 		long code = 0L;
 		for(int i = 0; i < resolve.length; i++) {
-			code += idxFn.applyAsLong(init[i], resolve[i]) << base * i;
+			code += idxFn.applyAsLong(init[i], resolve[i]) << (base * i);
 		}
 		return code;
 	}
