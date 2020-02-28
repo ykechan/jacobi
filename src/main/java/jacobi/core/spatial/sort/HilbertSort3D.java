@@ -87,16 +87,6 @@ public class HilbertSort3D implements SpatialSort {
 			int[] counts = this.sort(comps, cat, order);
 			long enhance = this.enhanceResolution(cat.parity);
 			
-			System.out.println("begin=" + cat.begin + ", end = " + cat.end 
-					+ ", depth = " + cat.depth
-					+ ", parity = " + cat.parity
-					+ ", enhance = " + enhance);
-			System.out.println("Groups: " + Arrays.toString(counts));
-			for(int i = cat.begin; i < cat.end; i++) {
-				int k = order[i];
-				System.out.println(comps[3*k] + ", " + comps[3*k + 1] + ", " + comps[3*k + 2]);
-			}
-			
 			int start = cat.begin;
 						
 			for(int count : counts){
@@ -147,8 +137,8 @@ public class HilbertSort3D implements SpatialSort {
 		
 		for(int i = begin; i < end; i++){
 			int k = order[i];
-			int parity = (comps[3*k]     < u[0] ? 0 : 2)
-					   + (comps[3*k + 1] < u[1] ? 0 : 1)
+			int parity = (comps[3*k]     < u[0] ? 0 : 1)
+					   + (comps[3*k + 1] < u[1] ? 0 : 2)
 					   + (comps[3*k + 2] < u[2] ? 0 : 4);
 			
 			if(groups[parity] == null) {
@@ -177,7 +167,7 @@ public class HilbertSort3D implements SpatialSort {
 			int k = 3 * order[i];
 			ans[0] += comps[k++];
 			ans[1] += comps[k++];
-			ans[2] += comps[k++];
+			ans[2] += comps[k];
 		}
 		
 		for(int i = 0; i < ans.length; i++) {
@@ -187,14 +177,12 @@ public class HilbertSort3D implements SpatialSort {
 	}
 	
 	protected long enhanceResolution(int parity) {
-		int startOct = parity % 8;
+		int index = BasisType.values().length * (parity % 8);
 		
-		if(parity == BASIS[2*startOct]) {
-			return ENHANCE[2*startOct];
-		}
-		
-		if(parity == BASIS[2*startOct + 1]) {
-			return ENHANCE[2*startOct + 1];
+		for(BasisType type : BasisType.values()) {
+			if(parity == BASIS[index + type.ordinal()]) {
+				return ENHANCE[index + type.ordinal()];
+			}
 		}
 		
 		throw new IllegalArgumentException("Parity " + parity + " is not a basis.");
@@ -214,20 +202,19 @@ public class HilbertSort3D implements SpatialSort {
 	};
 	
 	protected static final long[] ENHANCE = {
-		4068694057L, 2464372777L, 
-		3601275499L, 3066501739L, 
-		2965470221L, 3500243981L, 
-		2498051663L, 4102372943L, 
-		2047594657L, 443273377L, 
-		1580176099L, 1045402339L, 
-		944370821L, 1479144581L, 
-		476952263L, 2081273543L
+		472462885633L , 60548678401L  , 882708449985L , 750667566945L , 
+		326563205637L , 189258469893L , 1015990721093L, 617653477349L , 
+		202138788745L , 339443524489L , 616680270793L , 1017232109161L, 
+		56241271437L  , 468155478669L , 749962541901L , 884218019565L , 
+		1005591970065L, 593677762833L , 316293400785L , 184252517745L , 
+		859692290069L , 722387554325L , 449575671893L , 51238428149L  , 
+		735267873177L , 872572608921L , 50265221593L  , 450817059961L , 
+		589370355869L , 1001284563101L, 183547492701L , 317802970365L
 	};
 	
 	protected enum BasisType {
 		
 		STAY, DIAG, RIGHT, FORWARD
-		
 	}
 	
 }

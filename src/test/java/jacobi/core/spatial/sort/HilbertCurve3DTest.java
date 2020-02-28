@@ -3,6 +3,8 @@ package jacobi.core.spatial.sort;
 import java.util.Arrays;
 import java.util.function.IntBinaryOperator;
 import java.util.function.ToIntBiFunction;
+import java.util.function.ToLongBiFunction;
+import java.util.function.ToLongFunction;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -83,6 +85,51 @@ import jacobi.core.spatial.sort.HilbertSort3D.BasisType;
  *
  */
 public class HilbertCurve3DTest {
+	
+	@Test
+	public void shouldBeAbleToEnhanceAllBasisCurves() {
+		Octant[] octants = Octant.all();
+		long[] enhances = new long[octants.length * BasisType.values().length];
+				
+		for(Octant start : octants) {
+			int index = BasisType.values().length * start.toInt();
+			for(BasisType type : BasisType.values()) {
+				enhances[index + type.ordinal()] = this.enhance(type, start);
+			}
+		}
+		
+		Assert.assertArrayEquals(enhances, HilbertSort3D.ENHANCE);
+	}
+	
+	@Test
+	public void shouldBeAbleToEnhanceAllStayCurves() {
+		Octant[] octants = Octant.all();
+		for(Octant start : octants) {
+			Octant[] lowRes = this.basisOf(BasisType.STAY, start);
+			long indices = this.enhance(BasisType.STAY, start);
+			this.assertExitCloseToEntrance(lowRes, indices);
+		}
+	}
+	
+	@Test
+	public void shouldBeAbleToEnhanceAllDiagCurves() {
+		Octant[] octants = Octant.all();
+		for(Octant start : octants) {
+			Octant[] lowRes = this.basisOf(BasisType.DIAG, start);
+			long indices = this.enhance(BasisType.DIAG, start);
+			this.assertExitCloseToEntrance(lowRes, indices);
+		}
+	}
+	
+	@Test
+	public void shouldBeAbleToEnhanceAllRightCurves() {
+		Octant[] octants = Octant.all();
+		for(Octant start : octants) {
+			Octant[] lowRes = this.basisOf(BasisType.RIGHT, start);
+			long indices = this.enhance(BasisType.RIGHT, start);
+			this.assertExitCloseToEntrance(lowRes, indices);
+		}
+	}
 	
 	@Test
 	public void shouldBeAbleToGenerateAllBasisCurve() {
@@ -183,6 +230,62 @@ public class HilbertCurve3DTest {
 		}
 	}
 	
+	protected void assertExitCloseToEntrance(Octant[] lowRes, long resolve) {
+		Octant[] octants = Octant.all();
+		
+		int count = 0;
+		for(int i = 1; i < lowRes.length; i++) {
+			int before = (int) ((resolve >> (i - 1) * 5) % 32);
+			Octant exit = octants[before / BasisType.values().length];
+			BasisType type = Arrays.stream(BasisType.values())
+				.filter(b -> b.ordinal() == before % BasisType.values().length)
+				.findAny()
+				.orElseThrow(() -> new IllegalArgumentException("Basis Type not found for " + before));
+			
+			switch(type) {
+				case DIAG:
+					exit = exit.across();
+					break;
+				case FORWARD:
+					exit = exit.forward();
+					break;
+				case RIGHT:
+					exit = exit.right();
+					break;
+				case STAY:
+					exit = exit.asc();
+					break;
+				default:
+					throw new UnsupportedOperationException("Unknown basis " + type);			
+			}
+			
+			int exitX = (lowRes[i - 1].x ? 2 : 0) + (exit.x ? 1 : 0);
+			int exitY = (lowRes[i - 1].y ? 2 : 0) + (exit.y ? 1 : 0);
+			int exitZ = (lowRes[i - 1].z ? 2 : 0) + (exit.z ? 1 : 0);
+			
+			Octant enter = octants[(int) ((resolve >> i * 5) % 32) 
+			                       / BasisType.values().length];
+			
+			int enterX = (lowRes[i].x ? 2 : 0) + (enter.x ? 1 : 0);
+			int enterY = (lowRes[i].y ? 2 : 0) + (enter.y ? 1 : 0);
+			int enterZ = (lowRes[i].z ? 2 : 0) + (enter.z ? 1 : 0);
+			
+			System.out.println("[" + exitX +"," + exitY + "," + exitZ +"] -> "
+					+ "[" + enterX + "," + enterY + "," + enterZ + " ]");
+			
+			Assert.assertEquals("[" + exitX +"," + exitY + "," + exitZ +"] -> "
+				+ "[" + enterX + "," + enterY + "," + enterZ + " ]",
+				1, 
+				Math.abs(enterX - exitX)
+			  + Math.abs(enterY - exitY)
+			  + Math.abs(enterZ - exitZ)
+			);
+			count++;
+		}
+		
+		Assert.assertEquals(7, count);
+	}
+	
 	protected void assertTranscendence(Octant[] curve) {
 		int n = curve.length / 2;
 		for(int i = 0; i < n; i++) {
@@ -211,8 +314,75 @@ public class HilbertCurve3DTest {
 	}
 	
 	protected long enhance(BasisType type, Octant start) {
+		
 		Octant[] curve = this.basisOf(type, start);
-		return 0L;
+		Octant[] init = new Octant[curve.length];
+		init[0] = curve[0];
+		for(int i = 1; i < init.length; i++) {
+			init[i] = curve[i].forward().right();
+		}
+		
+		if(type == BasisType.STAY || type == BasisType.DIAG){
+			init[4] = curve[3].x == curve[3].y 
+					? init[3].right()
+					: init[3].forward();
+		}
+		
+		if(type == BasisType.RIGHT || type == BasisType.FORWARD){
+			init[2] = type == BasisType.RIGHT ? init[2].right() : init[2].forward();
+			init[6] = type == BasisType.RIGHT ? init[6].right() : init[6].forward();
+		}
+			
+		int base = 5;
+		BasisType[] resolve = {};
+			
+		if(type == BasisType.STAY || type == BasisType.DIAG){
+			resolve = new BasisType[]{
+				BasisType.DIAG, BasisType.STAY, BasisType.STAY, 
+				curve[3].x == curve[3].y ? BasisType.RIGHT : BasisType.FORWARD,
+				curve[3].x == curve[3].y ? BasisType.RIGHT : BasisType.FORWARD, 
+				BasisType.STAY, BasisType.STAY, BasisType.DIAG
+			};	
+			
+		}
+		
+		if(type == BasisType.RIGHT || type == BasisType.FORWARD){
+			resolve = new BasisType[] {
+				BasisType.DIAG, type, type,
+				BasisType.STAY, BasisType.STAY,
+				type, type, BasisType.DIAG
+			};			
+		}
+		
+		if(resolve.length != init.length) {
+			throw new UnsupportedOperationException("Unknown basis " + type);
+		}
+		
+		boolean upper = init[0].z;
+		for(int i = 0; i < resolve.length; i++) {
+			BasisType octtype = resolve[i];	
+			if(i > 0 && curve[i].z != curve[i - 1].z) {
+				upper = curve[i - 1].z;
+			}
+			
+			if(upper != init[i].z){
+				init[i] = init[i].asc();
+			}
+			
+			if(octtype == BasisType.STAY || octtype == BasisType.DIAG) {
+				upper = !upper;
+			}
+			
+		}
+		
+		ToLongBiFunction<Octant, BasisType> idxFn = (oct, t) -> 
+			BasisType.values().length * oct.toInt() + t.ordinal();
+					
+		long code = 0L;
+		for(int i = 0; i < resolve.length; i++) {
+			code += idxFn.applyAsLong(init[i], resolve[i]) << base * i;
+		}
+		return code;
 	}
 	
 	protected Octant[] basisOf(BasisType type, Octant start) {
