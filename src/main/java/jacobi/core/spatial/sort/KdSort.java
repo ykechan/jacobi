@@ -23,10 +23,12 @@
  */
 package jacobi.core.spatial.sort;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
-
-import jacobi.core.util.IntStack;
+import java.util.stream.IntStream;
 
 /**
  * Implementation of spatial sorting in the order of a kd-tree.
@@ -34,8 +36,7 @@ import jacobi.core.util.IntStack;
  * <p>Fractal sort utilize all of the dimensions which in turn generates good result,
  * but it does not scale well with the number of dimensions (especially Hilbert sort).
  * Only sorting in a few dimensions may miss out a lot of information from the missing
- * dimensions. Dimension reduction techniques like PCA work but this library would leave
- * that choice to the data analyst.</p>
+ * dimensions. </p>
  * 
  * <p>K-d sort is provided for sorting data in high dimension. As in a kd-tree, the spatial 
  * data are divided in half by a single dimension, then in turn sorting the two halves
@@ -50,94 +51,70 @@ public class KdSort implements SpatialSort {
 	public int[] sort(List<double[]> vectors) {
 		// ...
 		return null;
-	}	
-	
-	protected int[] groupBy(List<double[]> vectors, Buffer buffer, int... orderBy) {
-		if(orderBy.length > 4) {
-			throw new UnsupportedOperationException("Number of dimensions too large in single batch.");
-		}
-		
-		double[] mean = this.meanOf(vectors, buffer, orderBy);
-		IntStack[] groups = new IntStack[1 << orderBy.length];
-		
-		int begin = buffer.begin;
-		int end = buffer.end;
-		
-		for(int i = begin; i < end; i++) {
-			int k = buffer.array[i];
-			double[] v = vectors.get(k);
-			
-			int hash = 0;
-			for(int j = 0; j < mean.length; j++){
-				hash += v[orderBy[j]] < mean[j] ? 0 : 1;
-				hash *= 2;
-			}
-			
-			if(groups[hash] == null) {
-				groups[hash] = new IntStack(4);
-			}
-			
-			groups[hash].push(k);
-		}
-		
-		return this.merge(groups, buffer);
 	}
 	
-	protected double[] meanOf(List<double[]> vectors, Buffer buffer, int... orderBy) {
-		double[] mean = new double[orderBy.length];
+	protected int[] targetDims(List<double[]> vectors, double[] mean) {
+		double[] var = this.varFn.apply(vectors, mean);
+		double totalVar = 0.0;
 		
-		int begin = buffer.begin;
-		int end = buffer.end;
-		
-		for(int i = begin; i < end; i++){
-			double[] v = vectors.get(buffer.array[i]);
-			for(int j = 0; j < mean.length; j++) {
-				mean[j] += v[orderBy[j]];
-			}
-		}
-		
-		for(int j = 0; j < mean.length; j++) {
-			mean[j] /= end - begin;
-		}
-		return mean;
-	}
-	
-	protected int[] merge(IntStack[] groups, Buffer buffer) {
-		int[] nums = new int[groups.length];
-		int start = buffer.begin;
-		for(int i = 0; i < groups.length; i++){
-			if(start + groups[i].size() > buffer.end) {
-				throw new IllegalArgumentException(
-					"Number of items out of bounds [" + buffer.begin + "," + buffer.end + "),"
-				);
+		int max0 = -1, max1 = -1, max2 = -1;
+		for(int i = 0; i < var.length; i++) {
+			totalVar += var[i];
+			
+			if(max0 < 0 || var[max0] < var[i]){
+				max2 = max1; max1 = max0; max0 = i;
+				continue;
 			}
 			
-			groups[i].toArray(buffer.array, start);
-			nums[i] = groups[i].size();
-			start += groups[i].size();
+			if(max1 < 0 || var[max1] < var[i]){
+				max2 = max1; max1 = i;
+				continue;
+			}
+			
+			if(max2 < 0 || var[max2] < var[i]){
+				max2 = i;
+			}						
 		}
-				
-		return nums;
-	}	
+		
+		if(var[max0] + var[max1] + var[max2] > this.rSquare * totalVar){
+			return var[max2] > this.rSquare * var[max1]
+				? new int[] {max0, max1}
+				: new int[] {max0, max1, max2} ;
+		}
+		
+		return new int[] {};
+	}
 	
-	protected List<int[]> histo() {
+	protected int[] targetDims(double[] mean, double[] var) {
+		
 		return null;
 	}
 	
-	private Function<int[], SpatialSort> sortFactory;
-	private Function<List<double[]>, double[]> meanFn, stdDevFn;
+	protected double[] histoDiv(List<double[]> vectors, 
+			double[] mean, double[] var, 
+			int numBins) {
 		
-	protected static class Buffer {
-		
-		public final int[] array;
-		
-		public final int begin, end;
-
-		public Buffer(int[] array, int begin, int end) {
-			this.array = array;
-			this.begin = begin;
-			this.end = end;
-		}
-		
+		return null;
 	}
+	
+	protected List<int[]> histo(List<double[]> vectors, 
+			double[] mean, double[] var, 
+			int numBins) {
+		
+		int[][] bins = new int[numBins][mean.length];
+		for(double[] vector : vectors) {
+			
+			for(int i = 0; i < mean.length; i++) {
+				double z = (vector[i] - mean[i]) / var[i];
+				int bin = (int) Math.floor(z + 0.5) + (numBins / 2);
+				bins[bin < 0 ? 0 : bin > bins.length - 1 ? bins.length - 1 : bin][i]++;
+			}
+		}
+		return Arrays.asList(bins);
+	}
+	
+	private Function<List<double[]>, double[]> meanFn;
+	private BiFunction<List<double[]>, double[], double[]> varFn;	
+	private Function<int[], SpatialSort> lowDim;
+	private double rSquare;
 }
