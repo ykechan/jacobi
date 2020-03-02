@@ -23,12 +23,15 @@
  */
 package jacobi.core.spatial.sort;
 
+import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.IntStream;
+
+import jacobi.core.util.IntStack;
 
 /**
  * Implementation of spatial sorting in the order of a kd-tree.
@@ -49,11 +52,37 @@ public class KdSort implements SpatialSort {
 
 	@Override
 	public int[] sort(List<double[]> vectors) {
-		// ...
-		return null;
+		int[] order = IntStream.range(0, vectors.size()).toArray();
+		return order;
 	}
 	
-	protected int[] targetDims(List<double[]> vectors, double[] mean) {
+	protected List<IntStack> groupBy(VectorList vectorList, int[] dims, double[] mean) {
+		if(dims.length > DEFAULT_MAX_DIM) {
+			throw new UnsupportedOperationException("Number of dimensions "
+				+ dims.length + " in a batch is too large.");
+		}
+		
+		IntStack[] groups = new IntStack[1 << dims.length];
+		for(int i = vectorList.begin; i < vectorList.end; i++) {
+			int k = vectorList.order[i];
+			double[] vector = vectorList.vectors.get(k);
+			int parity = 0;
+			for(int j = 0; j < dims.length; j++) {
+				int dim = dims[j];
+				parity += vector[dim] < mean[dim] ? 0 : 1;
+				parity *= 2;
+			}
+			
+			if(groups[parity] == null){
+				groups[parity] = new IntStack(4);
+			}
+			
+			groups[parity].push(k);
+		}
+		return Arrays.asList(groups);
+	}
+	
+	protected int[] chooseDims(List<double[]> vectors, double[] mean) {
 		double[] var = this.varFn.apply(vectors, mean);
 		double totalVar = 0.0;
 		
@@ -77,44 +106,54 @@ public class KdSort implements SpatialSort {
 		}
 		
 		if(var[max0] + var[max1] + var[max2] > this.rSquare * totalVar){
-			return var[max2] > this.rSquare * var[max1]
-				? new int[] {max0, max1}
-				: new int[] {max0, max1, max2} ;
+			return new int[] {max0, max1, max2} ;
 		}
 		
 		return new int[] {};
 	}
 	
-	protected int[] targetDims(double[] mean, double[] var) {
+	protected int[] chooseDims(double[] mean, double[] var) {
 		
 		return null;
-	}
-	
-	protected double[] histoDiv(List<double[]> vectors, 
-			double[] mean, double[] var, 
-			int numBins) {
-		
-		return null;
-	}
-	
-	protected List<int[]> histo(List<double[]> vectors, 
-			double[] mean, double[] var, 
-			int numBins) {
-		
-		int[][] bins = new int[numBins][mean.length];
-		for(double[] vector : vectors) {
-			
-			for(int i = 0; i < mean.length; i++) {
-				double z = (vector[i] - mean[i]) / var[i];
-				int bin = (int) Math.floor(z + 0.5) + (numBins / 2);
-				bins[bin < 0 ? 0 : bin > bins.length - 1 ? bins.length - 1 : bin][i]++;
-			}
-		}
-		return Arrays.asList(bins);
 	}
 	
 	private Function<List<double[]>, double[]> meanFn;
 	private BiFunction<List<double[]>, double[], double[]> varFn;	
 	private Function<int[], SpatialSort> lowDim;
 	private double rSquare;
+	
+	protected static class VectorList {
+		
+		public final List<double[]> vectors;
+		
+		public final int begin, end;
+		
+		public final int[] order;
+
+		public VectorList(List<double[]> vectors, int begin, int end, int[] order) {
+			this.vectors = vectors;
+			this.begin = begin;
+			this.end = end;
+			this.order = order;
+		}
+		
+		public List<double[]> toList() {
+			return new AbstractList<double[]>() {
+
+				@Override
+				public double[] get(int index) {
+					return vectors.get(order[index + begin]);
+				}
+
+				@Override
+				public int size() {
+					return end - begin;
+				}
+				
+			};
+		}		
+	}
+	
+	protected static final int DEFAULT_MAX_DIM = 8;
+	
 }
