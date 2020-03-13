@@ -55,7 +55,7 @@ public enum RDefaultDistances {
 			for(int i = 0; i < qp.length; i++){
 				double dx = Math.max(target.min(i) - qp[i], qp[i] - target.max(i));
 				if(dx > 0.0) {
-					dist -= dx * dx;
+					dist += dx * dx;
 				}
 			}
 			

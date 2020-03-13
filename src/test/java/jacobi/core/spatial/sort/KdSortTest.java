@@ -11,7 +11,7 @@ import org.junit.runner.RunWith;
 
 import jacobi.api.Matrix;
 import jacobi.core.impl.ImmutableMatrix;
-import jacobi.core.spatial.sort.KdSort.Division;
+import jacobi.core.spatial.sort.KdSort.Div;
 import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
@@ -37,31 +37,41 @@ public class KdSortTest {
 	public Matrix stats;
 	
 	@Test
-	@JacobiImport("test 30x10")
+	@JacobiImport("Rand Cont' 30x10")
 	public void shouldBeAbleToSelectDimensionsInLargeVariance() {
-		int[] dims = new KdSort(v -> this.stats.getRow(0), (v, m) -> this.stats.getRow(1))
-				.selectDims(this.toList(this.input), this.stats.getRow(0), 8);
-		
-		//System.out.println(Arrays.toString(dims));
+		int[] dims = new KdSort(d -> null, m -> this.stats, 1.0)
+				.selectDims(this.stats.getRow(1), 8);
 		Assert.assertArrayEquals(new int[] {7, 4, 5, 6, 3, 2, 1, 0}, dims);
 	}
 	
 	@Test
-	@JacobiImport("test 30x10")
+	@JacobiImport("Rand Cont' 30x10")
 	@JacobiEquals(expected = 1, actual = 1)
-	public void shouldBeAbleToDivideADivision() {
+	public void shouldBeAbleToSortADiv() {
+		List<double[]> vectors = this.toList(this.input);
+		
 		int[] seq = IntStream.range(0, this.input.getRowCount()).toArray();
+		new KdSort(d -> null, m -> this.stats, 1.0)
+			.sortDiv(vectors, new Div(seq, 0, seq.length));
 		
-		new KdSort(v -> this.stats.getRow(0), (v, m) -> this.stats.getRow(1)) {
-
-			@Override
-			protected int[] selectDims(List<double[]> vectors, double[] mean, int maxDim) {
-				return new int[] {7, 4, 5, 6, 3, 2, 1, 0};
-			}
-			
-		}.divide(this.toList(this.input), new Division(seq, 0, seq.length));
+		this.output = this.toMatrix(vectors, seq);
+	}
+	
+	@Test
+	@JacobiImport("Rand Dist & Cont' 40x8")
+	public void shouldBeAbleToDivideContAndDistData() {
+	}
+	
+	@Test
+	@JacobiImport("Rand Corr. Data 40x8")
+	public void shouldBeAbleToDivideCorrelatedData() {
+		List<double[]> vectors = this.toList(this.input);
 		
-		this.output = this.toMatrix(this.toList(this.input), seq);
+		int[] seq = IntStream.range(0, this.input.getRowCount()).toArray();
+		new KdSort(d -> null, m -> this.stats, 1.0)
+			.sortDiv(vectors, new Div(seq, 0, seq.length));
+		
+		this.output = this.toMatrix(vectors, seq);
 	}
 	
 	protected List<double[]> toList(Matrix matrix) {

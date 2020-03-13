@@ -53,37 +53,7 @@ public class Weighted<T> implements Comparable<Weighted<T>> {
      */
     public static <T> Comparator<Weighted<T>> desc() {
         return (a, b) -> -a.compareTo(b);
-    }
-    
-    /**
-     * Select the top k elements givens its weights. A weight of zero means this element is un-fit to be selected.
-     * A negative weight indicates this element contains an error and will be returned isolated.
-     * @param weights  Weights of the elements
-     * @param k  Number of elements wanted
-     * @return  Indices of the elements in descending order
-     */
-    public static int[] select(double[] weights, int k) {
-        PriorityQueue<Weighted<Integer>> heap = new PriorityQueue<>(k + 1);
-        for(int i = 0; i < weights.length; i++){            
-            if(weights[i] == 0.0){
-                continue;
-            }
-            if(weights[i] < 0.0){
-                return new int[]{i};
-            }
-            if(heap.size() < k || heap.peek().weight < weights[i]){
-                heap.offer(new Weighted<>(i, weights[i]));
-            } 
-            while(heap.size() > k){
-                heap.poll();
-            }
-        }
-        int[] array = new int[heap.size()];
-        for(int i = array.length - 1; i >= 0; i--){
-            array[i] = heap.poll().item;
-        }
-        return array;
-    }
+    }    
     
     /**
      * Item contained.

@@ -110,6 +110,11 @@ public class Aabb {
 		
 		return new Aabb(newMin, newMax);
 	}
+	
+	@Override
+	public String toString() {
+		return Arrays.toString(this.minBd) + "x" + Arrays.toString(this.maxBd);
+	}
 
 	private double[] minBd, maxBd;
 }

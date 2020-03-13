@@ -88,7 +88,7 @@ public class RTreeFactoryTest {
 		}
 		
 		int k = 0;
-		for(RObject<?> n : node.nodes()) {
+		for(RObject<?> n : node.nodeList()) {
 			this.render(svg, n, depth + 1, k++, target);
 		}
 		return svg;
@@ -119,7 +119,7 @@ public class RTreeFactoryTest {
 			}
 		}
 		
-		if(node.nodes().isEmpty()){
+		if(node.nodeList().isEmpty()){
 			double[] vector = this.input.getRow(node.get()
 				.orElseThrow(() -> new IllegalStateException("Leaf " + node + " has no payload.")));
 			
@@ -136,8 +136,8 @@ public class RTreeFactoryTest {
 			
 		RObject<Integer> prev = null;
 		int depth = 0;
-		for(RObject<Integer> n : node.nodes()) {
-			Assert.assertTrue(prev == null || prev.nodes().isEmpty() == n.nodes().isEmpty());
+		for(RObject<Integer> n : node.nodeList()) {
+			Assert.assertTrue(prev == null || prev.nodeList().isEmpty() == n.nodeList().isEmpty());
 			depth = Math.max(this.verify(node, n), depth);
 			prev = n;
 		}

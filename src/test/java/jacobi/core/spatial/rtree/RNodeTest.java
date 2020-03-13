@@ -29,11 +29,11 @@ public class RNodeTest {
 		Assert.assertEquals( 8.0, node.minBoundBox().max(0), 1e-12);
 		Assert.assertEquals( 7.0, node.minBoundBox().max(1), 1e-12);
 		
-		Assert.assertEquals(4, node.nodes().size());
-		Assert.assertEquals("Lower, Lower", node.nodes().get(0).get().get());
-		Assert.assertEquals("Lower, Upper", node.nodes().get(1).get().get());
-		Assert.assertEquals("Upper, Lower", node.nodes().get(2).get().get());
-		Assert.assertEquals("Upper, Upper", node.nodes().get(3).get().get());
+		Assert.assertEquals(4, node.nodeList().size());
+		Assert.assertEquals("Lower, Lower", node.nodeList().get(0).get().get());
+		Assert.assertEquals("Lower, Upper", node.nodeList().get(1).get().get());
+		Assert.assertEquals("Upper, Lower", node.nodeList().get(2).get().get());
+		Assert.assertEquals("Upper, Upper", node.nodeList().get(3).get().get());
 	}
 	
 	@Test
@@ -125,7 +125,7 @@ public class RNodeTest {
 			node.minBoundBox().max(1) - node.minBoundBox().min(1),
 			Color.GRAY);
 		
-		for(RObject<?> child : node.nodes()) {
+		for(RObject<?> child : node.nodeList()) {
 			this.render(child, depth + 1, svg);
 		}
 		return svg;
@@ -146,7 +146,7 @@ public class RNodeTest {
 			}
 
 			@Override
-			public List<RObject<T>> nodes() {
+			public List<RObject<T>> nodeList() {
 				return Collections.emptyList();
 			}
 			

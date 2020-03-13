@@ -37,8 +37,6 @@ import java.util.stream.IntStream;
  * <p>This implementation is a heap structure specifically designed to store 
  * weighted integers. The integer are naturally compared by their weights.</p>
  * 
- * <p>In the common use case entries often flows and ebbs.</p>
- * 
  * @author Y.K. Chan
  *
  */
@@ -53,7 +51,6 @@ public class MinHeap implements Enque<Weighted<Integer>> {
 		this.length = 0;
 		this.expand = expand;
 		this.array = new double[2 * initCap];
-		this.lag = Lag.NONE;
 	}
 
 	@Override
@@ -73,6 +70,17 @@ public class MinHeap implements Enque<Weighted<Integer>> {
 	 * @return  This
 	 */
 	public Enque<Weighted<Integer>> push(int item, double weight) {		
+		if(this.expand < 1 && this.array.length == 2 * this.length){
+			if(weight < this.min()){
+				return this;
+			}
+			
+			this.array[0] = weight;
+			this.array[1] = Double.longBitsToDouble((long) item);
+			
+			this.heapifyDown(this.array, 0);
+			return this;
+		}
 		
 		this.array = this.ensureCapacity(this.array, this.length + 1);
 		
@@ -98,27 +106,20 @@ public class MinHeap implements Enque<Weighted<Integer>> {
 		if(this.isEmpty()) {
 			throw new NoSuchElementException();
 		}
-		switch(this.lag) {
-			case NONE:
-				return this.get(this.array, 0);
-				
-			case TOP:
-				return this.get(this.array, this.array[2 * 1] < this.array[2 * 2] ? 1 : 2);
-				
-			case LEFT:
-				return this.get(this.array, 2);
-							
-			case RIGHT:
-				return this.get(this.array, 1);
-				
-			case ALL:
-				break;
-				
-			default:
-				throw new IllegalStateException("Unknown lagging state " + this.lag);
-		}		
 		
 		return this.get(this.array, 0);
+	}
+	
+	/**
+	 * Find the minimum weight in this heap
+	 * @return  The minimum weight
+	 */
+	public double min() {
+		if(this.isEmpty()){
+			throw new NoSuchElementException();
+		}
+		
+		return this.array[0];
 	}
 
 	@Override
@@ -127,7 +128,7 @@ public class MinHeap implements Enque<Weighted<Integer>> {
 		return IntStream.range(0, this.length)
 				.mapToObj(i -> this.get(this.array, i))
 				.toArray(factory);
-	}
+	}	
 
 	/**
 	 * Get an entry from &lt;weight, item&gt; pair array 
@@ -140,10 +141,6 @@ public class MinHeap implements Enque<Weighted<Integer>> {
 			(int) Double.doubleToRawLongBits(this.array[2 * index + 1]), 
 			this.array[2 * index]
 		);
-	}
-	
-	protected int minIndex(double[] array, int length, Lag lag) {
-		return 0;
 	}
 	
 	/**
@@ -231,13 +228,8 @@ public class MinHeap implements Enque<Weighted<Integer>> {
 			: array;
 	}
 	
-	private Lag lag;
 	private int length, expand;
 	private double[] array;
-	
-	protected enum Lag {
-		NONE, TOP, LEFT, RIGHT, ALL
-	}
 	
 	/**
 	 * Default increment of expand size

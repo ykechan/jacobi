@@ -41,30 +41,69 @@ import jacobi.core.spatial.sort.SpatialSort;
 public class RTreeFactory {
 	
 	/**
+	 * Factory method for default implementation
+	 * @param degInt  Minimum number of child in internal nodes
+	 * @param degLeaf  Minimum number of items in leaf nodes
+	 * @return  Instance of RTreeFactory
+	 */
+	public static RTreeFactory of(int degInt, int degLeaf) {
+		return new RTreeFactory(RSort.getInstance(), 
+			new RAdaptivePacker(() -> 1.0), 
+			degInt, degLeaf
+		);
+	}
+	
+	/**
 	 * Constructor.
 	 * @param sorter  Implementation of spatial sort
 	 * @param packer  Implementation of packing spatial objects
 	 * @param degree  Minimum number of children an internal node can have
 	 * @param degLeaf  Minimum number of spatial objects a leaf node can have
 	 */
-	public RTreeFactory(SpatialSort sorter, RPacker packer, int degree, int degLeaf) {
+	protected RTreeFactory(SpatialSort sorter, RPacker packer, int degree, int degLeaf) {
 		this.sorter = sorter;
 		this.packer = packer;
 		this.degree = degree;
 		this.degLeaf = degLeaf;
 	}
+	
+	/**
+	 * Create a RTree from input spatial data
+	 * @param input  Input spatial data
+	 * @param bDist  Distance function between an Aabb to a point
+	 * @param pDist  Distance function between two points
+	 * @return  R-Tree
+	 */
+	public RTree<Integer> create(Matrix input, 
+			RDistance<Aabb> bDist, 
+			RDistance<double[]> pDist) {
+		
+		return new RTree<>(this.createNode(input), bDist, pDist);
+	}
 
+	/**
+	 * Create RNode from input spatial data
+	 * @param data  Input spatial data
+	 * @return  RNode with row indices as indexed items
+	 */
 	protected RNode<Integer> createNode(Matrix data) {
 		List<double[]> list = this.toList(data);
 		int[] order = this.sorter.sort(list);
 		
 		List<RNode<Integer>> nodes = this.bottom(list, order, this.degLeaf, 2 * this.degLeaf);
 		while(nodes.size() > 1){
-			nodes = this.collapse(nodes, this.degree, 1 + this.degree);
+			nodes = this.collapse(nodes, this.degree, 2 * this.degree);
 		}
 		return nodes.get(0);
 	}
 	
+	/**
+	 * Pack internal nodes into list of internal nodes
+	 * @param nodes  List of internal nodes
+	 * @param minItems  Minimum number of spatial objects a node can have
+	 * @param maxItems  Maximum number of spatial objects a node can have
+	 * @return
+	 */
 	protected List<RNode<Integer>> collapse(List<RNode<Integer>> nodes, int minItems, int maxItems) {
 		int[] groups = this.packer.pack(nodes, minItems, maxItems);
 		
@@ -126,7 +165,7 @@ public class RTreeFactory {
 					}
 
 					@Override
-					public List<RObject<Boolean>> nodes() {
+					public List<RObject<Boolean>> nodeList() {
 						return Collections.emptyList();
 					}
 					

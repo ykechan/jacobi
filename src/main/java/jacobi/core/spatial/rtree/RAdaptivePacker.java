@@ -34,6 +34,10 @@ import java.util.function.DoubleSupplier;
  */
 public class RAdaptivePacker implements RPacker {
 	
+	/**
+	 * Constructor
+	 * @param rand  Random function
+	 */
 	public RAdaptivePacker(DoubleSupplier rand) {
 		this.rand = rand;
 	}
@@ -65,6 +69,12 @@ public class RAdaptivePacker implements RPacker {
 		return rObjs.size();
 	}
 	
+	/**
+	 * Update the minimum bounding box to include a new aabb.
+	 * @param mbb  Input mbb to be updated
+	 * @param aabb  Aabb to be included
+	 * @return  Measure in [0, 1) of volume increase
+	 */
 	protected double updateMbb(Mbb mbb, Aabb aabb) {
 		if(mbb.length() != aabb.dim()) {
 			throw new IllegalArgumentException("Dimension mismatch");
@@ -103,15 +113,33 @@ public class RAdaptivePacker implements RPacker {
 	
 	private DoubleSupplier rand;
 	
+	/**
+	 * Data object for minimum bounding box.
+	 * 
+	 * @author Y.K. Chan
+	 *
+	 */
 	protected static class Mbb {
 		
+		/**
+		 * Minimum and maximum bounds
+		 */
 		public final double[] min, max;
 
+		/**
+		 * Constructor
+		 * @param min  Minimum bounds
+		 * @param max  Maximum bounds
+		 */
 		public Mbb(double[] min, double[] max) {
 			this.min = min;
 			this.max = max;
 		}
 		
+		/**
+		 * Get the number of dimensions of bound
+		 * @return  Number of dimensions of bound
+		 */
 		public int length() {
 			return this.min.length;
 		}

@@ -24,6 +24,7 @@
 package jacobi.core.util;
 
 import java.util.Deque;
+import java.util.Queue;
 import java.util.function.IntFunction;
 
 /**
@@ -38,13 +39,55 @@ import java.util.function.IntFunction;
  * which pair of methods was used. Queue interface extends Collections which makes it
  * way more verbose then necessary to instantiate.</p>
  * 
- * <p>This interface attempts to provide a bare minimum skeleton for a LIFO/FIFO data structure.
+ * <p>This interface attempts to provide a bare minimum skeleton for a LIFO/FIFO/others data structure.
  * The order depends on the implementation.</p>
  * 
  * @author Y.K. Chan
  *
  */
 public interface Enque<T> {
+	
+	/**
+	 * Factory method for creation using a queue 
+	 * @param queue  Backing queue
+	 * @return  An enque
+	 */
+	public static <T> Enque<T> of(Queue<T> queue) {
+		return new Enque<T>() {
+
+			@Override
+			public int size() {
+				return queue.size();
+			}
+
+			@Override
+			public Enque<T> push(T item) {
+				queue.add(item);
+				return this;
+			}
+
+			@Override
+			public T pop() {
+				return queue.remove();
+			}
+
+			@Override
+			public T peek() {
+				return queue.poll();
+			}
+
+			@Override
+			public T[] toArray(IntFunction<T[]> factory) {
+				T[] array = factory.apply(this.size());
+				int k = 0;
+				while(!queue.isEmpty()){
+					array[k++] = queue.remove();
+				}
+				return array;
+			}
+			
+		};
+	}
 	
 	/**
 	 * Factory method for creating a Stack (LIFO) using a Deque

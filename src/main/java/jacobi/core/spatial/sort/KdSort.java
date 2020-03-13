@@ -24,18 +24,21 @@
 package jacobi.core.spatial.sort;
 
 import java.util.AbstractList;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
-import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.stream.IntStream;
 
+import jacobi.api.Matrix;
+import jacobi.core.impl.ImmutableMatrix;
 import jacobi.core.util.IntStack;
-import jacobi.core.util.Real;
 import jacobi.core.util.Weighted;
 
 /**
@@ -55,67 +58,94 @@ import jacobi.core.util.Weighted;
  */
 public class KdSort implements SpatialSort {
 	
-	public KdSort(Function<List<double[]>, double[]> meanFn, 
-			BiFunction<List<double[]>, double[], double[]> varFn) {
-		this.meanFn = meanFn;
-		this.varFn = varFn;
-	}
-
-	@Override
-	public int[] sort(List<double[]> vectors) {
-		
-		return null;
+	/**
+	 * Constructor
+	 * @param baseFactory
+	 * @param statsFn
+	 * @param rSquare
+	 */
+	public KdSort(Function<int[], SpatialSort> baseFactory, 
+			UnaryOperator<Matrix> statsFn, double rSquare) {
+		this.baseFactory = baseFactory;
+		this.statsFn = statsFn;
+		this.rSquare = rSquare;
 	}
 	
-	protected List<Division> divide(List<double[]> vectors, Division div) {
-		List<double[]> subList = div.of(vectors);
+	@Override
+	public int[] sort(List<double[]> vectors) {
+		int[] seq = IntStream.range(0, vectors.size()).toArray();
 		
-		double[] mean = this.meanFn.apply(subList);
-		int[] dims = this.selectDims(subList, mean, 8);
+		Deque<Div> stack = new ArrayDeque<>();
+		stack.push(new Div(seq, 0, seq.length));
 		
-		List<IntStack> groups = this.groupBy(vectors, div, mean, dims);
-		List<Division> divs = new ArrayList<>(groups.size()); 
+		while(!stack.isEmpty()) {
+			Div div = stack.pop();
+			this.sortDiv(vectors, div)
+				.stream()
+				.filter(v -> v != null && v.end - v.begin > 1)
+				.forEach(stack::push);
+		}
+		
+		return seq;
+	}
+	
+	protected List<Div> sortDiv(List<double[]> vectors, Div div) {
+		Matrix stats = this.statsFn.apply(this.toMatrix(vectors, div));
+		double[] mean = stats.getRow(0);
+		double[] var = stats.getRow(1);
+		
+		int[] dims = this.selectDims(var, 8);
+		
+		SpatialSort ssort = this.baseFactory.apply(dims);
+		if(ssort != null){
+			int[] order = ssort.sort(this.subList(vectors, div));
+			for(int i = 0; i < order.length; i++) {
+				int k = order[i];
+				order[i] = div.seq[div.begin + k];
+			}
+			
+			System.arraycopy(order, 0, div.seq, div.begin, order.length);
+			return Collections.emptyList();
+		}
+		
+		List<IntStack> groups = this.sortDiv(vectors, div, mean, dims);
+		
+		List<Div> divList = new ArrayList<>();
 		
 		int begin = div.begin;
-		for(IntStack group : groups) {
-			if(group == null) {
+		for(IntStack group : groups){
+			if(group == null){
 				continue;
 			}
 			
-			group.toArray(div.seq, begin);
-			
-			if(group.size() > 1){
-				divs.add(new Division(div.seq, begin, begin + group.size()));
-			}
-			
-			if(group.size() >= div.end - div.begin){
-				// all are degenerated
+			if(group.size() >= div.end - div.begin) {
 				return Collections.emptyList();
 			}
 			
-			begin += group.size();		
+			group.toArray(div.seq, begin);
+			begin += group.size();
 		}
 		
-		if(begin != div.end) {
-			throw new IllegalStateException("Division count not match. Expected "
-				+ div.end + ", actual " + begin);
+		if(begin != div.end){
+			throw new IllegalStateException();
 		}
-		return divs;
+		return divList;
 	}
 	
-	protected List<IntStack> groupBy(List<double[]> vectors, Division div, double[] mean, int[] dims) {
+	protected List<IntStack> sortDiv(List<double[]> vectors, Div div, double[] mean, int[] dims) {		
+		
 		IntStack[] groups = new IntStack[1 << dims.length];
-		for(int i = div.begin; i < div.end; i++) {
+		for(int i = div.begin; i < div.end; i++){
 			int k = div.seq[i];
-			double[] v = vectors.get(k);
+			double[] vector = vectors.get(k);
 			
 			int parity = 0;
-			for(int d : dims) {
-				parity *= 2;				
-				parity += v[d] < mean[d] ? 0 : 1;
+			for(int d : dims){
+				parity *= 2;
+				parity += vector[d] < mean[d] ? 0 : 1;
 			}
 			
-			if(groups[parity] == null) {
+			if(groups[parity] == null){
 				groups[parity] = new IntStack(4);
 			}
 			
@@ -124,62 +154,94 @@ public class KdSort implements SpatialSort {
 		return Arrays.asList(groups);
 	}
 	
-	protected int[] selectDims(List<double[]> vectors, double[] mean, int maxDim) {
-		double[] vars = this.varFn.apply(vectors, mean);
-		Queue<Weighted<Integer>> heap = new PriorityQueue<>();
-		heap.add(new Weighted<>(0, vars[0]));
+	protected int[] selectDims(double[] vars, int limit){
+		Queue<Weighted<Integer>> heap = new PriorityQueue<>(limit);
+		double total = 0.0;
 		
-		for(int i = 1; i < vars.length; i++) {
-			if(heap.size() >= maxDim && vars[i] < heap.peek().weight){
+		for(int i = 0; i < vars.length; i++){
+			total += vars[i];
+			if(heap.size() >= limit && vars[i] < heap.peek().weight){
 				continue;
 			}
-			
+						
 			heap.add(new Weighted<>(i, vars[i]));
-			
-			while(heap.size() > maxDim) {
+			while(heap.size() > limit){
 				heap.remove();
-			}			
-		}
+			}
+		}		
 		
 		int[] dims = new int[heap.size()];
 		int k = dims.length;
-		
-		while(!heap.isEmpty()) {
+		while(!heap.isEmpty()){
 			dims[--k] = heap.remove().item;
+		}
+		
+		double minCov = this.rSquare * total;
+		double cov = 0.0;
+		for(int i = 0; i < dims.length; i++) {
+			if(cov > minCov){
+				return Arrays.copyOfRange(dims, 0, i);
+			}
+			
+			cov += vars[dims[i]];
 		}
 		return dims;
 	}
 	
-	private Function<List<double[]>, double[]> meanFn;
-	private BiFunction<List<double[]>, double[], double[]> varFn;
+	protected Matrix toMatrix(List<double[]> vectors, Div div) {
+		int dim = vectors.get(0).length;
+		return new ImmutableMatrix() {
+
+			@Override
+			public int getRowCount() {
+				return div.end - div.begin;
+			}
+
+			@Override
+			public int getColCount() {
+				return dim;
+			}
+
+			@Override
+			public double[] getRow(int index) {
+				return vectors.get(index);
+			}
+			
+		};
+	}
 	
-	protected static class Division {
+	protected List<double[]> subList(List<double[]> list, Div div) {
+		return new AbstractList<double[]>() {
+
+			@Override
+			public double[] get(int index) {
+				return list.get(index);
+			}
+
+			@Override
+			public int size() {
+				return div.end - div.begin;
+			}
+			
+		};
+	}
+		
+	private Function<int[], SpatialSort> baseFactory;
+	private UnaryOperator<Matrix> statsFn;
+	private double rSquare;	
+	
+	protected static class Div {
 		
 		public final int[] seq;
 		
 		public final int begin, end;
 
-		public Division(int[] seq, int begin, int end) {
+		public Div(int[] seq, int begin, int end) {
 			this.seq = seq;
 			this.begin = begin;
 			this.end = end;
 		}
 		
-		public <T> List<T> of(List<T> list) {
-			return new AbstractList<T>() {
-
-				@Override
-				public T get(int index) {
-					return list.get(begin + index);
-				}
-
-				@Override
-				public int size() {
-					return end - begin;
-				}
-				
-			};
-		}
-		
 	}
+	
 }

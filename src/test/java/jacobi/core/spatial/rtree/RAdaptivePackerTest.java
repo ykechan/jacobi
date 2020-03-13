@@ -129,7 +129,7 @@ public class RAdaptivePackerTest {
 			}
 
 			@Override
-			public List<RObject<double[]>> nodes() {
+			public List<RObject<double[]>> nodeList() {
 				return Collections.emptyList();
 			}
 			

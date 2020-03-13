@@ -1,15 +1,68 @@
 package jacobi.core.spatial.rtree;
 
+import java.awt.Color;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+import jacobi.api.Matrix;
+import jacobi.core.util.Ranking;
+import jacobi.test.annotations.JacobiImport;
+import jacobi.test.annotations.JacobiInject;
+import jacobi.test.util.JacobiJUnit4ClassRunner;
+import jacobi.test.util.JacobiSvg;
+
+@JacobiImport("/jacobi/test/data/RTreeTest.xlsx")
+@RunWith(JacobiJUnit4ClassRunner.class)
 public class RTreeTest {
+	
+	@JacobiInject(0)
+	public Matrix input; 
+	
+	@JacobiInject(1)
+	public Matrix query;
+	
+	@JacobiInject(100)
+	public Matrix oracle;
+	
+	@Test
+	@JacobiImport("Range Oracle Rand 80x2")
+	public void shouldQueryRangeResultMatchesWithOracleInRandom2D() throws IOException {
+		RTree<Integer> tree = this.factory().create(input, 
+			RDefaultDistances.EUCLIDEAN_SQ.againstAabb(), 
+			RDefaultDistances.EUCLIDEAN_SQ.againstPoint()
+		);
+		
+		
+		for(int i = 0; i < query.getRowCount(); i++) {
+			double[] q = new double[] { query.get(i, 0), query.get(i, 1) };
+			Iterator<Integer> iter = tree.queryRange(q, query.get(i, 2) * query.get(i, 2));
+			
+			Set<Integer> set = new TreeSet<>();
+			while(iter.hasNext()) {
+				set.add(iter.next());
+			}
+			System.out.println("Query " + i);
+			for(int j = 0; j < this.oracle.getRowCount(); j++) {
+				Assert.assertEquals(
+					"Query #" + i + ", @" + j,
+					this.oracle.get(j, i) > 0.0, set.contains(j));
+			}
+		}		
+	}
 	
 	@Test
 	public void shouldBeAbleToByPassNodeWithMBBOutOfReach() {
@@ -62,7 +115,8 @@ public class RTreeTest {
 		};
 		
 		RTree<String> tree = new RTree<>(parent, bDist, qDist);
-		List<String> ans = tree.queryRange(new double[2], 10.0);
+		List<String> ans = this.toList(tree.queryRange(new double[2], 10.0));
+		
 		Assert.assertEquals(4, verify.get());
 		Assert.assertArrayEquals(new String[] {
 			"LL #0", "LL #1", "LL #2", "LL #3" 
@@ -79,8 +133,9 @@ public class RTreeTest {
 		));
 		
 		AtomicInteger verify = new AtomicInteger(0);
+		
 		RTree<String> tree = new RTree<>(node, (b, p) -> 0.0, (q, p) -> verify.incrementAndGet());
-		List<String> ans = tree.queryRange(new double[2], 0.1);
+		List<String> ans = this.toList(tree.queryRange(new double[2], 0.1));
 		
 		Assert.assertTrue(ans.isEmpty());
 		Assert.assertEquals(4, verify.get());
@@ -97,6 +152,16 @@ public class RTreeTest {
 			
 		RTree<String> tree = new RTree<>(node, (b, p) -> 0.0, (q, p) -> 1.0);
 		tree.toArray(node.minBoundBox());
+	}	
+	
+	protected RTreeFactory factory() {
+		return new RTreeFactory(
+			v -> IntStream.range(0, v.size()).boxed()
+				.sorted(Comparator.comparingDouble(i -> v.get(i)[0]))
+				.mapToInt(Integer::intValue).toArray(),
+			(ls, min) -> Math.min(min, ls.size()), 
+			4, 2
+		);
 	}
 	
 	protected <T> RObject<T> leaf(double[] point, T item) {
@@ -114,11 +179,20 @@ public class RTreeTest {
 			}
 
 			@Override
-			public List<RObject<T>> nodes() {
+			public List<RObject<T>> nodeList() {
 				return Collections.emptyList();
 			}
 			
 		};
+	}
+	
+	protected <T> List<T> toList(Iterator<T> iter) {
+		List<T> items = new ArrayList<>();
+		while(iter.hasNext()){
+			items.add(iter.next());
+		}
+		
+		return items;
 	}
 
 }

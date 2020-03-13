@@ -76,7 +76,7 @@ public class RNode<T> implements RObject<T> {
 	}
 
 	@Override
-	public List<RObject<T>> nodes() {
+	public List<RObject<T>> nodeList() {
 		return this.nodeList;
 	}
 	

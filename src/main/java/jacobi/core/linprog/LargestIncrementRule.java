@@ -25,6 +25,7 @@
 package jacobi.core.linprog;
 
 import jacobi.api.Matrix;
+import jacobi.core.util.MinHeap;
 import jacobi.core.util.Weighted;
 import java.util.Arrays;
 
@@ -49,7 +50,7 @@ public class LargestIncrementRule implements PivotingRule {
     public int[] apply(Tableau tab, Integer max) {
         double[] delta = this.compute(tab.getMatrix(), tab.getCoeff());        
         int[] vars = tab.getVars();
-        return Arrays.stream(Weighted.select(delta, max)).map((i) -> vars[i]).toArray();
+        return Arrays.stream(this.select(delta, max)).map((i) -> vars[i]).toArray();
     }
 
     /**
@@ -60,11 +61,13 @@ public class LargestIncrementRule implements PivotingRule {
      */
     protected double[] compute(Matrix mat, double[] coeff) {        
         int last = mat.getColCount() - 1;
-        double[] bounds = new double[last];        
+        double[] bounds = new double[last]; 
         Arrays.fill(bounds, Double.NaN);
+        
         for(int i = 0; i < mat.getRowCount(); i++){
             this.merge(coeff, mat.getRow(i), bounds);
         }
+        
         for(int i = 0; i < bounds.length; i++){
             bounds[i] = Double.isNaN(bounds[i]) ? coeff[i] < 0.0 ? 0.0 : -1.0 : bounds[i] * coeff[i];
         }
@@ -88,6 +91,34 @@ public class LargestIncrementRule implements PivotingRule {
             bounds[i] = Double.isNaN(bounds[i]) ? bound : Math.min(bounds[i], bound);
         }
         return bounds;
+    }
+    
+    /**
+     * Select the top k elements givens its weights. A weight of zero means this element is un-fit to be selected.
+     * A negative weight indicates this element contains an error and will be returned isolated.
+     * @param weights  Weights of the elements
+     * @param k  Number of elements wanted
+     * @return  Indices of the elements in descending order
+     */
+    protected int[] select(double[] weights, int k) {
+    	MinHeap heap = new MinHeap(k, 0);
+    	 for(int i = 0; i < weights.length; i++){            
+             if(weights[i] == 0.0){
+                 continue;
+             }
+             
+             if(weights[i] < 0.0){
+                 return new int[]{i};
+             }
+             
+             heap.push(i, weights[i]);
+         }
+    	 
+         int[] array = new int[heap.size()];
+         for(int i = array.length - 1; i >= 0; i--){
+             array[i] = heap.pop().item;
+         }
+         return array;
     }
     
 }

@@ -71,7 +71,7 @@ public class RPointList extends AbstractList<RObject<Integer>> {
 			}
 
 			@Override
-			public List<RObject<Integer>> nodes() {
+			public List<RObject<Integer>> nodeList() {
 				return Collections.emptyList();
 			}
 			

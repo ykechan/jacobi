@@ -53,6 +53,6 @@ public interface RObject<T> extends Supplier<Optional<T>> {
 	 * Get the list of child nodes.
 	 * @return  List of child nodes, or empty if this is a leaf
 	 */
-	public List<RObject<T>> nodes();
+	public List<RObject<T>> nodeList();
 
 }
