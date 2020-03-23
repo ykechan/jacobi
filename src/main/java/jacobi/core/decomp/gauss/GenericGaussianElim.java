@@ -51,9 +51,8 @@ public class GenericGaussianElim {
      */
     public <T extends ElementaryOperator> T compute(Matrix matrix, Function<ElementaryOperator, T> decor) {
         T oper = decor.apply(new FrontElementEliminator(matrix));
-        int end = Math.min(
-                matrix.getRowCount(), 
-                matrix.getColCount()) - 1;
+        int end = Math.min(matrix.getRowCount(), matrix.getColCount()) - 1;
+        
         int nextPivot = -1;
         for(int i = 0; i < end; i++){
             if(nextPivot < 0){

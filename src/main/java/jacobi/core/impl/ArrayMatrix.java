@@ -27,6 +27,7 @@ import java.util.Arrays;
 
 import jacobi.api.Matrix;
 import jacobi.core.facade.FacadeProxy;
+import jacobi.core.util.Throw;
 
 /**
  * Implementation of a dense matrix by a 1-D array.
@@ -35,10 +36,55 @@ import jacobi.core.facade.FacadeProxy;
  */
 public class ArrayMatrix implements Matrix {
 	
-	protected ArrayMatrix(double[] array, int numRow, int numCol) {
-		this.numRow = numRow;
-		this.numCol = numCol;
+	/**
+	 * Factory method for wrapping an array of elements into a matrix
+	 * @param n  Number of columns
+	 * @param elements  Array of matrix elements
+	 * @return  New instance of an ArrayMatrix with elements as backing array
+	 */
+	public static Matrix wrap(int n, double... elements) {
+		Throw.when()
+			.isTrue(
+				() -> elements == null || elements.length < 1, 
+				() -> "No matrix elements"
+			)
+			.isTrue(() -> n < 1, () -> "Invalid number of column " + n)
+			.isTrue(
+				() -> elements.length % n > 0, 
+				() -> "Unable to fit " + elements.length + " elements into columns of " + n 
+			);
+		return new ArrayMatrix(elements, elements.length / n, n);
+	}
+	
+	/**
+	 * Factory method
+	 * @param m  Number of rows
+	 * @param n  Number of columns
+	 * @return  New instance of an ArrayMatrix
+	 */
+	public static Matrix of(int m, int n) {
+		if(m <= 0 || n <= 0) {
+			throw new IllegalArgumentException("Invalid dimension " + m + "x" + n);
+		}
+		
+		long numElem = (long) m * (long) n;
+		if(numElem > Integer.MAX_VALUE) {
+			throw new UnsupportedOperationException("Unable to create a " + numElem + " long array.");
+		}
+		
+		return new ArrayMatrix(new double[m * n], m, n);
+	}
+	
+	/**
+	 * Constructor
+	 * @param array  Backing array
+	 * @param m  Number of rows
+	 * @param n  Number of columns
+	 */
+	protected ArrayMatrix(double[] array, int m, int n) {
 		this.array = array;
+		this.numRow = m;
+		this.numCol = n;		
 	}
 
 	@Override
@@ -56,7 +102,7 @@ public class ArrayMatrix implements Matrix {
 		
 		return Arrays.copyOfRange(this.array, 
 			index * this.numCol, 
-			index * this.numCol + this.numRow);
+			index * this.numCol + this.numCol);
 	}
 
 	@Override
@@ -80,7 +126,7 @@ public class ArrayMatrix implements Matrix {
 	@Override
 	public Matrix swapRow(int i, int j) {
 		double[] temp = this.getRow(i);
-		System.arraycopy(this.array, i * this.numCol, this.array, j * this.numCol, this.numCol);
+		System.arraycopy(this.array, j * this.numCol, this.array, i * this.numCol, this.numCol);
 		System.arraycopy(temp, 0, this.array, j * this.numCol, this.numCol);
 		return this;
 	}

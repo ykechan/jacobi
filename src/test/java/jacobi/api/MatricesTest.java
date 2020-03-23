@@ -44,7 +44,7 @@ public class MatricesTest {
     public void testConstructor() throws Exception {
         Constructor<Matrices> cons = Matrices.class.getDeclaredConstructor();
         cons.setAccessible(true);
-        Matrices matrices = cons.newInstance();
+        cons.newInstance();
     }
     
     @Test

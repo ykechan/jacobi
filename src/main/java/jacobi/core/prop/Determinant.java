@@ -23,6 +23,8 @@
  */
 package jacobi.core.prop;
 
+import java.util.Arrays;
+
 import jacobi.api.Matrix;
 import jacobi.core.decomp.gauss.AbstractElementaryOperatorDecor;
 import jacobi.core.decomp.gauss.ElementaryOperator;
@@ -71,8 +73,9 @@ public class Determinant {
             default :
                 break;
         }
-        double det = this.gaussElim.compute(matrix, (op) -> new Sign(op)).get();
-        for(int i = 0; i < matrix.getRowCount(); i++){            
+        double det = this.gaussElim.compute(matrix, (op) -> new Sign(op)).get();        
+        
+        for(int i = 0; i < matrix.getRowCount(); i++){ 
             det *= matrix.get(i, i);
         }
         return det;

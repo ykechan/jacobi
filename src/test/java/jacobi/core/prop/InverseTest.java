@@ -53,6 +53,7 @@ public class InverseTest {
     @JacobiEquals(expected = 1, actual = 1)
     public void test4x4() {
         ans = new Inverse().compute(this.input);
+        System.out.println(ans);
     }
     
     @Test

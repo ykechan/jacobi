@@ -52,8 +52,7 @@ public class FullMatrixOperator extends AbstractElementaryOperatorDecor {
                () -> "Row count mismatch. Partner matrix has " 
                        + partner.getRowCount() 
                        + " row(s) and matrix has "
-                       + op.getMatrix().getRowCount()
-                       + " row(s).");
+                       + op.getMatrix().getRowCount() + " row(s).");
         this.partner = partner;
     }
 

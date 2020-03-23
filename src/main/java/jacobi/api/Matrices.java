@@ -23,6 +23,7 @@
  */
 package jacobi.api;
 
+import jacobi.core.impl.ArrayMatrix;
 import jacobi.core.impl.ColumnVector;
 import jacobi.core.impl.CopyOnWriteMatrix;
 import jacobi.core.impl.DefaultMatrix;
@@ -38,6 +39,8 @@ import java.util.stream.IntStream;
  * @author Y.K. Chan
  */
 public final class Matrices {
+	
+	public static final int DEFAULT_COLUMN_LIMIT = 5;
     
     private Matrices() { 
         throw new UnsupportedOperationException("Do not instaniate.");
@@ -53,7 +56,7 @@ public final class Matrices {
             return Empty.getInstance();
         }
         int n = Arrays.stream(rows)
-                .mapToInt((r) -> r.length)
+                .mapToInt(r -> r.length)
                 .reduce((i, j) -> { 
                     if(i == j){
                         return i;
@@ -63,11 +66,26 @@ public final class Matrices {
                     );
                 })
                 .orElse(0);
-        return n == 0 
-                ? Empty.getInstance()
-                : n == 1
-                    ? new ColumnVector( Arrays.stream(rows).mapToDouble((arr) -> arr[0]).toArray() )
-                    : Matrices.wrap(rows).copy();
+        if(n == 0) {
+        	return Empty.getInstance();
+        }
+        
+        if(n == 1) {
+        	return new ColumnVector( Arrays.stream(rows).mapToDouble(arr -> arr[0]).toArray() );
+        }
+        
+        if(n < DEFAULT_COLUMN_LIMIT && rows.length >= n && n < Integer.MAX_VALUE / rows.length){
+        	int numCols = (int) n;
+        	
+        	double[] array = new double[numCols * rows.length];
+        	for(int i = 0; i < rows.length; i++) {
+        		System.arraycopy(rows[i], 0, array, i * numCols, numCols);
+        	}
+        	
+        	return ArrayMatrix.wrap(numCols, array);
+        }
+        
+        return Matrices.wrap(rows).copy();
     }
     
     /**
@@ -111,11 +129,20 @@ public final class Matrices {
             throw new IllegalArgumentException("Invalid number of rows / columns : " 
                     + m + "x" + n);
         }
-        return m == 0 || n == 0
-                ? Empty.getInstance() 
-                : n == 1
-                    ? new ColumnVector(m)
-                    : new DefaultMatrix(m, n);
+        
+        if(m < 1 || n < 1){
+        	return Empty.getInstance();
+        }
+        
+        if(n == 1) {
+        	return new ColumnVector(m);
+        }
+        
+        if(n < DEFAULT_COLUMN_LIMIT && m >= n && m < Integer.MAX_VALUE / n) {
+        	return ArrayMatrix.of(m, n);
+        }
+        
+        return new DefaultMatrix(m, n);
     }
     
     /**
@@ -148,8 +175,8 @@ public final class Matrices {
      */
     public static Matrix diag(double[] values, int m) {
         return values == null || values.length == 0
-                ? Empty.getInstance()
-                : CopyOnWriteMatrix.of(new DiagonalMatrix(m, values.length, values));
+            ? Empty.getInstance()
+            : CopyOnWriteMatrix.of(new DiagonalMatrix(m, values.length, values));
     }        
     
     /**
@@ -161,9 +188,15 @@ public final class Matrices {
         if(matrix == null){
             return null;
         }
+        
         if(matrix instanceof ImmutableMatrix){
-            return new DefaultMatrix(matrix);
+            Matrix clone = Matrices.zeros(matrix.getRowCount(), matrix.getColCount());
+            for(int i = 0; i < matrix.getRowCount(); i++){
+            	clone.setRow(i, matrix.getRow(i));
+            }
+            return clone;
         }
+        
         return matrix.copy();
     }
     
