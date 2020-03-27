@@ -107,12 +107,13 @@ public class OrderStats {
 		
 		double[][] buffer = this.createBuffer(input);
 		double[] ans = new double[input.getColCount()];
-		for(int j = 0; j < input.getColCount(); j += buffer.length){
+		for(int j = 0; j < input.getColCount(); j += buffer.length){			
 			int span = Math.min(buffer.length, input.getColCount() - j);
+			buffer = this.getColumns(input, j, buffer);
 			
 			for(int i = 0; i < span; i++) {
-				double[] buf = buffer[i];				
-				ans[j + i] = this.select(buf, order);
+				double[] buf = buffer[i];
+				ans[j + i] = this.select(buf, order);				
 			}
 		}
 		return ans;
