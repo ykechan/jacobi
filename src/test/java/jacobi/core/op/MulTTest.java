@@ -25,12 +25,15 @@ package jacobi.core.op;
 
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
+import jacobi.core.impl.ColumnVector;
 import jacobi.core.util.MapReducer;
 import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.annotations.JacobiResult;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
+
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -73,6 +76,14 @@ public class MulTTest {
     @JacobiEquals(expected = 2, actual = 2)
     public void testForkJoinOn10x4x4x13() {
         this.ans = this.mockForkJoin().compute(a, b);
+    }
+    
+    @Test
+    @JacobiImport("(10x4)x(1x4)^t")
+    @JacobiEquals(expected = 2, actual = 2)
+    public void shouldBeAbleToMul10x4MatrixToRowVector4() {
+        this.ans = new MulT().compute(a, b);
+        Assert.assertTrue(this.ans instanceof ColumnVector);
     }
     
     @Test(expected = IllegalArgumentException.class)

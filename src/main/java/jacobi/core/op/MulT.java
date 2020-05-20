@@ -27,6 +27,7 @@ package jacobi.core.op;
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.api.annotations.Pure;
+import jacobi.core.impl.ColumnVector;
 import jacobi.core.util.MapReducer;
 import jacobi.core.util.Throw;
 
@@ -55,6 +56,11 @@ public class MulT {
                     + " matrix with a "
                     + b.getRowCount()+ "x" + b.getColCount()
                     + " matrix.");
+        
+        if(b.getColCount() == 1){
+        	return new ColumnVector(this.compute(a, b.getRow(0)));
+        }
+        
         return this.compute(a, b, Matrices.zeros(a.getRowCount(), b.getRowCount()));
     }
 
@@ -90,7 +96,7 @@ public class MulT {
     }
     
     /**
-     * Compute matrix C where C = A * B^t with C created in parallel.
+     * Compute matrix C where C = A * B^t with C created in serial.
      * @param a  Input matrix A
      * @param b  Input matrix B
      * @param ans  Resultant matrix C
@@ -122,6 +128,25 @@ public class MulT {
             w[k] = elem;
         }
         return w;
+    }
+    
+    /**
+     * Compute A * b, where A is a matrix and b is a column vector. 
+     * @param a  Input matrix A
+     * @param b  Input column vector b
+     * @return  Column vector v = A * b
+     */
+    protected double[] compute(Matrix a, double[] b) {
+    	double[] v = new double[a.getRowCount()];
+    	for(int i = 0; i < v.length; i++) {
+    		double[] row = a.getRow(i);
+    		double prod = 0.0;
+    		for(int j = 0; j < row.length; j++) {
+    			prod += row[j] * b[j];
+    		}
+    		v[i] = prod;
+    	}
+    	return v;
     }
     
     /**

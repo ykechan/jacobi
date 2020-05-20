@@ -52,50 +52,54 @@ public class IntStackTest {
         
         stack.push(13).push(17);
         
-        Assert.assertEquals(4, stack.size());
-        
-        Assert.assertEquals(9, stack.capacity());                
+        Assert.assertEquals(4, stack.size());         
     }
     
     @Test
     public void testReAllocateShouldNotHappenIfInitialCapacityIsSufficient() {
-        IntStack stack = new IntStack(10);
-        Assert.assertEquals(10, stack.capacity());
+        IntStack stack = new IntStack(30);
+        Assert.assertEquals(30, stack.capacity());
         stack
             .push(1).push(3).push(5).push(7).push(11)
             .push(13).push(17).push(19).push(23).push(29);
         Assert.assertEquals(10, stack.size());
-        Assert.assertEquals(10, stack.capacity());
+        Assert.assertEquals(30, stack.capacity());
         
         Assert.assertEquals(29, stack.pop());
         Assert.assertEquals(23, stack.pop());
         Assert.assertEquals(19, stack.pop());
         
         Assert.assertEquals(7, stack.size());
-        Assert.assertEquals(10, stack.capacity());
+        Assert.assertEquals(30, stack.capacity());
         
         stack.push(31).push(37).push(41);
         Assert.assertEquals(10, stack.size());
-        Assert.assertEquals(10, stack.capacity());
+        Assert.assertEquals(30, stack.capacity());
     }
     
     @Test
     public void testShouldExpendIfInitialCapacityIsInsufficient() {
-        IntStack stack = new IntStack(6);
-        Assert.assertEquals(6, stack.capacity());
+        IntStack stack = new IntStack(29);
+        Assert.assertEquals(29, stack.capacity());
+        
         stack
             .push(1).push(3).push(5).push(7).push(11)
-            .push(13).push(17).push(19).push(23).push(29);
-        Assert.assertEquals(10, stack.size());
+            .push(13).push(17).push(19).push(23).push(29)
+            .push(31).push(37).push(41).push(43).push(47)
+            .push(53).push(59).push(61).push(67).push(71)
+            .push(73).push(79).push(83).push(89).push(97)
+            .push(101).push(103).push(107).push(109).push(113)
+            ;
+        Assert.assertEquals(30, stack.size());
         
-        Assert.assertEquals(29, stack.pop());
-        Assert.assertEquals(23, stack.pop());
-        Assert.assertEquals(19, stack.pop());
+        Assert.assertEquals(113, stack.pop());
+        Assert.assertEquals(109, stack.pop());
+        Assert.assertEquals(107, stack.pop());
         
-        Assert.assertEquals(7, stack.size());
+        Assert.assertEquals(27, stack.size());
         
         stack.push(31).push(37).push(41);
-        Assert.assertEquals(10, stack.size());
+        Assert.assertEquals(30, stack.size());
     }
     
     @Test
@@ -115,54 +119,5 @@ public class IntStackTest {
         }
     }
     
-    @Test
-    public void testByDefaultCapacityShouldAlwaysBeAPerfectSquare() {
-        IntStack stack = new IntStack(0);
-        Random rand = new Random(Double.doubleToLongBits(Math.PI));
-        
-        for(int i = 0; i < 256; i++){
-            stack.push(rand.nextInt());
-            double ans = Math.sqrt(stack.capacity());
-            Assert.assertTrue(Real.isNegl(ans - Math.floor(ans)));
-        }        
-    }
-    
-    @Test
-    public void testShouldReturn3ForNumbersLessThenOrEqualsTo4() {
-        IntStack stack = new IntStack(0);
-        Assert.assertEquals(1, stack.sqrt(0));
-        Assert.assertEquals(1, stack.sqrt(1));
-        Assert.assertEquals(1, stack.sqrt(2));
-        Assert.assertEquals(1, stack.sqrt(3));
-                
-        Assert.assertEquals(1, stack.sqrt(-1));
-        Assert.assertEquals(1, stack.sqrt(-99));
-    }
-    
-    @Test
-    public void testShouldReturnAnsForPerfectSquares() {
-        IntStack stack = new IntStack(0);
-        Random rand = new Random(Double.doubleToLongBits(-Math.E));
-        for(int i = 0; i < 1000; i++){
-            int num = 4 + rand.nextInt(Short.MAX_VALUE - 4);
-            Assert.assertEquals(num, stack.sqrt(num * num));
-        }
-    }
-    
-    @Test
-    public void testShouldReturnClosestUpperBoundForNonSquares() {
-        IntStack stack = new IntStack(0);
-        Random rand = new Random(Double.doubleToLongBits(-Math.E));
-        for(int i = 0; i < 1000; i++){
-            int num = rand.nextInt();
-            if(num <= 4){
-                Assert.assertEquals(1, stack.sqrt(num));
-                continue;
-            }
-            int ans = stack.sqrt(num);
-            Assert.assertTrue(ans * ans >= num);
-            Assert.assertTrue((ans - 1) * (ans - 1) < num);
-        }
-    }
 
 }

@@ -38,14 +38,22 @@ import java.util.Arrays;
  * @author Y.K. Chan
  */
 public class IntStack {
+	
+	/**
+	 * Factory method to create a new IntStack with default parameters
+	 * @return  New instance of IntStack
+	 */
+	public static final IntStack newInstance() {
+		return new IntStack(0);
+	}
     
     /**
      * Constructor.
      * @param initialCapacity  Minimum capacity at the start
      */
     public IntStack(int initialCapacity) {
-        this.step = Math.max(2 * this.sqrt(initialCapacity) + 1, 3);
-        this.array = new int[Math.max(initialCapacity, 4)];
+        this.step = Math.max(8 * initialCapacity / 13, 13);
+        this.array = new int[Math.max(initialCapacity, 21)];
         this.count = 0;
     }
     
@@ -72,8 +80,9 @@ public class IntStack {
      */
     public IntStack push(int elem) {
         if(this.count >= this.capacity()){
-            this.step += 2;
-            this.array = Arrays.copyOf(this.array, this.array.length + this.step);            
+        	int current = this.array.length;
+            this.array = Arrays.copyOf(this.array, this.array.length + this.step);
+            this.step = current;
         }
         this.array[this.count++] = elem;
         return this;
@@ -112,32 +121,6 @@ public class IntStack {
      */
     protected final int capacity() {
         return this.array.length;
-    }
-    
-    /**
-     * Find the ceiling of the square root of a whole number.
-     * For number less than the first perfect square (i.e. 4), a constant 1 is returned.
-     * @param num  Input whole number
-     * @return  Ceiling the square root. 
-     */
-    protected final int sqrt(int num) {
-        if(num < 4){
-            return 1;
-        }
-        long upper = num / 2;
-        long lower = 1;
-        while(upper - lower > 1){
-            long mid = (lower + upper) / 2;
-            long sq = mid * mid;
-            if(sq > num){
-                upper = mid;
-            }else if(sq < num){
-                lower = mid;
-            }else{
-                return (int) mid;
-            }
-        }
-        return Math.max((int) lower, (int) upper);
     }
 
     private int count, step;

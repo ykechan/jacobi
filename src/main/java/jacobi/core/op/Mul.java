@@ -78,11 +78,13 @@ public class Mul {
                     + " matrix with a "
                     + b.getRowCount()+ "x" + b.getColCount()
                     + " matrix.");
+        
         if(b instanceof ColumnVector){
             return a.getRowCount() == 1 
-                    ? Matrices.scalar(this.dot(a.getRow(0), ((ColumnVector) b).getVector()))
-                    : this.mulVector(a, (ColumnVector) b);
+                ? Matrices.scalar(this.dot(a.getRow(0), ((ColumnVector) b).getVector()))
+                : this.mulVector(a, (ColumnVector) b);
         }
+        
         Matrix ans = Matrices.zeros(a.getRowCount(), b.getColCount());
         this.compute(a, this.copy(b), ans);
         return ans;
@@ -200,8 +202,8 @@ public class Mul {
      */
     protected Matrix copy(Matrix mat) {
         return Matrices.wrap(IntStream.range(0, mat.getRowCount())
-                .mapToObj((i) -> mat.getRow(i))
-                .toArray((n) -> new double[n][]));
+            .mapToObj(mat::getRow)
+            .toArray(n -> new double[n][]));
     }
     
     private int stride;

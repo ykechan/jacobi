@@ -14,8 +14,9 @@ package jacobi.core.graph.util;
  * </p>
  * 
  * @author Y.K. Chan
- *
+ * @deprecated Use jacobi.core.util.Enque and jacobi.core.util.MinHeap instead
  */
+@Deprecated
 public interface MinHeap {
     
     /**

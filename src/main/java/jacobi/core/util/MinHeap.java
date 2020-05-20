@@ -43,6 +43,28 @@ import java.util.stream.IntStream;
 public class MinHeap implements Enque<Weighted<Integer>> {
 	
 	/**
+	 * Factory method for a min-heap with default parameters
+	 * @return  Instance of min-heap
+	 */
+	public static MinHeap newDefault() {
+		return new MinHeap(DEFAULT_INIT_SIZE, DEFAULT_INIT_EXPAND);
+	}
+	
+	/**
+	 * Factory method for a min-heap with fixed capacity. Added items when capacity is reached
+	 * will drop the minimum item.
+	 * @param  capacity  Maximum number of item this heap can hold
+	 * @return  Instance of min-heap
+	 */
+	public static MinHeap ofMax(int capacity) {
+		if(capacity < 1){
+			throw new IllegalArgumentException("Invalid capacity " + capacity);
+		}
+		
+		return new MinHeap(capacity, 0);
+	}
+	
+	/**
 	 * Constructor.
 	 * @param initCap  Initial capacity
 	 * @param expand  Initial expansion amount
@@ -120,6 +142,15 @@ public class MinHeap implements Enque<Weighted<Integer>> {
 		}
 		
 		return this.array[0];
+	}
+	
+	public int[] flush() {
+		int[] items = new int[this.size()];		
+		int k = 0;
+		while(!this.isEmpty()){
+			items[k++] = this.pop().item;
+		}		
+		return items;
 	}
 
 	@Override

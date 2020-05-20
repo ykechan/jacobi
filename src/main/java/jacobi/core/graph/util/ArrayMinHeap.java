@@ -7,8 +7,9 @@ import java.util.NoSuchElementException;
  * Implementation of a binary min-heap using backed primitive array.
  * 
  * @author Y.K. Chan
- *
+ * @deprecated Use jacobi.core.util.Enque and jacobi.core.util.MinHeap instead
  */
+@Deprecated
 public class ArrayMinHeap implements MinHeap {
     
     /**

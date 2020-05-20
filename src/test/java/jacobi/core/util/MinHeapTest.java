@@ -1,10 +1,5 @@
 package jacobi.core.util;
 
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Random;
-import java.util.stream.IntStream;
-
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -14,7 +9,7 @@ public class MinHeapTest {
 	public void shouldBeAbleToFindKMaxItemsFromRandomWeights() {
 		double[] array = new double[] {78, 3.33, Math.PI, 10.0, 123.99, Math.E, 45.0, 3.0, 70.98};
 		
-		Enque<Weighted<Integer>> enque = new MinHeap(4, 0);
+		Enque<Weighted<Integer>> enque = MinHeap.ofMax(4);
 		for(int i = 0; i < array.length; i++){
 			enque.push(new Weighted<>(i, array[i]));
 		}
@@ -83,16 +78,9 @@ public class MinHeapTest {
 		Assert.assertEquals(9.0, entry.weight, 1e-12);
 	}
 	
-	@Test
-	public void test() {
-		double a = Double.POSITIVE_INFINITY;
-		double b = Double.POSITIVE_INFINITY;
-		
-		System.out.println(a);
-		System.out.println(a + b);
-		System.out.println(2 * b);
-		System.out.println(-2 * b);
-		System.out.println(Math.min(3.0, b));
+	@Test(expected = IllegalArgumentException.class)
+	public void shouldFailWhenInitialCapacityIsZero() {
+		MinHeap.ofMax(0);
 	}
 
 }

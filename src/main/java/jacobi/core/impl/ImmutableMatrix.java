@@ -46,7 +46,7 @@ import java.util.Arrays;
  * 
  * <p>An immutable matrix would not return its inner array in getRow(...), and
  * methods swapRow(...), set(...), setRow(...) would results in an
- * UnsupportedOperationException to thrown.</p>
+ * UnsupportedOperationException to be thrown.</p>
  * 
  * @author Y.K. Chan
  */
@@ -58,7 +58,7 @@ public abstract class ImmutableMatrix implements Matrix { // NOPMD
      * @return  An immutable matrix
      */
     public static ImmutableMatrix of(Matrix base) {
-        return base instanceof ImmutableMatrix
+        return base instanceof ImmutableMatrix 
             ? (ImmutableMatrix) base
             : new ImmutableMatrix() {
 
