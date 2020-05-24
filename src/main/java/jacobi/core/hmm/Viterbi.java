@@ -170,6 +170,15 @@ public class Viterbi {
 	protected Matrix logT(Matrix input) {
 		return Matrices.wrap(this.transpose.compute(input, r -> {
 			for(int i = 0; i < r.length; i++){
+				if(r[i] < 0.0){
+					throw new UnsupportedOperationException("Negative probability " + r[i] + " not supported.");
+				}
+				
+				if(r[i] == 0.0){
+					r[i] = NEG_INF;
+					continue;
+				}
+				
 				r[i] = Math.log(r[i]);
 			}
 			return r;
@@ -206,4 +215,9 @@ public class Viterbi {
 		}
 		
 	}
+	
+	/**
+	 * Constant value for representing -ve infinity arising from ln(0)
+	 */
+	protected static final double NEG_INF = -128.0;
 }

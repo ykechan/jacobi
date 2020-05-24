@@ -3,6 +3,7 @@ package jacobi.core.hmm;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.junit.Assert;
@@ -35,6 +36,9 @@ public class ViterbiTest {
 	@JacobiInject(3)
 	public Matrix input;
 	
+	@JacobiResult(100)
+	public Matrix output;
+	
 	@JacobiResult(1000)
 	public Matrix lnProbs;
 	
@@ -62,6 +66,34 @@ public class ViterbiTest {
 			.toArray());
 		
 		this.lnProbs = Matrices.wrap(rows.toArray(new double[0][]));
+	}
+	
+	@Test
+	@JacobiImport("test DNA GC Content #1")
+	@JacobiEquals(expected = 100, actual = 100)
+	public void shouldBeAbleToComputeHiddenSeqInTestDNAGCContent1() {
+		MarkovModel mm = MarkovModel.of(transit, emits, this.init.getRow(0)).validate();
+		int[] seq = new Viterbi().compute(mm, IntStream.range(0, this.input.getRowCount())
+			.mapToDouble(i -> this.input.get(i, 0))
+			.mapToInt( v -> (int) v )
+			.toArray());
+		
+		this.output = Matrices.wrap(new double[][]{ 
+			Arrays.stream(seq).mapToDouble(v -> v).toArray()
+		});
+	}
+	
+	@Test
+	@JacobiImport("Muller, FMP, Springer 2015")
+	@JacobiEquals(expected = 100, actual = 100)
+	public void shouldBeAbleToComputeExampleFromMullerFMPSpringer2015(){
+		MarkovModel mm = MarkovModel.of(transit, emits, this.init.getRow(0)).validate();
+		int[] seq = new Viterbi().compute(mm, Arrays.stream(this.input.getRow(0))
+			.mapToInt(v -> (int) v).toArray());
+		
+		this.output = Matrices.wrap(new double[][]{ 
+			Arrays.stream(seq).mapToDouble(v -> v).toArray()
+		});
 	}
 	
 	@Test
