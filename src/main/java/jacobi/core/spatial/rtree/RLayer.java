@@ -24,6 +24,7 @@
 package jacobi.core.spatial.rtree;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Data object for a serialized siblings layer in a R-Tree.
@@ -68,7 +69,7 @@ public class RLayer {
 			spans[2 * i] = index;
 			spans[2 * i + 1] = cover[i];
 			
-			double[] aabb = RLayer.aabbOf(layer, index, cover[i]);
+			double[] aabb = layer.mbbOf(index, cover[i]);
 			System.arraycopy(aabb, 0, bounds, i * aabbLen, aabbLen);
 			
 			index += cover[i];
@@ -78,29 +79,39 @@ public class RLayer {
 	}
 	
 	/**
-	 * Compute the axis-aligned bounded box of a range of aabbs.
-	 * @param layer  R-Layer
-	 * @param index  Starting index of aabb
-	 * @param span  Number of aabb to be included
-	 * @return  Aabb of the range of aabbs
+	 * Construct a layer by combining spatial vectors
+	 * @param cover  Array of number of nodes in each groups
+	 * @param vectors  List of vectors
+	 * @return  R-Layer
 	 */
-	protected static double[] aabbOf(RLayer layer, int index, int span) {
-		int aabbLen = 2 * layer.dim();
-		double[] aabb = Arrays.copyOfRange(layer.bounds, index * aabbLen, (index + 1) * aabbLen);
-		
-		for(int i = 1; i < span; i++){
-			int begin = (index + i) * aabbLen;
-			for(int j = 0; j < aabbLen; j += 2){
-				if(aabb[j] > layer.bounds[begin + j]){
-					aabb[j] = layer.bounds[begin + j];
-				}
-				
-				if(aabb[j + 1] < layer.bounds[begin + j + 1]){
-					aabb[j + 1] = layer.bounds[begin + j + 1];
-				}
-			}
+	public static RLayer coverOf(int[] cover, List<double[]> vectors) {
+		if(vectors.isEmpty()){
+			return new RLayer(cover, new double[0]);
 		}
-		return aabb;
+		
+		int numDim = vectors.get(0).length;
+		int[] spans = new int[2 * cover.length];
+		double[] bounds = new double[2 * numDim * cover.length];
+		
+		int begin = 0;
+		for(int i = 0; i < cover.length; i++){
+			if(cover[i] < 1){
+				throw new IllegalArgumentException("Invalid span " + cover[i] + " at #" + i);
+			}
+			
+			double[] mbb = RLayer.mbbOf(vectors.subList(begin, begin + cover[i]));
+			if(mbb.length != 2 * numDim){
+				throw new IllegalArgumentException("Dimension mismatch");
+			}
+			
+			System.arraycopy(mbb, 0, bounds, i * mbb.length, mbb.length);
+			
+			spans[2 * i] = begin;
+			spans[2 * i + 1] = cover[i];
+			
+			begin += cover[i];
+		}
+		return new RLayer(spans, bounds);
 	}
 	
 	/**
@@ -139,4 +150,64 @@ public class RLayer {
 		return this.spans.length / 2;
 	}
 	
+	/**
+	 * Compute the minimum axis-aligned bounded box of a range of aabbs.
+	 * @param layer  R-Layer
+	 * @param index  Starting index of aabb
+	 * @param span  Number of aabb to be included
+	 * @return  Mbb of the range of aabbs
+	 */
+	public double[] mbbOf(int index, int span) {
+		int mbbLen = 2 * this.dim();
+		double[] mbb = Arrays.copyOfRange(this.bounds, index * mbbLen, (index + 1) * mbbLen);
+		
+		for(int i = 1; i < span; i++){
+			int begin = (index + i) * mbbLen;
+			for(int j = 0; j < mbbLen; j += 2){
+				if(mbb[j] > this.bounds[begin + j]){
+					mbb[j] = this.bounds[begin + j];
+				}
+				
+				if(mbb[j + 1] < this.bounds[begin + j + 1]){
+					mbb[j + 1] = this.bounds[begin + j + 1];
+				}
+			}
+		}
+		return mbb;
+	}
+	
+	/**
+	 * Compute the minimum axis-aligned bounded box of a list of vectors.
+	 * @param vectors  List of vectors
+	 * @return  Mbb of a list of vectors
+	 */
+	private static double[] mbbOf(List<double[]> vectors) {
+		double[] first = vectors.get(0);
+		
+		int numDim = first.length;
+		double[] mbb = new double[2 * numDim]; 
+		
+		for(int i = 0; i < mbb.length; i++){
+			mbb[i] = first[i / 2];
+		}
+		
+		for(int i = 1; i < vectors.size(); i++){
+			double[] vector = vectors.get(i);
+			if(vector.length != numDim){
+				throw new IllegalArgumentException("Dimension mismatch.");
+			}
+			
+			for(int j = 0; j < vector.length; j++){
+				double x = vector[j];
+				if(mbb[2 * j] > x){
+					mbb[2 * j] = x;
+				}
+				
+				if(mbb[2 * j + 1] < x){
+					mbb[2 * j + 1] = x;
+				}
+			}
+		}
+		return mbb;
+	}
 }

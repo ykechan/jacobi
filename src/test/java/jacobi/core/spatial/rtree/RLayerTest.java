@@ -1,6 +1,8 @@
 package jacobi.core.spatial.rtree;
 
+import java.util.AbstractList;
 import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -109,6 +111,118 @@ public class RLayerTest {
 		this.outSpans = Matrices.wrap(new double[][]{
 			Arrays.stream(parent.spans).mapToDouble(v -> v).toArray()
 		});
+	}
+	
+	@Test
+	@JacobiImport("test rand 5-D vectors")
+	@JacobiEquals(expected = 10, actual = 10)
+	@JacobiEquals(expected = 11, actual = 11)
+	public void shouldBeAbleToGroupRand5DVectors() {
+		int[] cover = Arrays.stream(this.spans.getRow(0)).mapToInt(v -> (int) v).toArray();
+		
+		RLayer rLayer = RLayer.coverOf(cover, new AbstractList<double[]>(){
+
+			@Override
+			public double[] get(int index) {
+				return input.getRow(index);
+			}
+
+			@Override
+			public int size() {
+				return input.getRowCount();
+			}
+			
+		});
+		
+		this.output = this.toMatrix(rLayer);
+		this.outSpans = Matrices.wrap(new double[][]{
+			Arrays.stream(rLayer.spans).mapToDouble(v -> v).toArray()
+		});
+	}
+	
+	@Test
+	public void shouldBeAbleToUseEmptyBounds() {
+		RLayer rLayer = new RLayer(new int[4], new double[0]);
+		Assert.assertEquals(0, rLayer.dim());
+		Assert.assertArrayEquals(new double[0], rLayer.mbbOf(0, 4), 1e-12);
+		
+		RLayer rLayer2 = RLayer.coverOf(new int[]{3, 4}, Collections.emptyList());
+		Assert.assertEquals(0, rLayer2.dim());
+		Assert.assertArrayEquals(new double[0], rLayer2.bounds, 1e-12);
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void shouldFailOnZeroSpan() {
+		int[] span = {0, 1, 1, 1, 2, 1, 3, 1}; // 4 nodes
+		double[] aabbs = {
+			1.0, 2.0, 3.0, 4.0,
+			
+			10.0, 20.0, 30.0, 40.0,
+			
+			50.0, 60.0, 70.0, 80.0,
+			
+			100.0, 200.0, 100.0, 200.0,
+		}; // 2-D AABBs
+		
+		RLayer.coverOf(new int[]{1, 0, 2, 1}, new RLayer(span, aabbs));
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void shouldFailOnNegativeSpan() {
+		int[] span = {0, 1, 1, 1, 2, 1, 3, 1}; // 4 nodes
+		double[] aabbs = {
+			1.0, 2.0, 3.0, 4.0,
+			
+			10.0, 20.0, 30.0, 40.0,
+			
+			50.0, 60.0, 70.0, 80.0,
+			
+			100.0, 200.0, 100.0, 200.0,
+		}; // 2-D AABBs
+		
+		RLayer.coverOf(new int[]{1, -1, 2, 1}, new RLayer(span, aabbs));
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void shouldFailOnWidthMismatch() {
+		int[] span = {0, 1, 1, 1, 2, 1, 3, 1}; // 4 nodes
+		double[] aabbs = {
+			1.0, 2.0, 3.0, 4.0,
+			
+			10.0, 20.0, 30.0, 40.0,
+			
+			50.0, 60.0, 70.0, 80.0,
+			
+			100.0, 200.0, 100.0, 200.0,
+		}; // 2-D AABBs
+		
+		RLayer.coverOf(new int[]{1, 2}, new RLayer(span, aabbs));
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void shouldFailOnDimensionMismatchInFirst() {
+		int[] span = {1, 3}; // 4 nodes
+		double[][] vectors = {
+			new double[]{1.0, 2.0, 3.0, 4.0},
+			new double[]{10.0, 20.0, 30.0, 40.0, 0.0},
+			new double[]{50.0, 60.0, 70.0, 80.0},
+			new double[]{100.0, 200.0, 100.0, 200.0}
+		}; // 2-D AABBs
+		
+		RLayer.coverOf(span, Arrays.asList(vectors));
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void shouldFailOnDimensionMismatchInMiddle() {
+		int[] span = {2, 2}; // 4 nodes
+		double[][] vectors = {
+			new double[]{1.0, 2.0, 3.0, 4.0},
+			new double[]{10.0, 20.0, 30.0, 40.0, 0.0},
+			new double[]{50.0, 60.0, 70.0, 80.0},
+			new double[]{100.0, 200.0, 100.0, 200.0}
+		}; // 2-D AABBs
+		
+		RLayer.coverOf(span, Arrays.asList(vectors));
 	}
 	
 	protected RLayer ofAabbs(Matrix aabbs, int[] span) {
