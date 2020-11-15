@@ -35,10 +35,10 @@ public class RInlineTreeFactoryTest {
 		);
 		
 		RLayer base = factory.serialize(this.input, false);
-		Assert.assertEquals(this.input.getRowCount(), base.spans.length);
-		for(int i = 1; i < base.spans.length; i++){
-			double[] curr = this.input.getRow(base.spans[i]);
-			double[] prev = this.input.getRow(base.spans[i - 1]);
+		Assert.assertEquals(this.input.getRowCount(), base.cuts.length);
+		for(int i = 1; i < base.cuts.length; i++){
+			double[] curr = this.input.getRow(base.cuts[i]);
+			double[] prev = this.input.getRow(base.cuts[i - 1]);
 			
 			Assert.assertTrue(prev[0] <= curr[0]);
 		}
@@ -56,10 +56,10 @@ public class RInlineTreeFactoryTest {
 		);
 		
 		RLayer base = factory.serialize(this.input, true);
-		Assert.assertEquals(this.input.getRowCount(), base.spans.length);
-		for(int i = 1; i < base.spans.length; i++){
-			double[] curr = this.input.getRow(base.spans[i]);
-			double[] prev = this.input.getRow(base.spans[i - 1]);
+		Assert.assertEquals(this.input.getRowCount(), base.cuts.length);
+		for(int i = 1; i < base.cuts.length; i++){
+			double[] curr = this.input.getRow(base.cuts[i]);
+			double[] prev = this.input.getRow(base.cuts[i - 1]);
 			
 			Assert.assertTrue(prev[0] <= curr[0]);
 		}
@@ -67,8 +67,8 @@ public class RInlineTreeFactoryTest {
 		Assert.assertEquals(this.input.getRowCount() * this.input.getColCount(), 
 				base.bounds.length);
 		
-		for(int i = 0; i < base.spans.length; i++){
-			double[] vector = this.input.getRow(base.spans[i]);
+		for(int i = 0; i < base.cuts.length; i++){
+			double[] vector = this.input.getRow(base.cuts[i]);
 			Assert.assertArrayEquals(vector, 
 				Arrays.copyOfRange(base.bounds, i * this.input.getColCount(), (i + 1) * this.input.getColCount()), 
 				1e-12);
@@ -95,7 +95,7 @@ public class RInlineTreeFactoryTest {
 		Assert.assertEquals(2, nodes.dim());
 		Assert.assertEquals(2, root.dim());
 		
-		Assert.assertEquals(128, base.spans.length);
+		Assert.assertEquals(128, base.cuts.length);
 		Assert.assertEquals(13, nodes.length());
 		Assert.assertEquals(3, root.length());
 		
@@ -157,8 +157,8 @@ public class RInlineTreeFactoryTest {
 			double minY = root.bounds[i + 2];
 			double maxY = root.bounds[i + 3];
 			
-			int begin = root.spans[2 * (i / stride)];
-			int span = root.spans[2 * (i / stride) + 1];
+			int begin = root.cuts[2 * (i / stride)];
+			int span = root.cuts[2 * (i / stride) + 1];
 			int end = begin + span;
 			
 			for(int j = begin; j < end; j++){
@@ -179,8 +179,8 @@ public class RInlineTreeFactoryTest {
 			double minY = nodes.bounds[i + 2];
 			double maxY = nodes.bounds[i + 3];
 			
-			int begin = nodes.spans[2 * (i / stride)];
-			int span = nodes.spans[2 * (i / stride) + 1];
+			int begin = nodes.cuts[2 * (i / stride)];
+			int span = nodes.cuts[2 * (i / stride) + 1];
 			int end = begin + span;
 			
 			for(int j = begin; j < end; j++){

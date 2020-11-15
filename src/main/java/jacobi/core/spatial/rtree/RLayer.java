@@ -29,11 +29,9 @@ import java.util.List;
 /**
  * Data object for a serialized siblings layer in a R-Tree.
  * 
- * <p>A layer consists of a span array and a bounds array. The span array is the sequence
- * {s[0], m[0], s[1], m[1] ...} which s[i] is the starting index of the i-th node in the underlying
- * layer, and m[i] is the number of children contains in the i-th node. The bounds array is
- * the sequence of axis-aligned bounded boxes for each node, with minimum and maximum for each
- * dimension.</p>
+ * <p>A layer consists of a cuts array and a bounds array. The cuts array is the sequence of
+ * the ending index for each node in the underlying layer. The bounds array is the sequence of 
+ * axis-aligned bounding boxes for each node, with a minimum and maximum for each dimension.</p>
  * 
  * @author Y.K Chan
  *
@@ -57,25 +55,26 @@ public class RLayer {
 		}
 		
 		if(width != layer.length()){
-			throw new IllegalArgumentException("Grouping is not a cover of the layer");
+			throw new IllegalArgumentException("Grouping "
+					+ Arrays.toString(cover)
+					+ " is not a cover of the layer "
+					+ Arrays.toString(layer.cuts));
 		}
 		
-		int[] spans = new int[2 * cover.length];
+		int[] cuts = new int[cover.length];
 		int aabbLen = 2 * layer.dim();
 		double[] bounds = new double[aabbLen * cover.length];
 		
 		int index = 0;
 		for(int i = 0; i < cover.length; i++){
-			spans[2 * i] = index;
-			spans[2 * i + 1] = cover[i];
-			
 			double[] aabb = layer.mbbOf(index, cover[i]);
 			System.arraycopy(aabb, 0, bounds, i * aabbLen, aabbLen);
 			
 			index += cover[i];
+			cuts[i] = index;
 		}
 		
-		return new RLayer(spans, bounds);
+		return new RLayer(cuts, bounds);
 	}
 	
 	/**
@@ -90,7 +89,7 @@ public class RLayer {
 		}
 		
 		int numDim = vectors.get(0).length;
-		int[] spans = new int[2 * cover.length];
+		int[] cuts = new int[cover.length];
 		double[] bounds = new double[2 * numDim * cover.length];
 		
 		int begin = 0;
@@ -106,18 +105,16 @@ public class RLayer {
 			
 			System.arraycopy(mbb, 0, bounds, i * mbb.length, mbb.length);
 			
-			spans[2 * i] = begin;
-			spans[2 * i + 1] = cover[i];
-			
 			begin += cover[i];
+			cuts[i] = begin;
 		}
-		return new RLayer(spans, bounds);
+		return new RLayer(cuts, bounds);
 	}
 	
 	/**
 	 * Span array
 	 */
-	public final int[] spans;
+	public final int[] cuts;
 	
 	/**
 	 * Bound array.
@@ -126,11 +123,11 @@ public class RLayer {
 
 	/**
 	 * Constructor
-	 * @param spans  Array of spans
+	 * @param cuts  Array of spans
 	 * @param bounds  Array of bounds
 	 */
-	protected RLayer(int[] spans, double[] bounds) {
-		this.spans = spans;
+	protected RLayer(int[] cuts, double[] bounds) {
+		this.cuts = cuts;
 		this.bounds = bounds;
 	}
 	
@@ -139,7 +136,7 @@ public class RLayer {
 	 * @return  Number of dimensions
 	 */
 	public int dim() {
-		return this.bounds.length / this.spans.length;
+		return this.bounds.length / 2 / this.cuts.length;
 	}
 	
 	/**
@@ -147,7 +144,7 @@ public class RLayer {
 	 * @return  Number of nodes
 	 */
 	public int length() {
-		return this.spans.length / 2;
+		return this.cuts.length;
 	}
 	
 	/**

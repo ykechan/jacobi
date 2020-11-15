@@ -67,7 +67,7 @@ public class RInlineTreeFactory {
 		List<RLayer> hierarchy = this.buildHierarchy(matrix, true);
 		
 		int depth = hierarchy.size() - 1;
-		RLayer base = hierarchy.get(depth);
+		RLayer leaves = hierarchy.get(depth);
 		
 		List<RLayer> index = hierarchy.subList(0, depth);
 		return null;
@@ -84,7 +84,7 @@ public class RInlineTreeFactory {
 		Deque<RLayer> stack = new ArrayDeque<>();
 		stack.push(base);
 		
-		RLayer nodes = this.sPacker.apply(this.toList(matrix, base.spans));
+		RLayer nodes = this.sPacker.apply(this.toList(matrix, base.cuts));
 		stack.push(nodes);
 		
 		int max = DEFAULT_MAX_DEPTH;

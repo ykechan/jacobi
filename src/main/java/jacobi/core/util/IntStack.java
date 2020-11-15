@@ -89,6 +89,14 @@ public class IntStack {
     }
     
     /**
+     * Get the top integer in the stack. The integer will not be removed from the stack.
+     * @return  Integer element
+     */
+    public int peek() {
+    	return this.array[this.count - 1];
+    }
+    
+    /**
      * Pop an integer from the stack. The integer will be removed from the stack.
      * @return  Integer element
      */

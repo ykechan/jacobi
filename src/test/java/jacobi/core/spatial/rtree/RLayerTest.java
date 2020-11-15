@@ -38,7 +38,7 @@ public class RLayerTest {
 	
 	@Test
 	public void shouldBeAbleToGetNumberOfDimensionAndLength() {
-		int[] span = {0, 1, 1, 1, 2, 1, 3, 1}; // 4 nodes
+		int[] span = {1, 2, 3, 4}; // 4 nodes
 		double[] aabbs = {
 			1.0, 2.0, 3.0, 4.0,
 			
@@ -99,17 +99,13 @@ public class RLayerTest {
 		int[] spans = Arrays.stream(this.spans.toArray()).flatMap(r -> Arrays.stream(r).boxed())
 				.mapToInt(v -> v.intValue()).toArray();
 		
-		int[] widths = new int[2 * spans.length];
-		for(int i = 0; i < widths.length; i += 2){
-			widths[i] = i == 0 ? 0 : widths[i - 2] + widths[i - 1];
-			widths[i + 1] = spans[i / 2];
-		}
+		int[] widths = Arrays.copyOf(spans, spans.length);
 		
 		RLayer base = this.ofAabbs(this.input, widths);
 		RLayer parent = RLayer.coverOf(cover, base);
 		this.output = this.toMatrix(parent);
 		this.outSpans = Matrices.wrap(new double[][]{
-			Arrays.stream(parent.spans).mapToDouble(v -> v).toArray()
+			Arrays.stream(parent.cuts).mapToDouble(v -> v).toArray()
 		});
 	}
 	
@@ -136,7 +132,7 @@ public class RLayerTest {
 		
 		this.output = this.toMatrix(rLayer);
 		this.outSpans = Matrices.wrap(new double[][]{
-			Arrays.stream(rLayer.spans).mapToDouble(v -> v).toArray()
+			Arrays.stream(rLayer.cuts).mapToDouble(v -> v).toArray()
 		});
 	}
 	
@@ -236,12 +232,11 @@ public class RLayerTest {
 	}
 	
 	protected RLayer flat(Matrix vectors) {
-		int[] spans = new int[2 * vectors.getRowCount()];
+		int[] spans = new int[vectors.getRowCount()];
 		double[] bounds = new double[2 * vectors.getColCount() * vectors.getRowCount()];
 		
 		for(int i = 0; i < vectors.getRowCount(); i++){
-			spans[2 * i] = i;
-			spans[2 * i + 1] = 1;
+			spans[i] = i + 1;
 			
 			double[] v = vectors.getRow(i);
 			double[] aabb = new double[2 * v.length];
