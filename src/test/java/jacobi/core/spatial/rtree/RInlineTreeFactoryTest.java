@@ -157,9 +157,8 @@ public class RInlineTreeFactoryTest {
 			double minY = root.bounds[i + 2];
 			double maxY = root.bounds[i + 3];
 			
-			int begin = root.cuts[2 * (i / stride)];
-			int span = root.cuts[2 * (i / stride) + 1];
-			int end = begin + span;
+			int begin = i == 0 ? 0 : root.cuts[(i / stride) - 1];
+			int end = root.cuts[(i / stride)];
 			
 			for(int j = begin; j < end; j++){
 				double x0 = nodes.bounds[j * stride];
@@ -179,9 +178,8 @@ public class RInlineTreeFactoryTest {
 			double minY = nodes.bounds[i + 2];
 			double maxY = nodes.bounds[i + 3];
 			
-			int begin = nodes.cuts[2 * (i / stride)];
-			int span = nodes.cuts[2 * (i / stride) + 1];
-			int end = begin + span;
+			int begin = i == 0 ? 0 : nodes.cuts[(i / stride) - 1];
+			int end = nodes.cuts[(i / stride)];
 			
 			for(int j = begin; j < end; j++){
 				double x = base.bounds[2 * j];
