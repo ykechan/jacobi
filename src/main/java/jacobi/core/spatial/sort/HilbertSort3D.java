@@ -42,9 +42,9 @@ import jacobi.core.util.IntStack;
  * 2 different ways for each starting position which makes 16 basis curve. These are pre-defined
  * with each curve represented in an octal integer with least significant coefficient being
  * the code of the octrant to travel first. For each basis curve, the octrants can be further
- * enhanced by the basis curves themselves, and the resolutaion is encoded in 16-based long
+ * enhanced by the basis curves themselves, and the resolution is encoded in 16-based long
  * with least significant coefficient being the index of the basis curves to enhance the first
- * octrant that was travelled first.</p>
+ * octrant that was traveled first.</p>
  * 
  * @author Y.K. Chan
  *

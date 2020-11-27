@@ -74,7 +74,7 @@ public class FractalSort2D implements SpatialSort {
 		Deque<Category> stack = new ArrayDeque<>();
 		stack.push(new Category(0, indices.length, this.fractalFn.apply(0)[0], 0));
 		
-		while(!stack.isEmpty()){			
+		while(!stack.isEmpty()){
 			Category quad = stack.pop();
 			if(quad.end - quad.begin < 2 || quad.depth > limit){
 				continue;

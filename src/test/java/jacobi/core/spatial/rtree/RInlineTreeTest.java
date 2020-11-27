@@ -1,50 +1,218 @@
 package jacobi.core.spatial.rtree;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+import jacobi.api.Matrices;
+import jacobi.api.Matrix;
+import jacobi.test.annotations.JacobiEquals;
+import jacobi.test.annotations.JacobiImport;
+import jacobi.test.annotations.JacobiInject;
+import jacobi.test.annotations.JacobiResult;
+import jacobi.test.util.JacobiJUnit4ClassRunner;
+
+@JacobiImport("/jacobi/test/data/RInlineTreeTest.xlsx")
+@RunWith(JacobiJUnit4ClassRunner.class)
 public class RInlineTreeTest {
 	
+	@JacobiInject(0)
+	public Matrix input;
+	
+	@JacobiInject(100)
+	public Matrix query;
+	
+	@JacobiResult(200)
+	public Matrix filters;
+	
+	@JacobiResult(300)
+	public Matrix ans;
+	
+	@JacobiInject(-1)
+	public Map<Integer, Matrix> all;
+	
+	private List<RLayer> rIndex;
+	
+	private RLayer rLeaves;
+	
 	@Test
-	public void shouldBeAbleToFilter2DMbbsByRLayer() {
-		int[] cuts = {
-			//3, 5, 7, 11, 13
-			3, 8, 15, 26, 39
-		};
+	@JacobiImport("test 2-D tree from example")
+	@JacobiEquals(expected = 200, actual = 200)
+	public void shouldBeAbleToQueryRangeInExampleTree() {
+		List<int[]> filters = new ArrayList<>();
+		RInlineTree rTree = this.buildTree((idx, lf) -> new RInlineTree(idx, lf, this.input){
+
+			@Override
+			protected int[] queryFilter(RLayer rLayer, double[] query, double maxDist, int[] filter) {
+				int[] next = super.queryFilter(rLayer, query, maxDist, filter);
+				filters.add(next);
+				return next;
+			}
+			
+		});
+
+		Iterator<Integer> iter = rTree.queryRange(this.query.getRow(0), this.queryDist());
+		Assert.assertTrue(iter.hasNext());
+		int ans0 = iter.next();
+		Assert.assertTrue(iter.hasNext());
+		int ans1 = iter.next();
+		Assert.assertFalse(iter.hasNext());
 		
-		double[] rects = {
-		//  min-x, min-y, max-x, max-y
-			110.0, 77.0, 241.0, 202.0,
-			196.0, 156.0, 434.0, 286.0,
-			395, 198, 865, 436,
-			569, 54, 678, 121,
-			855, 90, 1024, 135
-		};
+		Assert.assertEquals('c', (char) ('a' + Math.min(ans0, ans1)));
+		Assert.assertEquals('m', (char) ('a' + Math.max(ans0, ans1)));
 		
-		double[] bounds = new double[rects.length];
-		for(int i = 0; i < bounds.length; i +=4){
-			bounds[i] = rects[i];
-			bounds[i + 1] = rects[i + 2];
-			bounds[i + 2] = rects[i + 1];
-			bounds[i + 3] = rects[i + 3];
+		this.filters = this.toMatrix(filters);
+	}
+	
+	@Test
+	@JacobiImport("test rand 2-D (32)")
+	@JacobiEquals(expected = 200, actual = 200)
+	@JacobiEquals(expected = 300, actual = 300)
+	public void shouldBeAbleToQueryRangeInRand2D32Tree() {
+		List<int[]> filters = new ArrayList<>();
+		RInlineTree rTree = this.buildTree((idx, lf) -> new RInlineTree(idx, lf, this.input){
+
+			@Override
+			protected int[] queryFilter(RLayer rLayer, double[] query, double maxDist, int[] filter) {
+				int[] next = super.queryFilter(rLayer, query, maxDist, filter);
+				filters.add(next);
+				return next;
+			}
+			
+		});
+
+		Iterator<Integer> iter = rTree.queryRange(this.query.getRow(0), this.queryDist());
+		Assert.assertTrue(iter.hasNext());
+		int ans0 = iter.next();
+		Assert.assertFalse(iter.hasNext());
+		
+		this.filters = this.toMatrix(filters);
+		this.ans = Matrices.scalar(ans0);
+	}
+	
+	@Test
+	@JacobiImport("test rand 2-D sort by Y (32)")
+	@JacobiEquals(expected = 200, actual = 200)
+	@JacobiEquals(expected = 300, actual = 300)
+	public void shouldBeAbleToQueryRangeInRand2DSortByY32Tree() {
+		List<int[]> filters = new ArrayList<>();
+		RInlineTree rTree = this.buildTree((idx, lf) -> new RInlineTree(idx, lf, this.input){
+
+			@Override
+			protected int[] queryFilter(RLayer rLayer, double[] query, double maxDist, int[] filter) {
+				int[] next = super.queryFilter(rLayer, query, maxDist, filter);
+				filters.add(next);
+				return next;
+			}
+			
+		});
+
+		Iterator<Integer> iter = rTree.queryRange(this.query.getRow(0), this.queryDist());
+		Assert.assertTrue(iter.hasNext());
+		int ans0 = iter.next();
+		Assert.assertTrue(iter.hasNext());
+		int ans1 = iter.next();
+		Assert.assertFalse(iter.hasNext());
+		
+		this.filters = this.toMatrix(filters);
+		this.ans = Matrices.wrap(new double[][]{new double[]{
+			Math.min(ans0, ans1),
+			Math.max(ans0, ans1)
+		}});
+	}
+	
+	@Test
+	@JacobiImport("test rand 4-D sort by X (128)")
+	@JacobiEquals(expected = 200, actual = 200)
+	public void shouldBeAbleToQueryRangeInRand4DSortByX128Tree() {
+		List<int[]> filters = new ArrayList<>();
+		RInlineTree rTree = this.buildTree((idx, lf) -> new RInlineTree(idx, lf, this.input){
+
+			@Override
+			protected int[] queryFilter(RLayer rLayer, double[] query, double maxDist, int[] filter) {
+				int[] next = super.queryFilter(rLayer, query, maxDist, filter);
+				filters.add(next);
+				return next;
+			}
+			
+		});
+
+		Iterator<Integer> iter = rTree.queryRange(this.query.getRow(0), this.queryDist());
+		Assert.assertFalse(iter.hasNext());
+		
+		this.filters = this.toMatrix(filters);
+	}
+	
+	protected double queryDist() {
+		double[] q0 = this.query.getRow(0);
+		double[] q1 = this.query.getRow(1);
+		double dist = 0.0;
+		
+		for(int i = 0; i < q0.length; i++){
+			double dx = q0[i] - q1[i];
+			dist += dx * dx;
 		}
 		
-		
-		RLayer rLayer = new RLayer(cuts, bounds);
-		double[] query = {557, 269};
-		double dist = 557 - 422;
-		
-		RInlineTree rTree = new RInlineTree(
-			Collections.singletonList(rLayer), 
-			null, 
-			null
-		);
-		
-		int[] filter = rTree.queryFilter(rLayer, query, dist * dist, new int[]{5});
-		Assert.assertArrayEquals(new int[]{-3, 12}, filter);
+		return Math.sqrt(dist);
 	}
+	
+	protected RInlineTree buildTree(BiFunction<List<RLayer>, RLayer, RInlineTree> factoryFn) {
+		RLayer leaves = this.toRLayer(this.all.get(10));
+		List<RLayer> layers = new ArrayList<>();
+		
+		for(int i = 11; i < 32; i++){
+			Matrix matrix = this.all.get(i);
+			if(matrix == null){
+				this.rLeaves = leaves;
+				Collections.reverse(layers);
+				this.rIndex = Collections.unmodifiableList(layers);
+				return factoryFn.apply(this.rIndex, this.rLeaves);
+			}
+			
+			RLayer rLayer = this.toRLayer(matrix);
+			layers.add(rLayer);
+		}
 
+		throw new UnsupportedOperationException("Tree too deep");
+	}
+	
+	protected RLayer toRLayer(Matrix input) {
+		int dim = input.getColCount() - 1;
+		if(dim % 2 != 0){
+			throw new IllegalArgumentException();
+		}
+		
+		int[] cuts = new int[input.getRowCount()];
+		double[] bounds = new double[cuts.length * dim];
+		
+		for(int i = 0; i < input.getRowCount(); i++){
+			double[] row = input.getRow(i);
+			cuts[i] = (int) row[0];
+			
+			System.arraycopy(row, 1, bounds, i * dim, dim);
+		}
+		return new RLayer(cuts, bounds);
+	}
+	
+	protected Matrix toMatrix(List<int[]> filters) {
+		Matrix matrix = Matrices.zeros(filters.size(), filters.stream().mapToInt(a -> a.length).max().orElse(0));
+		for(int i = 0; i < matrix.getRowCount(); i++){
+			int[] filter = filters.get(i);
+			matrix.getAndSet(i, r -> {
+				for(int j = 0; j < filter.length; j++){
+					r[j] = filter[j];
+				}
+			});
+		}
+		return matrix;
+	}
+	
 }

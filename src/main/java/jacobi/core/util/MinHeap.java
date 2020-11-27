@@ -249,8 +249,9 @@ public class MinHeap implements Enque<Weighted<Integer>> {
 	protected double[] ensureCapacity(double[] array, int max) {
 		int next = array.length / 2;
 		while(next < max){
+			int temp = next;
 			next += this.expand;
-			this.expand += DEFAULT_INCREMENT;
+			this.expand = temp;
 		}
 		
 		next *= 2;
@@ -261,11 +262,6 @@ public class MinHeap implements Enque<Weighted<Integer>> {
 	
 	private int length, expand;
 	private double[] array;
-	
-	/**
-	 * Default increment of expand size
-	 */
-	protected static final int DEFAULT_INCREMENT = 2;
 	
 	/**
 	 * Default initial element capacity

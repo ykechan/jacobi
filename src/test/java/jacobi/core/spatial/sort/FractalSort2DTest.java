@@ -9,10 +9,20 @@ import java.util.stream.IntStream;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+import jacobi.api.Matrix;
+import jacobi.test.annotations.JacobiImport;
+import jacobi.test.annotations.JacobiInject;
+import jacobi.test.util.JacobiJUnit4ClassRunner;
 import jacobi.test.util.JacobiSvg;
 
+@JacobiImport("/jacobi/test/data/FractalSort2DTest.xlsx")
+@RunWith(JacobiJUnit4ClassRunner.class)
 public class FractalSort2DTest {
+	
+	@JacobiInject(0)
+	public Matrix input;
 
 	@Test
 	public void shouldBeAbleToInitVectorsIntoComponentArray() {
@@ -244,6 +254,74 @@ public class FractalSort2DTest {
 			  + (a[1] - b[1]) * (a[1] - b[1]) < 3.0);
 		}
 		
+		this.render(this.orderBy(points, order), 0, 1).exportTo(null);
+	}
+	
+	@Test
+	@JacobiImport("test 32 rand 2-D")
+	public void shouldBeAbleToSort32Rand2DPoints() throws IOException {
+		List<double[]> points = new AbstractList<double[]>(){
+
+			@Override
+			public double[] get(int index) {
+				return input.getRow(index);
+			}
+
+			@Override
+			public int size() {
+				return input.getRowCount();
+			}
+			
+		};
+		
+		int[] order = new FractalSort2D(0, 1, Fractal2D.HILBERT).sort(points);
+		this.render(this.orderBy(points, order), 0, 1).exportTo(null);
+	}
+	
+	
+	@Test
+	@JacobiImport("test 30 rand 2-D")
+	public void shouldBeAbleToSort30Rand2DPoints() throws IOException {
+		List<double[]> points = new AbstractList<double[]>(){
+
+			@Override
+			public double[] get(int index) {
+				return input.getRow(index);
+			}
+
+			@Override
+			public int size() {
+				return input.getRowCount();
+			}
+			
+		};
+		
+		int[] order = new FractalSort2D(0, 1, Fractal2D.HILBERT).sort(points);
+		for(int i = 0; i < order.length; i++){
+			double[] p = points.get(order[i]);
+			System.out.println(p[0] + "\t" + p[1]);
+		}
+		this.render(this.orderBy(points, order), 0, 1).exportTo(null);
+	}
+	
+	@Test
+	@JacobiImport("test S1")
+	public void shouldBeAbleToS1Data() throws IOException {
+		List<double[]> points = new AbstractList<double[]>(){
+
+			@Override
+			public double[] get(int index) {
+				return input.getRow(index);
+			}
+
+			@Override
+			public int size() {
+				return input.getRowCount();
+			}
+			
+		};
+		
+		int[] order = new FractalSort2D(0, 1, Fractal2D.HILBERT).sort(points);
 		this.render(this.orderBy(points, order), 0, 1).exportTo(null);
 	}
 	

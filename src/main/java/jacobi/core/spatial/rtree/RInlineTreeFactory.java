@@ -70,6 +70,7 @@ public class RInlineTreeFactory {
 		RLayer leaves = hierarchy.get(depth);
 		
 		List<RLayer> index = hierarchy.subList(0, depth);
+		//return new RInlineTree(index, leaves, matrix);
 		return null;
 	}
 	

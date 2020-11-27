@@ -1,12 +1,8 @@
 package jacobi.core.spatial.sort;
 
 import java.util.Arrays;
-import java.util.function.IntBinaryOperator;
-import java.util.function.ToIntBiFunction;
 import java.util.function.ToLongBiFunction;
-import java.util.function.ToLongFunction;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.junit.Assert;
