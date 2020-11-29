@@ -49,7 +49,7 @@ public class DefaultSpatialSortTest {
 		
 		Matrix stats = DefaultSpatialSort.getInstance().sampleMedianAndVar(vectors);
 		Assert.assertArrayEquals(new double[]{20.0, 15.0, 25.0}, stats.getRow(0), 1e-12);
-		Assert.assertArrayEquals(new double[]{20.0, 10.0, 10.0}, stats.getRow(0), 1e-12);
+		Assert.assertArrayEquals(new double[]{20.0, 10.0, 10.0}, stats.getRow(1), 1e-12);
 	}
 	
 	@Test

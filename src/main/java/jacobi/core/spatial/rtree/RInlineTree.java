@@ -28,13 +28,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Queue;
 import java.util.PrimitiveIterator.OfInt;
 
 import jacobi.api.Matrix;
 import jacobi.api.spatial.SpatialIndex;
 import jacobi.core.util.IntStack;
-import jacobi.core.util.Weighted;
 
 /**
  * Implementation of a static inline R-Tree.
@@ -120,10 +118,6 @@ public class RInlineTree implements SpatialIndex<Integer> {
 					
 					int index = this.begin++;
 					double pDist = distFn(query, bounds, index);
-					System.out.println("#" + index + ": "
-							+ Arrays.toString(Arrays.copyOfRange(bounds, index * query.length, (index + 1) * query.length))
-							+ ", dist=" + pDist
-							+ ", qDist=" + qDist);
 					if(pDist > qDist){
 						continue;
 					}
@@ -173,7 +167,6 @@ public class RInlineTree implements SpatialIndex<Integer> {
 		IntStack stack = IntStack.newInstance();
 		
 		int depth = this.index.indexOf(rLayer);
-		System.out.println("#" + depth + ": " + Arrays.toString(cuts));
 		
 		int at = 0;
 		int run = 0;
@@ -181,8 +174,8 @@ public class RInlineTree implements SpatialIndex<Integer> {
 			int len = filter[i];
 			if(len < 0){
 				int end = at - len - 1;
-				int skip = cuts[end] - cuts[at];
-				at = end;
+				int skip = cuts[end] - (at == 0 ? 0 : cuts[at - 1]);
+				at -= len;
 				
 				if(run > 0){
 					stack.push(run);
@@ -214,6 +207,7 @@ public class RInlineTree implements SpatialIndex<Integer> {
 		if(run > 0){
 			stack.push(run);
 		}
+		
 		return stack.toArray();
 	}
 	
@@ -226,7 +220,7 @@ public class RInlineTree implements SpatialIndex<Integer> {
 	 * @return  Iterator to indices of all vectors within range
 	 */
 	protected Iterator<Integer> queryRangeByLeaves(double[] query, double qDist, int[] filter) {
-		int total = Arrays.stream(filter).sum();
+		int total = Arrays.stream(filter).sum();		
 		if(total < this.lazy){
 			return this.queryRangeByLeaves(query, qDist, filter);
 		}

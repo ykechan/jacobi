@@ -28,7 +28,6 @@ public class RCoverHeuristicPackerTest {
 		RLayer rLayer = this.ofAabbs(this.input);
 		int span = new RCoverHeuristicPacker(1, 16).packFront(rLayer, 0);
 		this.output = Matrices.scalar(span);
-		System.out.println(span);
 	}
 	
 	@Test
@@ -55,7 +54,7 @@ public class RCoverHeuristicPackerTest {
 			System.arraycopy(row, 0, array, i * aabbs.getColCount(), row.length);
 		}
 		
-		return new RLayer(new int[2 * aabbs.getRowCount()], array);
+		return new RLayer(new int[aabbs.getRowCount()], array);
 	}
 
 }
