@@ -80,6 +80,7 @@ public class RCoverHeuristicPacker implements Function<RLayer, RLayer> {
 		while(begin < rLayer.length()){
 			int span = this.packFront(rLayer, begin);
 			array.push(span);
+			begin += span;
 		}
 		return RLayer.coverOf(array.toArray(), rLayer);
 	}
@@ -127,7 +128,7 @@ public class RCoverHeuristicPacker implements Function<RLayer, RLayer> {
 				at = i + 1;
 			}
 		}
-		return at;
+		return at - begin;
 	}
 	
 	

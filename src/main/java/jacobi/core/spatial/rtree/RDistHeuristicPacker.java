@@ -109,7 +109,6 @@ public class RDistHeuristicPacker implements Function<List<double[]>, RLayer> {
 				}
 			}
 			
-			System.out.println("#" + i + ": Dist=" + dist);
 			if(i - begin < this.min){
 				continue;
 			}
@@ -119,7 +118,6 @@ public class RDistHeuristicPacker implements Function<List<double[]>, RLayer> {
 				max = i;
 			}
 		}
-		System.out.println("max=" + max);
 		return max - begin;
 	}
 

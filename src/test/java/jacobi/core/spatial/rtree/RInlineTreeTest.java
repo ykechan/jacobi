@@ -14,6 +14,7 @@ import org.junit.runner.RunWith;
 
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
+import jacobi.core.util.MinHeap;
 import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
@@ -151,6 +152,27 @@ public class RInlineTreeTest {
 		this.filters = this.toMatrix(filters);
 	}
 	
+	@Test
+	@JacobiImport("test kNN rand 3-D sort by Z")
+	public void shouldBeAbleToQueryAStarInRand3DSortByZ() {
+		RInlineTree rTree = this.buildTree((idx, lf) -> new RInlineTree(idx, lf, this.input));
+		double[] p = this.query.getRow(0);
+		int k = (int) this.query.get(1, 0);
+		
+		MinHeap heap = rTree.queryAStar(p, k);
+	}
+	
+	@Test
+	@JacobiImport("test 3 centroids 3-D (100)")
+	public void shouldBeAbleToQueryKnnIn3Centroids3D100() {
+		RInlineTree rTree = this.buildTree((idx, lf) -> new RInlineTree(idx, lf, this.input));
+		double[] p = this.query.getRow(0);
+		int k = (int) this.query.get(1, 0);
+		
+		MinHeap heap = rTree.queryAStar(p, k);
+		System.out.println(Arrays.toString(heap.flush()));
+	}
+	
 	protected double queryDist() {
 		double[] q0 = this.query.getRow(0);
 		double[] q1 = this.query.getRow(1);
@@ -165,7 +187,7 @@ public class RInlineTreeTest {
 	}
 	
 	protected RInlineTree buildTree(BiFunction<List<RLayer>, RLayer, RInlineTree> factoryFn) {
-		RLayer leaves = this.toRLayer(this.all.get(10));
+		RLayer leaves = this.toRLayer(this.all.get(10), true);
 		List<RLayer> layers = new ArrayList<>();
 		
 		for(int i = 11; i < 32; i++){
@@ -177,16 +199,16 @@ public class RInlineTreeTest {
 				return factoryFn.apply(this.rIndex, this.rLeaves);
 			}
 			
-			RLayer rLayer = this.toRLayer(matrix);
+			RLayer rLayer = this.toRLayer(matrix, false);
 			layers.add(rLayer);
 		}
 
 		throw new UnsupportedOperationException("Tree too deep");
 	}
 	
-	protected RLayer toRLayer(Matrix input) {
+	protected RLayer toRLayer(Matrix input, boolean isLeaf) {
 		int dim = input.getColCount() - 1;
-		if(dim % 2 != 0){
+		if(dim % 2 != 0 && !isLeaf){
 			throw new IllegalArgumentException();
 		}
 		

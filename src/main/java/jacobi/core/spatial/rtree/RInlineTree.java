@@ -26,13 +26,18 @@ package jacobi.core.spatial.rtree;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.PrimitiveIterator.OfInt;
+import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.stream.Collectors;
 
 import jacobi.api.Matrix;
 import jacobi.api.spatial.SpatialIndex;
 import jacobi.core.util.IntStack;
+import jacobi.core.util.MinHeap;
 
 /**
  * Implementation of a static inline R-Tree.
@@ -70,8 +75,17 @@ public class RInlineTree implements SpatialIndex<Integer> {
 
 	@Override
 	public List<Integer> queryKNN(double[] query, int kMax) {
-		// TODO Auto-generated method stub
-		return null;
+		if(query == null){
+			throw new IllegalArgumentException("No query point.");
+		}
+		
+		RLayer root = this.index.get(0);
+		if(query.length != root.dim()){
+			throw new IllegalArgumentException("Dimension mismatch.");
+		}
+		
+		MinHeap heap = this.queryAStar(query, kMax);
+		return Arrays.stream(heap.flush()).boxed().collect(Collectors.toList());
 	}
 
 	@Override
@@ -95,61 +109,55 @@ public class RInlineTree implements SpatialIndex<Integer> {
 		for(RLayer rLayer : this.index){
 			filter = this.queryFilter(rLayer, query, qDist, filter);
 		}
-		OfInt iter = Arrays.stream(filter).iterator();
 		
-		int gallop = Math.max(1, GALLOP_WIDTH / root.dim());
+		return this.queryRangeByLeaves(query, qDist, filter);
+	}
+	
+	/**
+	 * Query the first k nearest neighbor found by A*-star search
+	 * @param query  Query point
+	 * @param kMax  Maximum number of nearest neighbor
+	 * @return  Min-heap contains at least k
+	 */
+	protected MinHeap queryAStar(double[] query, int kMax) {
+		Queue<Node> queue = new PriorityQueue<>(Comparator.comparingDouble(n -> n.dist));
+		MinHeap heap = MinHeap.ofMax(kMax);
 		
-		int[] seq = this.leaves.cuts;
-		double[] bounds = this.leaves.bounds;
+		RLayer root = this.index.get(0);
 		
-		return new Iterator<Integer>() {
-
-			@Override
-			public boolean hasNext() {
-				if(!this.stack.isEmpty()){
-					return true;
-				}
-				
-				int done = 0;
-				while(this.begin < this.end){
-					if(!this.stack.isEmpty() && done++ > gallop){
-						return true;
-					}
-					
-					int index = this.begin++;
-					double pDist = distFn(query, bounds, index);
-					if(pDist > qDist){
-						continue;
-					}
-					
-					this.stack.push(seq[index]);
-				}
-				
-				if(!this.stack.isEmpty()){
-					return true;
-				}
-				
-				if(iter.hasNext()){
-					int span = iter.nextInt();
-					if(span > 0){
-						this.end = this.begin + span;
-					} else {
-						this.begin -= span;
-					}
-					return this.hasNext();
-				}
-				
-				return false;
-			}
-
-			@Override
-			public Integer next() {
-				return this.stack.pop();
+		queue.offer(new Node(-1, 0, 0.0));
+		while(!queue.isEmpty()){
+			Node node = queue.remove();
+			if(heap.size() >= kMax && -heap.peek().weight < node.dist){
+				break;
 			}
 			
-			private int begin, end;
-			private IntStack stack = IntStack.newInstance();
-		};
+			RLayer parent = node.depth < 0 ? null : this.index.get(node.depth);
+			int begin = parent == null || node.index == 0 ? 0 : parent.cuts[node.index - 1];
+			int end = parent == null ? root.length() : parent.cuts[node.index];
+			
+			int depth = node.depth + 1;
+			if(depth < this.index.size()){
+				RLayer rLayer = this.index.get(depth);
+				
+				double[] bounds = rLayer.bounds;
+				
+				for(int i = begin; i < end; i++){
+					double dist = this.distMbb(query, bounds, i, Double.MAX_VALUE);
+					queue.offer(new Node(depth, i, dist));
+				}
+				continue;
+			}
+			
+			double[] bounds = this.leaves.bounds;
+			int[] seq = this.leaves.cuts;
+			// query leaves
+			for(int i = begin; i < end; i++){				
+				double dist = this.distFn(query, bounds, i);
+				heap.push(seq[i], -dist);
+			}
+		}
+		return heap;
 	}
 	
 	/**
@@ -165,8 +173,6 @@ public class RInlineTree implements SpatialIndex<Integer> {
 		double[] bounds = rLayer.bounds;
 		
 		IntStack stack = IntStack.newInstance();
-		
-		int depth = this.index.indexOf(rLayer);
 		
 		int at = 0;
 		int run = 0;
@@ -222,47 +228,65 @@ public class RInlineTree implements SpatialIndex<Integer> {
 	protected Iterator<Integer> queryRangeByLeaves(double[] query, double qDist, int[] filter) {
 		int total = Arrays.stream(filter).sum();		
 		if(total < this.lazy){
-			return this.queryRangeByLeaves(query, qDist, filter);
+			return this.queryRangeListByLeaves(query, qDist, filter);
 		}
 		
-		double[] array = this.leaves.bounds;
-		IntStack result = IntStack.newInstance();
+		double[] bounds = this.leaves.bounds;
+		int[] seq = this.leaves.cuts;
 		
 		OfInt iter = Arrays.stream(filter).iterator();
+		
+		int dim = bounds.length / 2 / seq.length;
+		int gallop = Math.max(1, GALLOP_WIDTH / dim);
 		
 		// lazy
 		return new Iterator<Integer>() {
 
 			@Override
 			public boolean hasNext() {
-				if(!result.isEmpty()){
+				if(!this.stack.isEmpty()){
 					return true;
 				}
 				
-				if(this.end - this.begin < 1){
-					int span = iter.nextInt();
-					if(span < 0){
-						this.begin -= span;
-					}else{
-						this.end = this.begin + span;
+				int done = 0;
+				while(this.begin < this.end){
+					if(!this.stack.isEmpty() && done++ > gallop){
+						return true;
 					}
 					
+					int index = this.begin++;
+					double pDist = distFn(query, bounds, index);
+					if(pDist > qDist){
+						continue;
+					}
+					
+					this.stack.push(seq[index]);
+				}
+				
+				if(!this.stack.isEmpty()){
+					return true;
+				}
+				
+				if(iter.hasNext()){
+					int span = iter.nextInt();
+					if(span > 0){
+						this.end = this.begin + span;
+					} else {
+						this.begin -= span;
+					}
 					return this.hasNext();
 				}
 				
-				while(this.begin < this.end){
-					
-				}
 				return false;
 			}
 
 			@Override
 			public Integer next() {
-				return result.pop();
+				return this.stack.pop();
 			}
 			
-			private int begin = 0;
-			private int end = 0;
+			private int begin, end;
+			private IntStack stack = IntStack.newInstance();
 		};
 	}
 	
@@ -298,6 +322,34 @@ public class RInlineTree implements SpatialIndex<Integer> {
 			begin = end;
 		}
 		return result.iterator();
+	}
+	
+	/**
+	 * Query all vectors in leaf nodes to heap with the query point by filter
+	 * @param query  Query point
+	 * @param heap   Min heap
+	 * @param filter  Sequence of access to leaf nodes
+	 * @return  Iterator to indices of all vectors within range
+	 */
+	protected List<Integer> queryRangeHeapByLeaves(double[] query, MinHeap heap, int[] filter) {
+		int[] seq = this.leaves.cuts;
+		double[] array = this.leaves.bounds;
+		
+		int begin = 0;
+		for(int s : filter){
+			if(s < 0){
+				begin -= s;
+				continue;
+			}
+			
+			int end = begin + s;
+			for(int i = begin; i < end; i++){
+				double pDist = this.distFn(query, array, i);
+				heap.push(seq[i], pDist);
+			}
+			begin = end;
+		}
+		return Arrays.stream(heap.flush()).boxed().collect(Collectors.toList());
 	}
 	
 	/**
@@ -351,6 +403,43 @@ public class RInlineTree implements SpatialIndex<Integer> {
 	private RLayer leaves;
 	private Matrix matrix;
 	private int lazy;
+	
+	/**
+	 * Data object of an address to a node in the R-Tree
+	 * 
+	 * @author Y.K. Chan
+	 *
+	 */
+	protected static class Node {
+		
+		/**
+		 * Distance to this node
+		 */
+		public final double dist;
+		
+		/**
+		 * Depth of this node
+		 */
+		public final int depth;
+		
+		/**
+		 * Index of this node
+		 */
+		public final int index;
+		
+		/**
+		 * Constructor
+		 * @param depth  Depth of this node
+		 * @param index  Index of this node
+		 * @param dist  Distance to this node
+		 */
+		public Node(int depth, int index, double dist) {
+			this.dist = dist;
+			this.depth = depth;
+			this.index = index;
+		}
+		
+	}
 	
 	protected static final int DEFAULT_LAZY_LENGTH = 8;
 	
