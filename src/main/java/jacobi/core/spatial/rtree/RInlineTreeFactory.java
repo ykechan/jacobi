@@ -52,10 +52,12 @@ public class RInlineTreeFactory {
 	 */
 	public RInlineTreeFactory(SpatialSort sortingFn, 
 			Function<RLayer, RLayer> rPacker,
-			Function<List<double[]>, RLayer> sPacker) {
+			Function<List<double[]>, RLayer> sPacker,
+			boolean inline) {
 		this.sortingFn = sortingFn;
 		this.rPacker = rPacker;
 		this.sPacker = sPacker;
+		this.inline = inline;
 	}
 
 	/**
@@ -64,7 +66,7 @@ public class RInlineTreeFactory {
 	 * @return  Spatial index
 	 */
 	public SpatialIndex<Integer> create(Matrix matrix) {
-		List<RLayer> hierarchy = this.buildHierarchy(matrix, true);
+		List<RLayer> hierarchy = this.buildHierarchy(matrix, this.inline);
 		
 		int depth = hierarchy.size() - 1;
 		RLayer leaves = hierarchy.get(depth);
@@ -160,4 +162,5 @@ public class RInlineTreeFactory {
 	private SpatialSort sortingFn;
 	private Function<RLayer, RLayer> rPacker;
 	private Function<List<double[]>, RLayer> sPacker;
+	private boolean inline;
 }

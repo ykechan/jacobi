@@ -221,6 +221,32 @@ public class RLayerTest {
 		RLayer.coverOf(span, Arrays.asList(vectors));
 	}
 	
+	@Test(expected = IllegalArgumentException.class)
+	public void shouldBeAbleToDetectInvalidCover() {
+		int[] span = {-2, 2}; // 4 nodes
+		double[][] vectors = {
+			new double[]{1.0, 2.0, 3.0, 4.0},
+			new double[]{10.0, 20.0, 30.0, 40.0, 0.0},
+			new double[]{50.0, 60.0, 70.0, 80.0},
+			new double[]{100.0, 200.0, 100.0, 200.0}
+		}; // 2-D AABBs
+		
+		RLayer.coverOf(span, Arrays.asList(vectors));
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void shouldBeAbleToDetectDimensionMismatch() {
+		int[] span = {2, 2}; // 4 nodes
+		double[][] vectors = {
+			new double[]{1.0, 2.0, 3.0, 4.0},
+			new double[]{10.0, 20.0, 30.0, 40.0},
+			new double[]{50.0, 60.0, 70.0},
+			new double[]{100.0, 200.0, 100.0}
+		}; // 2-D AABBs
+		
+		RLayer.coverOf(span, Arrays.asList(vectors));
+	}
+	
 	protected RLayer ofAabbs(Matrix aabbs, int[] span) {
 		double[] array = new double[aabbs.getRowCount() * aabbs.getColCount()];
 		for(int i = 0; i < aabbs.getRowCount(); i++){

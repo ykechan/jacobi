@@ -31,7 +31,8 @@ public class RInlineTreeFactoryTest {
 		RInlineTreeFactory factory = new RInlineTreeFactory(
 			ls -> this.sortBy(ls, 0),
 			this.nodePacker(5),
-			this.vectorPacker(10)
+			this.vectorPacker(10),
+			true
 		);
 		
 		RLayer base = factory.serialize(this.input, false);
@@ -52,7 +53,8 @@ public class RInlineTreeFactoryTest {
 		RInlineTreeFactory factory = new RInlineTreeFactory(
 			ls -> this.sortBy(ls, 0),
 			this.nodePacker(5),
-			this.vectorPacker(10)
+			this.vectorPacker(10),
+			true
 		);
 		
 		RLayer base = factory.serialize(this.input, true);
@@ -81,7 +83,8 @@ public class RInlineTreeFactoryTest {
 		RInlineTreeFactory factory = new RInlineTreeFactory(
 			ls -> this.sortBy(ls, 0),
 			this.nodePacker(5),
-			this.vectorPacker(10)
+			this.vectorPacker(10),
+			true
 		);
 		
 		List<RLayer> hierarchy = factory.buildHierarchy(this.input, true);
@@ -112,7 +115,8 @@ public class RInlineTreeFactoryTest {
 		RInlineTreeFactory factory = new RInlineTreeFactory(
 			ls -> this.sortBy(ls, 0),
 			this.nodePacker(5),
-			this.vectorPacker(10)
+			this.vectorPacker(10),
+			true
 		);
 		
 		List<RLayer> hierarchy = factory.buildHierarchy(this.input, true);
@@ -139,7 +143,8 @@ public class RInlineTreeFactoryTest {
 		RInlineTreeFactory factory = new RInlineTreeFactory(
 				ls -> this.sortBy(ls, 0),
 				this.nodePacker(5),
-				this.vectorPacker(10)
+				this.vectorPacker(10),
+				true
 			);
 			
 		List<RLayer> hierarchy = factory.buildHierarchy(this.input, true);

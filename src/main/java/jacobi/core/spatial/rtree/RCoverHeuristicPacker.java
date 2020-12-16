@@ -85,6 +85,12 @@ public class RCoverHeuristicPacker implements Function<RLayer, RLayer> {
 		return RLayer.coverOf(array.toArray(), rLayer);
 	}
 	
+	/**
+	 * Determine the number of nodes at the beginning of the R-Layer to be packed
+	 * @param rLayer  Input R-Layer
+	 * @param begin  Begin index of interest
+	 * @return  Number of nodes to be packed
+	 */
 	protected int packFront(RLayer rLayer, int begin) {
 		int end = Math.min(begin + this.max, rLayer.length());
 		if(end - begin < this.min){
@@ -131,7 +137,13 @@ public class RCoverHeuristicPacker implements Function<RLayer, RLayer> {
 		return at - begin;
 	}
 	
-	
+	/**
+	 * Update minimum bounding box to include the node given by index
+	 * @param rLayer  R-Layer
+	 * @param index  Index of node
+	 * @param mbb  minimum-bounding box
+	 * @return  Volume of the updated mbb, with true as item if mbb has been extended, and false otherwise
+	 */
 	protected Weighted<Boolean> updateMBB(RLayer rLayer, int index, double[] mbb) {
 		double vol = 1.0;
 		boolean extended = false;
@@ -156,6 +168,11 @@ public class RCoverHeuristicPacker implements Function<RLayer, RLayer> {
 		return new Weighted<>(extended, vol);
 	}
 	
+	/**
+	 * Compute the volume of an axis-aligned bounding box. 
+	 * @param aabb  Axis-aligned bounding box
+	 * @return  Volume, or -1.0 if overflow may occur
+	 */
 	protected double volume(double[] aabb) {
 		double vol = 1.0;
 		for(int i = 0; i < aabb.length; i+=2){
@@ -167,6 +184,12 @@ public class RCoverHeuristicPacker implements Function<RLayer, RLayer> {
 		return vol;
 	}
 	
+	/**
+	 * Compute the volume ratio of an axis-aligned bounding box. 
+	 * @param aabb  Axis-aligned bounding box
+	 * @param range  Range span in each dimension
+	 * @return  Volume ratio
+	 */
 	protected double volume(double[] aabb, double[] range) {
 		double vol = 1.0;
 		for(int i = 0; i < aabb.length; i+=2){
@@ -177,6 +200,9 @@ public class RCoverHeuristicPacker implements Function<RLayer, RLayer> {
 
 	private int min, max;
 	
+	/**
+	 * Threshold value that may cause overflow
+	 */
 	protected static final double MAG_THRES = Integer.MAX_VALUE;
 	
 	protected static final double SPAN = 16.0;
