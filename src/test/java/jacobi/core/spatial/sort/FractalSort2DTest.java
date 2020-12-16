@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.io.IOException;
 import java.util.AbstractList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -323,6 +324,55 @@ public class FractalSort2DTest {
 		
 		int[] order = new FractalSort2D(0, 1, Fractal2D.HILBERT).sort(points);
 		this.render(this.orderBy(points, order), 0, 1).exportTo(null);
+	}
+	
+	@Test(expected = RuntimeException.class)
+	public void shouldFailWhenFractalFunctionReturnNonQuadrantArray() {
+		new FractalSort2D(0, 1, k -> new int[]{1, 2, 3, 4, 5}).sort(new AbstractList<double[]>(){
+
+			@Override
+			public double[] get(int index) {
+				return new double[]{index, index};
+			}
+
+			@Override
+			public int size() {
+				return 10;
+			}
+			
+		});
+	}
+	
+	@Test
+	public void shouldReturnWhenSortingEmptyList() {
+		int[] result = new FractalSort2D(0, 1, Fractal2D.Z_CURVE).sort(Collections.emptyList());
+		Assert.assertNotNull(result);
+		Assert.assertEquals(0, result.length);
+	}
+	
+	@Test
+	public void shouldReturnWhenSortingAllDegenerateList() {
+		int[] result = new FractalSort2D(0, 1, Fractal2D.Z_CURVE).sort(new AbstractList<double[]>(){
+
+			@Override
+			public double[] get(int index) {
+				return new double[]{0.0, 0.0};
+			}
+
+			@Override
+			public int size() {
+				return 1024;
+			}
+			
+		});
+		
+		Assert.assertEquals(1024, result.length);
+	}
+	
+	@Test
+	public void shouldQuitOnEmptyIndices() {
+		int[] result = new FractalSort2D(0, 1, Fractal2D.Z_CURVE).sort(new double[0], new int[0], 0);
+		Assert.assertEquals(0, result.length);
 	}
 	
 	protected List<double[]> orderBy(List<double[]> vectors, int[] order) {

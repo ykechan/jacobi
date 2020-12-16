@@ -8,6 +8,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import jacobi.core.spatial.sort.HilbertSort3D.BasisType;
+import jacobi.core.util.IntStack;
 
 public class HilbertSort3DTest {
 	
@@ -159,6 +160,23 @@ public class HilbertSort3DTest {
 			  + Math.abs(u[1] - v[1])
 			  + Math.abs(u[2] - v[2]), 1e-8);
 		}
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void shouldFailToEnhanceResolutionWhenParityIsIncorrect() {
+		new HilbertSort3D(0, 1, 2).enhanceResolution(1234);
+	}
+	
+	@Test(expected = IllegalStateException.class)
+	public void shouldFailWhenOctGroupsDoesntCoverTheFullOctrant() {
+		new HilbertSort3D(0, 1, 2){
+
+			@Override
+			protected IntStack[] octGroups(double[] comps, int begin, int end, int[] order) {
+				return new IntStack[0];
+			}
+			
+		}.sort(new double[]{1.0, 2.0, 3.0}, new Category(0, 3, 0, 0) , new int[0]);
 	}
 	
 	protected List<double[]> grid(int n) {

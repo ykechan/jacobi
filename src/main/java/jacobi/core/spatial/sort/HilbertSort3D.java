@@ -73,6 +73,13 @@ public class HilbertSort3D implements SpatialSort {
 		);
 	}
 
+	/**
+	 * Sort a list of vectors by basis curve
+	 * @param comps  Vector components serialized
+	 * @param basis  Basis curve
+	 * @param order  Order sequence	 
+	 * @return  Sorted sequence
+	 */
 	protected int[] sort(double[] comps, int basis, int[] order) {
 		Deque<Category> stack = new ArrayDeque<>();
 		stack.push(new Category(0, order.length, basis, 0));
@@ -108,6 +115,13 @@ public class HilbertSort3D implements SpatialSort {
 		return order;
 	}
 	
+	/**
+	 *  Sort a list of vectors within a octrant
+	 * @param comps  Vector components serialized
+	 * @param octrant  Octrant in 3-D space
+	 * @param order  Order sequence
+	 * @return  Sorted sequence
+	 */
 	protected int[] sort(double[] comps, Category octrant, int[] order) {
 		IntStack[] octs = this.octGroups(comps, octrant.begin, octrant.end, order);
 		int[] counts = new int[octs.length];
@@ -130,6 +144,14 @@ public class HilbertSort3D implements SpatialSort {
 		return counts;
 	}
 	
+	/**
+	 * Group vectors into 8 octrants
+	 * @param comps  Vector components serialized
+	 * @param begin  Begin index of interest
+	 * @param end  End index of interest
+	 * @param order  Order sequence
+	 * @return  Indices of vectors in 8 octrants
+	 */
 	protected IntStack[] octGroups(double[] comps, int begin, int end, int[] order) {
 		IntStack[] groups = new IntStack[8];
 		double[] u = this.mean(comps, begin, end, order);
@@ -149,6 +171,11 @@ public class HilbertSort3D implements SpatialSort {
 		return groups;
 	}
 	
+	/**
+	 * Serialize components of a list of vectors
+	 * @param vectors  List of vectors
+	 * @return  Vector components serialized
+	 */
 	protected double[] init(List<double[]> vectors) {
 		double[] comps = new double[3 * vectors.size()];
 		int k = 0;
@@ -160,6 +187,14 @@ public class HilbertSort3D implements SpatialSort {
 		return comps;
 	}
 	
+	/**
+	 * Compute the mean of vectors
+	 * @param comps  Vector components serialized
+	 * @param begin  Begin index of interest
+	 * @param end  End index of interest
+	 * @param order  Order sequence
+	 * @returnv  Mean vector
+	 */
 	protected double[] mean(double[] comps, int begin, int end, int[] order) {
 		double[] ans = new double[3];
 		for(int i = begin; i < end; i++) {
@@ -175,6 +210,11 @@ public class HilbertSort3D implements SpatialSort {
 		return ans;
 	}
 	
+	/**
+	 * Enhance the resolution of a octrant given the parity of the octrant
+	 * @param parity  Parity of the octrant
+	 * @return  Encoded parities for the inner octrants
+	 */
 	protected long enhanceResolution(int parity) {
 		int index = BasisType.values().length * (parity % 8);
 		
@@ -189,6 +229,9 @@ public class HilbertSort3D implements SpatialSort {
 
 	private int xIdx, yIdx, zIdx;
 	
+	/**
+	 * Encoded basis curve
+	 */
 	protected static final int[] BASIS = {
 		9954504, 16147656, 3135888, 5237064, 
 		12533913, 14598297, 740313, 7043841, 
@@ -200,6 +243,9 @@ public class HilbertSort3D implements SpatialSort {
 		6822711, 629559, 13641327, 11540151
 	};
 	
+	/**
+	 * Encoded basis curves for enhancing resolution
+	 */
 	protected static final long[] ENHANCE = {
 		472462885633L , 60548678401L  , 882708449985L , 750667566945L , 
 		326563205637L , 189258469893L , 1015990721093L, 617653477349L , 
@@ -211,6 +257,10 @@ public class HilbertSort3D implements SpatialSort {
 		589370355869L , 1001284563101L, 183547492701L , 317802970365L
 	};
 	
+	/**
+	 * Types of Hilbert basis curve
+	 * @author Y.K. Chan
+	 */
 	protected enum BasisType {
 		
 		STAY, DIAG, RIGHT, FORWARD

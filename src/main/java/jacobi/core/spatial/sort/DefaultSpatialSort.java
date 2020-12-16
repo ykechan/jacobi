@@ -59,6 +59,10 @@ public class DefaultSpatialSort implements SpatialSort {
 	 */
 	public static final int DEFAULT_SAMPLING_SIZE = 13;
 	
+	/**
+	 * Get the singleton instance of this class
+	 * @return  Singleton instance
+	 */
 	public static DefaultSpatialSort getInstance() {
 		return INST;
 	}
@@ -87,7 +91,7 @@ public class DefaultSpatialSort implements SpatialSort {
 		int dim = vectors.get(0).length;
 		switch(dim){
 			case 0:
-				return new int[0];
+				return IntStream.range(0, vectors.size()).toArray();
 				
 			case 1:
 				// not a spatial sort, but ok
@@ -107,6 +111,11 @@ public class DefaultSpatialSort implements SpatialSort {
 		return this.zSort.sort(vectors);
 	}
 	
+	/**
+	 * Get spatial sort implementation for special case that only a few dimensions are significant
+	 * @param dim  Dimensions that are significant
+	 * @return  Implementation if sorting these dimensions is available, null otherwise
+	 */
 	protected SpatialSort getSortingFunction(int[] dim) {
 		switch(dim.length){
 			case 0:
