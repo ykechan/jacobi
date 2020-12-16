@@ -76,6 +76,11 @@ public class DefaultRTreeFactory {
 	public static final int DEFAULT_SAMPLE_SIZE = 16;
 	
 	/**
+	 * Default flag for serialize the matrix data to a single array for better access locality
+	 */
+	public static final boolean DEFAULT_INLINE_DATA = true;
+	
+	/**
 	 * Constructor
 	 * @param  data  Spatial data as row vectors in a matrix
 	 */
@@ -86,6 +91,7 @@ public class DefaultRTreeFactory {
 		this.nodeMax = DEFAULT_NODE_MAX;
 		this.rSquare = DEFAULT_R_SQUARE;
 		this.sampleSize = DEFAULT_SAMPLE_SIZE;
+		this.inline = DEFAULT_INLINE_DATA;
 		this.randFn = () -> ThreadLocalRandom.current().nextDouble();
 		this.data = data;
 	}
@@ -173,7 +179,7 @@ public class DefaultRTreeFactory {
 			? new DefaultSpatialSort(this.randFn, this.sampleSize, this.rSquare)
 			: this.spatialSort;
 		
-		RInlineTreeFactory rFactory = new RInlineTreeFactory(sSort, rPacker, sPacker);
+		RInlineTreeFactory rFactory = new RInlineTreeFactory(sSort, rPacker, sPacker, inline);
 		return rFactory.create(this.data);
 	}
 
@@ -181,6 +187,7 @@ public class DefaultRTreeFactory {
 	private int nodeMin, nodeMax;
 	private double rSquare;
 	private int sampleSize;
+	private boolean inline;
 	private DoubleSupplier randFn;
 	private SpatialSort spatialSort;
 	private Matrix data;
