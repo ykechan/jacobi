@@ -33,6 +33,8 @@ import jacobi.test.annotations.JacobiInject;
 import jacobi.test.annotations.JacobiResult;
 import jacobi.test.util.Jacobi;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
+
+import java.util.Arrays;
 import java.util.stream.IntStream;
 import org.junit.Assert;
 import org.junit.Test;
@@ -108,6 +110,7 @@ public class CholeskyDecompTest {
     }
     
     protected Matrix front(double[] zElem) {
+    	System.out.println("z=" + Arrays.toString(zElem));
         return Matrices.wrap(new double[][]{
             IntStream.range(0, zElem.length / 2).mapToDouble((i) -> zElem[4*(i/2) + (i % 2)] ).toArray()
         });

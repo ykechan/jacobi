@@ -24,6 +24,8 @@
 package jacobi.core.solver;
 
 import jacobi.api.Matrix;
+import jacobi.core.impl.ColumnVector;
+import jacobi.core.util.Real;
 import jacobi.core.util.Throw;
 import java.util.stream.IntStream;
 
@@ -67,12 +69,30 @@ public class Substitution {
                         + ", got " 
                         + rhs.getRowCount() 
                         + " known values."
-            );        
-        return this.tri.getRowCount() < this.tri.getColCount()
-                ? null
-                : this.mode == Mode.BACKWARD 
-                    ? this.backward(rhs) 
-                    : this.forward(rhs);
+            );
+        if(this.tri.getRowCount() < this.tri.getColCount()){
+        	return null;
+        }
+        
+        if(rhs instanceof ColumnVector){
+        	double[] vector = ((ColumnVector) rhs).getVector();
+        	double[] result = this.mode == Mode.BACKWARD 
+        			? this.backward(vector) 
+        			: this.forward(vector);
+        	return result == null ? null : rhs;
+        }
+        
+        return this.mode == Mode.BACKWARD ? this.backward(rhs) : this.forward(rhs);
+    }
+    
+    /**
+     * Compute substitution on a column vector. This method is perturbative, i.e.&nbsp;it transforms 
+     * the input into the output.
+     * @param vector  Right-hand side of the equation
+     * @return  Column vector after substitution, or null if unable to substitute
+     */
+    public double[] compute(double[] vector) {
+    	return this.mode == Mode.BACKWARD ? this.backward(vector) : this.forward(vector);
     }
     
     /**
@@ -95,6 +115,30 @@ public class Substitution {
     }
     
     /**
+     * Forward substitution on a column vector. This method is perturbative, i.e.&nbsp;it transforms 
+     * the input into the output.
+     * @param vector  Right-hand side of the equation
+     * @return  Column vector after substitution, or null if unable to substitute
+     */
+    protected double[] forward(double[] vector) {
+    	int n = Math.min(this.tri.getRowCount(), this.tri.getColCount());
+        for(int i = 0; i < n; i++){
+        	double[] row = this.tri.getRow(i);
+        	
+        	double elem = vector[i];
+        	for(int j = 0; j < i; j++){
+        		elem -= row[j] * vector[j];
+        	}
+
+        	if(Real.isNegl(row[i])){
+        		return null;
+        	}
+        	vector[i] = elem / row[i];
+        }
+        return vector;
+    }
+    
+    /**
      * Backward substitution. This method is perturbative, i.e.&nbsp;it transforms 
      * the input into the output.
      * @param rhs  Right-hand side of the equation
@@ -111,6 +155,30 @@ public class Substitution {
             rhs.setRow(i, sol);
         }
         return rhs;
+    }
+    
+    /**
+     * Backward substitution on a column vector. This method is perturbative, i.e.&nbsp;it transforms 
+     * the input into the output.
+     * @param vector  Right-hand side of the equation
+     * @return  Column vector after substitution, or null if unable to substitute
+     */
+    protected double[] backward(double[] vector) {
+    	int n = Math.min(this.tri.getRowCount(), this.tri.getColCount()) - 1;
+        for(int i = n; i >= 0; i--){
+        	double[] row = this.tri.getRow(i);
+        	
+        	double elem = vector[i];
+        	for(int j = i + 1; j < row.length; j++){
+        		elem -= row[j] * vector[j];
+        	}
+        	
+        	if(Real.isNegl(row[i])){
+        		return null;
+        	}
+        	vector[i] = elem / row[i];
+        }
+        return vector;
     }
     
     /**

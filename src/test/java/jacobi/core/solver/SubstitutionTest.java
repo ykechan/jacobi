@@ -25,12 +25,16 @@ package jacobi.core.solver;
 
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
+import jacobi.core.impl.ColumnVector;
 import jacobi.core.solver.Substitution.Mode;
 import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.annotations.JacobiResult;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
+
+import java.util.stream.IntStream;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,6 +62,16 @@ public class SubstitutionTest {
     }
     
     @Test
+    @JacobiImport("Upper Full Rank 5x5x1")
+    @JacobiEquals(expected = 2, actual = 2)
+    public void testUpperFullRank5x5x1UsingVector() {
+    	double[] vector = IntStream.range(0, this.rhs.getRowCount()).mapToDouble(i -> this.rhs.get(i, 0)).toArray();
+        double[] result = new Substitution(Mode.BACKWARD, this.tri).compute(vector);
+        
+        this.rhs = new ColumnVector(result);
+    }
+    
+    @Test
     @JacobiImport("Upper Full Rank 5x5x3")
     @JacobiEquals(expected = 2, actual = 2)
     public void testUpperFullRank5x5x3() {
@@ -76,6 +90,16 @@ public class SubstitutionTest {
     @JacobiEquals(expected = 2, actual = 2)
     public void testLowerFullRank6x6x1() {
         new Substitution(Mode.FORWARD, this.tri).compute(rhs);
+    }
+    
+    @Test
+    @JacobiImport("Lower Full Rank 6x6x1")
+    @JacobiEquals(expected = 2, actual = 2)
+    public void testLowerFullRank6x6x1UsingVector() {
+    	double[] vector = IntStream.range(0, this.rhs.getRowCount()).mapToDouble(i -> this.rhs.get(i, 0)).toArray();
+        double[] result = new Substitution(Mode.FORWARD, this.tri).compute(vector);
+        
+        this.rhs = new ColumnVector(result);
     }
     
     @Test
@@ -118,9 +142,41 @@ public class SubstitutionTest {
         Assert.assertNull(new Substitution(Mode.FORWARD, this.tri).compute(rhs));
     }
     
+    @Test
+    @JacobiImport("Lower 5x5x1")
+    public void testLowerUnderDet5x5x2() {
+        Assert.assertNull(new Substitution(Mode.FORWARD, this.tri).compute(rhs));
+    }
+    
+    @Test
+    @JacobiImport("Lower Full Rank 5x5x3")
+    @JacobiEquals(expected = 2, actual = 2)
+    public void shouldBeAbleToSolveLowerFullRank5x5x3() {
+    	new Substitution(Mode.FORWARD, this.tri).compute(rhs);
+    }
+    
     @Test(expected = IllegalArgumentException.class)
     public void testRowCountMismatch() {
         new Substitution(Mode.BACKWARD, Matrices.zeros(5, 3)).compute(Matrices.zeros(2));
     }
     
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldFailWhenNoTriangularMatrixSupplied() {
+    	new Substitution(Mode.BACKWARD, null);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldFailWhenNoModeSupplied() {
+    	new Substitution(null, Matrices.zeros(3));
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldFailWhenRHSNotSupplied() {
+    	new Substitution(Mode.BACKWARD, Matrices.zeros(5, 3)).compute((Matrix) null);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldReturnNullWhenUnderDetTriangularMatrixSupplied() {
+    	new Substitution(Mode.BACKWARD, Matrices.zeros(5, 3)).compute((Matrix) null);
+    }
 }
