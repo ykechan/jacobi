@@ -39,5 +39,17 @@ public class DecisionTest {
 		Assert.assertFalse(set.contains(new Decision<>(42)));
 		Assert.assertFalse(set.contains(new Decision<>("John Wayne Gacy")));
 	}
+	
+	@Test
+	public void shouldDecisionNodeEqualsToItselfByInstance() {
+		Decision<String> decision = new Decision<>("eureka");
+		Assert.assertTrue(decision.equals(decision));
+	}
+	
+	@Test
+	public void shouldDecisionNodeNotEqualsToOtherObject() {
+		Assert.assertFalse(new Decision<>("eureka").equals(Boolean.TRUE));
+		Assert.assertFalse(new Decision<>("eureka").equals(10));
+	}
 
 }
