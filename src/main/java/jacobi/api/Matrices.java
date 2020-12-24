@@ -94,7 +94,7 @@ public final class Matrices {
      * @param rows  Matrix elements
      * @return  Matrix instance
      */
-    public static Matrix wrap(double[][] rows) {
+    public static Matrix wrap(double[]... rows) {
         return rows == null || rows.length == 0 || rows[0].length == 0
                 ? Empty.getInstance() 
                 : new DefaultMatrix(rows);
