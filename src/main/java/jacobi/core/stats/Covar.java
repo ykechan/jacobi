@@ -59,7 +59,7 @@ public class Covar {
             double[] row = cov.getRow(i);
             for(int j = 0; j < i; j++){
                 row[j] = cov.get(j, i);
-            }            
+            }
             cov.setRow(i, row);
         }
         return cov;

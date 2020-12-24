@@ -82,17 +82,27 @@ public class Variance {
      * @return  Variance value of each columns
      */
     public double[] compute(Matrix matrix) {
-        Throw.when().isNull(() -> matrix, () -> "No matrix to compute.");
+        return this.compute(matrix, new RowReduce.Mean().compute(matrix));
+    }
+    
+    /**
+     * Compute the variance of each columns of the matrix given the mean
+     * @param matrix  Input matrix
+     * @param mean  Mean of each columns
+     * @return  Variance value of each columns
+     */
+    public double[] compute(Matrix matrix, double[] mean) {
+    	Throw.when().isNull(() -> matrix, () -> "No matrix to compute.");
         if(matrix.getRowCount() == 0){
             return new double[0];
         }
-        double[] mean = new RowReduce.Mean().compute(matrix);
+        
         double[] var = this.serial(matrix, 0, matrix.getRowCount(), mean);
         for(int i = 0; i < var.length; i++){
             var[i] /= matrix.getRowCount();
         }
         return var;
-    }    
+    }
 
     /**
      * Compute the variance of each columns in given row range and the mean.
@@ -113,4 +123,5 @@ public class Variance {
         }
         return sum;
     }
+    
 }
