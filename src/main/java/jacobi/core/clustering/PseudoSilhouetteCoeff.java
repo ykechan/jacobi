@@ -119,8 +119,10 @@ public class PseudoSilhouetteCoeff implements ToDoubleBiFunction<Matrix, List<in
 		double min0 = Math.min(iDist, jDist);
 		double min1 = Math.max(iDist, jDist);
 		
-		for(double[] centroid : centroids){
+		for(int i = 2; i < centroids.size(); i++){
+			double[] centroid = centroids.get(i);
 			double dist = this.em.distanceBetween(centroid, vector);
+
 			if(dist < min0){
 				min1 = min0;
 				min0 = dist;
