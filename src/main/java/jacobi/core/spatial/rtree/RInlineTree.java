@@ -85,7 +85,14 @@ public class RInlineTree implements SpatialIndex<Integer> {
 		}
 		
 		MinHeap heap = this.queryAStar(query, kMax);
-		return Arrays.stream(heap.flush()).boxed().collect(Collectors.toList());
+		
+		int[] kNN = heap.flush();
+		// in asc order
+		for(int i = 0, j = kNN.length - 1; i < j; i++, j--){
+			int temp = kNN[i]; kNN[i] = kNN[j]; kNN[j] = temp;
+		}
+		
+		return Arrays.stream(kNN).boxed().collect(Collectors.toList());
 	}
 
 	@Override

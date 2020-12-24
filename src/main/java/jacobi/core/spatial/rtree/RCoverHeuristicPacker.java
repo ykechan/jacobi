@@ -93,7 +93,7 @@ public class RCoverHeuristicPacker implements Function<RLayer, RLayer> {
 	 */
 	protected int packFront(RLayer rLayer, int begin) {
 		int end = Math.min(begin + this.max, rLayer.length());
-		if(end - begin < this.min){
+		if(end - begin <= this.min){
 			return end - begin;
 		}
 		
@@ -134,7 +134,7 @@ public class RCoverHeuristicPacker implements Function<RLayer, RLayer> {
 				at = i + 1;
 			}
 		}
-		return at - begin;
+		return (at < 0 ? end : at) - begin;
 	}
 	
 	/**
