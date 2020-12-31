@@ -50,7 +50,7 @@ public class DirectQuery implements SpatialIndex<Integer> {
 
 	@Override
 	public List<Integer> queryKNN(double[] query, int kMax) {
-		MinHeap heap = new MinHeap(kMax, 2);
+		MinHeap heap = MinHeap.ofMax(kMax);
 		for(int i = 0; i < this.matrix.getRowCount(); i++){
 			double[] p = this.matrix.getRow(i);
 			

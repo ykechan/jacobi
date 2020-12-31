@@ -185,7 +185,7 @@ public class FullGaussMixModel extends AbstractEMClustering<Pair> {
 	private Function<Matrix, Matrix> covarFn;
 	private AbstractEMClustering<double[]> defaultEm;
 	
-	private static final AbstractEMClustering<double[]> DEFAULT_EM_INST = new SimpleKMeans(
+	protected static final AbstractEMClustering<double[]> DEFAULT_EM_INST = new SimpleKMeans(
 		m -> Collections.emptyList(), MapReducer.DEFAULT_NUM_FLOP
 	);
 }

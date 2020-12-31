@@ -66,9 +66,6 @@ public class DefaultSpatialSortTest {
 		SpatialSort ssort = new DefaultSpatialSort(rand::nextDouble, 13, 0.5);
 		
 		int[] seq = ssort.sort(data);
-		for(int s : seq){
-			System.out.println(s);
-		}
 	}
 	
 	@Test

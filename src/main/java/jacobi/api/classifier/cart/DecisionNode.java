@@ -67,9 +67,7 @@ public interface DecisionNode<T> extends Classifier<T> {
 
 	@Override
 	default T apply(double[] inst) {
-		return this.decide(inst)
-			.map(n -> n.apply(inst))
-			.orElse(this.decide());
+		return this.decide(inst).map(n -> n.apply(inst)).orElse(this.decide());
 	}
 
 }

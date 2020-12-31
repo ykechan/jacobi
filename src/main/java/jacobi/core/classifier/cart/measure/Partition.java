@@ -25,7 +25,6 @@ package jacobi.core.classifier.cart.measure;
 
 import jacobi.api.classifier.Column;
 import jacobi.api.classifier.DataTable;
-import jacobi.core.classifier.cart.ArraySequence;
 import jacobi.core.classifier.cart.Sequence;
 import jacobi.core.util.Weighted;
 

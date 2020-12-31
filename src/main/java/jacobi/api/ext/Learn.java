@@ -29,6 +29,7 @@ import jacobi.api.annotations.Facade;
 import jacobi.api.annotations.Implementation;
 import jacobi.api.classifier.Column;
 import jacobi.api.classifier.DefinedSupervised;
+import jacobi.api.unsupervised.Unsupervised;
 import jacobi.core.classifier.DefinedSupervisedFactory;
 
 /**
@@ -48,9 +49,13 @@ public interface Learn {
 	 * @return  Extension to learners of classifier models
 	 */
 	@Implementation(DefinedSupervisedFactory.class)
-	public <T> DefinedSupervised<T> classify(
-		List<Column<?>> features, 
-		List<T> outcomes
-	);
+	public <T> DefinedSupervised<T> classify(List<Column<?>> features, List<T> outcomes);
+	
+	/**
+	 * Get the extension for unsupervised learning, e.g. clustering
+	 * @return  Extension to unsupervised learning
+	 */
+	@Implementation(Unsupervised.Factory.class)
+	public Unsupervised unsupervised();
 
 }

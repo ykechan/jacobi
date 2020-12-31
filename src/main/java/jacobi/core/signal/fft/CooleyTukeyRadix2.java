@@ -138,12 +138,13 @@ public class CooleyTukeyRadix2 implements CooleyTukeyMerger {
     private ComplexVector[] pivots;
     
     private static final List<ComplexVector> DEFAULT_PIVOTS = IntStream.rangeClosed(0, 6)
-            .mapToObj(n -> n < 2 
+    		.boxed()
+            .map(n -> (ComplexVector)( n < 2 
                     ? ComplexVector.rootsOfUnity(1)
                     : 12 % n == 0 
                         ? ComplexVector.rootsOfUnity(2 * n).slice(0, n)
                         :  ComplexVector.rootsOfUnity(1)
-            )
+            ))
             .map(p -> p.conj())
             .collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
 }

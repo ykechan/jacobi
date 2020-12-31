@@ -57,6 +57,7 @@ public class Ranking {
 	 * Constructor.
 	 * @param entries  Array of entries
 	 * @param rand  Random function that accepts an integer n and returns a random integer in [0, n).
+	 * @param threshold  Maximum number of element to switch to insertion sort
 	 */
 	protected Ranking(double[] entries, IntUnaryOperator rand, int threshold) {
 		this.rand = rand;
@@ -86,7 +87,7 @@ public class Ranking {
 	public int[] sort() {
 		
 		int limit = (int) Math.ceil(Math.E * Math.log(this.entries.length / 2));
-		this.introsort(0, this.entries.length / 2, limit);		
+		this.introsort(0, this.entries.length / 2, limit);
 		
 		return this.toArray();
 	}
@@ -149,7 +150,7 @@ public class Ranking {
 		int next = pos + 1;
 		double pivVal = this.entries[2 * pos];
 		for(int i = pos + 1; i < end; i++) {
-			if(this.entries[2 * i] > pivVal){				
+			if(this.entries[2 * i] > pivVal){
 				break;
 			}
 			

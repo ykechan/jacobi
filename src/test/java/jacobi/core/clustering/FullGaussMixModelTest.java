@@ -1,5 +1,6 @@
 package jacobi.core.clustering;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -38,6 +39,9 @@ public class FullGaussMixModelTest {
 	
 	@JacobiResult(10)
 	public Matrix result;
+	
+	@JacobiInject(10)
+	public Matrix oracle;
 	
 	@JacobiInject(-1)
 	public Map<Integer, Matrix> all;
@@ -97,6 +101,83 @@ public class FullGaussMixModelTest {
 		
 		List<int[]> clusters = clustering.compute(this.input);
 		this.result = this.toMatrix(clusters);
+	}
+	
+	@Test
+	@JacobiImport("test old faithful")
+	@JacobiEquals(expected = 10, actual = 10)
+	public void shouldBeAbleToComputeDistanceInOldFaithful() {
+		AtomicInteger step = new AtomicInteger(0);
+		Clustering clustering = new FullGaussMixModel(
+			m -> Arrays.asList(this.mean.toArray()),
+			Integer.MAX_VALUE
+		){
+
+			@Override
+			protected List<Pair> expectation(Matrix matrix, int[] membership) {
+				List<Pair> exp = super.expectation(matrix, membership);
+				int n = step.incrementAndGet();
+				
+				Matrix means = Matrices.wrap(exp.stream()
+					.map(p -> p.getLeft().getRow(0))
+					.toArray(k -> new double[k][]));
+
+				Jacobi.assertEquals(all.get(100 * n), means);
+				for(int i = 0; i < exp.size(); i++){
+					Matrix chol = exp.get(i).getRight();
+					Matrix covar = all.get(100 * n + i + 1);
+					
+					double det = covar.ext(Prop.class).det();
+					double actual = 1.0;
+					for(int j = 0; j < chol.getRowCount(); j++){
+						actual *= chol.get(j, j);
+					}
+					actual *= actual;
+					
+					Assert.assertEquals(det, actual, 1e-8);
+				}
+				return exp;
+			}
+			
+		};
+		
+		List<int[]> clusters = clustering.compute(this.input);
+		
+		int numCols = this.oracle.getColCount();
+		List<double[]> seqs = new ArrayList<>();
+		
+		for(int[] cluster : clusters){
+			int done = 0;
+			while(done < cluster.length){
+				int end = Math.min(cluster.length, done + numCols);
+				
+				double[] row = new double[numCols];
+				for(int i = done; i < end; i++){
+					row[i - done] = cluster[i];
+				}
+				seqs.add(row);
+				done = end;
+			}
+		}
+		
+		this.result = new ImmutableMatrix() {
+
+			@Override
+			public int getRowCount() {
+				return seqs.size();
+			}
+
+			@Override
+			public int getColCount() {
+				return numCols;
+			}
+
+			@Override
+			public double[] getRow(int index) {
+				return seqs.get(index);
+			}
+			
+		};
 	}
 	
 	@Test

@@ -34,7 +34,6 @@ public class PseudoSilhouetteCoeffTest {
 	public void shouldBeAbleToComputeSilhouetteInGauss5D4CentroidsWith2Clusters() {
 		List<int[]> clusters = this.toClusters(this.clusterMat);
 		double sil = new PseudoSilhouetteCoeff(Integer.MAX_VALUE).applyAsDouble(input, clusters);
-		System.out.println(sil);
 		this.ans = Matrices.scalar(sil);
 	}
 	
@@ -44,7 +43,6 @@ public class PseudoSilhouetteCoeffTest {
 	public void shouldBeAbleToComputeSilhouetteInGauss5D4CentroidsWith4Clusters() {
 		List<int[]> clusters = this.toClusters(this.clusterMat);
 		double sil = new PseudoSilhouetteCoeff(Integer.MAX_VALUE).applyAsDouble(input, clusters);
-		System.out.println(sil);
 		this.ans = Matrices.scalar(sil);
 	}
 	

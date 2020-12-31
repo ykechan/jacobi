@@ -75,7 +75,7 @@ public class ParallelSupplier<T> implements Supplier<List<T>> {
      * @param numThreads   Number of worker threads
     */
     public static void cyclic(IntConsumer task, int begin, int end, int numThreads) {
-        AtomicInteger work = new AtomicInteger(begin); 
+    	AtomicInteger work = new AtomicInteger(begin); 
         ParallelSupplier.of(() -> { 
             int next = work.getAndIncrement();
             while(next < end){
@@ -146,7 +146,7 @@ public class ParallelSupplier<T> implements Supplier<List<T>> {
         }); 
         return this.suppliers.stream()
                 .map(t -> t.get())
-                .collect(Collectors.toList());        
+                .collect(Collectors.toList());
     }    
 
     private List<Task<T>> suppliers;
