@@ -182,7 +182,7 @@ THE SOFTWARE.
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
-            <version>3.13</version>
+            <version>3.17</version>
             <scope>test</scope>
         </dependency>
         <dependency>
