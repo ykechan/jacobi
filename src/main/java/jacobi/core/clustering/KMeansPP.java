@@ -64,7 +64,7 @@ public class KMeansPP implements Function<Matrix, List<double[]>> {
 		Throw.when()
 			.isNull(() -> t, () -> "No input vectors")
 			.isTrue(
-				() -> this.kMax >= t.getRowCount(), 
+				() -> this.kMax > t.getRowCount(), 
 				() -> "Too few vectors to select. Expected at least " + this.kMax
 			);
 		

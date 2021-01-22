@@ -26,6 +26,7 @@ package jacobi.core.spatial;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import jacobi.api.Matrix;
 import jacobi.api.spatial.SpatialIndex;
@@ -53,51 +54,43 @@ public class DirectQuery implements SpatialIndex<Integer> {
 		MinHeap heap = MinHeap.ofMax(kMax);
 		for(int i = 0; i < this.matrix.getRowCount(); i++){
 			double[] p = this.matrix.getRow(i);
-			
-			double min = heap.size() < kMax ? Double.MIN_VALUE : heap.peek().weight;
-			double dist = 0.0;
-			
-			for(int j = 0; j < p.length; j++){
-				double comp = (query[j] - p[j]) * (query[j] - p[j]);
-				min += comp;
-				if(min > 0.0){
-					break;
-				}
-				dist += comp;
-			}
-			
-			if(min < 0.0){
-				heap.push(i, -dist);
-				
-				while(heap.size() > kMax){
-					heap.pop();
-				}
+			double pDist = sqDist(query, p);
+			if(heap.size() < kMax || heap.min() > pDist){
+				heap.push(i, pDist);
 			}
 		}
-		return null;
+		return Arrays.stream(heap.flush()).boxed().collect(Collectors.toList());
 	}
 
 	@Override
 	public Iterator<Integer> queryRange(double[] query, double dist) {
 		IntStack result = new IntStack(4);
-		double limit = dist * dist;
+		double qDist = dist * dist;
 		
 		for(int i = 0; i < this.matrix.getRowCount(); i++){
 			double[] p = this.matrix.getRow(i);
-			double res = limit;
+			double pDist = sqDist(query, p);
 			
-			for(int j = 0; j < p.length; j++){
-				res -= (query[j] - p[j]) * (query[j] - p[j]);
-				if(res < 0.0) {
-					break;
-				}
-			}
-			
-			if(res <= 0.0){
+			if(pDist < qDist){
 				result.push(i);
 			}
 		}
 		return Arrays.stream(result.toArray()).iterator();
+	}
+	
+	/**
+	 * Compute the squared euclidean distance between two vectors
+	 * @param u  First vector
+	 * @param v  Second vector
+	 * @return  Squared euclidean distance
+	 */
+	protected static double sqDist(double[] u, double[] v) {
+		double dist = 0.0;
+		for(int i = 0; i < u.length; i++){
+			double dx = u[i] - v[i];
+			dist += dx * dx;
+		}
+		return dist;
 	}
 
 	private Matrix matrix;

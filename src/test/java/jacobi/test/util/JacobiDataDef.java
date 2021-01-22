@@ -44,7 +44,8 @@ public class JacobiDataDef {
 				+ outcomeCol.getItems()
 			);
 		}
-				
+		System.out.println("Outcome " + outcomeCol.getItems());
+		
 		return (in, out) -> {
 			List<Column<?>> cols = IntStream.range(0, in.getColCount())
 				.mapToObj(i -> colDefs.containsKey(i) ? colDefs.get(i) : Column.numeric(i))
@@ -100,7 +101,11 @@ public class JacobiDataDef {
 				if(!typedefs.containsKey(typeName)){
 					throw new IllegalArgumentException("Type " + typeName + " not found.");
 				}
-								
+				
+				System.out.println("Creating " + index + ": " + typeName);
+				Column<?> col = typedefs.get(typeName).apply(index);
+				System.out.println(col.getItems());
+				
 				columnDefs.put(index, typedefs.get(typeName).apply(index));
 			}catch(NumberFormatException ex){
 				throw new IllegalArgumentException("Invalid column index at row #"
@@ -133,6 +138,7 @@ public class JacobiDataDef {
 			}
 			
 			List<String> items = this.getItems(sheet, k);
+			System.out.println("Type " + typeName + " => " + items);
 			typedefs.put(typeName, this.columnOf(items));
 			k += items.size();
 		}

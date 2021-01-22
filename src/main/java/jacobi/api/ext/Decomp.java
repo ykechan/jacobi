@@ -66,7 +66,7 @@ public interface Decomp extends Supplier<Matrix> {
      */
     @Pure
     @Implementation(CholeskyDecomp.class)
-    public Optional<Decomp> chol();
+    public Optional<Matrix> chol();
     
     /**
      * Compute Cholesky decomposition, i.e.&nbsp;A = L * L^t where L is lower triangular

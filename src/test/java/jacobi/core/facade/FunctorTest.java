@@ -24,6 +24,7 @@
 package jacobi.core.facade;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
@@ -145,7 +146,33 @@ public class FunctorTest {
     	
     	Object result = func.invoke("", new Object[] {Collections.singletonList(target)});
     	Assert.assertTrue(result instanceof Optional);
-    	Date date = ((Optional<Date>) result).get();    	
+    	Date date = ((Optional<Date>) result).get();
+    }
+    
+    @Test
+    public void testGenericInterfaceWithCorrectGenericReturnType() throws Exception {
+    	Invocator func = new Functor(GenericFacade.class.getMethod("firstOf", List.class),
+    			WrongGeneric.class);
+    	String target = "1991-07-10";
+    	
+    	Object result = func.invoke(target, new Object[] {Collections.singletonList(target)});
+    	Assert.assertTrue(result instanceof Optional);
+    	String date = ((Optional<String>) result).get();
+    	
+    	Assert.assertEquals("1991-07-10", date);
+    }
+    
+    @Test
+    public void testGenericInterfaceWithMultipleOptionalReturnType() throws Exception {
+    	Invocator func = new Functor(GenericOptionalOfDifferentTypes.class.getMethod("pipe"),
+    			EchoAndToDate.class);
+    	String target = "1991-07-10";
+    	
+    	Object result = func.invoke(target, new Object[]{});
+    	Assert.assertTrue(result instanceof Optional);
+    	String date = ((Optional<String>) result).get();
+    	
+    	Assert.assertEquals("1991-07-10", date);
     }
     
     @Facade(String.class)
@@ -244,6 +271,31 @@ public class FunctorTest {
     	
     	public <T> Optional<String> first(String str, List<T> list) {
     		return Optional.of(str);
+    	}
+    	
+    }
+    
+    @Facade(String.class)
+    public interface GenericOptionalOfDifferentTypes {
+    	
+    	public Optional<String> pipe();
+    	
+    	public Optional<Date> parse();
+    	
+    }
+    
+    public static class EchoAndToDate {
+    	
+    	public Optional<String> echo(String str) {
+    		return Optional.of(str);
+    	}
+    	
+    	public Optional<Date> toDate(String str) {
+    		try {
+				return Optional.of(new SimpleDateFormat("yyyy-MM-dd").parse(str));
+			} catch (ParseException e) {
+				throw new UnsupportedOperationException(e);
+			}
     	}
     	
     }

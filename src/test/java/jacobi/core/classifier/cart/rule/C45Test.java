@@ -32,8 +32,7 @@ public class C45Test {
 	@Test
 	public void testShouldBeAbleToSortGolfData() throws IOException {
 		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/golf.def.csv")){
-			DataTable<YesOrNo> dataTab = new JacobiDefCsvReader()
-					.read(input, YesOrNo.class);
+			DataTable<YesOrNo> dataTab = new JacobiDefCsvReader().read(input, YesOrNo.class);
 			
 			AtomicInteger count = new AtomicInteger(0);
 			
@@ -66,8 +65,7 @@ public class C45Test {
 	@Test
 	public void testShouldBeAbleToSortIrisData() throws IOException {
 		try(InputStream input = this.getClass().getResourceAsStream("/jacobi/test/data/iris.def.csv")){
-			DataTable<Iris> dataTab = new JacobiDefCsvReader()
-					.read(input, Iris.class);
+			DataTable<Iris> dataTab = new JacobiDefCsvReader().read(input, Iris.class);
 			
 			DecisionNode<Iris> root = C45.of(new RankedBinaryPartition(Impurity.ENTROPY)).make(
 				dataTab, 

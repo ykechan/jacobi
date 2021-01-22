@@ -32,6 +32,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * A functor is a wrapper of an implementation class for invoking facade method.
@@ -225,7 +226,17 @@ public class Functor implements Invocator {
      */
     private boolean returnTypeMatches(Method method, Facade facade, Method facadeMethod) {
     	if(method.getReturnType() == facadeMethod.getReturnType()) {
-    		return true;
+    		if(facadeMethod.getReturnType() != Optional.class){
+    			return true;
+    		}
+    		
+    		Type returnTypeArg = this.getGenericReturnType(facade, facadeMethod);
+    		if(returnTypeArg instanceof TypeVariable){
+    			return true;
+    		}
+    		
+    		return this.getGenericReturnType(facade, method)
+    			.equals(this.getGenericReturnType(facade, facadeMethod));
     	}
     	
     	if(method.getReturnType() == facade.value()){ 
@@ -235,6 +246,18 @@ public class Functor implements Invocator {
     	}
     	
     	return false;
+    }
+    
+    private Type getGenericReturnType(Facade facade, Method method) {
+    	ParameterizedType paramType = (ParameterizedType) method.getGenericReturnType();
+    	Type typeArg = paramType.getActualTypeArguments()[0];
+    	
+    	Class<?> declareClass = method.getDeclaringClass();
+    	if(declareClass.isInterface() && typeArg == declareClass){
+    		return facade.value();
+    	}
+    	
+    	return typeArg;
     }
     
     private Method method;
