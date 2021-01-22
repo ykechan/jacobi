@@ -1,6 +1,5 @@
 package jacobi.core.clustering;
 
-import java.awt.Color;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -11,11 +10,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import jacobi.api.Matrix;
-import jacobi.api.unsupervised.Unsupervised;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
 import jacobi.test.util.JacobiJUnit4ClassRunner;
-import jacobi.test.util.JacobiSvg;
 
 @JacobiImport("/jacobi/test/data/DbscanTest.xlsx")
 @RunWith(JacobiJUnit4ClassRunner.class)

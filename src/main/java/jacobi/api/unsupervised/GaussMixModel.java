@@ -23,22 +23,13 @@
  */
 package jacobi.api.unsupervised;
 
-import java.util.AbstractList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.DoubleSupplier;
-import java.util.function.Function;
 import java.util.stream.IntStream;
 
-import jacobi.api.Matrices;
 import jacobi.api.Matrix;
-import jacobi.core.clustering.AbstractEMClustering;
-import jacobi.core.clustering.DiagGaussMixModel;
-import jacobi.core.clustering.FullGaussMixModel;
-import jacobi.core.clustering.IterativeClustering;
-import jacobi.core.clustering.KMeansPP;
 import jacobi.core.util.ParallelSupplier;
 import jacobi.core.util.Throw;
 
@@ -51,7 +42,7 @@ import jacobi.core.util.Throw;
 public class GaussMixModel {
 	
 	/**
-	 * Default number of epochs for k-means
+	 * Default number of epochs for iterative clustering
 	 */
 	public static final int DEFAULT_NUM_EPOCHS = 4;
 	
@@ -120,42 +111,10 @@ public class GaussMixModel {
 		if(k < 2){
 			return Collections.singletonList(IntStream.range(0, matrix.getRowCount()).toArray());
 		}
-		
-		AbstractEMClustering<?> em = this.initialize(k, full);
-		int epochs = DEFAULT_NUM_EPOCHS;
-		
-		return new IterativeClustering(em, epochs, em).compute(matrix);
+
+		return null;
 	}
 	
-	protected AbstractEMClustering<?> initialize(int k, boolean full) {
-		long flop = DEFAULT_FLOP_THRESHOLD;
-		
-		Function<Matrix, Matrix> initFn = new KMeansPP(
-			randFn, k, DEFAULT_KMEANS_PP_SAMPLING, flop
-		);
-		
-		if(full){
-			return new FullGaussMixModel(initFn.andThen(m -> Arrays.asList(m.toArray())), flop);
-		}
-		
-		return new DiagGaussMixModel(initFn.andThen(m -> new AbstractList<Matrix>(){
-
-			@Override
-			public Matrix get(int index) {
-				double[] centroid = m.getRow(index);
-				double[] var = new double[centroid.length];
-				
-				Arrays.fill(var, 1.0);
-				return Matrices.wrap(centroid, var);
-			}
-
-			@Override
-			public int size() {
-				return m.getRowCount();
-			}
-			
-		}), flop);
-	}
 	
 	private DoubleSupplier randFn;
 }

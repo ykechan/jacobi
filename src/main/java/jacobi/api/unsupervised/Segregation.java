@@ -42,6 +42,14 @@ import jacobi.core.util.Throw;
 public class Segregation {
 	
 	/**
+	 * Get the default singleton instance of this class
+	 * @return  Default instance
+	 */
+	public static Segregation getInstance() {
+		return INSTANCE;
+	}
+	
+	/**
 	 * Given the row indices of members of each clusters, obtain the clusters as collection of 
 	 * member vectors.  
 	 * @param input  Input matrix
@@ -62,7 +70,7 @@ public class Segregation {
 			@Override
 			public Matrix get(int index) {
 				int[] seq = seqs.get(index);
-				return toMatrix(input, seq);
+				return toMatrix(input, seq, 0, seq.length);
 			}
 
 			@Override
@@ -79,8 +87,9 @@ public class Segregation {
 	 * @param seq  Sequence of row indices
 	 * @return  Sub-matrix
 	 */
-	protected Matrix toMatrix(Matrix input, int[] seq) {
-		if(seq.length == 0){
+	public Matrix toMatrix(Matrix input, int[] seq, int begin, int end) {
+		int len = end - begin;
+		if(len < 1){
 			return Matrices.zeros(0);
 		}
 		
@@ -89,7 +98,7 @@ public class Segregation {
 
 			@Override
 			public int getRowCount() {
-				return seq.length;
+				return len;
 			}
 
 			@Override
@@ -99,11 +108,12 @@ public class Segregation {
 
 			@Override
 			public double[] getRow(int index) {
-				int i = seq[index];
+				int i = seq[begin + index];
 				return input.getRow(i);
 			}
 			
 		};
 	}
 
+	private static final Segregation INSTANCE = new Segregation();
 }

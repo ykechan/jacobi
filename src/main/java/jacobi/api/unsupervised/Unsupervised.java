@@ -28,6 +28,7 @@ import java.util.List;
 import jacobi.api.Matrix;
 import jacobi.api.annotations.Facade;
 import jacobi.api.annotations.Implementation;
+import jacobi.core.clustering.Dbscan;
 import jacobi.core.facade.FacadeProxy;
 
 /**
@@ -102,5 +103,14 @@ public interface Unsupervised {
 	 */
 	@Implementation(GaussMixModel.class)
 	public List<int[]> gmm(int k, boolean full);
+	
+	/**
+	 * Clustering using DBSCAN algorithm
+	 * @param minPts  Minimum number of points in a cluster
+	 * @param epsilon  Reaching distance of a cluster
+	 * @return  Row indices of members of each clusters
+	 */
+	@Implementation(Dbscan.Proxy.class)
+	public List<int[]> dbscan(int minPts, double epsilon);
 
 }

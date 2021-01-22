@@ -23,7 +23,6 @@
  */
 package jacobi.core.clustering;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.function.ToDoubleBiFunction;
 
@@ -47,22 +46,14 @@ import jacobi.core.util.MapReducer;
  *
  */
 public class PseudoSilhouetteCoeff implements ToDoubleBiFunction<Matrix, List<int[]>> {
-	
-	/**
-	 * Constructor
-	 * @param flop   Number of FLOPs to start parallelizing
-	 */
-	public PseudoSilhouetteCoeff(long flop) {
-		this(new SimpleKMeans(m -> Collections.emptyList(), flop), flop);
-	}
 
 	/**
 	 * Constructor.
 	 * @param meanFn  Statistics mean function
 	 * @param flop   Number of FLOPs to start parallelizing
 	 */
-	protected PseudoSilhouetteCoeff(AbstractEMClustering<double[]> em, long flop) {
-		this.em = em;
+	public PseudoSilhouetteCoeff(ClusterMetric<double[]> em, long flop) {
+		this.metric = em;
 		this.flop = flop;
 	}
 
@@ -70,7 +61,7 @@ public class PseudoSilhouetteCoeff implements ToDoubleBiFunction<Matrix, List<in
 	public double applyAsDouble(Matrix matrix, List<int[]> clusters) {
 		long estCost = (long) matrix.getRowCount() * matrix.getColCount() * clusters.size();
 		
-		List<double[]> centroids = this.em.expectation(matrix, clusters);
+		List<double[]> centroids = this.metric.expects(matrix, clusters);
 		
 		if(estCost < this.flop){
 			double sil = this.silhouette(centroids, matrix, 0, matrix.getRowCount());
@@ -113,15 +104,15 @@ public class PseudoSilhouetteCoeff implements ToDoubleBiFunction<Matrix, List<in
 			throw new IllegalArgumentException("Unable to measure with only " + centroids.size() + " clusters.");
 		}
 		
-		double iDist = this.em.distanceBetween(centroids.get(0), vector);
-		double jDist = this.em.distanceBetween(centroids.get(1), vector);
+		double iDist = this.metric.distanceBetween(centroids.get(0), vector);
+		double jDist = this.metric.distanceBetween(centroids.get(1), vector);
 		
 		double min0 = Math.min(iDist, jDist);
 		double min1 = Math.max(iDist, jDist);
 		
 		for(int i = 2; i < centroids.size(); i++){
 			double[] centroid = centroids.get(i);
-			double dist = this.em.distanceBetween(centroid, vector);
+			double dist = this.metric.distanceBetween(centroid, vector);
 
 			if(dist < min0){
 				min1 = min0;
@@ -138,5 +129,5 @@ public class PseudoSilhouetteCoeff implements ToDoubleBiFunction<Matrix, List<in
 	}
 	
 	private long flop;
-	private AbstractEMClustering<double[]> em;
+	private ClusterMetric<double[]> metric;
 }

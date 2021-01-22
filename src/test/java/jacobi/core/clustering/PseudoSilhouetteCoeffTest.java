@@ -33,7 +33,8 @@ public class PseudoSilhouetteCoeffTest {
 	@JacobiEquals(expected = 10, actual = 10)
 	public void shouldBeAbleToComputeSilhouetteInGauss5D4CentroidsWith2Clusters() {
 		List<int[]> clusters = this.toClusters(this.clusterMat);
-		double sil = new PseudoSilhouetteCoeff(Integer.MAX_VALUE).applyAsDouble(input, clusters);
+		double sil = new PseudoSilhouetteCoeff(EuclideanCluster.getInstance(), Integer.MAX_VALUE)
+				.applyAsDouble(input, clusters);
 		this.ans = Matrices.scalar(sil);
 	}
 	
@@ -42,7 +43,8 @@ public class PseudoSilhouetteCoeffTest {
 	@JacobiEquals(expected = 10, actual = 10)
 	public void shouldBeAbleToComputeSilhouetteInGauss5D4CentroidsWith4Clusters() {
 		List<int[]> clusters = this.toClusters(this.clusterMat);
-		double sil = new PseudoSilhouetteCoeff(Integer.MAX_VALUE).applyAsDouble(input, clusters);
+		double sil = new PseudoSilhouetteCoeff(EuclideanCluster.getInstance(), Integer.MAX_VALUE)
+				.applyAsDouble(input, clusters);
 		this.ans = Matrices.scalar(sil);
 	}
 	

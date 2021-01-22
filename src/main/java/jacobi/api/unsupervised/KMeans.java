@@ -34,10 +34,12 @@ import java.util.stream.IntStream;
 import jacobi.api.Matrix;
 import jacobi.core.clustering.AdaptiveKMeans;
 import jacobi.core.clustering.Clustering;
+import jacobi.core.clustering.EuclideanCluster;
+import jacobi.core.clustering.ExpectationMaximization;
 import jacobi.core.clustering.IterativeClustering;
 import jacobi.core.clustering.KMeansPP;
 import jacobi.core.clustering.PseudoSilhouetteCoeff;
-import jacobi.core.clustering.SimpleKMeans;
+import jacobi.core.clustering.WithinClusterDistance;
 import jacobi.core.util.Throw;
 
 /**
@@ -70,8 +72,8 @@ public class KMeans {
 	 */
 	public KMeans() {
 		this.randFn = () -> ThreadLocalRandom.current().nextDouble();
-		this.wssFn = new SimpleKMeans(m -> Collections.emptyList(), DEFAULT_FLOP_THRESHOLD);
-		this.silhouetteFn = new PseudoSilhouetteCoeff(DEFAULT_FLOP_THRESHOLD);
+		this.measureIntra = WithinClusterDistance.of(EuclideanCluster.getInstance());
+		this.measureInter = new PseudoSilhouetteCoeff(EuclideanCluster.getInstance(), DEFAULT_FLOP_THRESHOLD);
 	}
 
 	/**
@@ -96,12 +98,12 @@ public class KMeans {
 		long flop = DEFAULT_FLOP_THRESHOLD;
 		int minRank = k * DEFAULT_KMEANS_PP_SAMPLING;
 		
-		KMeansPP init = new KMeansPP(this.randFn, k, minRank, flop);
+		KMeansPP init = null;
 		
-		Clustering kmeans = new SimpleKMeans(init.andThen(this::toList), flop);
+		Clustering kmeans = new ExpectationMaximization<>(init, EuclideanCluster.getInstance(), flop);
 		
 		int numIter = DEFAULT_NUM_EPOCHS;
-		return new IterativeClustering(this.wssFn, Math.max(3, numIter), kmeans).compute(matrix);
+		return new IterativeClustering(this.measureIntra, Math.max(3, numIter), kmeans).compute(matrix);
 	}
 	
 	/**
@@ -118,7 +120,7 @@ public class KMeans {
 		
 		Clustering clusteringFn = new AdaptiveKMeans(
 			k -> m -> this.compute(m, k),
-			this.silhouetteFn,
+			this.measureInter,
 			kMin, kMax
 		);
 		
@@ -147,5 +149,5 @@ public class KMeans {
 	}
 
 	private DoubleSupplier randFn;
-	private ToDoubleBiFunction<Matrix, List<int[]>> wssFn, silhouetteFn;
+	private ToDoubleBiFunction<Matrix, List<int[]>> measureIntra, measureInter;
 }

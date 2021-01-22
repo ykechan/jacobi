@@ -23,17 +23,16 @@
  */
 package jacobi.core.clustering;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.AbstractList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.function.DoubleSupplier;
 import java.util.function.Function;
+import java.util.function.IntUnaryOperator;
 
 import jacobi.api.Matrix;
-import jacobi.core.impl.ArrayMatrix;
 import jacobi.core.util.MapReducer;
 import jacobi.core.util.MinHeap;
-import jacobi.core.util.Weighted;
+import jacobi.core.util.Throw;
 
 /**
  * Implementation of k-means++ seeding strategy.
@@ -44,165 +43,138 @@ import jacobi.core.util.Weighted;
  * @author Y.K. Chan
  *
  */
-public class KMeansPP implements Function<Matrix, Matrix> {
+public class KMeansPP implements Function<Matrix, List<double[]>> {
 	
-	/**
-	 * Constructor
-	 * @param randFn  Random function
-	 * @param kMax  Number of initial centroids to be selected
-	 * @param minRank  The number of vectors to be considered as centroids ordered by distance, 0 would consider all vectors
-	 * @param numFlop  Minimum number of FLOP to start parallelizing 
+	/*
+	 * Constructor.
+	 * @param metric  Cluster metric
+	 * @param kRand  Random function
+	 * @param kMax  Number of centroids
+	 * @param flop  Number of FLOPs to start parallelizing
 	 */
-	public KMeansPP(DoubleSupplier randFn, int kMax, int minRank, long numFlop) {
-		this.randFn = randFn;
+	public KMeansPP(ClusterMetric<double[]> metric, IntUnaryOperator kRand, int kMax, long flop) {
+		this.metric = metric;
+		this.kRand = kRand;
 		this.kMax = kMax;
-		this.minRank = minRank;
-		this.numFlop = numFlop;
+		this.flop = flop;
 	}
 	
 	@Override
-	public Matrix apply(Matrix t) {
-		int numCols = t.getColCount();
+	public List<double[]> apply(Matrix t) {
+		Throw.when()
+			.isNull(() -> t, () -> "No input vectors")
+			.isTrue(
+				() -> this.kMax >= t.getRowCount(), 
+				() -> "Too few vectors to select. Expected at least " + this.kMax
+			);
 		
-		double[] centroids = new double[numCols * this.kMax];
-		int start = (int) (this.randFn.getAsDouble() * t.getRowCount());
-		
-		System.arraycopy(t.getRow(start), 0, centroids, 0, t.getColCount());
-		
-		for(int i = 1; i < this.kMax; i++){
-			Weighted<double[]> dists = this.computeDistances(t, centroids, i);
-			int next = this.minRank < 1 
-				? this.select(dists.item, dists.weight)
-				: this.select(dists.item, this.minRank);
-			
-			System.arraycopy(t.getRow(next), 0, centroids, i * numCols, numCols);
+		if(t.getRowCount() == this.kMax){
+			return new AbstractList<double[]>(){
+
+				@Override
+				public double[] get(int index) {
+					return t.getRow(index);
+				}
+
+				@Override
+				public int size() {
+					return t.getRowCount();
+				}
+				
+			};
 		}
-		return ArrayMatrix.wrap(numCols, centroids);
+		
+		int start = this.kRand.applyAsInt(t.getRowCount());
+		
+		double[][] centroids = new double[this.kMax][];
+		centroids[0] = t.getRow(start);
+		
+		for(int i = 1; i < centroids.length; i++){
+			int next = this.select(t, Arrays.asList(centroids).subList(0, i));
+			centroids[i] = t.getRow(next);
+		}
+		return Arrays.asList(centroids);
 	}
 	
 	/**
-	 * Select the next centroids given the distances with all vectors considered
-	 * @param dists  Distances for each vector
-	 * @param sum  Sum of all distances
-	 * @return  Index of next centroid
+	 * Select the k-th distant vector to a group of centroids, where k is given by the k-rand function. 
+	 * @param matrix  Input matrix
+	 * @param centroids   Group of centroids
+	 * @return  Index of the k-th distant vector
 	 */
-	protected int select(double[] dists, double sum) {
+	protected int select(Matrix matrix, List<double[]> centroids) {
+		int maxRank = this.kRand.applyAsInt(0);
 		
-		double prob = this.randFn.getAsDouble() * sum;
-		
-		double q = 0.0;
-		double maxDist = 0.0;
-		int max = -1;
-		for(int i = 0; i < dists.length; i++){
-			q += dists[i];
-			if(q > prob){
-				return i;
-			}
-			
-			if(max < 0 || dists[i] > maxDist){
-				max = i;
-				maxDist = dists[i];
-			}
-		}
-		
-		return max;
-	}
-	
-	/**
-	 * Select the next centroid given the distances and maximum number of points with largest distance to consider
-	 * @param dists  Distances for each vector
-	 * @param rank  Maximum number of points with the largest distance to consider selecting
-	 * @return  Index of next centroid
-	 */
-	protected int select(double[] dists, int rank) {
-		MinHeap heap = MinHeap.ofMax(rank);
-		for(int i = 0; i < dists.length; i++){
-			heap.push(i, dists[i]);
-		}
-		
-		List<Weighted<Integer>> weights = new ArrayList<>(rank);
-		double sum = 0.0;
-		while(!heap.isEmpty()){
-			Weighted<Integer> w = heap.pop();
-			weights.add(w);
-			sum += w.weight;
-		}
-		
-		Collections.reverse(weights);
-		
-		double prob = this.randFn.getAsDouble() * sum;
-		double q = 0.0;
-		for(Weighted<Integer> w : weights){
-			q += w.weight;
-			if(q > prob){
-				return w.item;
-			}
-		}
-		return 0;
-	}
-	
-	/**
-	 * Compute the distances of all vectors to its corresponding closest centroids, with the total distance
-	 * @param input  Input vector
-	 * @param centroids  Centroids
-	 * @param num  Number of centroids
-	 * @return  Distances of all vectors to its corresponding closest centroids, with the total distance
-	 */
-	protected Weighted<double[]> computeDistances(Matrix input, double[] centroids, int num) {
-		double[] dists = new double[input.getRowCount()];
-		
-		long flop = (long) dists.length * input.getColCount() * num;
-		if(flop > this.numFlop){
-			double totalDist = MapReducer.of(0, input.getRowCount())
-				.flop(num * input.getColCount())
-				.map((begin, end) -> {
-					double sum = 0.0;
-					for(int i = begin; i < end; i++){
-						double[] vector = input.getRow(i);
-						dists[i] = this.closestDistance(vector, centroids, num) / dists.length;
-						sum += dists[i];
+		int numFlop = centroids.size() * matrix.getColCount() * this.log2(maxRank);
+		long estCost = (long) matrix.getRowCount() * numFlop;
+		if(estCost > this.flop){
+			MinHeap heap = MapReducer.of(0, matrix.getRowCount()).flop(numFlop).map((begin, end) -> {
+				MinHeap h = MinHeap.ofMax(1 + maxRank);
+				
+				for(int i = begin; i < end; i++){
+					double[] vector = matrix.getRow(i);
+					double dist = this.minDistanceBetween(centroids, vector);
+					if(dist > 0.0){
+						h.push(i, dist);
 					}
-					return sum;
-				})
-				.reduce((a, b) -> a + b).get();
+				}
+				
+				return h;
+			}).reduce((a, b) -> { 
+				while(!b.isEmpty()){
+					a.push(b.pop());
+				} 
+				return a; 
+			}).get();
 			
-			return new Weighted<>(dists, totalDist);
+			return heap.peek().item;
 		}
 		
-		double sum = 0.0;
-		for(int i = 0; i < input.getRowCount(); i++){
-			double[] vector = input.getRow(i);
-			dists[i] = this.closestDistance(vector, centroids, num) / dists.length;
-			sum += dists[i];
+		MinHeap heap = MinHeap.ofMax(1 + maxRank);
+		
+		for(int i = 0; i < matrix.getRowCount(); i++){
+			double[] vector = matrix.getRow(i);
+			double dist = this.minDistanceBetween(centroids, vector);
+			if(dist > 0.0){
+				heap.push(i, dist);
+			}
 		}
-		return new Weighted<>(dists, sum);
+		
+		return heap.peek().item;
 	}
 	
+	
+	
 	/**
-	 * Compute the distance between a vector to its closest centroid 
+	 * Find the minimum distance between a vector and a list of centroids. 
+	 * @param centroids  Input centroids
 	 * @param vector  Input vector
-	 * @param centroids  Centroids
-	 * @param num  Number of centroids
-	 * @return  Distance between a vector to its closest centroid 
+	 * @return  Minimum distance between a vector and a list of centroids. 
 	 */
-	protected double closestDistance(double[] vector, double[] centroids, int num) {
-		double minDist = -1.0;
-		for(int i = 0; i < num; i++){
-			int begin = i * vector.length;
-			double dist = 0.0;
-			for(int j = 0; j < vector.length; j++){
-				double dx = vector[j] - centroids[begin + j];
-				dist += dx * dx;
-			}
-			
-			if(i == 0 || dist < minDist){
+	protected double minDistanceBetween(List<double[]> centroids, double[] vector) {
+		double minDist = this.metric.distanceBetween(centroids.get(0), vector);
+		
+		for(int i = 1; i < centroids.size(); i++){
+			double dist = this.metric.distanceBetween(centroids.get(i), vector);
+			if(dist < minDist){
 				minDist = dist;
 			}
 		}
+		
 		return minDist;
 	}
 	
-	private DoubleSupplier randFn;
-	private int kMax, minRank;
-	private long numFlop;
+	protected int log2(int num) {
+		int lg = 0;
+		while(num > 0){
+			num /= 2;
+			lg++;
+		}
+		return Math.max(lg, 1);
+	}
+	
+	private ClusterMetric<double[]> metric;
+	private IntUnaryOperator kRand;
+	private int kMax;
+	private long flop;
 }
