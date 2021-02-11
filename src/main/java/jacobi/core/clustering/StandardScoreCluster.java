@@ -23,11 +23,13 @@
  */
 package jacobi.core.clustering;
 
+import java.util.Arrays;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
+import jacobi.core.impl.Empty;
 import jacobi.core.stats.RowReduce;
 import jacobi.core.stats.Variance;
 
@@ -74,13 +76,22 @@ public class StandardScoreCluster implements ClusterMetric<Matrix> {
 
 	@Override
 	public Matrix expects(Matrix matrix) {
+		if(matrix.getRowCount() < 1){
+			return Empty.getInstance();
+		}
+		
 		double[] u = this.meanFunc.apply(matrix);
 		double[] sig = this.varFunc.apply(matrix, u);
+		
 		return Matrices.wrap(u, sig);
 	}
 
 	@Override
 	public double distanceBetween(Matrix cluster, double[] vector) {
+		if(cluster.getRowCount() < 2){
+			return Double.MAX_VALUE;
+		}
+		
 		double[] u = cluster.getRow(0);
 		double[] sig = cluster.getRow(1);
 		

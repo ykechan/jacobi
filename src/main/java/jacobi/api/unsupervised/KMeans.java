@@ -98,7 +98,10 @@ public class KMeans {
 		long flop = DEFAULT_FLOP_THRESHOLD;
 		int minRank = k * DEFAULT_KMEANS_PP_SAMPLING;
 		
-		KMeansPP init = null;
+		KMeansPP init = new KMeansPP(EuclideanCluster.getInstance(),
+			n -> (int) Math.floor(n * this.randFn.getAsDouble()),
+			k, flop
+		);
 		
 		Clustering kmeans = new ExpectationMaximization<>(init, EuclideanCluster.getInstance(), flop);
 		

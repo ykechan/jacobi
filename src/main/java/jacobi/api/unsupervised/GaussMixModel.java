@@ -27,11 +27,23 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.DoubleSupplier;
+import java.util.function.ToDoubleBiFunction;
 import java.util.stream.IntStream;
 
 import jacobi.api.Matrix;
+import jacobi.core.clustering.ClusterMetric;
+import jacobi.core.clustering.Clustering;
+import jacobi.core.clustering.EuclideanCluster;
+import jacobi.core.clustering.ExpectationMaximization;
+import jacobi.core.clustering.GaussianCluster;
+import jacobi.core.clustering.IterativeClustering;
+import jacobi.core.clustering.KMeansPP;
+import jacobi.core.clustering.StandardScoreCluster;
+import jacobi.core.clustering.WithinClusterDistance;
+import jacobi.core.util.Pair;
 import jacobi.core.util.ParallelSupplier;
 import jacobi.core.util.Throw;
+import jacobi.core.util.Weighted;
 
 /**
  * Comprehensive implementation to clustering by Gaussian Mixture Model.
@@ -65,15 +77,16 @@ public class GaussMixModel {
 	 * Constructor.
 	 */
 	public GaussMixModel() {
-		this(DEFAULT_RAND_FUNC);
+		this(DEFAULT_RAND_FUNC, DEFAULT_NUM_EPOCHS);
 	}
 
 	/**
 	 * Constructor.
 	 * @param randFn  Random function
 	 */
-	public GaussMixModel(DoubleSupplier randFn) {
+	public GaussMixModel(DoubleSupplier randFn, int numEpochs) {
 		this.randFn = randFn;
+		this.numEpochs = numEpochs;
 	}
 
 	/**
@@ -112,9 +125,46 @@ public class GaussMixModel {
 			return Collections.singletonList(IntStream.range(0, matrix.getRowCount()).toArray());
 		}
 
-		return null;
+		System.out.println("full=" + full);
+		return this.init(k, full).compute(matrix);
 	}
 	
+	/**
+	 * Initialize the clustering algorithm
+	 * @param k  Number of clusters
+	 * @param full  True for inferring the full co-variance matrix, 
+	 * 		false for inferring the diagonal only 
+	 * @return  Implementation of clustering algorithm
+	 */
+	protected Clustering init(int k, boolean full) {
+		long flop = GaussMixModel.DEFAULT_FLOP_THRESHOLD;
+		
+		KMeansPP init = new KMeansPP(EuclideanCluster.getInstance(),
+			n -> (int) Math.floor(n * this.randFn.getAsDouble()),
+			k, flop);
+		
+		ExpectationMaximization<double[]> baseEM = new ExpectationMaximization<>(
+			init, EuclideanCluster.getInstance(), flop
+		);
+		
+		if(full){
+			ClusterMetric<Weighted<Pair>> metric = GaussianCluster.getInstance();
+			return this.iterative(metric, baseEM.bind(metric));
+		}
+		
+		ClusterMetric<Matrix> metric = StandardScoreCluster.getInstance();
+		return this.iterative(metric, baseEM.bind(metric));
+	}
 	
+	protected <T> Clustering iterative(ClusterMetric<T> metric, Clustering em) {
+		if(this.numEpochs < 2){
+			return em;
+		}
+		
+		ToDoubleBiFunction<Matrix, List<int[]>> measureFunc = WithinClusterDistance.of(metric);
+		return new IterativeClustering(measureFunc, this.numEpochs, em);
+	}
+		
 	private DoubleSupplier randFn;
+	private int numEpochs;
 }

@@ -66,6 +66,15 @@ public class ExpectationMaximization<T> implements Clustering {
 		this.flop = flop;
 	}
 	
+	/**
+	 * Construct a new implementation on a different metric, with this being the initializing function
+	 * @param metric  New cluster metric
+	 * @return  New instance of implementation
+	 */
+	public <V> ExpectationMaximization<V> bind(ClusterMetric<V> metric) {
+		return new ExpectationMaximization<>(this.bindAsInit(metric), metric, this.flop);
+	}
+	
 	@Override
 	public List<int[]> compute(Matrix matrix) {
 		List<T> clusters = this.initFunc.apply(matrix);
@@ -165,6 +174,24 @@ public class ExpectationMaximization<T> implements Clustering {
 		}
 		
 		return new Array(memberships, counts);
+	}
+	
+	/**
+	 * Bind this as init function to another cluster descriptor type
+	 * @param metric  Cluster metric
+	 * @return  Initialize function to another cluster descriptor type
+	 */
+	protected <V> Function<Matrix, List<V>> bindAsInit(ClusterMetric<V> metric) {
+		return m -> {
+			List<T> clusters = this.initFunc.apply(m);
+			Array memberships = this.maximization(m, clusters);
+			
+			ExpectationMaximization<V> em = new ExpectationMaximization<>(
+				x -> Collections.emptyList(), metric, this.flop
+			);
+			
+ 			return em.expectation(m, memberships);
+		};
 	}
 	
 	/**

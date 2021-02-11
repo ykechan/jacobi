@@ -45,7 +45,7 @@ import jacobi.core.util.Throw;
  */
 public class KMeansPP implements Function<Matrix, List<double[]>> {
 	
-	/*
+	/**
 	 * Constructor.
 	 * @param metric  Cluster metric
 	 * @param kRand  Random function
@@ -164,6 +164,11 @@ public class KMeansPP implements Function<Matrix, List<double[]>> {
 		return minDist;
 	}
 	
+	/**
+	 * Approximate the base-2 log
+	 * @param num  Input value
+	 * @return  Approx. log of the input value base-2
+	 */
 	protected int log2(int num) {
 		int lg = 0;
 		while(num > 0){

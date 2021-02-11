@@ -50,9 +50,11 @@ public class WithinClusterDistance implements ToDoubleBiFunction<Matrix, List<in
 	/**
 	 * Constructor
 	 * @param metric  Cluster metric function
+	 * @param seg  Cluster segregation
 	 */
 	public WithinClusterDistance(ClusterMetric<Object> metric, Segregation seg) {
 		this.metric = metric;
+		this.seg = seg;
 	}
 
 	@Override

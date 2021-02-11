@@ -1,9 +1,11 @@
 package jacobi.core.clustering;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.stream.IntStream;
 
 import org.junit.Assert;
@@ -13,6 +15,8 @@ import org.junit.runner.RunWith;
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.core.clustering.ExpectationMaximization.Array;
+import jacobi.core.util.Pair;
+import jacobi.core.util.Weighted;
 import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
@@ -121,6 +125,17 @@ public class ExpectationMaximizationTest {
 	}
 	
 	@Test
+	@JacobiImport("test old faithful")
+	@JacobiEquals(expected = 100, actual = 20)
+	public void shouldBeAbleToPerformFullGMMOnOldFaithful() {
+		ExpectationMaximization<?> em = this.gmmMock(true);
+		List<int[]> seqs = em.compute(this.input);
+		
+		Assert.assertEquals(2, seqs.size());
+		this.clusters = this.toMatrix(seqs, 20);
+	}
+	
+	@Test
 	public void shouldBeAbleToSortMembershipsIntoSeqs() {
 		ExpectationMaximization<?> em = this.mock();
 		Array result = em.sort(new int[]{2, 2, 2, 1, 1, 0, 0, 0, 0}, new int[]{4, 2, 3});
@@ -173,11 +188,67 @@ public class ExpectationMaximizationTest {
 		};
 	}
 	
+	protected ExpectationMaximization<Weighted<Pair>> gmmMock(boolean serial) {
+		BiConsumer<Integer, List<Weighted<Pair>>> verify = (k, clusters) -> {
+			int offset = 10 * (k + 1);
+
+			Matrix means = all.get(offset);
+			Jacobi.assertEquals(means, Matrices.wrap(clusters.stream()
+				.map(w -> w.item.getLeft().getRow(0))
+				.toArray(n -> new double[n][])));
+			
+			for(int i = 0; i < clusters.size(); i++){
+				Weighted<Pair> cluster = clusters.get(i);
+				Matrix chol = all.get(offset + i + 1);
+				
+				List<double[]> rows = new ArrayList<>();
+				rows.addAll(Arrays.asList( cluster.item.getRight().toArray() ));
+				double[] lnDet = new double[cluster.item.getRight().getColCount()];
+				lnDet[0] = cluster.weight;
+				rows.add(lnDet);
+				
+				Jacobi.assertEquals(chol, Matrices.wrap(rows.toArray(new double[0][])));
+			}
+		};
+		
+		return new ExpectationMaximization<Weighted<Pair>>(
+			new ExpectationMaximization<>(
+				m -> Arrays.asList(this.init.toArray()),
+				EuclideanCluster.getInstance(), 
+				Integer.MAX_VALUE
+			).bindAsInit(GaussianCluster.getInstance()).andThen(ls -> {
+				verify.accept(0, ls);
+				return ls;
+			}),
+			GaussianCluster.getInstance(), 
+			serial ? Integer.MAX_VALUE : 0
+		){
+			
+			@Override
+			protected List<Weighted<Pair>> expectation(Matrix matrix, Array memberships) {
+				List<Weighted<Pair>> clusters = super.expectation(matrix, memberships);
+				verify.accept(this.step++, clusters);
+				return clusters;
+			}
+
+			private int step = 1;
+		};
+	}
+	
 	protected Matrix toMatrix(List<int[]> seqs) {
 		int len = seqs.stream().mapToInt(s -> s.length).max().orElse(0);
+		return this.toMatrix(seqs, len);
+	}
+	
+	protected Matrix toMatrix(List<int[]> seqs, int len) {
 		return Matrices.wrap(seqs.stream()
 			.map(s -> Arrays.stream(s).mapToDouble(i -> i).toArray())
-			.map(a -> Arrays.copyOf(a, len))
+			.flatMap(a -> {
+				int rows = (a.length / len) + (a.length % len == 0 ? 0 : 1);
+				return IntStream.range(0, rows)
+					.mapToObj(i -> Arrays.copyOfRange(a, i * len, Math.min(a.length, (i + 1) * len)))
+					.map(r -> r.length < len ? Arrays.copyOf(r, len) : r);
+			})
 			.toArray(n -> new double[n][])
 		);
 	}
