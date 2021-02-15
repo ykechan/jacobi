@@ -139,12 +139,7 @@ public class MulT {
     protected double[] compute(Matrix a, double[] b) {
     	double[] v = new double[a.getRowCount()];
     	for(int i = 0; i < v.length; i++) {
-    		double[] row = a.getRow(i);
-    		double prod = 0.0;
-    		for(int j = 0; j < row.length; j++) {
-    			prod += row[j] * b[j];
-    		}
-    		v[i] = prod;
+    		v[i] = Dot.prod(a.getRow(i), b);
     	}
     	return v;
     }

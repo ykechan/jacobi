@@ -43,6 +43,20 @@ public class Dot {
      * Default lower limit of number of rows to decide using parallelism.
      */
     public static final int DEFAULT_THRESHOLD = 64;
+    
+    /**
+     * Compute the dot product between two vectors
+     * @param u  Left vector
+     * @param v  Right vector
+     * @return  Dot product of the two vectors
+     */
+    public static double prod(double[] u, double[] v) {
+    	double ans = 0.0;
+    	for(int i = 0; i < v.length; i++){
+    		ans += u[i] * v[i];
+    	}
+    	return ans;
+    }
 
     /**
      * Constructor.

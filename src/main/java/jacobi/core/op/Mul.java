@@ -187,11 +187,7 @@ public class Mul {
      * @return  Dot product
      */
     protected double dot(double[] u, double[] v) {
-        double ans = 0.0;
-        for(int i = 0; i < u.length; i++){
-            ans += u[i] * v[i];
-        }
-        return ans;
+        return Dot.prod(u, v);
     }
     
     /**
