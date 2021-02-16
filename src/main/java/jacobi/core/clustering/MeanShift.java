@@ -146,6 +146,9 @@ public class MeanShift implements Clustering {
 		}
 		
 		ClusterMetric<double[]> metric = EuclideanCluster.getInstance();
+		// by default is its own cluster
+		memberships[start.index] = start.index;
+		
 		for(int k = 0; k < max; k++){
 			Neighbourhood next = this.shift(sIndex, current.mean, context, start.index);
 			
