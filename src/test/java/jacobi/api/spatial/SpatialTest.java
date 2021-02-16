@@ -1,6 +1,5 @@
 package jacobi.api.spatial;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
@@ -45,35 +44,6 @@ public class SpatialTest {
 		this.ans = Matrices.wrap(new double[][]{
 			kNN.stream().mapToDouble(v -> (double) v).toArray()
 		});
-	}
-	
-	@Test
-	@JacobiImport("test kNN 4 indicators")
-	public void shouldBeAbleToCrossValidationByKNN() {
-		SpatialIndex<Boolean> sIndex = this.input
-			.ext(Data.class)
-			.select(0, 1, 2, 3).get()
-			.ext(Spatial.class).build().map(i -> this.input.get(i, 4) > 0.0);
-		
-		int[] confusion = new int[4];
-		int correct = 0;
-		for(int i = 0; i < this.input.getRowCount(); i++){
-			double[] q = Arrays.copyOf(this.input.getRow(i), 4);
-			boolean ans = this.input.get(i, 4) > 0.0;
-			List<Boolean> kNN = sIndex.queryKNN(q, this.oracle.getColCount());
-			boolean guess = kNN.stream().skip(1).filter(b -> b).count() > 2;
-			
-			System.out.println("#" + i + ", ans = " + ans + ", guess = " + guess);
-			
-			int index = (ans ? 2 : 0) + (guess ? 1 : 0);
-			if(ans == guess){
-				correct++;
-			}
-			confusion[index]++;
-		}
-		
-		System.out.println(Arrays.toString(confusion));
-		System.out.println(correct);
 	}
 	
 }

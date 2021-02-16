@@ -64,8 +64,7 @@ public class UnsupervisedTest {
 			double[] actual = centroids.get(i);
 			double[] expected = this.oracle.getRow(i);
 			
-			double norm = new MulT()
-				.compute(Matrices.wrap(actual), new ColumnVector(actual)).get(0, 0);
+			double norm = Dot.prod(actual, actual);
 			
 			
 		}
