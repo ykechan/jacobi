@@ -96,7 +96,6 @@ public class KMeans {
 		}
 		
 		long flop = DEFAULT_FLOP_THRESHOLD;
-		int minRank = k * DEFAULT_KMEANS_PP_SAMPLING;
 		
 		KMeansPP init = new KMeansPP(EuclideanCluster.getInstance(),
 			n -> (int) Math.floor(n * this.randFn.getAsDouble()),
@@ -117,7 +116,7 @@ public class KMeans {
 	 * @return  Row indices for each cluster
 	 */
 	public List<int[]> compute(Matrix matrix, int kMin, int kMax) {
-		if(kMin < 1 || kMax < 1){
+		if(kMin < 1 || kMax < kMin){
 			throw new IllegalArgumentException("Invalid number of clusters [" + kMin + "," + kMax + "].");
 		}
 		

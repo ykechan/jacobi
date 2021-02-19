@@ -112,10 +112,14 @@ public class MeanShift implements Clustering {
 	public List<int[]> compute(Matrix matrix) {
 		SpatialIndex<Tuple> sIndex = this.createIndex(matrix);
 		
-		Context context = new Context(new int[matrix.getRowCount()], new ArrayList<>(), new HashMap<>());
+		Context context = this.initContext(matrix);
 		Arrays.fill(context.memberships, -10);
 		
 		for(int i = 0; i < matrix.getRowCount(); i++){
+			if(context.memberships[i] >= 0){
+				continue;
+			}
+			
 			Tuple start = new Tuple(i, matrix.getRow(i));
 			Tuple dest = this.trace(sIndex, context, start);
 			
@@ -126,6 +130,7 @@ public class MeanShift implements Clustering {
 			
 			context.memberships[i] = dest.index;
 		}
+		
 		return this.collapse(context.memberships);
 	}
 	
@@ -161,7 +166,7 @@ public class MeanShift implements Clustering {
 			Tuple hit = context.cache.get(hash);
 			if(hit == null){
 				context.cache.put(hash, new Tuple(start.index, next.mean));
-			}else if(metric.distanceBetween(hit.vector, next.mean) < this.epsilon){
+			}else if(metric.distanceBetween(hit.vector, next.mean) < context.eps){
 				memberships[start.index] = hit.index;
 				break;
 			}
@@ -189,7 +194,7 @@ public class MeanShift implements Clustering {
 		ClusterMetric<double[]> metric = EuclideanCluster.getInstance();
 		
 		for(Tuple t : context.destinations){
-			if(metric.distanceBetween(next.mean, t.vector) < this.epsilon){
+			if(metric.distanceBetween(next.mean, t.vector) < context.eps){
 				context.memberships[current.index] = t.index;
 				return true;
 			}
@@ -199,7 +204,7 @@ public class MeanShift implements Clustering {
 			return false;
 		}
 		
-		return metric.distanceBetween(next.mean, current.mean) < this.epsilon;
+		return metric.distanceBetween(next.mean, current.mean) < context.eps;
 	}
 	
 	/**
@@ -223,19 +228,14 @@ public class MeanShift implements Clustering {
 			neighbours.add(tuple);
 			
 			double dist = metric.distanceBetween(mean, tuple.vector);
-			if(tuple.index == start || dist > this.epsilon){
+			if(tuple.index == start || dist > context.eps){
 				continue;
 			}
 
 			int cluster = memberships[tuple.index];
 			if(cluster < 0){
-				System.out.println("#" + start + " collapsed " + tuple.index
-						+ " @ " + Arrays.toString(mean)
-						+ ", dist=" + dist + ", eps=" + this.epsilon);
 				memberships[tuple.index] = start;
 			}else if(cluster != start){
-				System.out.println("#" + start + " was collapsed to " + cluster + " by " + tuple.index
-					+ ", dist=" + dist + ", eps=" + this.epsilon);
 				memberships[start] = cluster;
 				return EMPTY;
 			}
@@ -278,7 +278,7 @@ public class MeanShift implements Clustering {
 			
 			norm += w;
 			heap.push(tuple.index, -w);
-		}
+		} 
 		
 		int[] elements = new int[weights.length];
 		int k = elements.length;
@@ -325,34 +325,34 @@ public class MeanShift implements Clustering {
 			}
 			
 			int k = i;
-			IntStack chain = IntStack.newInstance();
 			while(k != memberships[k]){
 				if(memberships[k] < 0){
-					chain = null;
+					k = -1;
 					break;
 				}
 				
-				chain.push(k);
-				
-				int temp = memberships[k];
-				memberships[k] = -1;
-				k = temp;
+				k = memberships[k];
 			}
 			
-			if(chain == null){
+			if(k < 0){
 				continue;
 			}
 			
-			IntStack bucket = buckets[k];
-			while(!chain.isEmpty()){
-				bucket.push(chain.pop());
-			}
+			memberships[i] = k;
+			buckets[k].push(i);
 		}
 		return Arrays.stream(buckets)
-			.filter(b -> b != null && b.size() > 1)
+			.filter(b -> b != null && b.size() >= this.minPts)
 			.map(b -> b.toArray()).collect(Collectors.toList());
 	}
 	
+	/**
+	 * Hash function for a neighbourhood on its members
+	 * @param neighbourhood  Neighbourhood
+	 * @param len  Number of members to include in the hash value
+	 * @return  Hash value based on index of the neighbourhood members. If all members are included,
+	 *    the indices are sorted s.t. the hash value is based on inclusion not ordering.
+	 */
 	protected int hashCode(Neighbourhood neighbourhood, int len) {
 		int[] elem = neighbourhood.elements;
 		int num = Math.min(elem.length, len);
@@ -370,6 +370,18 @@ public class MeanShift implements Clustering {
 			}
 		}
 		return (int) checksum.getValue();
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	protected Context initContext(Matrix matrix) {
+		int[] membership = new int[matrix.getRowCount()];
+		Arrays.fill(membership, -1);
+		
+		double eps = this.epsilon * this.epsilon;
+		return new Context(membership, new ArrayList<>(), new HashMap<>(), eps);
 	}
 
 	private ParzenWindow window;
@@ -455,28 +467,35 @@ public class MeanShift implements Clustering {
 		/**
 		 * Membership of each vectors
 		 */
-		public int[] memberships;
+		public final int[] memberships;
 		
 		/**
 		 * Destinations of found clusters
 		 */
-		public List<Tuple> destinations;
+		public final List<Tuple> destinations;
 		
 		/**
 		 * Cache of intermediate steps
 		 */
-		public Map<Integer, Tuple> cache;
+		public final Map<Integer, Tuple> cache;
 		
+		/**
+		 * Epsilon for collapsing
+		 */
+		public final double eps;
+
 		/**
 		 * Constructor.
 		 * @param memberships  Array of memberships
 		 * @param destinations  Destinations of found clusters
 		 * @param cache  Cache of intermediate steps
+		 * @param eps  Epsilon distance for collapsing
 		 */
-		public Context(int[] memberships, List<Tuple> destinations, Map<Integer, Tuple> cache) {
+		public Context(int[] memberships, List<Tuple> destinations, Map<Integer, Tuple> cache, double eps) {
 			this.memberships = memberships;
 			this.destinations = destinations;
 			this.cache = cache;
+			this.eps = eps;
 		}
 	}
 	

@@ -4,20 +4,22 @@ import java.awt.Color;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.api.spatial.SpatialIndex;
 import jacobi.core.clustering.MeanShift.Context;
-import jacobi.core.clustering.MeanShift.Neighbourhood;
 import jacobi.core.clustering.MeanShift.Tuple;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
@@ -35,6 +37,9 @@ public class MeanShiftTest {
 	@JacobiInject(1)
 	public Matrix props;
 	
+	@JacobiInject(100)
+	public Matrix oracle;
+	
 	@JacobiInject(-1)
 	public Map<Integer, Matrix> all;
 	
@@ -44,12 +49,9 @@ public class MeanShiftTest {
 		MeanShift impl = this.mock(ParzenWindow.FLAT);
 		int startAt = this.indexOf(this.props.getRow(0));
 		
-		int[] memberships = new int[this.data.getRowCount()];
-		Arrays.fill(memberships, -100);
-		
+		Context context = impl.initContext(this.data);
 		Tuple start = new Tuple(startAt, this.data.getRow(startAt));
 		
-		Context context = new Context(memberships, new ArrayList<>(), new HashMap<>());
 		int ans = impl.trace(impl.createIndex(this.data), context, start).index;
 		Assert.assertEquals(startAt, ans);
 	}
@@ -60,12 +62,9 @@ public class MeanShiftTest {
 		MeanShift impl = this.mock(ParzenWindow.FLAT);
 		int startAt = this.indexOf(this.props.getRow(0));
 		
-		int[] memberships = new int[this.data.getRowCount()];
-		Arrays.fill(memberships, -100);
-		
+		Context context = impl.initContext(this.data);
 		Tuple start = new Tuple(startAt, this.data.getRow(startAt));
 		
-		Context context = new Context(memberships, new ArrayList<>(), new HashMap<>());
 		int ans = impl.trace(impl.createIndex(this.data), context, start).index;
 		Assert.assertEquals(-1, ans);
 	}
@@ -76,14 +75,11 @@ public class MeanShiftTest {
 		MeanShift impl = this.mock(ParzenWindow.FLAT);
 		int startAt = this.indexOf(this.props.getRow(0));
 		
-		int[] memberships = new int[this.data.getRowCount()];
-		Arrays.fill(memberships, -100);
-		
+		Context context = impl.initContext(this.data);
 		Tuple start = new Tuple(startAt, this.data.getRow(startAt));
 		
-		Context context = new Context(memberships, new ArrayList<>(), new HashMap<>());
 		int ans = impl.trace(impl.createIndex(this.data), context, start).index;
-		System.out.println(ans);
+		Assert.assertEquals(startAt, ans);
 	}
 	
 	@Test
@@ -139,6 +135,122 @@ public class MeanShiftTest {
 	}
 	
 	@Test
+	@JacobiImport("test radiation trace (1)")
+	public void shouldBeAbleToTracePoint1InTestRadiation() {
+		MeanShift impl = this.mock(ParzenWindow.FLAT);
+		
+		int startAt = this.indexOf(this.props.getRow(0));
+		Tuple start = new Tuple(startAt, this.data.getRow(startAt));
+		
+		SpatialIndex<Tuple> sIndex = this.directQuery(this.data);
+		
+		Context context = impl.initContext(this.data);
+		int[] before = Arrays.copyOf(context.memberships, context.memberships.length);
+		
+		Tuple tr = impl.trace(sIndex, context, start);
+		int ans = tr.index;
+		Assert.assertEquals(startAt, ans);
+		this.assertCollapsed(before, start, context, sIndex);
+	}
+	
+	@Test
+	@JacobiImport("test radiation trace (2)")
+	public void shouldBeAbleToTracePoint2InTestRadiation() {
+		MeanShift impl = this.mock(ParzenWindow.FLAT);
+		
+		int startAt = this.indexOf(this.props.getRow(0));
+		Tuple start = new Tuple(startAt, this.data.getRow(startAt));
+		
+		SpatialIndex<Tuple> sIndex = this.directQuery(this.data);
+		
+		Context context = impl.initContext(this.data);
+		int[] before = Arrays.copyOf(context.memberships, context.memberships.length);
+		
+		Tuple tr = impl.trace(sIndex, context, start);
+		int ans = tr.index;
+		Assert.assertEquals(startAt, ans);
+		this.assertCollapsed(before, start, context, sIndex);
+		
+		for(Map.Entry<Integer, Tuple> entry : context.cache.entrySet()){
+			System.out.println("key=" + entry.getKey() 
+				+ ", #" + entry.getValue().index 
+				+ ":" + Arrays.toString(entry.getValue().vector));
+		}
+	}
+	
+	@Test
+	@JacobiImport("test radiation trace (3)")
+	public void shouldBeAbleToTracePoint3InTestRadiation() {
+		MeanShift impl = this.mock(ParzenWindow.FLAT);
+		
+		int startAt = this.indexOf(this.props.getRow(0));
+		Tuple start = new Tuple(startAt, this.data.getRow(startAt));
+		
+		SpatialIndex<Tuple> sIndex = this.directQuery(this.data);
+		
+		Context context = impl.initContext(this.data);
+		int[] before = Arrays.copyOf(context.memberships, context.memberships.length);
+		
+		Tuple tr = impl.trace(sIndex, context, start);
+		int ans = tr.index;
+		Assert.assertEquals(startAt, ans);
+		this.assertCollapsed(before, start, context, sIndex);
+		
+		for(Map.Entry<Integer, Tuple> entry : context.cache.entrySet()){
+			System.out.println("key=" + entry.getKey() 
+				+ ", #" + entry.getValue().index 
+				+ ":" + Arrays.toString(entry.getValue().vector));
+		}
+	}
+	
+	@Test
+	@JacobiImport("test radiation trace (ALL)")
+	public void shouldBeAbleToTraceAllPointsInTestRadiation() {
+		Context[] temp = new Context[1];
+		
+		double[] props = this.props == null ? new double[]{1.0, 0.0} : this.props.getRow(1);
+		MeanShift impl = new MeanShift(ParzenWindow.FLAT, props[0], props[1], 3){
+
+			@Override
+			protected SpatialIndex<Tuple> createIndex(Matrix matrix) {
+				return directQuery(matrix);
+			}
+
+			@Override
+			protected Context initContext(Matrix matrix) {
+				Context context = super.initContext(matrix);
+				temp[0] = context;
+				return context;
+			}
+			
+		};
+		
+		List<int[]> result = impl.compute(this.data);
+		for(int[] seq : result){
+			Assert.assertTrue(seq.length > 0);
+			Arrays.sort(seq);
+			boolean lower = seq[0] == 0;
+			long error = Arrays.stream(seq).filter(s -> (s < 70) != lower).count();
+			Assert.assertTrue(error < 3);
+		}
+		
+		Context context = temp[0];
+		Assert.assertEquals(this.oracle.getRowCount(), context.destinations.size());
+		
+		double[][] array = context.destinations.stream()
+			.map(t -> t.vector).sorted(Comparator.comparingDouble(a -> a[0]))
+			.toArray(n -> new double[n][]);
+		
+		
+		for(int i = 0; i < this.oracle.getRowCount(); i++){
+			double[] target = this.oracle.getRow(i);
+			double[] dest = array[i];
+			
+			Assert.assertTrue(EuclideanCluster.getInstance().distanceBetween(target, dest) < props[1]);
+		}
+	}
+	
+	@Test
 	public void shouldBeAbleToCollapseMembershipOf6Elements() {
 		MeanShift impl = this.mock(ParzenWindow.FLAT);
 		List<int[]> seqs = impl.collapse(new int[]{
@@ -167,6 +279,33 @@ public class MeanShiftTest {
 		Assert.assertEquals(1, seqs.size());
 		Arrays.sort(seqs.get(0));
 		Assert.assertArrayEquals(new int[]{0, 1, 2, 3, 4, 5}, seqs.get(0));
+	}
+	
+	protected void assertCollapsed(int[] before, Tuple start, Context context, SpatialIndex<Tuple> sIndex) {
+		double[] props = this.props == null ? new double[]{1.0, 0.0} : this.props.getRow(1);
+		
+		Set<Integer> passby = new TreeSet<>();
+		context.cache.put(0, start);
+		for(Tuple dest : context.cache.values()){
+			Iterator<Tuple> iter = sIndex.queryRange(dest.vector, props[1]);
+			while(iter.hasNext()){
+				passby.add(iter.next().index);
+			}
+		}
+		
+		for(int i = 0; i < context.memberships.length; i++){
+			int m = context.memberships[i];
+			if(m < 0){
+				Assert.assertFalse(passby.contains(i));
+			}
+			
+			if(m == before[i]){
+				continue;
+			}
+		
+			Assert.assertTrue(m >= 0);
+			Assert.assertTrue("#" + i + " was collapsed but not detected", passby.contains(i));
+		}
 	}
 	
 	protected MeanShift mock(ParzenWindow window) {
@@ -224,8 +363,6 @@ public class MeanShiftTest {
 					tuples.add(new Tuple(i, matrix.getRow(i)));
 				}
 				
-				System.out.println("Query " + Arrays.toString(query)
-					+ " < " + dist + ": " + tuples.size());
 				return tuples.iterator();
 			}
 			

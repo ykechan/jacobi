@@ -113,4 +113,10 @@ public interface Unsupervised {
 	@Implementation(Dbscan.Proxy.class)
 	public List<int[]> dbscan(int minPts, double epsilon);
 
+	/**
+	 * Configurer for clustering using the Mean-Shift algorithm.
+	 * @return  Mean-shift clustering model
+	 */
+	@Implementation(MeanShifts.Proxy.class)
+	public MeanShifts meanShift();
 }
