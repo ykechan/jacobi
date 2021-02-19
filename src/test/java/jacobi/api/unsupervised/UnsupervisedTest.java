@@ -136,7 +136,7 @@ public class UnsupervisedTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void shouldFailWhenMinPointsIsNegativeAndNotSpecialValue() {
 		MeanShifts ms = Matrices.zeros(0).ext(Learn.class).unsupervised().meanShift();
-		ms.setMinPts(0);
+		ms.setMinPts(-2);
 	}
 	
 	@Test(expected = IllegalArgumentException.class)
