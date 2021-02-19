@@ -88,8 +88,8 @@ public class StandardScoreCluster implements ClusterMetric<Matrix> {
 
 	@Override
 	public double distanceBetween(Matrix cluster, double[] vector) {
-		if(cluster.getRowCount() < 2){
-			return Double.MAX_VALUE;
+		if(cluster.getRowCount() < 1){
+			return Double.POSITIVE_INFINITY;
 		}
 		
 		double[] u = cluster.getRow(0);
