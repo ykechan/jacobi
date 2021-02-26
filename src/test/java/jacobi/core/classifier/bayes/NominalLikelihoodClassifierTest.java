@@ -126,8 +126,6 @@ public class NominalLikelihoodClassifierTest {
 	
 	@Test
 	@JacobiImport("outlook model predicts golf")
-	@JacobiEquals(expected = 10, actual = 10)
-	@JacobiEquals(expected = 11, actual = 11)
 	public void shouldBeAbleToPredictPlayByOutlookModelUsingArgmax() {
 		DataTable<YesOrNo> dataTab = new JacobiDataDef(this.workbook, ENUMS)
 				.loadDef("weighted outlook and golf", YesOrNo.class)
@@ -141,7 +139,7 @@ public class NominalLikelihoodClassifierTest {
 		
 		for(int i = 0; i < outlookCol.cardinality(); i++){
 			double[] features = new double[dataTab.getMatrix().getColCount()];
-			features[i] = i;
+			features[outlookCol.getIndex()] = i;
 			Assert.assertArrayEquals(this.model.getRow(i), 
 				classifier.eval(features, dataTab.getOutcomeColumn()), 1e-12);
 		}
