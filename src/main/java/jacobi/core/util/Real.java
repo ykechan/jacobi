@@ -43,12 +43,31 @@ public enum Real {
     public static final double TOLERANCE = 1e-8;
     
     /**
+     * Pseudo-value to approximate ln(0). The exponential of this value is practically zero.
+     */
+    public static final double LN_ZERO = -256.0;
+    
+    /**
      * Check if a value is negligible, i.e.&nbsp;with absolute value smaller than EPSILON.
      * @param value  Value to be checked
      * @return   True if negligible, false otherwise
      */
     public static boolean isNegl(double value) {
         return value > -EPSILON && value < EPSILON;
+    }
+    
+    /**
+     * Zero-checked natural log. If parameter is zero, LN_ZERO is returned.
+     * @param x  Function parameter
+     * @return  Ln(x) is x != 0, LN_ZERO otherwise.
+     * @throws  IllegalArgumentException  when x < 0
+     */
+    public static double pseudoLn(double x) {
+    	if(x < 0.0){
+    		throw new IllegalArgumentException("Ln is not defined at " + x);
+    	}
+    	
+    	return x == 0.0 ? LN_ZERO : Math.log(x);
     }
 
 }
