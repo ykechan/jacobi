@@ -44,7 +44,7 @@ import jacobi.core.util.Weighted;
  * co-variance matrix &Sigma;. The probability density function of such a distribution is given 
  * by<br>
  * 
- * p(x) = (2&pi;)<sup>n/2</sup> det(&Sigma;)<sup>&frac12;</sup> exp(-&frac12; &Delta;<sup>T</sup>&Sigma;<sup>-1</sup>&Delta;),<br>
+ * p(x) = (2&pi;)<sup>-n/2</sup> det(&Sigma;)<sup>-&frac12;</sup> exp(-&frac12; &Delta;<sup>T</sup>&Sigma;<sup>-1</sup>&Delta;),<br>
  * where n is the number of dimensions,<br>
  * 		exp is the exponential function,<br>
  *      and &Delta; = x - &mu;
@@ -119,7 +119,7 @@ public class GaussianCluster implements ClusterMetric<Weighted<Pair>> {
 			dist += dx[i] * y[i];
 		}
 		
-		return (dist + cluster.weight + dx.length * LN_2PI) / 2;
+		return (cluster.weight + dx.length * LN_2PI + dist) / 2;
 	}
 
 	/**

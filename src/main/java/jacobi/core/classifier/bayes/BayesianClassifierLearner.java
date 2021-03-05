@@ -33,6 +33,8 @@ import jacobi.api.classifier.Column;
 import jacobi.api.classifier.DataTable;
 import jacobi.api.classifier.Instance;
 import jacobi.api.classifier.bayes.BayesianClassifierParams;
+import jacobi.core.clustering.GaussianCluster;
+import jacobi.core.clustering.StandardScoreCluster;
 import jacobi.core.util.Real;
 
 /**
@@ -63,25 +65,22 @@ public class BayesianClassifierLearner<T>
 			? new double[outCol.cardinality()] 
 			: this.prior(dataTab);
 			
-		System.out.println("bias = " + Arrays.toString(bias));
 		List<BayesianClassifier<T>> classifiers = new ArrayList<>();
 		classifiers.addAll(this.byNominals(dataTab, params));
-		switch(params.getNumericOption()){
-			case IGNORE:
-				break;
-				
-			case NAIVE:
-				break;
-				
-			case GAUSS:
-				break;
-				
-			default:
-				throw new UnsupportedOperationException("Unknown numeric option " + params.getNumericOption());
+	
+		BayesianClassifier<T> numClassifier = this.byNumerics(dataTab, params);
+		if(numClassifier != null){
+			classifiers.add(numClassifier);
 		}
 		return new NaiveBayesClassifier<>(outCol, bias, classifiers);
 	}
 	
+	/**
+	 * Obtain a list of classifiers on the nominal features
+	 * @param dataTab  Input data table
+	 * @param params  Learning parameters
+	 * @return  List of Bayesian classifier on the nominal features
+	 */
 	protected List<BayesianClassifier<T>> byNominals(DataTable<T> dataTab, BayesianClassifierParams params) {
 		double pseudoCount = (params.isAlwaysUseLaplace() ? -1 : 1) * params.getPseudoCount();
 		
@@ -92,8 +91,35 @@ public class BayesianClassifierLearner<T>
 			.collect(Collectors.toList());
 	}
 	
+	/**
+	 * Obtain a bayesian classifier based on the numeric features 
+	 * @param dataTab  Input data table
+	 * @param params  Learning parameters
+	 * @return  Bayesian classifer on the numeric features, 
+	 * 		or null if numeric features are ignored / not found.
+	 */
 	protected BayesianClassifier<T> byNumerics(DataTable<T> dataTab, BayesianClassifierParams params) {
-		return null;
+		GaussianLikelihoodClassifier.Learner<T, ?> learner = null;
+		if(dataTab.getColumns().stream().noneMatch(c -> c.isNumeric())){
+			return null;
+		}
+		
+		switch(params.getNumericOption()){
+			case IGNORE:
+				break;
+				
+			case GAUSS:
+				learner = new GaussianLikelihoodClassifier.Learner<>(GaussianCluster.getInstance());
+				break;
+				
+			case NAIVE:
+				learner = new GaussianLikelihoodClassifier.Learner<>(StandardScoreCluster.getInstance());
+				break;
+				
+			default:
+				break;
+		}
+		return learner == null ? null : learner.learn(dataTab, null);
 	}
 	
 	/**
@@ -114,5 +140,4 @@ public class BayesianClassifierLearner<T>
 		return Arrays.stream(weights).map(w -> Real.pseudoLn(w) - total).toArray();
 	}
 	
-	private long flop;
 }

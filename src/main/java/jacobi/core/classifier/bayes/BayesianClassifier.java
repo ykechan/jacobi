@@ -23,8 +23,6 @@
  */
 package jacobi.core.classifier.bayes;
 
-import java.util.Arrays;
-
 import jacobi.api.classifier.Classifier;
 import jacobi.api.classifier.Column;
 
@@ -54,7 +52,6 @@ public abstract class BayesianClassifier<T> implements Classifier<T> {
 	@Override
 	public T apply(double[] t) {
 		double[] lnProbs = this.eval(t, this.outCol);
-		System.out.println(Arrays.toString(t) + " -> " + Arrays.toString(lnProbs));
 		int max = 0;
 		for(int i = 1; i < lnProbs.length; i++){
 			if(lnProbs[i] > lnProbs[max]){

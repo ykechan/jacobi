@@ -48,6 +48,11 @@ public enum Real {
     public static final double LN_ZERO = -256.0;
     
     /**
+     * Value of the (short) Golden-ratio. This can be used as an arbitrary value in many cases
+     */
+    public static final double GOLDEN_RATIO = (Math.sqrt(5.0) - 1) / 2.0;
+    
+    /**
      * Check if a value is negligible, i.e.&nbsp;with absolute value smaller than EPSILON.
      * @param value  Value to be checked
      * @return   True if negligible, false otherwise

@@ -28,7 +28,7 @@ import jacobi.test.annotations.JacobiInject;
 @JacobiImport("/jacobi/test/data/JacobiDataDefTest.xlsx")
 public class JacobiDataDefTest {
 	
-	private static List<Class<?>> ENUMS = Arrays.asList(
+	private static final List<Class<?>> ENUMS = Arrays.asList(
 		Outlook.class, YesOrNo.class
 	);
 	

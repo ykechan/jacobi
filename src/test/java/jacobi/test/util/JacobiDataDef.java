@@ -19,6 +19,7 @@ import jacobi.api.Matrix;
 import jacobi.api.classifier.Column;
 import jacobi.api.classifier.DataTable;
 import jacobi.core.classifier.DefinedMatrix;
+import jacobi.core.classifier.Reweightable;
 
 public class JacobiDataDef {
 	
@@ -51,7 +52,7 @@ public class JacobiDataDef {
 				.mapToObj(i -> colDefs.containsKey(i) ? colDefs.get(i) : Column.numeric(i))
 				.collect(Collectors.toList());
 			
-			return DefinedMatrix.of(in, new AbstractList<T>() {
+			DefinedMatrix<T> defMat = DefinedMatrix.of(in, new AbstractList<T>() {
 
 				@SuppressWarnings("unchecked")
 				@Override
@@ -65,6 +66,15 @@ public class JacobiDataDef {
 				}
 				
 			}).apply(cols);
+			
+			if(out.getColCount() == 1){
+				return defMat;
+			}
+			
+			double[] weights = IntStream.range(0, out.getRowCount())
+				.mapToDouble(i -> out.get(i, 1))
+				.toArray();
+			return Reweightable.of(defMat).reweight(weights);
 		};
 	}
 	
