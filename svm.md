@@ -1,25 +1,25 @@
 # Introduction to Support Vector Machine
 
-The Support Vector Machine (SVM) has a very simple idea: cut a space such that it separates the data as far as possible.
-However, training a SVM is much more involved than one would expect. General quadratic programming algorithms are
-notoriously difficult to comprehend, let alone implement. And even with one given the shear size (~1000) of the
-problem it is not efficient to simply packing the whole she-bang into the QP library.
+Support Vector Machines (SVMs) are based on a very simple idea: cut a space in half such that it separates the data 
+as far as possible. However, training a SVM is much more involved than one would expect. General quadratic programming 
+algorithms are notoriously difficult to comprehend, let alone implement. And even with one given the shear size (~1000) 
+of common problems it is not efficient to simply pack the whole she-bang into the QP library.
 
-Two algorithms are specifically designed to train SVMs are to be included in this library: PEGASOS and SMO. 
-This documents serves as a technical document on the explanation of the implementations of these algorithms.
+Two algorithms which are specifically designed to train SVMs are to be included in this library: PEGASOS and SMO. 
+This document serves as a technical document on the explanation of the implementations of these algorithms.
 
 ## Problem formulation
 
 Given a set of data {x<sub>i</sub>, y<sub>i</sub>}, y<sub>i</sub> &isin; {-1, 1}, and an inner product function
-&lt;.,.&gt;: R<sup>n</sup> x R<sup>n</sup> -&gt; R, a SVM classify an instance x if 
+&lt;.,.&gt;: R<sup>n</sup> x R<sup>n</sup> -&gt; R, a SVM classifies an instance x if 
 
->&lt;w, x&gt; > b, where w is the coefficient vector, and b is some bias term. 
+>&lt;w, x&gt; &gt; b, where w is the coefficient vector, and b is some bias term. 
 
-Also, w and b are the arguments the minimize the Hinge-Loss function:
+Also, w and b are the arguments that minimize the Hinge-Loss function:
 
 >L(w, b) = &sum;max(0, 1 - y<sub>i</sub>(&lt;w, x<sub>i</sub>&gt; - b)).
 
-The max function excludes instances that are so easily classified, and focus on those that are difficult.
+The max function excludes instances that are easily classified, and focus on those that are difficult.
 If the inner product is the simple dot-product, then it is a hyperplane with w being the normal vector. 
 The expression
 
@@ -27,8 +27,8 @@ The expression
 
 is the distance between x and the hyperplane, and the unit is measured by the norm of the normal vector.
 The longer the normal vector, the closer x needs to get to the hyperplane to have the value of the
-above expression lesser than one. We not only want to correctly classify most instances, but want the margin
-as wide as possible. Thus a regulation term is included:
+above expression lesser than one. Not only would we want to correctly classify most instances, but we want 
+the margin as wide as possible. Thus a regulation term is included:
 
 >L(w, b) = &lambda;||w||<sup>2</sup> + &sum;max(0, 1 - y<sub>i</sub>(&lt;w, x<sub>i</sub>&gt; - b)).
 >where &lambda; is the strength of regulation.
@@ -125,10 +125,10 @@ A solution to the problem must satisfies the KKT conditions:
 > &nabla;L = 0 w.r.t. w, b, and &xi;
 
 - Primal feasibility
-> &delta;<sub>i</sub> + &xi;<sub>i</sub> >= 1, &xi;<sub>i</sub> >= 0
+> &delta;<sub>i</sub> + &xi;<sub>i</sub> >= 0, &xi;<sub>i</sub> >= 0
 
 - Complementarity
-> &alpha;<sub>i</sub>[&delta;<sub>i</sub> + &xi;<sub>i</sub> - 1] = 0, 
+> &alpha;<sub>i</sub>[&delta;<sub>i</sub> + &xi;<sub>i</sub>] = 0, 
 > &beta;<sub>i</sub>&xi;<sub>i</sub> = 0
 
 By Stationarity,
@@ -187,7 +187,7 @@ C&sum;&xi;<sub>i</sub> - &sum;&alpha;<sub>i</sub>&delta;<sub>i</sub> - C&sum;&xi
 y<sub>i</sub>y<sub>j</sub>
 &nabla;&lt;w, x<sub>i</sub>&gt;&nabla;&lt;w, x<sub>j</sub>&gt;) - 
 &sum;&alpha;<sub>i</sub>y<sub>i</sub>&lt;w, x<sub>i</sub>&gt; + &sum;&alpha;<sub>i</sub>  
-> = (1 + b)&sum;&alpha;<sub>i</sub> - &frac12;(&sum;&alpha;<sub>i</sub>&alpha;<sub>j</sub>
+> = &sum;&alpha;<sub>i</sub> - &frac12;(&sum;&alpha;<sub>i</sub>&alpha;<sub>j</sub>
 y<sub>i</sub>y<sub>j</sub>
 &nabla;&lt;w, x<sub>i</sub>&gt;&nabla;&lt;w, x<sub>j</sub>&gt;).
 
@@ -198,6 +198,164 @@ y<sub>i</sub>y<sub>j</sub>
 &nabla;&lt;w, x<sub>i</sub>&gt;&nabla;&lt;w, x<sub>j</sub>&gt;  
 > subject to &alpha;<sub>i</sub> &isin; [0, C], &sum;&alpha;<sub>i</sub>y<sub>i</sub> = 0.
 
-Whew. That is the whole gory details of arriving the dual lagrangian. The above is based on [this reference](http://fourier.eng.hmc.edu/e176/lectures/ch9/node8.html), though the full substitution is missing. 
+Whew. That is the whole gory details of arriving in the dual lagrangian. The above is based on [this reference](http://fourier.eng.hmc.edu/e176/lectures/ch9/node8.html), though the full substitution is missing. 
 
+Some observations: 
 
+If &alpha;<sub>i</sub> = 0, &beta;<sub>i</sub> = C, &xi;<sub>i</sub> = 0,
+&therefore; &delta;<sub>i</sub> &gt;= 0, by Primal feasibility.
+
+If &alpha;<sub>i</sub> = C, &beta;<sub>i</sub> = 0,
+&therefore; &delta;<sub>i</sub> = -&xi;<sub>i</sub> &lt;= 0 by Complementarity
+
+If &alpha;<sub>i</sub> &isin; (0, C), &delta;<sub>i</sub> = -&xi;<sub>i</sub>.
+&because; &beta;<sub>i</sub> = C - &alpha;<sub>i</sub> &gt; 0, &xi;<sub>i</sub> = 0.
+&therefore; &delta;<sub>i</sub> = 0.
+
+## Sequential Minimal Optimization Algorithm
+
+The SMO algorithm is an efficient algorithm of solving the above optimization problem without
+using QP algorithms such as interior point methods. If all &alpha;<sub>i</sub> can be found that
+satisfy the KKT conditions:
+
+> &alpha;<sub>i</sub> = 0 -&gt; y<sub>i</sub>(&lt;w, x<sub>i</sub>&gt; - b) >= 1  
+> &alpha;<sub>i</sub> = C -&gt; y<sub>i</sub>(&lt;w, x<sub>i</sub>&gt; - b) <= 1  
+> &alpha;<sub>i</sub> &isin; (0, C) -&gt; y<sub>i</sub>(&lt;w, x<sub>i</sub>&gt; - b) = 1  
+> &sum;&alpha;<sub>i</sub>y<sub>i</sub> = 0  
+
+Then a solution is found:
+> w = &sum;&alpha;<sub>i</sub>y<sub>i</sub>x<sub>i</sub>  
+> b = E({ y<sub>i</sub> - &lt;w, x<sub>i</sub>&gt;}), where E(.) is the expected value
+
+In each step, SMO optimizes &alpha;<sub>i</sub> and &alpha;<sub>j</sub> and fixes all other &alpha;s.
+
+&because; &sum;&alpha;<sub>n</sub>y<sub>n</sub> = 0,
+&therefore; &alpha;<sub>i</sub>y<sub>i</sub> + &alpha;<sub>j</sub>y<sub>j</sub> =
+-&sum;<sub>n != i, j</sub>&alpha;<sub>n</sub>y<sub>n</sub>
+
+> &alpha;<sub>i</sub> + &alpha;<sub>j</sub>y<sub>ij</sub>=-&sum;<sub>n != i, j</sub>&alpha;<sub>n</sub>y<sub>ni</sub>  
+> where double subscript refers to multiplicative of the two terms with subscript
+
+Since the RHS is independent of &alpha;<sub>i</sub> and &alpha;<sub>j</sub>, it stays constant after the update.
+
+If y<sub>ij</sub> = 1, &alpha;<sub>i</sub> + &alpha;<sub>j</sub> = some constant A
+
+Therefore if &alpha;^<sub>i</sub> = 0, &alpha;^<sub>j</sub> = A  
+If &alpha;^<sub>i</sub> = C, &alpha;^<sub>j</sub> = A - C  
+WLOG, &alpha;^<sub>i</sub> &isin; [max(0, A - C), min(C, A)]  
+
+If y<sub>ij</sub> = 1, &alpha;<sub>i</sub> - &alpha;<sub>j</sub> = some constant B
+
+Therefore if &alpha;^<sub>i</sub> = 0, &alpha;^<sub>j</sub> = -B  
+If &alpha;^<sub>i</sub> = C, &alpha;^<sub>j</sub> = C - B  
+WLOG, &alpha;^<sub>i</sub> &isin; [max(0, -B), min(C, C - B)]  
+
+If the updates goes out of these bounds, it is truncated to the closest bound.
+
+Consider the Lagrangian,
+
+> L = &alpha;<sub>i</sub> + &alpha;<sub>j</sub> - 
+&frac12;&sum;&alpha;<sub>nn</sub>y<sub>nn</sub>x<sub>nn</sub> -
+&sum;<sub>u != v</sub>&alpha;<sub>uv</sub>y<sub>uv</sub>x<sub>uv</sub>  
+> = &sum;&alpha;<sub>i</sub> - 
+&frac12;(&alpha;<sub>ii</sub>x<sub>ii</sub> + &alpha;<sub>jj</sub>x<sub>jj</sub>) -
+&alpha;<sub>ij</sub>y<sub>ij</sub>x<sub>ij</sub> -
+&sum;<sub>n != i, j</sub>(&alpha;<sub>ni</sub>y<sub>ni</sub>x<sub>ni</sub> + 
+&alpha;<sub>nj</sub>y<sub>nj</sub>x<sub>nj</sub>)  
+
+> &because; w = &sum;&alpha;<sub>i</sub>y<sub>i</sub>x<sub>i</sub>,
+> &sum;<sub>n != i, j</sub>&alpha;<sub>nk</sub>y<sub>nk</sub>x<sub>nk</sub>=
+&alpha;<sub>k</sub>y<sub>k</sub>&lt;w, x<sub>k</sub>&gt; - &alpha;<sub>ik</sub>y<sub>ik</sub>x<sub>ik</sub>-
+&alpha;<sub>jk</sub>y<sub>jk</sub>x<sub>jk</sub> 
+
+>&therefore; &sum;<sub>n != i, j</sub>(&alpha;<sub>ni</sub>y<sub>ni</sub>x<sub>ni</sub> + 
+&alpha;<sub>nj</sub>y<sub>nj</sub>x<sub>nj</sub>)  
+>= &alpha;<sub>i</sub>y<sub>i</sub>&lt;w, x<sub>i</sub>&gt; - &alpha;<sub>ii</sub>y<sub>ii</sub>x<sub>ii</sub>-
+&alpha;<sub>ij</sub>y<sub>ij</sub>x<sub>ij</sub> +
+&alpha;<sub>j</sub>y<sub>j</sub>&lt;w, x<sub>j</sub>&gt; - &alpha;<sub>ij</sub>y<sub>ij</sub>x<sub>ij</sub>-
+&alpha;<sub>jj</sub>y<sub>jj</sub>x<sub>jj</sub>  
+>= &alpha;<sub>i</sub>y<sub>i</sub>&lt;w, x<sub>i</sub>&gt; +
+&alpha;<sub>j</sub>y<sub>j</sub>&lt;w, x<sub>j</sub>&gt;-
+&alpha;<sub>ii</sub>x<sub>ii</sub>-
+&alpha;<sub>jj</sub>x<sub>jj</sub>-
+2&alpha;<sub>ij</sub>y<sub>ij</sub>x<sub>ij</sub>
+
+Put a = &alpha;<sub>j</sub>, y = y<sub>ij</sub>, &alpha;<sub>i</sub>=A - ya for some constant A
+>&sum;<sub>n != i, j</sub>(&alpha;<sub>ni</sub>y<sub>ni</sub>x<sub>ni</sub> + 
+&alpha;<sub>nj</sub>y<sub>nj</sub>x<sub>nj</sub>)  
+>= (A - ya)y<sub>i</sub>&lt;w, x<sub>i</sub>&gt; + ay<sub>j</sub>&lt;w, x<sub>j</sub>&gt;-
+(A - ya)<sup>2</sup>x<sub>ii</sub>-
+a<sup>2</sup>x<sub>jj</sub>-
+2a(A - ya)yx<sub>ij</sub>  
+>= (A - ya)y<sub>i</sub>&lt;w, x<sub>i</sub>&gt; + ay<sub>j</sub>&lt;w, x<sub>j</sub>&gt;-
+(A<sup>2</sup> -2Aya + y<sup>2</sup>a<sup>2</sup>)x<sub>ii</sub>-
+a<sup>2</sup>x<sub>jj</sub>-
+(2Aa - 2ya<sup>2</sup>)yx<sub>ij</sub>  
+>= (A - ya)y<sub>i</sub>&lt;w, x<sub>i</sub>&gt; + ay<sub>j</sub>&lt;w, x<sub>j</sub>&gt;- [
+(A<sup>2</sup> -2Aya + y<sup>2</sup>a<sup>2</sup>)x<sub>ii</sub> +
+a<sup>2</sup>x<sub>jj</sub> +
+(2Aa - 2ya<sup>2</sup>)yx<sub>ij</sub>  ]  
+>= (A - ya)y<sub>i</sub>&lt;w, x<sub>i</sub>&gt; + ay<sub>j</sub>&lt;w, x<sub>j</sub>&gt;- [
+(x<sub>ii</sub> + x<sub>jj</sub> - 2x<sub>ij</sub>)a<sup>2</sup>
+-2Ay(x<sub>ii</sub> - x<sub>ij</sub>)a
++A<sup>2</sup>x<sub>ii</sub>]  
+>= y<sub>j</sub>(&lt;w, x<sub>j</sub>&gt; - &lt;w, x<sub>i</sub>&gt;)a - [
+(x<sub>ii</sub> + x<sub>jj</sub> - 2x<sub>ij</sub>)a<sup>2</sup> -
+2Ay(x<sub>ii</sub> - x<sub>ij</sub>)a] + constants
+
+Isolating terms related to a in L, yields
+>L(a) = (A - ya) + a - &frac12;[
+(A - ya)<sup>2</sup>x<sub>ii</sub> + a<sup>2</sup>x<sub>jj</sub> + 2a(A - ya)yx<sub>ij</sub>
+] - &sum;<sub>n != i,j</sub>...  
+> = (1 - y)a - &frac12;[
+(A<sup>2</sup> - 2yAa + a<sup>2</sup>)x<sub>ii</sub> +
+a<sup>2</sup>x<sub>jj</sub> +
+(2Aa - 2ya<sup>2</sup>)yx<sub>ij</sub>
+] - &sum;<sub>n != i,j</sub>... + constants  
+> = (1 - y)a - &frac12;[
+(x<sub>ii</sub> + x<sub>jj</sub> - 2x<sub>ij</sub>)a<sup>2</sup> -
+2Ay(x<sub>ii</sub> - x<sub>ij</sub>)a
+] - &sum;<sub>n != i,j</sub>... + constants  
+> = (1 - y)a - &frac12;
+(x<sub>ii</sub> + x<sub>jj</sub> - 2x<sub>ij</sub>)a<sup>2</sup> +
+Ay(x<sub>ii</sub> - x<sub>ij</sub>)a -
+&sum;<sub>n != i,j</sub>... + constants  
+> = (1 - y)a + &frac12;
+(x<sub>ii</sub> + x<sub>jj</sub> - 2x<sub>ij</sub>)a<sup>2</sup> +
+Ay(x<sub>ii</sub> - x<sub>ij</sub> - 2x<sub>ii</sub> + 2x<sub>ij</sub>)a -
+y<sub>j</sub>(&lt;w, x<sub>j</sub>&gt; - &lt;w, x<sub>i</sub>&gt;)a + constants  
+> = (1 - y)a + &frac12;
+(x<sub>ii</sub> + x<sub>jj</sub> - 2x<sub>ij</sub>)a<sup>2</sup> -
+Ay(x<sub>ii</sub> - x<sub>ij</sub>)a -
+y<sub>j</sub>(&lt;w, x<sub>j</sub>&gt; - &lt;w, x<sub>i</sub>&gt;)a + constants  
+
+Consider 1 - y - y<sub>j</sub>(&lt;w, x<sub>j</sub>&gt; - &lt;w, x<sub>i</sub>&gt;)
+> 1 - y - y<sub>j</sub>(&lt;w, x<sub>j</sub>&gt; - &lt;w, x<sub>i</sub>&gt;)  
+> = y<sub>j</sub>(y<sub>j</sub> - y<sub>i</sub> - &lt;w, x<sub>j</sub>&gt; + &lt;w, x<sub>i</sub>&gt;)  
+> = y<sub>j</sub>[(&lt;w, x<sub>i</sub>&gt; - y<sub>i</sub>) - (&lt;w, x<sub>j</sub>&gt; - y<sub>j</sub>)]  
+> = y<sub>j</sub>(&Delta;<sub>i</sub> - &Delta;<sub>j</sub>),  
+> where &Delta;<sub>i</sub> = &lt;w, x<sub>i</sub>&gt; - b - y<sub>i</sub>, the bias term cancelled out in the above expression
+
+Differentiate L w.r.t a, setting L' = 0 yields
+
+> &alpha;<sub>j</sub>\* = Ay(x<sub>ij</sub> - x<sub>ii</sub>))/&eta; + y<sub>j</sub>(&Delta;<sub>j</sub> - &Delta;<sub>i</sub>)/&eta;  
+> where &eta; = 2x<sub>ij</sub> - x<sub>ii</sub> - x<sub>jj</sub>
+
+WLOG,
+> &alpha;<sub>i</sub>\* = Ay(x<sub>ij</sub> - x<sub>jj</sub>))/&eta; + y<sub>i</sub>(&Delta;<sub>i</sub> - &Delta;<sub>j</sub>)/&eta;   
+> = Ay(x<sub>jj</sub> - x<sub>ij</sub>))/&eta; - y<sub>i</sub>(&Delta;<sub>j</sub> - &Delta;<sub>i</sub>)/&eta;   
+
+All sources I could find including the [original paper](https://www.microsoft.com/en-us/research/uploads/prod/1998/04/sequential-minimal-optimization.pdf), [here](http://fourier.eng.hmc.edu/e176/lectures/ch9/node9.html) or [here](http://cs229.stanford.edu/materials/smo.pdf) uses 
+
+> &alpha;<sub>j</sub>\* = &alpha;<sub>j</sub> - y<sub>j</sub>(&Delta;<sub>i</sub> - &Delta;<sub>j</sub>)/&eta;  
+
+Making  Ay(x<sub>ij</sub> - x<sub>ii</sub>))/&eta; = &alpha;<sub>j</sub>. I have no justification of this. For now I would
+follow the sources and move up, and maybe come back to check what went wrong in the derivation above later.
+
+The normal vector can be updated incrementally:
+
+> w\* = &sum;&alpha;\*<sub>i</sub>y<sub>i</sub>x<sub>i</sub>  
+> =  &sum;&alpha;<sub>i</sub>y<sub>i</sub>x<sub>i</sub> + &Delta;&alpha;<sub>i</sub>y<sub>i</sub>x<sub>i</sub> +
+&Delta;&alpha;<sub>j</sub>y<sub>j</sub>x<sub>j</sub>  
+> = w + &Delta;&alpha;<sub>i</sub>y<sub>i</sub>x<sub>i</sub> +
+&Delta;&alpha;<sub>j</sub>y<sub>j</sub>x<sub>j</sub>
