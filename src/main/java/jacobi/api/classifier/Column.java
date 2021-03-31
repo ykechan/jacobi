@@ -102,6 +102,7 @@ public class Column<T> implements Comparable<Column<?>> {
      * Create a nominal column with a collection of items.
      * @param index  Index of the column
      * @param items  Collection of items, can be duplicated.
+     * @param <T>  Type of nominal items
      * @throws  IllegalArgumentException if number of items is negative or zero.
      */
     public static <T> Column<T> of(int index, Collection<T> items) {
