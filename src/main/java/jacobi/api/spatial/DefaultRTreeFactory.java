@@ -169,7 +169,6 @@ public class DefaultRTreeFactory {
 	/**
 	 * Create spatial index on a set of vectors
 	 * 
-	 * @param vectors  Input vectors
 	 * @return Spatial index of given input vectors
 	 */
 	public SpatialIndex<Integer> build() {

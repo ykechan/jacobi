@@ -104,19 +104,23 @@ public class BacktrackingLineSearch implements IterativeOptimizerStep {
 		double tau = Math.abs(this.control * Dot.prod(gradFx, dx));
 		double lambda = 1.0;
 		
-		int i = 0;
+		double fy = fx;
+		int k = 0;
 		while(lambda > this.epsilon){
+			System.out.println("backtrack " + (k++) + ", worse = " + (fy > fx) + ", lambda=" + lambda);
+			if(fy < fx && lambda < 1e-4){
+				break;
+			}
 			double[] y = this.move(curr, lambda, dx);
-			double fy = func.at(y);
+			fy = func.at(y);
 			
-			if(fx - fy > tau){
+			if(fx - fy >= lambda * tau){
 				break;
 			}
 			
-			tau *= this.decay;
 			lambda *= this.decay;
 		}
-		return this.trim(dx, lambda);
+		return fy > fx ? new double[curr.length] : this.trim(dx, lambda);
 	}
 	
 	/**

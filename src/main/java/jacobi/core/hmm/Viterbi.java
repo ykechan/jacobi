@@ -8,7 +8,6 @@ import jacobi.api.Matrices;
 import jacobi.api.Matrix;
 import jacobi.api.hmm.MarkovModel;
 import jacobi.core.prop.Transpose;
-import jacobi.core.util.Throw;
 
 /**
  * Implementation of the Viterbi algorithm.

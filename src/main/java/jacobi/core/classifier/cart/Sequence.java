@@ -37,7 +37,7 @@ public interface Sequence {
      * re-arranged such that the following properties hold: all items in group i comes before
      * any items in group j if i &lt; j, and if item a comes before item b in the original
      * sequence and both items are in group k, item a comes before item b after re-arrangement.
-     * @param grouper  Function to get the group number given the index of item
+     * @param groupFn  Function to get the group number given the index of item
      * @return  Sequence to access in different groups.
      */
 	public List<Sequence> groupBy(IntUnaryOperator groupFn);
@@ -45,6 +45,7 @@ public interface Sequence {
 	/**
      * Get a list from a list of items which will be access in sequence order.
      * @param items  List of items
+     * @param <T>  Type of items
      * @return  Iterator to access the items in sequence order
      */
     public default <T> List<T> apply(List<T> items) {

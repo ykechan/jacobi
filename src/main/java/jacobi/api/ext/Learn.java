@@ -46,10 +46,21 @@ public interface Learn {
 	 * and associate each row with an outcome for training classifiers.
 	 * @param features  List of type of feature columns
 	 * @param outcomes  List of outcome
+	 * @param <T>  Type of outcome
 	 * @return  Extension to learners of classifier models
 	 */
 	@Implementation(DefinedSupervisedFactory.class)
 	public <T> DefinedSupervised<T> classify(List<Column<?>> features, List<T> outcomes);
+	
+	/**
+	 * Define the column types of the underlying numerical matrix
+	 * @param features  List of type of feature columns
+	 * @param outDef  Column of the outcome
+	 * @param <T>  Type of outcome
+	 * @return  Extension to learners of classifier models
+	 */
+	@Implementation(DefinedSupervisedFactory.class)
+	public <T> DefinedSupervised<T> classify(List<Column<?>> features, Column<T> outDef);
 	
 	/**
 	 * Get the extension for unsupervised learning, e.g. clustering

@@ -33,10 +33,23 @@ import org.junit.Test;
 public class RealTest {
 
     @Test
-    public void test() {
+    public void shouldBeAbleToCheckNegligable() {
         double rt2 = Math.sqrt(2.0);
         Assert.assertTrue(Real.isNegl(rt2 * rt2 - 2.0));
         Assert.assertTrue(Real.isNegl(2.0 - rt2 * rt2));
+    }
+    
+    @Test
+    public void shouldBeAbleToComputePseudoLn() {
+    	double x = Math.E * Math.E;
+    	Assert.assertTrue(Real.isNegl(2.0 - Real.pseudoLn(x)));
+    	
+    	Assert.assertEquals(Real.LN_ZERO, Real.pseudoLn(0.0), 1e-12);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldFailWhenPassingNegativeToPseudoLn() {
+    	Real.pseudoLn(-1);
     }
     
 }

@@ -40,6 +40,12 @@ import jacobi.core.util.Throw;
 public class DefinedSupervisedFactory {
 	
 	@SuppressWarnings("unchecked")
+	public <T> DefinedSupervised<T> create(Matrix matrix, List<Column<?>> colDefs, Column<T> outCol) {
+		DataTable<T> dataTab = DefinedMatrix.of(matrix, outCol).apply(colDefs);
+		return FacadeProxy.of(DefinedSupervised.class, dataTab);
+	}
+	
+	@SuppressWarnings("unchecked")
 	public <T> DefinedSupervised<T> create(Matrix matrix, List<Column<?>> colDefs, List<T> outcomes) {
 		Throw.when()
 			.isNull(() -> matrix, () -> "No input matrix.")

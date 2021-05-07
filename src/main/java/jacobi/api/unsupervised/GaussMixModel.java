@@ -83,6 +83,7 @@ public class GaussMixModel {
 	/**
 	 * Constructor.
 	 * @param randFn  Random function
+	 * @param numEpochs  Number of epochs
 	 */
 	public GaussMixModel(DoubleSupplier randFn, int numEpochs) {
 		this.randFn = randFn;

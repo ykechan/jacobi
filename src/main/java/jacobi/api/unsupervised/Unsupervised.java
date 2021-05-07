@@ -77,7 +77,6 @@ public interface Unsupervised {
 	
 	/**
 	 * K-means clustering that determines the optimal number of clusters
-	 * @param k  Number of clusters
 	 * @param kMin  Minimum number of clusters
 	 * @param kMax  Maximum number of clusters
 	 * @return  Row indices of members of each clusters

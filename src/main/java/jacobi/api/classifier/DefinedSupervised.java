@@ -56,5 +56,6 @@ public interface DefinedSupervised<T> {
 	 */
 	@Implementation(BayesianClassifierLearner.class)
 	public BayesianClassifier<T> learnBayes(BayesianClassifierParams param);
+	
 
 }

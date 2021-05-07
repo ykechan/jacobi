@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.DoublePredicate;
 import java.util.function.DoubleToIntFunction;
 import java.util.stream.Collectors;
 
@@ -72,6 +73,16 @@ public class Column<T> implements Comparable<Column<?>> {
     }
     
     /**
+     * Create a boolean column that is true by given predicate
+     * @param index  Index of the column
+     * @param p  Predicate to determine the column value
+     * @return  A boolean column
+     */
+    public static Column<Boolean> is(int index, DoublePredicate p) {
+        return new Column<>(index, Arrays.asList(Boolean.FALSE, Boolean.TRUE), v -> p.test(v) ? 1 : 0);
+    }
+    
+    /**
      * Create a nominal column with un-specified items
      * @param index  Index of the column
      * @param numItems  Number of values this nominal column can take
@@ -103,6 +114,7 @@ public class Column<T> implements Comparable<Column<?>> {
      * @param index  Index of the column
      * @param items  Collection of items, can be duplicated.
      * @param <T>  Type of nominal items
+     * @return  A nominal column
      * @throws  IllegalArgumentException if number of items is negative or zero.
      */
     public static <T> Column<T> of(int index, Collection<T> items) {
@@ -140,12 +152,13 @@ public class Column<T> implements Comparable<Column<?>> {
         }
         
         if(type.isEnum()) {
-            return new Column<>(index, 
+            Column<T> temp = new Column<>(index, 
                 Collections.unmodifiableList(Arrays.asList( 
                     type.getEnumConstants() 
                 )), 
                 v -> (int) v
             );
+            return temp;
         }        
         
         throw new IllegalArgumentException("Un-recogized type " + type);
@@ -221,6 +234,14 @@ public class Column<T> implements Comparable<Column<?>> {
      */
     public boolean isNumeric() {
         return this.items.isEmpty();
+    }
+    
+    /**
+     * Get if this attribute is effectively boolean, i.e. with only 2 nominal values.
+     * @return  True if this attribute is boolean, false otherwise
+     */
+    public boolean isBoolean() {
+    	return this.cardinality() == 2;
     }
     
     @Override

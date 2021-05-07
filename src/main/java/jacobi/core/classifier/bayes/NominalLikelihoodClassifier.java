@@ -121,7 +121,6 @@ public class NominalLikelihoodClassifier<T> extends BayesianClassifier<T> {
 		/**
 		 * Compute log-likehoods from conjunctive weights and total weights
 		 * @param conj  Conjunctive weights
-		 * @param weightSums  Total weights
 		 * @return  Log-likehoods of each features against each outcome
 		 */
 		protected Matrix toLnLikelihood(Matrix conj) {

@@ -23,6 +23,7 @@
  */
 package jacobi.core.solver.nonlin;
 
+import java.util.Arrays;
 import java.util.function.Supplier;
 
 import jacobi.core.impl.ColumnVector;

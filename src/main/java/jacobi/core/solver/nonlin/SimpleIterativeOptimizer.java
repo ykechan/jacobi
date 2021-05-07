@@ -60,28 +60,28 @@ public class SimpleIterativeOptimizer implements IterativeOptimizer {
         
         double error = 1.0;
         
+        double[] ans = null;
+        double minFx = 0.0;
+        
         for(long iter = 0; iter < limit; iter++) {
+        	double[] dx = step.delta(func, curr);
             curr = this.move(curr, step.delta(func, curr));
-            error = this.norm(func.grad(curr).getVector());
+            
+            double fx = func.at(curr);
+            if(ans == null || fx < minFx){
+            	ans = Arrays.copyOf(curr, curr.length);
+            	minFx = fx;
+            }
+            
+            error = this.norm(dx);
             if(error < epsilon) {
             	break;
             }
         }
         
-        return new Weighted<>(new ColumnVector(curr), error);
-    }
-    
-    /**
-     * Move the position vector by a delta vector
-     * @param position  Position vector
-     * @param dx  Delta vector
-     * @return  Instance of position vector with values updated
-     */
-    protected double[] move(double[] position, double[] dx) {
-        for(int i = 0; i < position.length; i++) {
-            position[i] += dx[i];
-        }
-        return position;
+        return ans == null
+        	? new Weighted<>(new ColumnVector(curr), func.at(curr))
+        	: new Weighted<>(new ColumnVector(ans), minFx);
     }
     
     /**
@@ -97,6 +97,19 @@ public class SimpleIterativeOptimizer implements IterativeOptimizer {
             }
         }
         return max;
+    }
+    
+    /**
+     * Move the position vector by a delta vector
+     * @param pos  Position vector
+     * @param dx  Delta vector
+     * @return  Instance of position vector with values updated
+     */
+    protected double[] move(double[] pos, double[] dx) {
+    	for(int i = 0; i < pos.length; i++) {
+        	pos[i] += dx[i];
+        }
+        return pos;
     }
 
     private Supplier<IterativeOptimizerStep> stepFactory;

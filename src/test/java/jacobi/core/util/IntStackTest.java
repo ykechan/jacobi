@@ -119,5 +119,15 @@ public class IntStackTest {
         }
     }
     
-
+    @Test
+    public void shouldBeAbleToPushArrayOfInts() {
+    	IntStack stack = new IntStack(0);
+    	stack.pushAll(5, 7, 2, 9, 0);
+    	
+    	Assert.assertEquals(0, stack.pop());
+    	Assert.assertEquals(9, stack.pop());
+    	Assert.assertEquals(2, stack.pop());
+    	Assert.assertEquals(7, stack.pop());
+    	Assert.assertEquals(5, stack.pop());
+    }
 }

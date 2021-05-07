@@ -12,7 +12,6 @@ import org.junit.runner.RunWith;
 
 import jacobi.api.Matrices;
 import jacobi.api.Matrix;
-import jacobi.core.spatial.sort.ZSort.Context;
 import jacobi.test.annotations.JacobiEquals;
 import jacobi.test.annotations.JacobiImport;
 import jacobi.test.annotations.JacobiInject;
@@ -105,11 +104,6 @@ public class ZSortTest {
 		this.result = Matrices.wrap(this.toList(this.input, seq).toArray(new double[0][]));
 	}
 
-	protected ZSort mock() {
-		ZSort zSort = new ZSort(null, null, 0.0);
-		return null;
-	}
-	
 	protected Matrix mockStats(List<double[]> vectors){
 		return this.stats;
 	}

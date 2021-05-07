@@ -133,9 +133,11 @@ public abstract class SumLinearArgFunc<T> implements VectorFunction {
         for(int i = begin; i < end; i++) {
             double dx = this.slopeAt(params.inter, i, params.args[i]);
             double[] row = this.consts.getRow(i);
+            
             for(int j = 0; j < vector.length; j++) {
                 vector[j] += dx * row[j];
             }
+           
         }
         return vector;
     }
@@ -330,7 +332,7 @@ public abstract class SumLinearArgFunc<T> implements VectorFunction {
         
         private double[] args;
         
-        private T inter;
+        public T inter;
 
         /**
          * Constructor.

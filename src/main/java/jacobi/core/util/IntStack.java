@@ -89,6 +89,27 @@ public class IntStack {
     }
     
     /**
+     * Push an array of integers onto the stack by order of the array.
+     * @param array  Input array of integers
+     * @return  This object
+     */
+    public IntStack pushAll(int... array) {
+    	int ensureCap = this.count + array.length;
+    	int current = this.array.length;
+    	
+    	while(current < ensureCap){
+    		int next = current + this.step;
+    		this.step = current;
+    		current = next;
+    	}
+    	
+    	this.array = current > this.array.length ? Arrays.copyOf(this.array, current) : this.array;
+    	System.arraycopy(array, 0, this.array, this.count, array.length);
+    	this.count += array.length;
+    	return this;
+    }
+    
+    /**
      * Get the top integer in the stack. The integer will not be removed from the stack.
      * @return  Integer element
      */

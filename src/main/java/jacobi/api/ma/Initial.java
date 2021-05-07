@@ -27,8 +27,6 @@ package jacobi.api.ma;
 /**
  * Modes for moving average algorithms to compute the initial points which not all data is available.
  *
- * <p></p>
- *
  * @author Y.K. Chan
  */
 public enum Initial {

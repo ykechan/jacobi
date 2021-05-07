@@ -42,7 +42,6 @@ import jacobi.core.util.Weighted;
  * appearing in the access sequence is considered.</p>
  * 
  * @author Y.K. Chan
- * @param <T>  Type for partition information
  */
 public interface Partition {
     
@@ -51,7 +50,7 @@ public interface Partition {
      * @param table  Data set
      * @param target  Partitioning column
      * @param seq  Access sequence
-     * @return
+     * @return  Impurity of outcome distribution
      */
     public Weighted<double[]> measure(DataTable<?> table, Column<?> target, Sequence seq);
 

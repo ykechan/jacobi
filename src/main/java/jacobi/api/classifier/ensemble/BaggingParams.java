@@ -48,21 +48,12 @@ public class BaggingParams<P> {
 	
 	/**
 	 * Factory method for creating Bootstrapping parameters with default sampling rate
-	 * @param span  Dimension span, i.e. number of featuress
+	 * @param span  Dimension span, i.e. number of features
 	 * @return  Bootstrapping parameters
 	 */
 	public static BootstrapRate defaultRate(int span) {
 		return new BootstrapRate(1 / Math.sqrt(span), DEFAULT_SAMPLING_RATE);
 	}		
-	
-	/**
-	 * 
-	 * @param modelLimit
-	 * @return
-	 */
-	public static StoppingCriteria defaultStop(int modelLimit) {
-		return null;
-	}
 
 	/**
 	 * Sampling parameters used in Bootstrapping

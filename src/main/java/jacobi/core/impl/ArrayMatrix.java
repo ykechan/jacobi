@@ -99,6 +99,9 @@ public class ArrayMatrix implements Matrix {
 
 	@Override
 	public double[] getRow(int index) {
+		if(index < 0 || index >= this.numRow){
+			throw new ArrayIndexOutOfBoundsException(index);
+		}
 		
 		return Arrays.copyOfRange(this.array, 
 			index * this.numCol, 

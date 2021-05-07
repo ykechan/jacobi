@@ -52,6 +52,24 @@ import jacobi.core.util.Enque;
 public class AdaptiveSelect implements Select {
 	
 	/**
+	 * Default number of elements from extrema to consider using a heap
+	 */
+	public static final int DEFAULT_LOWER_LIMIT = 16;
+	
+	/**
+	 * Default depth multiplier
+	 */
+	public static final double DEFAULT_CONST_FACTOR = 8.0;
+	
+	/**
+	 * Get default instance
+	 * @return  Default instance
+	 */
+	public static AdaptiveSelect getInstance() {
+		return INSTANCE;
+	}
+	
+	/**
 	 * Factory method
 	 * @param lowerLimit  Number of element that between extrema to target to consider using a heap
 	 * @param constFactor  Constant factor. If the depth is greater that constFactor * ln(n) 
@@ -288,5 +306,8 @@ public class AdaptiveSelect implements Select {
 		}
 		
 	}
+	
+
+	private static final AdaptiveSelect INSTANCE = AdaptiveSelect.of(DEFAULT_LOWER_LIMIT, DEFAULT_CONST_FACTOR);
 	
 }

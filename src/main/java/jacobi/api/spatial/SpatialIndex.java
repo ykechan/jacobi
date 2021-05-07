@@ -55,6 +55,8 @@ public interface SpatialIndex<T> {
 	/**
 	 * Return a spatial index with indexed items mapped by a mapping function
 	 * @param mapper  Mapping function
+	 * @param <T>  Type of indexed object 
+	 * @param <V>  Type of mapped object
 	 * @return  Spatial index in mapped type
 	 */
 	public default <V> SpatialIndex<V> map(Function<T, V> mapper) {

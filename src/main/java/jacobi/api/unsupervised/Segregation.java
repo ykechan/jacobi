@@ -85,6 +85,8 @@ public class Segregation {
 	 * Wrap a sub-matrix into a matrix given the sequence of row indices
 	 * @param input  Input matrix
 	 * @param seq  Sequence of row indices
+	 * @param begin  Begin index of interest
+	 * @param end  End index of interest
 	 * @return  Sub-matrix
 	 */
 	public Matrix toMatrix(Matrix input, int[] seq, int begin, int end) {

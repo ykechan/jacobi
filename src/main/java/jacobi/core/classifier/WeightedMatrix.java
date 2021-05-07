@@ -50,12 +50,13 @@ public class WeightedMatrix extends ImmutableMatrix {
 	 * @param dataTab  Input data table
 	 * @return  Boolean matrix
 	 */
-	public static WeightedMatrix of(DataTable<Boolean> dataTab) {
+	public static <T> WeightedMatrix of(DataTable<T> dataTab, Column<Boolean> outCol) {
 		int[] cols = dataTab.getColumns().stream()
 				.filter(c -> c.isNumeric())
 				.mapToInt(c -> c.getIndex()).toArray();
 		
-		Column<Boolean> outCol = dataTab.getOutcomeColumn();
+		System.out.println("cols = " +Arrays.toString(cols));
+		
 		double[] weights = new double[dataTab.size()];
 		
 		double[][] rows = new double[weights.length][];
@@ -96,6 +97,7 @@ public class WeightedMatrix extends ImmutableMatrix {
 	public WeightedMatrix(Matrix matrix, double[] weights, int[] cols) {
 		this.matrix = matrix;
 		this.weights = weights;
+		this.cols = cols;
 	}
 
 	@Override
@@ -128,7 +130,7 @@ public class WeightedMatrix extends ImmutableMatrix {
 	 * @return  Corresponding column index in the data table
 	 */
 	public int columnIndex(int index) {
-		return 0;
+		return this.cols[index];
 	}
 
 	private Matrix matrix;

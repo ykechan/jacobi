@@ -28,7 +28,7 @@ import java.util.List;
 import jacobi.api.Matrix;
 
 /**
- * Common interface of a data table in CART model.
+ * Common interface of a data table in supervised learning.
  * 
  * <p>A data table is a tuple of a matrix with column types defined, a typed outcome
  * value associated with each row of the matrix, and a weight value associated with 

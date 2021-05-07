@@ -101,9 +101,6 @@ public class LogisticRegression {
 		double[] stdDev = new Variance.StdDev().compute(matrix);
 		
 		int biasIndex = this.detectBias(stdDev);
-		System.out.println(Arrays.toString(mean));
-		System.out.println(Arrays.toString(stdDev));
-		
 		return () -> {
 			double[] vector = new double[matrix.getColCount()];
 			double offset = 0.0;

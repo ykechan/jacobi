@@ -50,11 +50,21 @@ public class GradientDescentStep implements IterativeOptimizerStep {
 	@Override
 	public double[] delta(VectorFunction func, double[] curr) {
 		double[] df = func.grad(curr).getVector();
-		for(int i = 0; i < df.length; i++) {
-			df[i] *= -this.learningRate;
-		}
-		return df;
+		return this.mul(-this.learningRate, df);
+	}
+	
+	/**
+	 * Multiply the given vector with scalar value
+	 * @param kappa  Scalar value
+	 * @param vector  Input vector
+	 * @return  Result vector
+	 */
+	protected double[] mul(double kappa, double[] vector) {
+		for(int i = 0; i < vector.length; i++){
+			vector[i] *= kappa;
+		} 
+		return vector;
 	}
 
-	private double learningRate;
+	protected final double learningRate;
 }

@@ -47,7 +47,7 @@ import jacobi.core.clustering.ParzenWindow;
  * 
  * <p>
  * This amounts to finding the value of the Gauss Error function 
- * erf(z) = 2/&Sqrt;&pi;&int;<sub>0</sub><sup>z</sup>exp(-t<sup>2</sup>)dt.
+ * erf(z) = 2/&sqrt;&pi;&int;<sub>0</sub><sup>z</sup>exp(-t<sup>2</sup>)dt.
  * 
  * An approximation by Abramowitz and Stegun is employed here:<br>
  * 
@@ -116,7 +116,8 @@ public class MeanShifts {
 
 	/**
 	 * Set the number of standard deviation to cutoff for a Gaussian parzen window
-	 * @param numSig  Number of standard deviation 
+	 * @param numSig  Number of standard deviation
+	 * @return  This 
 	 */
 	public MeanShifts setNumSig(double numSig) {
 		if(numSig < 0.0){

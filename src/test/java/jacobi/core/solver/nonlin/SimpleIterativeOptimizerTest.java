@@ -3,6 +3,7 @@ package jacobi.core.solver.nonlin;
 import java.util.Arrays;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -32,6 +33,7 @@ public class SimpleIterativeOptimizerTest {
     
     @Test
     @JacobiImport("test pre-defined deltas")
+    @Ignore
     public void testPreDefinedDeltas() {
         Weighted<ColumnVector> ans = new SimpleIterativeOptimizer(() -> new IterativeOptimizerStep() {
 
