@@ -27,7 +27,6 @@ import java.util.Arrays;
 import java.util.function.ToDoubleFunction;
 
 import jacobi.api.classifier.Classifier;
-import jacobi.core.op.Dot;
 
 /**
  * Classifier model class using a support vector machine.
@@ -35,7 +34,7 @@ import jacobi.core.op.Dot;
  * <p>
  * A support vector machine classify an instance feature vector x to true when
  * 
- * &lt;w, x&gt; > b, where w is the coefficient value and b is some bias value.
+ * &lt;w, x&gt; &gt; b, where w is the coefficient value and b is some bias value.
  * 
  * &lt;., .&gt; can be generalized to some other functions instead of the dot
  * product
@@ -48,12 +47,14 @@ public class SupportVectorMachine implements Classifier<Boolean>, ToDoubleFuncti
 
 	/**
 	 * Constructor.
+	 * @param cols  Index of feature columns
 	 * @param coeff  Coefficient value
 	 * @param bias  Bias value
 	 */
-	public SupportVectorMachine(double[] coeff, double bias) {
+	public SupportVectorMachine(int[] cols, double[] coeff, double bias) {
 		this.coeff = coeff;
 		this.bias = bias;
+		this.cols = cols;
 	}
 	
 	/**
@@ -62,6 +63,15 @@ public class SupportVectorMachine implements Classifier<Boolean>, ToDoubleFuncti
 	 */
 	public int dim() {
 		return this.coeff.length;
+	}
+	
+	/**
+	 * Get the column index of a feature in the instance vector 
+	 * @param index  Index of the feature
+	 * @return  Column index
+	 */
+	public int getColumn(int index) {
+		return this.cols[index];
 	}
 	
 	/**
@@ -88,7 +98,12 @@ public class SupportVectorMachine implements Classifier<Boolean>, ToDoubleFuncti
 
 	@Override
 	public double applyAsDouble(double[] value) {
-		return Dot.prod(this.coeff, value) - this.bias;
+		double dist = 0;
+		for(int i = 0; i < this.coeff.length; i++){
+			int j = this.cols[i];
+			dist += coeff[i] * value[j];
+		}
+		return dist - this.bias;
 	}
 	
 	@Override
@@ -96,6 +111,7 @@ public class SupportVectorMachine implements Classifier<Boolean>, ToDoubleFuncti
 		return "<" + Arrays.toString(this.coeff) + ", .> - " + this.bias;
 	}
 
+	private int[] cols;
 	private double[] coeff;
 	private double bias;
 }
