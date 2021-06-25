@@ -169,8 +169,8 @@ public class MinHeap implements Enque<Weighted<Integer>> {
 	 */
 	protected Weighted<Integer> get(double[] array, int index) {
 		return new Weighted<>(
-			(int) Double.doubleToRawLongBits(this.array[2 * index + 1]), 
-			this.array[2 * index]
+			(int) Double.doubleToRawLongBits(array[2 * index + 1]), 
+			array[2 * index]
 		);
 	}
 	
