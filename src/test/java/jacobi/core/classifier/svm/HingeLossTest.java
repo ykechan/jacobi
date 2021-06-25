@@ -1,7 +1,6 @@
 package jacobi.core.classifier.svm;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Assert;
@@ -42,9 +41,9 @@ public class HingeLossTest {
 	public void shouldBeAbleToComputeHingeLossWithZeroBias() {
 		double[] svm = {0.0, Math.E, Math.PI, Real.GOLDEN_RATIO};
 		
-		Assert.assertEquals(Math.E, HingeLoss.dot(svm, new double[]{1.0, 1.0, 0.0, 0.0}, 0), 1e-12);
-		Assert.assertEquals(Math.PI, HingeLoss.dot(svm, new double[]{1.0, 0.0, 1.0, 0.0}, 0), 1e-12);
-		Assert.assertEquals(Real.GOLDEN_RATIO, HingeLoss.dot(svm, new double[]{1.0, 0.0, 0.0, 1.0}, 0), 1e-12);
+		Assert.assertEquals(Math.E, HingeLoss.dot(svm, new double[]{1.0, 1.0, 0.0, 0.0}), 1e-12);
+		Assert.assertEquals(Math.PI, HingeLoss.dot(svm, new double[]{1.0, 0.0, 1.0, 0.0}), 1e-12);
+		Assert.assertEquals(Real.GOLDEN_RATIO, HingeLoss.dot(svm, new double[]{1.0, 0.0, 0.0, 1.0}), 1e-12);
 	}
 	
 	@Test
@@ -56,10 +55,10 @@ public class HingeLossTest {
 		for(int i = 0; i < this.input.getRowCount(); i++){
 			double[] v = this.input.getRow(i);
 			double[] svm = this.svms.getRow(0);
-			double dist = HingeLoss.dot(svm, v, 0);
+			double dist = HingeLoss.dot(svm, v);
 			int out = (int) this.outcomes.get(i, 0);
 			
-			VectorFunction func = new HingeLoss(Matrices.wrap(v), k -> out, 0.0);
+			VectorFunction func = new HingeLoss(Matrices.wrap(v), k -> out > 0, 0.0);
 			double fx = func.at(svm);
 			result.add(new double[]{dist, fx});
 		}
@@ -78,7 +77,7 @@ public class HingeLossTest {
 			double[] svm = this.svms.getRow(0);
 			int out = (int) this.outcomes.get(i, 0);
 			
-			VectorFunction func = new HingeLoss(Matrices.wrap(v), k -> out, 0.0);
+			VectorFunction func = new HingeLoss(Matrices.wrap(v), k -> out > 0, 0.0);
 			double fx = func.at(svm);
 			result[i] = fx;
 		}
@@ -97,7 +96,7 @@ public class HingeLossTest {
 			double[] svm = this.svms.getRow(0);
 			int out = (int) this.outcomes.get(i, 0);
 			
-			VectorFunction func = new HingeLoss(Matrices.wrap(v), k -> out, 0.0);
+			VectorFunction func = new HingeLoss(Matrices.wrap(v), k -> out > 0, 0.0);
 			double[] gx = func.grad(svm).getVector();
 			result.add(gx);
 		}
@@ -110,10 +109,11 @@ public class HingeLossTest {
 	@JacobiEquals(expected = 10, actual = 10)
 	public void shouldBeAbleToSumGradSvmWithRandDataInTernaryOutcome() {
 		double lambda = this.props.get(0, 0);
-		VectorFunction func = new HingeLoss(this.input, k -> (int) this.outcomes.get(k, 0), lambda);
 		List<double[]> result = new ArrayList<>();
 		
 		for(int i = 0; i < this.svms.getRowCount(); i++){
+			int in = i;
+			VectorFunction func = new HingeLoss(this.input, k -> ((int) this.outcomes.get(k, 0)) == in, lambda);
 			double[] svm = this.svms.getRow(i);
 
 			double[] gx = func.grad(svm).getVector();

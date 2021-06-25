@@ -28,9 +28,12 @@ import jacobi.api.annotations.Implementation;
 import jacobi.api.classifier.bayes.BayesianClassifierParams;
 import jacobi.api.classifier.cart.DecisionNode;
 import jacobi.api.classifier.cart.DecisionTreeParams;
+import jacobi.api.classifier.svm.SupportVectorMachineParams;
+import jacobi.api.classifier.svm.SupportVectorMachines;
 import jacobi.core.classifier.bayes.BayesianClassifier;
 import jacobi.core.classifier.bayes.BayesianClassifierLearner;
 import jacobi.core.classifier.cart.DecisionTreeLearner;
+import jacobi.core.classifier.svm.SupportVectorMachineLearner;
 
 /**
  * Proxy interface for supervised learning on classifiers with feature type defined.
@@ -57,5 +60,12 @@ public interface DefinedSupervised<T> {
 	@Implementation(BayesianClassifierLearner.class)
 	public BayesianClassifier<T> learnBayes(BayesianClassifierParams param);
 	
+	/**
+	 * Learn support vector machines classifier
+	 * @param param  Parameters for learning a SVM classifier
+	 * @return  Support vector machines classifier
+	 */
+	@Implementation(SupportVectorMachineLearner.class)
+	public SupportVectorMachines<T> learnSVM(SupportVectorMachineParams param);
 
 }

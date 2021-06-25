@@ -23,11 +23,13 @@
  */
 package jacobi.core.classifier.svm;
 
-import java.util.function.IntUnaryOperator;
+import java.util.Arrays;
+import java.util.function.IntPredicate;
 
 import jacobi.api.Matrix;
 import jacobi.core.impl.ColumnVector;
-import jacobi.core.solver.nonlin.VectorFunction;
+import jacobi.core.solver.nonlin.SumLinearArgFunc;
+import jacobi.core.util.Weighted;
 
 /**
  * The Hinge-Loss function on a set of data as a vector function.
@@ -35,7 +37,7 @@ import jacobi.core.solver.nonlin.VectorFunction;
  * @author Y.K. Chan
  *
  */
-public class HingeLoss implements VectorFunction {
+public class HingeLoss extends SumLinearArgFunc<Weighted<double[]>> {
 	
 	/**
 	 * Find the projection distance between an expanded SVM and a vector for it to belong
@@ -45,137 +47,135 @@ public class HingeLoss implements VectorFunction {
 	 * @param in  Class index
 	 * @return  Projection distance
 	 */
-	public static double dot(double[] svm, double[] vector, int in) {
+	public static double dot(double[] svm, double[] vector) {
 		if(svm.length % vector.length != 0){
 			throw new IllegalArgumentException("Dimension mismatch");
 		}
 		
-		int offset = in * vector.length;
-		if(offset < 0 || offset >= svm.length){
-			throw new IllegalArgumentException("Invalid class index " + in);
-		}
-		
 		int dim = vector.length;
-		double dist = -svm[offset];
+		double dist = -svm[0];
 		for(int i = 1; i < dim; i++){
-			dist += svm[offset + i] * vector[i];
+			dist += svm[i] * vector[i];
 		}
 		return dist;
 	}
-
+	
 	/**
 	 * Constructor
-	 * @param vectors  Instance vectors
-	 * @param isin  Vector index to class index mapping
-	 * @param lambda  Coefficient of the norm term
+	 * @param consts  Feature vectors
+	 * @param isin  Index to in set mapping
+	 * @param lambda  Regulation coefficient
 	 */
-	public HingeLoss(Matrix vectors, IntUnaryOperator isin, double lambda) {
-		this.vectors = vectors;
+	public HingeLoss(Matrix consts, IntPredicate isin, double lambda) {
+		super(consts);
 		this.isin = isin;
 		this.lambda = lambda;
 	}
-
-	@Override
-	public double at(double[] svm) {
-		int dim = this.vectors.getColCount();
-		if(svm.length % dim != 0){
-			throw new IllegalArgumentException("Dimension mismatch");
-		}
-		
-		int num = svm.length / dim;
-		
-		double fx = 0.0;
-		for(int i = 0; i < this.vectors.getRowCount(); i++){
-			double[] v = this.vectors.getRow(i);
-			int out = this.isin.applyAsInt(i);
-			
-			for(int j = 0; j < num; j++){
-				int sgn = out == j ? 1 : -1;
-				double hx = sgn * HingeLoss.dot(svm, v, j);
-				
-				fx += hx < 1 ? 1 - hx : 0.0;
-			}
-		}
-		
-		if(this.lambda == 0){
-			return fx;
-		}
-		
-		double norm = 0.0;
-		for(int j = 0; j < num; j++){
-			int offset = j * dim;
-			for(int k = 1; k < dim; k++){
-				double w = svm[offset + k];
-				norm += w * w;
-			}
-		}
-		return fx + this.lambda * norm;
-	}
-
-	@Override
-	public ColumnVector grad(double[] svm) {
-		int dim = this.vectors.getColCount();
-		if(svm.length % dim != 0){
-			throw new IllegalArgumentException("Dimension mismatch");
-		}
-		
-		int num = svm.length / dim;
-		double[] gx = new double[svm.length];
-		for(int i = 0; i < this.vectors.getRowCount(); i++){
-			double[] v = this.vectors.getRow(i);
-			int out = this.isin.applyAsInt(i);
-			
-			for(int j = 0; j < num; j++){
-				int sgn = out == j ? 1 : -1;
-				int in = sgn * (j + 1);
-				
-				gx = this.grad(svm, v, in, gx);
-			}
-		}
-		
-		if(this.lambda == 0){
-			return new ColumnVector(gx);
-		}
-		
-		for(int i = 0; i < num; i++){
-			int offset = i * dim;
-			for(int j = 1; j < dim; j++){
-				gx[offset + j] += 2 * this.lambda * svm[offset + j];
-			}
-		}
-		return new ColumnVector(gx);
-	}
-
-	@Override
-	public Matrix hess(double[] svm) {
-		throw new UnsupportedOperationException();
+	
+	/**
+	 * Get feature vectors
+	 * @return  Feature vectors
+	 */
+	public Matrix getVectors() {
+		return this.consts;
 	}
 	
 	/**
-	 * Find the sub-gradient of the Hinge-Loss function of a particular class index and matching sign
-	 * @param svm  Expanded SVM
-	 * @param vector  Instance vector
-	 * @param in  Class index and matching sign, i.e. sgn(in) denotes if it matches, and |in| - 1 is the class index
-	 * @param gx  Sub-gradient vector
-	 * @return  Sub-gradient vector
+	 * Get the class of a feature vector given its index
+	 * @param index  Index of feature vector
+	 * @return  True if positive, false otherwise
 	 */
-	protected double[] grad(double[] svm, double[] vector, int in, double[] gx) {
-		int sgn = in > 0 ? 1 : -1;
-		int out = Math.abs(in) - 1;
-		
-		double hx = sgn * HingeLoss.dot(svm, vector, out);
-		if(hx < 1){
-			int offset = out * vector.length;
-			gx[offset] += sgn;
-			
-			for(int i = 1; i < vector.length; i++){
-				gx[offset + i] -= sgn * vector[i];
-			}
-		}
-		return gx;
+	public boolean isIn(int index) {
+		return this.isin.test(index);
+	}
+	
+	/**
+	 * Get regulation coefficient
+	 * @return  Regulation coefficient
+	 */
+	public double getLambda() {
+		return this.lambda;
 	}
 
-	private Matrix vectors;
-	private IntUnaryOperator isin;
+	@Override
+	public double at(double[] pos) {
+		double hx = super.at(pos);
+		
+		double sqNorm = 0.0;
+		for(int i = 1; i < pos.length; i++){
+			sqNorm += pos[i] * pos[i];
+		}
+		return this.lambda * sqNorm + hx;
+	}
+	
+	@Override
+	public ColumnVector grad(double[] pos) {
+		Params<Weighted<double[]>> params = this.prepare(pos);
+		double bias = params.inter.weight;
+		
+		ColumnVector gx = super.grad(pos);
+		double[] dx = gx.getVector();
+		
+		int dBias = 0;
+		double[] dists = params.inter.item;
+		for(int i = 0; i < dists.length; i++){
+			int sgn = this.isin.test(i) ? 1 : -1;
+			double w = sgn * (dists[i] - bias);
+			if(w < 1){
+				dBias += sgn;
+			}
+		}
+		
+		for(int i = 1; i < pos.length; i++){
+			dx[i] += 2 * this.lambda * pos[i];
+		}
+		dx[0] = dBias;
+		return gx;
+	}
+	
+	@Override
+	protected double valueAt(Weighted<double[]> inter, int index, double x) {
+		double bias = inter.weight;
+		double dist = x - bias;
+		int sgn = this.isin.test(index) ? 1 : -1;
+		double hx = sgn * dist;
+		
+		return hx < 1 ? 1 - hx : 0;
+	}
+	
+	@Override
+	protected double slopeAt(Weighted<double[]> inter, int index, double x) {
+		double bias = inter.weight;
+		double dist = x - bias;
+		int sgn = this.isin.test(index) ? 1 : -1;
+		double hx = sgn * dist;
+		
+		return hx < 1 ? -sgn : 0;
+	}
+	
+	@Override
+	protected double convexityAt(Weighted<double[]> inter, int index, double x) {
+		throw new UnsupportedOperationException();
+	}
+	
+	@Override
+	protected Params<Weighted<double[]>> prepare(double[] pos) {
+		double bias = pos[0];
+		
+		double[] x = Arrays.copyOf(pos, pos.length);
+		x[0] = 0;
+		
+		Params<Weighted<double[]>> params = super.prepare(x);
+		params.inter = new Weighted<>(params.inter.item, bias);
+		
+		return params;
+	}
+	
+	@Override
+	protected Weighted<double[]> prepare(double[] pos, double[] args) {
+		return new Weighted<>(args, 0.0);
+	}
+	
+	private IntPredicate isin;
 	private double lambda;
 }

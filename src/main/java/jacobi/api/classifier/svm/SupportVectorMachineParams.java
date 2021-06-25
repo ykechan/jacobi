@@ -23,12 +23,105 @@
  */
 package jacobi.api.classifier.svm;
 
+import jacobi.core.util.Real;
+
 /**
- * Data class for parameters to train a Support Vector Machine.
+ * Data class for training parameters of Support Vector Machines.
  * 
  * @author Y.K. Chan
  *
  */
 public class SupportVectorMachineParams {
+	
+	public static final double DEFAULT_LEARNING_RATE = 0.05;
+	
+	public static final double DEFAULT_ERROR_TOL = 1e-6;
+	
+	public static final int DEFAULT_MIN_EPOCH = 4;
+	
+	public static final int DEFAULT_MAX_EPOCH = 256;
+	
+	public static final double DEFAULT_DECAY_RATE = 0.9;
+	
+	/**
+	 * Factory method using given regulation coefficient with other parameters set as default values
+	 * @param lambda  Regulation cofficient
+	 * @return  Training parameters
+	 */
+	public static SupportVectorMachineParams ofDefault(double lambda) {
+		return new SupportVectorMachineParams()
+			.setRegulationCoeff(lambda)
+			.setErrorTolerance(DEFAULT_ERROR_TOL)
+			.setLearningRate(DEFAULT_LEARNING_RATE)
+			.setDecayRate(DEFAULT_DECAY_RATE)
+			.setMinEpoch(DEFAULT_MIN_EPOCH)
+			.setMaxEpoch(DEFAULT_MAX_EPOCH);
+	}
+	
+	private double regulationCoeff;
+	
+	private double learningRate;
+	
+	private double decayRate;
+	
+	private double errorTolerance;
+	
+	private int minEpoch;
+	
+	private int maxEpoch;
+
+	public double getRegulationCoeff() {
+		return regulationCoeff;
+	}
+
+	public SupportVectorMachineParams setRegulationCoeff(double regulationCoeff) {
+		this.regulationCoeff = regulationCoeff;
+		return this;
+	}
+
+	public double getLearningRate() {
+		return learningRate;
+	}
+
+	public SupportVectorMachineParams setLearningRate(double learningRate) {
+		this.learningRate = learningRate;
+		return this;
+	}
+	
+	public double getDecayRate() {
+		return decayRate;
+	}
+
+	public SupportVectorMachineParams setDecayRate(double decayRate) {
+		this.decayRate = decayRate;
+		return this;
+	}
+
+	public double getErrorTolerance() {
+		return errorTolerance;
+	}
+
+	public SupportVectorMachineParams setErrorTolerance(double errorTolerance) {
+		this.errorTolerance = errorTolerance;
+		return this;
+	}
+
+	public int getMinEpoch() {
+		return minEpoch;
+	}
+
+	public SupportVectorMachineParams setMinEpoch(int minEpoch) {
+		this.minEpoch = minEpoch;
+		return this;
+	}
+
+	public int getMaxEpoch() {
+		return maxEpoch;
+	}
+
+	public SupportVectorMachineParams setMaxEpoch(int maxEpoch) {
+		this.maxEpoch = maxEpoch;
+		return this;
+	}
 	
 }

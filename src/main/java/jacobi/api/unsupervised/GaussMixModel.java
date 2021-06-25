@@ -126,7 +126,6 @@ public class GaussMixModel {
 			return Collections.singletonList(IntStream.range(0, matrix.getRowCount()).toArray());
 		}
 
-		System.out.println("full=" + full);
 		return this.init(k, full).compute(matrix);
 	}
 	
@@ -157,6 +156,12 @@ public class GaussMixModel {
 		return this.iterative(metric, baseEM.bind(metric));
 	}
 	
+	/**
+	 * Initialize clustering algorithm
+	 * @param metric  Cluster Metric
+	 * @param em  Base algorithm
+	 * @return  Clustering instance
+	 */
 	protected <T> Clustering iterative(ClusterMetric<T> metric, Clustering em) {
 		if(this.numEpochs < 2){
 			return em;
