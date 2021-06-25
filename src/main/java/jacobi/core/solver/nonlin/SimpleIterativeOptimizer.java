@@ -60,12 +60,12 @@ public class SimpleIterativeOptimizer implements IterativeOptimizer {
         
         double error = 1.0;
         
-        double[] ans = null;
-        double minFx = 0.0;
+        double[] ans = start;
+        double minFx = func.at(start);
         
         for(long iter = 0; iter < limit; iter++) {
         	double[] dx = step.delta(func, curr);
-            curr = this.move(curr, step.delta(func, curr));
+            curr = this.move(curr, dx);
             
             double fx = func.at(curr);
             if(ans == null || fx < minFx){
