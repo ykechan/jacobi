@@ -23,9 +23,10 @@
  */
 package jacobi.core.impl;
 
+import java.util.NoSuchElementException;
+
 import jacobi.api.Matrix;
-import java.util.Collections;
-import java.util.Iterator;
+import jacobi.core.facade.FacadeProxy;
 
 /**
  *
@@ -33,47 +34,55 @@ import java.util.Iterator;
  * 
  * <p>This serves as a NULL object for matrix.</p>
  * 
- * <p>Instead of simple null value of which Java screams annoyingly every time 
- * developers ever touches it no matter how slightly, an Empty matrix serves 
- * to cause as little error as possible. All operations are encouraged to 
- * define a default behaviour whenever an Empty matrix is encountered.</p>
- * 
- * <p>Nonetheless, computation result with Empty should not be relied upon.</p>
- * 
  * @author Y.K. Chan
  */
-public final class Empty extends ImmutableMatrix {
-    
-    /**
-     * Get singleton instance.
-     * @return  Instance of an Empty matrix
-     */
-    public static final Matrix getInstance() {
-        return INST;
-    }
-    
-    private Empty() {        
-    }
+public enum Empty implements Matrix {
+	
+	/**
+	 * Default instance
+	 */
+	INST;
+	
+	/**
+	 * Get singleton instance
+	 * @return  Instance
+	 */
+	public static Empty getInstance() {
+		return INST;
+	}
 
-    @Override
-    public int getRowCount() {
-        return 0;
-    }
+	@Override
+	public int getRowCount() {
+		return 0;
+	}
 
-    @Override
-    public int getColCount() {
-        return 0;
-    }
+	@Override
+	public int getColCount() {
+		return 0;
+	}
 
-    @Override
-    public double[] getRow(int index) {
-        throw new ArrayIndexOutOfBoundsException(index);
-    }
+	@Override
+	public double[] getRow(int index) {
+		throw new NoSuchElementException();
+	}
 
-    @Override
-    public Matrix copy() {
-        return INST;
-    }
-    
-    private static final Matrix INST = new Empty();
+	@Override
+	public Matrix setRow(int index, double[] values) {
+		throw new NoSuchElementException();
+	}
+
+	@Override
+	public Matrix swapRow(int i, int j) {
+		throw new NoSuchElementException();
+	}
+
+	@Override
+	public <T> T ext(Class<T> clazz) {
+		return FacadeProxy.of(clazz, this);
+	}
+
+	@Override
+	public Matrix copy() {
+		return this;
+	}
 }
