@@ -64,8 +64,6 @@ public class MultiplicativeDecomposition extends DecomposeVisitor {
 				continue;
 			}
 			
-			System.out.println("visit " + node);
-			
 			Map<String, Component> newComponents = node.accept(this);
 			this.join(newComponents, components);
 		}
@@ -82,7 +80,6 @@ public class MultiplicativeDecomposition extends DecomposeVisitor {
 			
 			if(v instanceof Number){
 				Number n = (Number) v;
-				System.out.println("n=" + n + ", left=" + expr.getLeft());
 				return this.indecomposable(n, expr.getLeft());
 			}
 		}

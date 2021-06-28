@@ -101,11 +101,16 @@ public class IdentityReducer extends AbstractSimplifierRule {
 		}
 		
 		if(expr instanceof Inv){
+			Expression arg = ((Inv) expr).getArg();
+			if(arg == Const.ONE || arg == Const.NEG_ONE){
+				return arg;
+			}
+			
 			return super.visit(expr);
 		}
 		
 		if(expr.getRight() == Const.NEG_ONE){
-			return new Inv(expr.getRight());
+			return new Inv(expr.getLeft());
 		}
 		return super.visit(expr);
 	}

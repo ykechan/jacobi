@@ -37,7 +37,10 @@ public class InverseReducerTest {
 	}
 	
 	protected InverseReducer mock() {
-		return InverseReducer.of(Formula.INST);
+		return new InverseReducer(Formula.INST, 
+			new AdditiveDecomposition(Formula.INST), 
+			new MultiplicativeDecomposition(Formula.INST)
+		);
 	}
 	
 }

@@ -113,6 +113,7 @@ public enum DefaultSimplifier implements Visitor<Expression> {
 		rules.add(IdentityReducer.DEFAULT_INSTANCE);
 		rules.add(DEFAULT_EVAL_RULE);
 		rules.add(new InverseReducer(hashFunc, addComp, mulComp));
+		rules.add(new CommonConstantFactorRule(addComp));
 		
 		return new CompositeSimplifier(rules);
 	}
