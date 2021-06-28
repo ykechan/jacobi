@@ -34,6 +34,7 @@ import jacobi.core.expr.Add;
 import jacobi.core.expr.Const;
 import jacobi.core.expr.Expression;
 import jacobi.core.expr.Func;
+import jacobi.core.expr.Functional;
 import jacobi.core.expr.Mul;
 import jacobi.core.expr.Pow;
 import jacobi.core.expr.Var;
@@ -50,7 +51,7 @@ import jacobi.core.expr.eval.Compiler;
  * @author Y.K. Chan
  *
  */
-public enum DefaultSimplifier implements Visitor<Expression> {
+public enum DefaultSimplifier implements Functional {
 	
 	/**
 	 * Default instance
@@ -64,36 +65,12 @@ public enum DefaultSimplifier implements Visitor<Expression> {
 	public static DefaultSimplifier getInstance() {
 		return INST;
 	}
-
+	
 	@Override
-	public Expression visit(Add expr) {
-		return this.getVisitor().visit(expr);
+	public Expression apply(Expression t) {
+		return t.accept(this.getVisitor());
 	}
 
-	@Override
-	public Expression visit(Mul expr) {
-		return this.getVisitor().visit(expr);
-	}
-
-	@Override
-	public Expression visit(Pow expr) {
-		return this.getVisitor().visit(expr);
-	}
-
-	@Override
-	public Expression visit(Func expr) {
-		return this.getVisitor().visit(expr);
-	}
-
-	@Override
-	public Expression visit(Var expr) {
-		return this.getVisitor().visit(expr);
-	}
-
-	@Override
-	public <V> Expression visit(Const<V> expr) {
-		return this.getVisitor().visit(expr);
-	}
 	
 	/**
 	 * Create a potentially stateful simplifier visitor 
