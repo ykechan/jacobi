@@ -107,7 +107,6 @@ public class BacktrackingLineSearch implements IterativeOptimizerStep {
 		double fy = fx;
 		int k = 0;
 		while(lambda > this.epsilon){
-			System.out.println("backtrack " + (k++) + ", worse = " + (fy > fx) + ", lambda=" + lambda);
 			if(fy < fx && lambda < 1e-4){
 				break;
 			}

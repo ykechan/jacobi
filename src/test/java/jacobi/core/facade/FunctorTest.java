@@ -67,6 +67,19 @@ public class FunctorTest {
     }
     
     @Test
+    public void shouldBeAbleToUseSingletonEnumAsImpl() throws Exception {
+        Invocator func = new Functor(TestInterface.class.getMethod("doSthElse", int.class),
+            EnumImpl.class);
+        String str = "This is a string.";
+        int num = 17;
+        Object result = func.invoke(str, new Object[]{num});
+        Assert.assertTrue(result instanceof Integer);
+        Assert.assertEquals(EnumImpl.class.getMethod("apply", String.class, int.class)
+                , ((Functor) func).getMethod());
+        Assert.assertEquals(100 * str.length() + 17, ((Integer) result).intValue());
+    }
+    
+    @Test
     public void testNotFacade() throws Exception {
         this.expected.expect(RuntimeException.class);
         Invocator func = new Functor(NotAFacade.class.getMethod("doSth", int.class),
@@ -181,6 +194,9 @@ public class FunctorTest {
         @Implementation(DoSthImpl.class)
         public int doSth(int i);
         
+        @Implementation(EnumImpl.class)
+        public int doSthElse(int i);
+        
     }
     
     public interface NotAFacade {
@@ -207,6 +223,15 @@ public class FunctorTest {
         private int privateMethodIgnored(String str, int i) {
             return -1;
         }
+    }
+    
+    public enum EnumImpl {
+    	
+    	INSTANCE;
+    	
+    	public int apply(String str, int i) {
+    		return 100 * str.length() + i;
+    	}
     }
     
     public static class ConfusedImpl {

@@ -1,4 +1,4 @@
-/*
+/* 
  * The MIT License
  *
  * Copyright 2021 Y.K. Chan
@@ -21,51 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jacobi.core.sym.eval;
-
-import java.util.List;
+package jacobi.api.ext;
 
 /**
+ * Extension for symbolic calculus.
  * 
  * @author Y.K. Chan
- *
+ * 
  */
-public class Swap extends Instruction {
+public interface Sym {
 	
-	public static <T> Swap load(int offset, T value) {
-		if(value == null){
-			throw new UnsupportedOperationException("Must not swap in null");
-		}
-		return new Swap(offset, -1, value);
-	}
-	
-	public static <T> Swap move(int offset, int target) {
-		if(target < 0){
-			throw new UnsupportedOperationException("Target index out of bound");
-		}
-		
-		return new Swap(offset, target, null);
-	}
-	
-	protected Swap(int offset, int target, Object value) {
-		super(offset);
-		this.target = target;
-		this.value = value;
-	}
-	
-	@Override
-	public Object run(List<?> input, List<?> mem) {
-		return this.value == null ? input.get(this.target) : this.value;
-	}
-	
-	@Override
-	public String toString() {
-		return new StringBuilder().append("swap")
-				.append(' ').append('#').append(this.offset)
-				.append(' ').append(this.value == null ? "$" + target : this.value)
-				.toString();
-	}
 
-	private int target;
-	private Object value;
 }

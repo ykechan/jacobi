@@ -26,6 +26,7 @@ package jacobi.core.sym.eval;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 public class Procedure implements Function<List<?>, Object> {
@@ -35,11 +36,42 @@ public class Procedure implements Function<List<?>, Object> {
 	 * @param steps  List of instructions
 	 * @param mem  Memory capacity
 	 */
-	protected Procedure(List<Instruction> steps, int mem) {
+	public Procedure(List<String> vars, List<Instruction> steps, int mem) {
+		this.vars = vars;
 		this.steps = steps;
 		this.mem = mem;
 	}
+
+	/**
+	 * Get the instructions of this procedure
+	 * @return  List of instructions
+	 */
+	public List<Instruction> getSteps() {
+		return steps;
+	}
+
+	/**
+	 * Get the list of variables in the order of input vector.
+	 * @return  List of variables
+	 */
+	public List<String> getVars() {
+		return vars;
+	}
 	
+	/**
+	 * Marshall values for variable for invoking the procedure
+	 * @param vars  Variable values
+	 * @return  Input vector
+	 */
+	public List<?> marshall(Map<String, ?> vars) {
+		Object[] args = new Object[this.vars.size()];
+		int i = 0;
+		for(String v : this.vars){
+			args[i++] = vars.get(v);
+		}
+		return Arrays.asList(args);
+	}
+
 	@Override
 	public Object apply(List<?> t) {
 		Object[] memory = new Object[this.mem];
@@ -53,6 +85,7 @@ public class Procedure implements Function<List<?>, Object> {
 		return memory[0];
 	}
 
+	private List<String> vars;
 	private List<Instruction> steps;
 	private int mem;
 }

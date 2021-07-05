@@ -1,5 +1,7 @@
 package jacobi.core.sym.parser;
 
+import java.text.ParseException;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -7,6 +9,8 @@ import jacobi.core.lexer.ItemLexer.Action;
 import jacobi.core.sym.Const;
 import jacobi.core.sym.Expr;
 import jacobi.core.sym.Formula;
+import jacobi.core.sym.Inv;
+import jacobi.core.sym.Mul;
 import jacobi.core.sym.Neg;
 import jacobi.core.sym.Pow;
 import jacobi.core.sym.Var;
@@ -133,6 +137,25 @@ public class ParserTest {
 		
 		Expr eqt = parser.get().orElse(null);
 		Assert.assertEquals("((x^2) - (2 * x)) + 4", eqt.accept(Formula.getInstance()));
+	}
+	
+	@Test
+	public void shouldBeAbleToParseQuadraticEqt() throws ParseException {
+		Expr eqt = Parser.parse("x^2 - 2*x + 4");
+		Assert.assertEquals("((x^2) - (2 * x)) + 4", eqt.accept(Formula.getInstance()));
+	}
+	
+	@Test
+	public void shouldBeAbleToParseRationalFunction() throws ParseException {
+		Expr ration = Parser.parse("(1 + x + x^2)/(2 - y - y * y)");
+		Assert.assertTrue(ration instanceof Mul);
+		Assert.assertTrue(ration.getArgs().get(1) instanceof Inv);
+		
+		Expr nom = ration.getArgs().get(0);
+		Expr denom = ration.getArgs().get(1).getArgs().get(0);
+		
+		Assert.assertEquals("(1 + x) + (x^2)", nom.accept(Formula.getInstance()));
+		Assert.assertEquals("(2 - y) - (y * y)", denom.accept(Formula.getInstance()));
 	}
 
 }
